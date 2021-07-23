@@ -1,0 +1,37 @@
+{
+  "name": "nft-factory-contracts",
+  "version": "1.0.0",
+  "description": "NFT Factory Contracts",
+  "main": "index.js",
+  "author": "iain nash",
+  "license": "MIT",
+  "private": false,
+  "scripts": {
+    "typechain": "hardhat typechain",
+    "compile": "hardhat compile",
+    "deploy": "hardhat deploy",
+    "test": "hardhat test"
+  },
+  "devDependencies": {
+    "@nomiclabs/hardhat-waffle": "^2.0.1",
+    "@types/chai": "^4.2.21",
+    "@types/data-urls": "^2.0.1",
+    "@types/mocha": "^8.2.3",
+    "@types/node": "^16.4.0",
+    "chai": "^4.3.4",
+    "data-urls": "^3.0.0",
+    "ethereum-waffle": "^3.4.0",
+    "ethers": "^5.4.1",
+    "hardhat": "^2.5.0",
+    "hardhat-gas-reporter": "^1.0.4",
+    "ts-node": "^10.1.0",
+    "typescript": "^4.3.5"
+  },
+  "dependencies": {
+    "@nomiclabs/hardhat-ethers": "^2.0.2",
+    "@nomiclabs/hardhat-etherscan": "^2.1.4",
+    "@openzeppelin/contracts": "^4.2.0",
+    "hardhat-deploy": "^0.8.11",
+    "hardhat-typechain": "^0.3.5"
+  }
+}

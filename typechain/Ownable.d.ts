@@ -20,24 +20,14 @@ import { BytesLike } from "@ethersproject/bytes";
 import { Listener, Provider } from "@ethersproject/providers";
 import { FunctionFragment, EventFragment, Result } from "@ethersproject/abi";
 
-interface FundsRecoverableInterface extends ethers.utils.Interface {
+interface OwnableInterface extends ethers.utils.Interface {
   functions: {
     "owner()": FunctionFragment;
-    "recoverERC20(address,uint256)": FunctionFragment;
-    "recoverETH()": FunctionFragment;
     "renounceOwnership()": FunctionFragment;
     "transferOwnership(address)": FunctionFragment;
   };
 
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
-  encodeFunctionData(
-    functionFragment: "recoverERC20",
-    values: [string, BigNumberish]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "recoverETH",
-    values?: undefined
-  ): string;
   encodeFunctionData(
     functionFragment: "renounceOwnership",
     values?: undefined
@@ -48,11 +38,6 @@ interface FundsRecoverableInterface extends ethers.utils.Interface {
   ): string;
 
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "recoverERC20",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "recoverETH", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "renounceOwnership",
     data: BytesLike
@@ -69,7 +54,7 @@ interface FundsRecoverableInterface extends ethers.utils.Interface {
   getEvent(nameOrSignatureOrTopic: "OwnershipTransferred"): EventFragment;
 }
 
-export class FundsRecoverable extends Contract {
+export class Ownable extends Contract {
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
@@ -80,7 +65,7 @@ export class FundsRecoverable extends Contract {
   removeAllListeners(eventName: EventFilter | string): this;
   removeListener(eventName: any, listener: Listener): this;
 
-  interface: FundsRecoverableInterface;
+  interface: OwnableInterface;
 
   functions: {
     owner(overrides?: CallOverrides): Promise<{
@@ -90,22 +75,6 @@ export class FundsRecoverable extends Contract {
     "owner()"(overrides?: CallOverrides): Promise<{
       0: string;
     }>;
-
-    recoverERC20(
-      tokenAddress: string,
-      tokenAmount: BigNumberish,
-      overrides?: Overrides
-    ): Promise<ContractTransaction>;
-
-    "recoverERC20(address,uint256)"(
-      tokenAddress: string,
-      tokenAmount: BigNumberish,
-      overrides?: Overrides
-    ): Promise<ContractTransaction>;
-
-    recoverETH(overrides?: Overrides): Promise<ContractTransaction>;
-
-    "recoverETH()"(overrides?: Overrides): Promise<ContractTransaction>;
 
     renounceOwnership(overrides?: Overrides): Promise<ContractTransaction>;
 
@@ -126,22 +95,6 @@ export class FundsRecoverable extends Contract {
 
   "owner()"(overrides?: CallOverrides): Promise<string>;
 
-  recoverERC20(
-    tokenAddress: string,
-    tokenAmount: BigNumberish,
-    overrides?: Overrides
-  ): Promise<ContractTransaction>;
-
-  "recoverERC20(address,uint256)"(
-    tokenAddress: string,
-    tokenAmount: BigNumberish,
-    overrides?: Overrides
-  ): Promise<ContractTransaction>;
-
-  recoverETH(overrides?: Overrides): Promise<ContractTransaction>;
-
-  "recoverETH()"(overrides?: Overrides): Promise<ContractTransaction>;
-
   renounceOwnership(overrides?: Overrides): Promise<ContractTransaction>;
 
   "renounceOwnership()"(overrides?: Overrides): Promise<ContractTransaction>;
@@ -160,22 +113,6 @@ export class FundsRecoverable extends Contract {
     owner(overrides?: CallOverrides): Promise<string>;
 
     "owner()"(overrides?: CallOverrides): Promise<string>;
-
-    recoverERC20(
-      tokenAddress: string,
-      tokenAmount: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    "recoverERC20(address,uint256)"(
-      tokenAddress: string,
-      tokenAmount: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    recoverETH(overrides?: CallOverrides): Promise<void>;
-
-    "recoverETH()"(overrides?: CallOverrides): Promise<void>;
 
     renounceOwnership(overrides?: CallOverrides): Promise<void>;
 
@@ -204,22 +141,6 @@ export class FundsRecoverable extends Contract {
 
     "owner()"(overrides?: CallOverrides): Promise<BigNumber>;
 
-    recoverERC20(
-      tokenAddress: string,
-      tokenAmount: BigNumberish,
-      overrides?: Overrides
-    ): Promise<BigNumber>;
-
-    "recoverERC20(address,uint256)"(
-      tokenAddress: string,
-      tokenAmount: BigNumberish,
-      overrides?: Overrides
-    ): Promise<BigNumber>;
-
-    recoverETH(overrides?: Overrides): Promise<BigNumber>;
-
-    "recoverETH()"(overrides?: Overrides): Promise<BigNumber>;
-
     renounceOwnership(overrides?: Overrides): Promise<BigNumber>;
 
     "renounceOwnership()"(overrides?: Overrides): Promise<BigNumber>;
@@ -239,22 +160,6 @@ export class FundsRecoverable extends Contract {
     owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     "owner()"(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    recoverERC20(
-      tokenAddress: string,
-      tokenAmount: BigNumberish,
-      overrides?: Overrides
-    ): Promise<PopulatedTransaction>;
-
-    "recoverERC20(address,uint256)"(
-      tokenAddress: string,
-      tokenAmount: BigNumberish,
-      overrides?: Overrides
-    ): Promise<PopulatedTransaction>;
-
-    recoverETH(overrides?: Overrides): Promise<PopulatedTransaction>;
-
-    "recoverETH()"(overrides?: Overrides): Promise<PopulatedTransaction>;
 
     renounceOwnership(overrides?: Overrides): Promise<PopulatedTransaction>;
 

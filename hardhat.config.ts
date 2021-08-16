@@ -39,10 +39,6 @@ const config: HardhatUserConfig = {
       // fix metamask
       chainId: 1337,
     },
-    // mumbai: {
-    //   chainId: 80001,
-    //   url: "https://rpc-mumbai.maticvigil.com",
-    // },
     ...NETWORKS_CONFIG,
   },
   namedAccounts: {
@@ -50,7 +46,7 @@ const config: HardhatUserConfig = {
     purchaser: 0,
   },
   solidity: {
-    version: "0.8.4",
+    version: "0.8.6",
     settings: {
       optimizer: {
         enabled: true,

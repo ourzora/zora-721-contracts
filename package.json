@@ -31,6 +31,7 @@
     "@nomiclabs/hardhat-ethers": "^2.0.2",
     "@nomiclabs/hardhat-etherscan": "^2.1.4",
     "@openzeppelin/contracts": "^4.2.0",
+    "base64-sol": "^1.0.1",
     "hardhat-deploy": "^0.8.11",
     "hardhat-typechain": "^0.3.5"
   }

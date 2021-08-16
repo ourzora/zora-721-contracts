@@ -1,47 +1,47 @@
 // SPDX-License-Identifier: GPL-3.0
 
-pragma solidity 0.8.4;
+pragma solidity 0.8.6;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "base64-sol/base64.sol";
 import "./FundsRecoverable.sol";
+import "./ISerialMintable.sol";
+import "./IERC2981.sol";
 
 /**
-
-
-
+This is a smart contract for handling dynamic contract minting.
 */
 
-contract ERC721SerialFactory is
+contract DynamicSerialMintable is
+    ISerialMintable,
     ERC721,
     AccessControl,
-    ReentrancyGuard,
-    FundsRecoverable
+    IERC2981,
+    ReentrancyGuard
 {
     struct SerialConfig {
         string name;
         string description;
         string animationStoragePath;
         string imageStoragePath;
-        address payable purchaseRecipient;
-        uint256 ethPrice;
         uint256 serialSize;
         uint256 atSerialId;
-        bool paused;
         uint256 firstReservedToken;
+
+        // royalties
+        address payable royaltyRecipient;
+        uint256 royaltyBPS;
     }
 
     event MintedSerial(uint256 serialId, uint256 tokenId, address minter);
 
     event CreatedSerial(uint256 serialId);
 
-    event SetSerialPaused(uint256 serialId, bool isPaused);
-
     uint256 public tokenIdsReserved = 1;
     uint256 public currentSerial = 0;
-    string ipfsBaseUrl = "https://ipfs.io/ipfs/";
     SerialConfig[] private serials;
     mapping(uint256 => uint256) private tokenIdToSerialId;
     bytes32 public constant CREATE_SERIAL_ROLE =
@@ -53,45 +53,21 @@ contract ERC721SerialFactory is
         AccessControl._setupRole(CREATE_SERIAL_ROLE, msg.sender);
     }
 
-    function setIPFSBase(string memory newIpfsBaseUrl)
-        public
-        onlyRole(AccessControl.DEFAULT_ADMIN_ROLE)
-    {
-        ipfsBaseUrl = newIpfsBaseUrl;
-    }
-
     function supportsInterface(bytes4 interfaceId)
         public
         view
-        override(ERC721, AccessControl)
+        override(ERC721, AccessControl, IERC165)
         returns (bool)
     {
         return
+            type(IERC2981).interfaceId == interfaceId ||
             ERC721.supportsInterface(interfaceId) ||
             AccessControl.supportsInterface(interfaceId);
     }
 
-    function mintSerial(uint256 serialId)
-        public
-        payable
-        nonReentrant
-        returns (uint256)
-    {
-        SerialConfig memory serial = serials[serialId];
-        require(!serial.paused, "PAUSED");
-        require(msg.value == serial.ethPrice, "WRONG PRICE");
-        if (serial.ethPrice > 0x0) {
-            (bool sent, bytes memory _data) = serial.purchaseRecipient.call{
-                value: msg.value
-            }("");
-            require(sent, "Failed to send Ether");
-        }
-
-        return _mintSerial(serial, serialId, msg.sender);
-    }
-
-    function mintSerialAuthenticated(uint256 serialId, address to)
-        public
+    function mintSerial(uint256 serialId, address to)
+        override
+        external
         nonReentrant
         onlyRole(MINTER_ROLE)
         returns (uint256)
@@ -119,10 +95,9 @@ contract ERC721SerialFactory is
         string memory description,
         string memory imageStoragePath,
         string memory animationStoragePath,
-        uint256 ethPrice,
-        address payable purchaseRecipient,
         uint256 serialSize,
-        bool paused
+        uint256 royaltyBPS,
+        address payable royaltyRecipient
     ) public onlyRole(CREATE_SERIAL_ROLE) {
         serials.push(
             SerialConfig({
@@ -130,27 +105,17 @@ contract ERC721SerialFactory is
                 description: description,
                 imageStoragePath: imageStoragePath,
                 animationStoragePath: animationStoragePath,
-                ethPrice: ethPrice,
                 firstReservedToken: tokenIdsReserved,
-                purchaseRecipient: purchaseRecipient,
                 serialSize: serialSize,
-                paused: paused,
-                atSerialId: 0
+                atSerialId: 0,
+                royaltyRecipient: royaltyRecipient,
+                royaltyBPS: royaltyBPS
             })
         );
 
-        emit SetSerialPaused(serials.length - 1, paused);
         emit CreatedSerial(serials.length - 1);
 
         tokenIdsReserved += serialSize;
-    }
-
-    function setSerialPaused(uint256 serialId, bool paused)
-        public
-        onlyRole(CREATE_SERIAL_ROLE)
-    {
-        emit SetSerialPaused(serialId, paused);
-        serials[serialId].paused = paused;
     }
 
     function getSerial(uint256 serialId)
@@ -169,7 +134,7 @@ contract ERC721SerialFactory is
         return serials[tokenIdToSerialId[tokenId]];
     }
 
-    function getContentIPFSCids(uint256 tokenId)
+    function getContentBaseURLs(uint256 tokenId)
         public
         view
         returns (string memory, string memory)
@@ -180,19 +145,11 @@ contract ERC721SerialFactory is
         );
     }
 
-    function getSerialRecipient(uint256 serialId)
-        public
-        view
-        returns (address)
-    {
-        return serials[serialId].purchaseRecipient;
-    }
-
-    function updateSerialRecipient(
+    function updateRoyaltyRecipient(
         uint256 serialId,
         address payable newRecipient
-    ) public onlyRole(CREATE_SERIAL_ROLE) {
-        serials[serialId].purchaseRecipient = newRecipient;
+    ) public onlyRole(AccessControl.DEFAULT_ADMIN_ROLE) {
+        serials[serialId].royaltyRecipient = newRecipient;
     }
 
     function _tokenMediaData(SerialConfig memory serial, uint256 tokenOfSerial)
@@ -208,12 +165,10 @@ contract ERC721SerialFactory is
                 string(
                     abi.encodePacked(
                         'image": "',
-                        ipfsBaseUrl,
                         serial.animationStoragePath,
                         "?id=",
                         Strings.toString(tokenOfSerial),
                         '", "animation_url": "',
-                        ipfsBaseUrl,
                         serial.animationStoragePath,
                         "?id=",
                         Strings.toString(tokenOfSerial),
@@ -226,7 +181,6 @@ contract ERC721SerialFactory is
                 string(
                     abi.encodePacked(
                         'image": "',
-                        ipfsBaseUrl,
                         serial.imageStoragePath,
                         "?id=",
                         Strings.toString(tokenOfSerial),
@@ -239,7 +193,6 @@ contract ERC721SerialFactory is
                 string(
                     abi.encodePacked(
                         'animation_url": "',
-                        ipfsBaseUrl,
                         serial.animationStoragePath,
                         serial.animationStoragePath,
                         "?id=",
@@ -249,6 +202,21 @@ contract ERC721SerialFactory is
         }
 
         return "";
+    }
+
+    function royaltyInfo(
+        uint256 _tokenId,
+        uint256 _salePrice
+    ) external override view returns (
+        address receiver,
+        uint256 royaltyAmount
+    ) {
+
+        SerialConfig memory config = getSerialByToken(_tokenId);
+        return (
+            config.royaltyRecipient,
+            (_salePrice * config.royaltyBPS) / 10_000
+        );
     }
 
     function tokenURI(uint256 tokenId)
@@ -265,22 +233,27 @@ contract ERC721SerialFactory is
         return
             string(
                 abi.encodePacked(
-                    'data:application/json;charset=utf-8,{"name": "',
-                    serial.name,
-                    " ",
-                    Strings.toString(tokenOfSerial),
-                    "/",
-                    Strings.toString(serial.serialSize),
-                    '", "',
-                    'description": "',
-                    serial.description,
-                    '", "',
-                    _tokenMediaData(serial, tokenOfSerial),
-                    'properties": {"number": ',
-                    Strings.toString(tokenOfSerial),
-                    ', "name": "',
-                    serial.name,
-                    '"}}'
+                    "data:application/json;base64,",
+                    Base64.encode(
+                        abi.encodePacked(
+                            '{"name": "',
+                            serial.name,
+                            " ",
+                            Strings.toString(tokenOfSerial),
+                            "/",
+                            Strings.toString(serial.serialSize),
+                            '", "',
+                            'description": "',
+                            serial.description,
+                            '", "',
+                            _tokenMediaData(serial, tokenOfSerial),
+                            'properties": {"number": ',
+                            Strings.toString(tokenOfSerial),
+                            ', "name": "',
+                            serial.name,
+                            '"}}'
+                        )
+                    )
                 )
             );
     }

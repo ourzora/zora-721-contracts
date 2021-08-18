@@ -71,9 +71,9 @@ contract DynamicSerialMintable is
     constructor(
         string memory name,
         string memory symbol,
-        address creator
+        address _allowedCreator
     ) ERC721(name, symbol) {
-        allowedCreator = creator;
+        allowedCreator = _allowedCreator;
     }
 
     function _isAllowedToMint(uint256 serialId) internal view returns (bool) {

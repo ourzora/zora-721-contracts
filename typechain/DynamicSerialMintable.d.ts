@@ -26,6 +26,7 @@ interface DynamicSerialMintableInterface extends ethers.utils.Interface {
     "approve(address,uint256)": FunctionFragment;
     "balanceOf(address)": FunctionFragment;
     "createSerial(string,string,string,bytes32,string,bytes32,uint256,uint256,address)": FunctionFragment;
+    "creator(uint256)": FunctionFragment;
     "currentSerial()": FunctionFragment;
     "getApproved(uint256)": FunctionFragment;
     "getSerial(uint256)": FunctionFragment;
@@ -71,6 +72,10 @@ interface DynamicSerialMintableInterface extends ethers.utils.Interface {
       BigNumberish,
       string
     ]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "creator",
+    values: [BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "currentSerial",
@@ -161,6 +166,7 @@ interface DynamicSerialMintableInterface extends ethers.utils.Interface {
     functionFragment: "createSerial",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "creator", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "currentSerial",
     data: BytesLike
@@ -225,7 +231,7 @@ interface DynamicSerialMintableInterface extends ethers.utils.Interface {
   events: {
     "Approval(address,address,uint256)": EventFragment;
     "ApprovalForAll(address,address,bool)": EventFragment;
-    "CreatedSerial(uint256)": EventFragment;
+    "CreatedSerial(uint256,address,uint256,uint256)": EventFragment;
     "MintedSerial(uint256,uint256,address)": EventFragment;
     "Transfer(address,address,uint256)": EventFragment;
   };
@@ -310,6 +316,20 @@ export class DynamicSerialMintable extends Contract {
       royaltyRecipient: string,
       overrides?: Overrides
     ): Promise<ContractTransaction>;
+
+    creator(
+      tokenId: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<{
+      0: string;
+    }>;
+
+    "creator(uint256)"(
+      tokenId: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<{
+      0: string;
+    }>;
 
     currentSerial(overrides?: CallOverrides): Promise<{
       0: BigNumber;
@@ -746,6 +766,13 @@ export class DynamicSerialMintable extends Contract {
     overrides?: Overrides
   ): Promise<ContractTransaction>;
 
+  creator(tokenId: BigNumberish, overrides?: CallOverrides): Promise<string>;
+
+  "creator(uint256)"(
+    tokenId: BigNumberish,
+    overrides?: CallOverrides
+  ): Promise<string>;
+
   currentSerial(overrides?: CallOverrides): Promise<BigNumber>;
 
   "currentSerial()"(overrides?: CallOverrides): Promise<BigNumber>;
@@ -1131,6 +1158,13 @@ export class DynamicSerialMintable extends Contract {
       overrides?: CallOverrides
     ): Promise<void>;
 
+    creator(tokenId: BigNumberish, overrides?: CallOverrides): Promise<string>;
+
+    "creator(uint256)"(
+      tokenId: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<string>;
+
     currentSerial(overrides?: CallOverrides): Promise<BigNumber>;
 
     "currentSerial()"(overrides?: CallOverrides): Promise<BigNumber>;
@@ -1480,7 +1514,12 @@ export class DynamicSerialMintable extends Contract {
       approved: null
     ): EventFilter;
 
-    CreatedSerial(serialId: null): EventFilter;
+    CreatedSerial(
+      serialId: null,
+      creator: null,
+      startToken: null,
+      serialSize: null
+    ): EventFilter;
 
     MintedSerial(serialId: null, tokenId: null, minter: null): EventFilter;
 
@@ -1539,6 +1578,16 @@ export class DynamicSerialMintable extends Contract {
       royaltyBPS: BigNumberish,
       royaltyRecipient: string,
       overrides?: Overrides
+    ): Promise<BigNumber>;
+
+    creator(
+      tokenId: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    "creator(uint256)"(
+      tokenId: BigNumberish,
+      overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     currentSerial(overrides?: CallOverrides): Promise<BigNumber>;
@@ -1808,6 +1857,16 @@ export class DynamicSerialMintable extends Contract {
       royaltyBPS: BigNumberish,
       royaltyRecipient: string,
       overrides?: Overrides
+    ): Promise<PopulatedTransaction>;
+
+    creator(
+      tokenId: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    "creator(uint256)"(
+      tokenId: BigNumberish,
+      overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     currentSerial(overrides?: CallOverrides): Promise<PopulatedTransaction>;

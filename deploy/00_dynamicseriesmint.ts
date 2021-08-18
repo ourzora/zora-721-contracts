@@ -2,10 +2,10 @@ module.exports = async ({ getNamedAccounts, deployments }: any) => {
   const { deploy } = deployments;
   const { deployer } = await getNamedAccounts();
 
-  await deploy("DyanmicSeriesMint", {
+  await deploy("DynamicSerialMintable", {
     from: deployer,
-    args: ["Dynamic Sketch", "DYNSKCH"],
+    args: ["Dynamic Mint", "DYNSKCH"],
     log: true,
   });
 };
-module.exports.tags = ["DynamicSketch"];
+module.exports.tags = ["DynamicSerialMintable"];

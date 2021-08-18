@@ -14,22 +14,7 @@ contract MinterRules is Ownable, ReentrancyGuard, FundsRecoverable {
     event OnPauseChange(uint256 releaseId, bool pauseStatus);
     event OnNewRelease(uint256 releaseId);
 
-    struct GasRule {
-        uint256 maxGasAllowed;
-        bool disallowZeroGas;
-        bool enabled;
-    }
-
-    struct OwnershipRule {
-        address tokenAddress;
-        uint256 tokenIdRangeStart;
-        uint256 tokenIdRangeEnd;
-        bool enabled;
-    }
-
     struct SketchRelease {
-        GasRule gasRule;
-        OwnershipRule ownershipRule;
         bool isPaused;
         uint256 maxAllowed;
         uint256 currentReleased;
@@ -42,8 +27,6 @@ contract MinterRules is Ownable, ReentrancyGuard, FundsRecoverable {
     SketchRelease[] private releases;
 
     function createRelease(
-        GasRule memory sketchReleaseGasRule,
-        OwnershipRule memory sketchReleaseRuleOwnership,
         bool isPaused,
         uint256 maxAllowed,
         uint256 ethPrice,
@@ -54,9 +37,8 @@ contract MinterRules is Ownable, ReentrancyGuard, FundsRecoverable {
         SketchRelease memory sketchRelease;
         sketchRelease.isPaused = isPaused;
         sketchRelease.maxAllowed = maxAllowed;
-        sketchRelease.gasRule = sketchReleaseGasRule;
-        sketchRelease.ownershipRule = sketchReleaseRuleOwnership;
         sketchRelease.recipient = recipient;
+        sketchRelease.ethPrice = ethPrice;
         sketchRelease.mintableAddress = mintableAddress;
         sketchRelease.mintableCollection = mintableCollection;
 
@@ -73,7 +55,7 @@ contract MinterRules is Ownable, ReentrancyGuard, FundsRecoverable {
         return releases[releaseId];
     }
 
-    function mint(uint256 releaseId, uint256 tokenOwned)
+    function mint(uint256 releaseId)
         public
         payable
         nonReentrant
@@ -82,25 +64,6 @@ contract MinterRules is Ownable, ReentrancyGuard, FundsRecoverable {
         SketchRelease memory release = getRelease(releaseId);
         require(!release.isPaused, "PAUSED");
         require(release.currentReleased < release.maxAllowed, "FINISHED");
-
-        if (release.gasRule.enabled) {
-            if (release.gasRule.disallowZeroGas) {
-                require(tx.gasprice != 0, "GAS");
-            }
-            require(release.gasRule.maxGasAllowed <= tx.gasprice, "GAS");
-        }
-
-        if (release.ownershipRule.enabled) {
-            require(
-                tokenOwned >= release.ownershipRule.tokenIdRangeStart &&
-                    tokenOwned <= release.ownershipRule.tokenIdRangeEnd,
-                "OWNERSHIP"
-            );
-            require(
-                IERC721(release.ownershipRule.tokenAddress).ownerOf(tokenOwned) == msg.sender,
-                "OWNERSHIP"
-            );
-        }
 
         if (release.ethPrice > 0) {
             require(release.ethPrice == msg.value, "PRICE");

@@ -47,7 +47,7 @@ contract DynamicSerialMintable is
 
     event MintedSerial(uint256 serialId, uint256 tokenId, address minter);
 
-    event CreatedSerial(uint256 serialId);
+    event CreatedSerial(uint256 serialId, address creator, uint256 startToken, uint256 serialSize);
 
     uint256 public tokenIdsReserved = 1;
     uint256 public currentSerial = 0;
@@ -178,7 +178,7 @@ contract DynamicSerialMintable is
             })
         );
 
-        emit CreatedSerial(serials.length - 1);
+        emit CreatedSerial(serials.length - 1, msg.sender, tokenIdsReserved, serialSize);
 
         tokenIdsReserved += serialSize;
     }

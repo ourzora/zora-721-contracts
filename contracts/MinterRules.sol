@@ -67,8 +67,9 @@ contract MinterRules is Ownable, ReentrancyGuard, FundsRecoverable {
 
         if (release.ethPrice > 0) {
             require(release.ethPrice == msg.value, "PRICE");
-            (bool sent, bytes memory _data) = release.recipient.call{
-                value: msg.value
+            (bool sent, ) = release.recipient.call{
+                value: msg.value,
+                gas: 30_000
             }("");
             require(sent, "Failed to send Ether");
         }

@@ -10,7 +10,6 @@ import "./FundsRecoverable.sol";
 import "./ISerialMintable.sol";
 import "./IERC2981.sol";
 
-
 /**
     This is a smart contract for handling dynamic contract minting.
 */
@@ -47,7 +46,12 @@ contract DynamicSerialMintable is
 
     event MintedSerial(uint256 serialId, uint256 tokenId, address minter);
 
-    event CreatedSerial(uint256 serialId, address creator, uint256 startToken, uint256 serialSize);
+    event CreatedSerial(
+        uint256 serialId,
+        address creator,
+        uint256 startToken,
+        uint256 serialSize
+    );
 
     uint256 public tokenIdsReserved = 1;
     uint256 public currentSerial = 0;
@@ -84,6 +88,10 @@ contract DynamicSerialMintable is
             }
         }
         return false;
+    }
+
+    function creator(uint256 tokenId) public view returns (address) {
+        return getSerialByToken(tokenId).owner;
     }
 
     function mintSerial(uint256 serialId, address to)
@@ -178,7 +186,12 @@ contract DynamicSerialMintable is
             })
         );
 
-        emit CreatedSerial(serials.length - 1, msg.sender, tokenIdsReserved, serialSize);
+        emit CreatedSerial(
+            serials.length - 1,
+            msg.sender,
+            tokenIdsReserved,
+            serialSize
+        );
 
         tokenIdsReserved += serialSize;
     }

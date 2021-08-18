@@ -22,47 +22,35 @@ import { FunctionFragment, EventFragment, Result } from "@ethersproject/abi";
 
 interface DynamicSerialMintableInterface extends ethers.utils.Interface {
   functions: {
-    "CREATE_SERIAL_ROLE()": FunctionFragment;
-    "DEFAULT_ADMIN_ROLE()": FunctionFragment;
-    "MINTER_ROLE()": FunctionFragment;
+    "allowedCreator()": FunctionFragment;
     "approve(address,uint256)": FunctionFragment;
     "balanceOf(address)": FunctionFragment;
-    "createSerial(string,string,string,string,uint256,uint256,address)": FunctionFragment;
+    "createSerial(string,string,string,bytes32,string,bytes32,uint256,uint256,address)": FunctionFragment;
     "currentSerial()": FunctionFragment;
     "getApproved(uint256)": FunctionFragment;
-    "getContentBaseURLs(uint256)": FunctionFragment;
-    "getRoleAdmin(bytes32)": FunctionFragment;
     "getSerial(uint256)": FunctionFragment;
     "getSerialByToken(uint256)": FunctionFragment;
-    "grantRole(bytes32,address)": FunctionFragment;
-    "hasRole(bytes32,address)": FunctionFragment;
+    "getURIs(uint256)": FunctionFragment;
     "isApprovedForAll(address,address)": FunctionFragment;
     "mintSerial(uint256,address)": FunctionFragment;
     "name()": FunctionFragment;
     "ownerOf(uint256)": FunctionFragment;
-    "renounceRole(bytes32,address)": FunctionFragment;
-    "revokeRole(bytes32,address)": FunctionFragment;
     "royaltyInfo(uint256,uint256)": FunctionFragment;
     "safeTransferFrom(address,address,uint256)": FunctionFragment;
+    "setAllowedMinters(uint256,address[])": FunctionFragment;
     "setApprovalForAll(address,bool)": FunctionFragment;
+    "setOwner(uint256,address)": FunctionFragment;
     "supportsInterface(bytes4)": FunctionFragment;
     "symbol()": FunctionFragment;
     "tokenIdsReserved()": FunctionFragment;
     "tokenURI(uint256)": FunctionFragment;
     "transferFrom(address,address,uint256)": FunctionFragment;
     "updateRoyaltyRecipient(uint256,address)": FunctionFragment;
+    "updateSerialURLs(uint256,string,string)": FunctionFragment;
   };
 
   encodeFunctionData(
-    functionFragment: "CREATE_SERIAL_ROLE",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "DEFAULT_ADMIN_ROLE",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "MINTER_ROLE",
+    functionFragment: "allowedCreator",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -72,7 +60,17 @@ interface DynamicSerialMintableInterface extends ethers.utils.Interface {
   encodeFunctionData(functionFragment: "balanceOf", values: [string]): string;
   encodeFunctionData(
     functionFragment: "createSerial",
-    values: [string, string, string, string, BigNumberish, BigNumberish, string]
+    values: [
+      string,
+      string,
+      string,
+      BytesLike,
+      string,
+      BytesLike,
+      BigNumberish,
+      BigNumberish,
+      string
+    ]
   ): string;
   encodeFunctionData(
     functionFragment: "currentSerial",
@@ -83,14 +81,6 @@ interface DynamicSerialMintableInterface extends ethers.utils.Interface {
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "getContentBaseURLs",
-    values: [BigNumberish]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "getRoleAdmin",
-    values: [BytesLike]
-  ): string;
-  encodeFunctionData(
     functionFragment: "getSerial",
     values: [BigNumberish]
   ): string;
@@ -99,12 +89,8 @@ interface DynamicSerialMintableInterface extends ethers.utils.Interface {
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "grantRole",
-    values: [BytesLike, string]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "hasRole",
-    values: [BytesLike, string]
+    functionFragment: "getURIs",
+    values: [BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "isApprovedForAll",
@@ -120,14 +106,6 @@ interface DynamicSerialMintableInterface extends ethers.utils.Interface {
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "renounceRole",
-    values: [BytesLike, string]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "revokeRole",
-    values: [BytesLike, string]
-  ): string;
-  encodeFunctionData(
     functionFragment: "royaltyInfo",
     values: [BigNumberish, BigNumberish]
   ): string;
@@ -136,8 +114,16 @@ interface DynamicSerialMintableInterface extends ethers.utils.Interface {
     values: [string, string, BigNumberish]
   ): string;
   encodeFunctionData(
+    functionFragment: "setAllowedMinters",
+    values: [BigNumberish, string[]]
+  ): string;
+  encodeFunctionData(
     functionFragment: "setApprovalForAll",
     values: [string, boolean]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "setOwner",
+    values: [BigNumberish, string]
   ): string;
   encodeFunctionData(
     functionFragment: "supportsInterface",
@@ -160,17 +146,13 @@ interface DynamicSerialMintableInterface extends ethers.utils.Interface {
     functionFragment: "updateRoyaltyRecipient",
     values: [BigNumberish, string]
   ): string;
+  encodeFunctionData(
+    functionFragment: "updateSerialURLs",
+    values: [BigNumberish, string, string]
+  ): string;
 
   decodeFunctionResult(
-    functionFragment: "CREATE_SERIAL_ROLE",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "DEFAULT_ADMIN_ROLE",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "MINTER_ROLE",
+    functionFragment: "allowedCreator",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "approve", data: BytesLike): Result;
@@ -187,21 +169,12 @@ interface DynamicSerialMintableInterface extends ethers.utils.Interface {
     functionFragment: "getApproved",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(
-    functionFragment: "getContentBaseURLs",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "getRoleAdmin",
-    data: BytesLike
-  ): Result;
   decodeFunctionResult(functionFragment: "getSerial", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "getSerialByToken",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "grantRole", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "hasRole", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "getURIs", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "isApprovedForAll",
     data: BytesLike
@@ -209,11 +182,6 @@ interface DynamicSerialMintableInterface extends ethers.utils.Interface {
   decodeFunctionResult(functionFragment: "mintSerial", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "name", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "ownerOf", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "renounceRole",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "revokeRole", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "royaltyInfo",
     data: BytesLike
@@ -223,9 +191,14 @@ interface DynamicSerialMintableInterface extends ethers.utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "setAllowedMinters",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "setApprovalForAll",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "setOwner", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "supportsInterface",
     data: BytesLike
@@ -244,15 +217,16 @@ interface DynamicSerialMintableInterface extends ethers.utils.Interface {
     functionFragment: "updateRoyaltyRecipient",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(
+    functionFragment: "updateSerialURLs",
+    data: BytesLike
+  ): Result;
 
   events: {
     "Approval(address,address,uint256)": EventFragment;
     "ApprovalForAll(address,address,bool)": EventFragment;
     "CreatedSerial(uint256)": EventFragment;
     "MintedSerial(uint256,uint256,address)": EventFragment;
-    "RoleAdminChanged(bytes32,bytes32,bytes32)": EventFragment;
-    "RoleGranted(bytes32,address,address)": EventFragment;
-    "RoleRevoked(bytes32,address,address)": EventFragment;
     "Transfer(address,address,uint256)": EventFragment;
   };
 
@@ -260,9 +234,6 @@ interface DynamicSerialMintableInterface extends ethers.utils.Interface {
   getEvent(nameOrSignatureOrTopic: "ApprovalForAll"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "CreatedSerial"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "MintedSerial"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "RoleAdminChanged"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "RoleGranted"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "RoleRevoked"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Transfer"): EventFragment;
 }
 
@@ -280,27 +251,11 @@ export class DynamicSerialMintable extends Contract {
   interface: DynamicSerialMintableInterface;
 
   functions: {
-    CREATE_SERIAL_ROLE(overrides?: CallOverrides): Promise<{
+    allowedCreator(overrides?: CallOverrides): Promise<{
       0: string;
     }>;
 
-    "CREATE_SERIAL_ROLE()"(overrides?: CallOverrides): Promise<{
-      0: string;
-    }>;
-
-    DEFAULT_ADMIN_ROLE(overrides?: CallOverrides): Promise<{
-      0: string;
-    }>;
-
-    "DEFAULT_ADMIN_ROLE()"(overrides?: CallOverrides): Promise<{
-      0: string;
-    }>;
-
-    MINTER_ROLE(overrides?: CallOverrides): Promise<{
-      0: string;
-    }>;
-
-    "MINTER_ROLE()"(overrides?: CallOverrides): Promise<{
+    "allowedCreator()"(overrides?: CallOverrides): Promise<{
       0: string;
     }>;
 
@@ -333,19 +288,23 @@ export class DynamicSerialMintable extends Contract {
     createSerial(
       name: string,
       description: string,
-      imageStoragePath: string,
-      animationStoragePath: string,
+      imageUrl: string,
+      imageHash: BytesLike,
+      animationUrl: string,
+      animationHash: BytesLike,
       serialSize: BigNumberish,
       royaltyBPS: BigNumberish,
       royaltyRecipient: string,
       overrides?: Overrides
     ): Promise<ContractTransaction>;
 
-    "createSerial(string,string,string,string,uint256,uint256,address)"(
+    "createSerial(string,string,string,bytes32,string,bytes32,uint256,uint256,address)"(
       name: string,
       description: string,
-      imageStoragePath: string,
-      animationStoragePath: string,
+      imageUrl: string,
+      imageHash: BytesLike,
+      animationUrl: string,
+      animationHash: BytesLike,
       serialSize: BigNumberish,
       royaltyBPS: BigNumberish,
       royaltyRecipient: string,
@@ -374,36 +333,6 @@ export class DynamicSerialMintable extends Contract {
       0: string;
     }>;
 
-    getContentBaseURLs(
-      tokenId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<{
-      0: string;
-      1: string;
-    }>;
-
-    "getContentBaseURLs(uint256)"(
-      tokenId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<{
-      0: string;
-      1: string;
-    }>;
-
-    getRoleAdmin(
-      role: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<{
-      0: string;
-    }>;
-
-    "getRoleAdmin(bytes32)"(
-      role: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<{
-      0: string;
-    }>;
-
     getSerial(
       serialId: BigNumberish,
       overrides?: CallOverrides
@@ -411,22 +340,30 @@ export class DynamicSerialMintable extends Contract {
       0: {
         name: string;
         description: string;
-        animationStoragePath: string;
-        imageStoragePath: string;
+        animationUrl: string;
+        animationHash: string;
+        imageUrl: string;
+        imageHash: string;
+        owner: string;
         serialSize: BigNumber;
         atSerialId: BigNumber;
         firstReservedToken: BigNumber;
         royaltyRecipient: string;
         royaltyBPS: BigNumber;
+        allowedMinters: string[];
         0: string;
         1: string;
         2: string;
         3: string;
-        4: BigNumber;
-        5: BigNumber;
-        6: BigNumber;
-        7: string;
+        4: string;
+        5: string;
+        6: string;
+        7: BigNumber;
         8: BigNumber;
+        9: BigNumber;
+        10: string;
+        11: BigNumber;
+        12: string[];
       };
     }>;
 
@@ -437,22 +374,30 @@ export class DynamicSerialMintable extends Contract {
       0: {
         name: string;
         description: string;
-        animationStoragePath: string;
-        imageStoragePath: string;
+        animationUrl: string;
+        animationHash: string;
+        imageUrl: string;
+        imageHash: string;
+        owner: string;
         serialSize: BigNumber;
         atSerialId: BigNumber;
         firstReservedToken: BigNumber;
         royaltyRecipient: string;
         royaltyBPS: BigNumber;
+        allowedMinters: string[];
         0: string;
         1: string;
         2: string;
         3: string;
-        4: BigNumber;
-        5: BigNumber;
-        6: BigNumber;
-        7: string;
+        4: string;
+        5: string;
+        6: string;
+        7: BigNumber;
         8: BigNumber;
+        9: BigNumber;
+        10: string;
+        11: BigNumber;
+        12: string[];
       };
     }>;
 
@@ -463,22 +408,30 @@ export class DynamicSerialMintable extends Contract {
       0: {
         name: string;
         description: string;
-        animationStoragePath: string;
-        imageStoragePath: string;
+        animationUrl: string;
+        animationHash: string;
+        imageUrl: string;
+        imageHash: string;
+        owner: string;
         serialSize: BigNumber;
         atSerialId: BigNumber;
         firstReservedToken: BigNumber;
         royaltyRecipient: string;
         royaltyBPS: BigNumber;
+        allowedMinters: string[];
         0: string;
         1: string;
         2: string;
         3: string;
-        4: BigNumber;
-        5: BigNumber;
-        6: BigNumber;
-        7: string;
+        4: string;
+        5: string;
+        6: string;
+        7: BigNumber;
         8: BigNumber;
+        9: BigNumber;
+        10: string;
+        11: BigNumber;
+        12: string[];
       };
     }>;
 
@@ -489,51 +442,51 @@ export class DynamicSerialMintable extends Contract {
       0: {
         name: string;
         description: string;
-        animationStoragePath: string;
-        imageStoragePath: string;
+        animationUrl: string;
+        animationHash: string;
+        imageUrl: string;
+        imageHash: string;
+        owner: string;
         serialSize: BigNumber;
         atSerialId: BigNumber;
         firstReservedToken: BigNumber;
         royaltyRecipient: string;
         royaltyBPS: BigNumber;
+        allowedMinters: string[];
         0: string;
         1: string;
         2: string;
         3: string;
-        4: BigNumber;
-        5: BigNumber;
-        6: BigNumber;
-        7: string;
+        4: string;
+        5: string;
+        6: string;
+        7: BigNumber;
         8: BigNumber;
+        9: BigNumber;
+        10: string;
+        11: BigNumber;
+        12: string[];
       };
     }>;
 
-    grantRole(
-      role: BytesLike,
-      account: string,
-      overrides?: Overrides
-    ): Promise<ContractTransaction>;
-
-    "grantRole(bytes32,address)"(
-      role: BytesLike,
-      account: string,
-      overrides?: Overrides
-    ): Promise<ContractTransaction>;
-
-    hasRole(
-      role: BytesLike,
-      account: string,
+    getURIs(
+      tokenId: BigNumberish,
       overrides?: CallOverrides
     ): Promise<{
-      0: boolean;
+      0: string;
+      1: string;
+      2: string;
+      3: string;
     }>;
 
-    "hasRole(bytes32,address)"(
-      role: BytesLike,
-      account: string,
+    "getURIs(uint256)"(
+      tokenId: BigNumberish,
       overrides?: CallOverrides
     ): Promise<{
-      0: boolean;
+      0: string;
+      1: string;
+      2: string;
+      3: string;
     }>;
 
     isApprovedForAll(
@@ -586,30 +539,6 @@ export class DynamicSerialMintable extends Contract {
       0: string;
     }>;
 
-    renounceRole(
-      role: BytesLike,
-      account: string,
-      overrides?: Overrides
-    ): Promise<ContractTransaction>;
-
-    "renounceRole(bytes32,address)"(
-      role: BytesLike,
-      account: string,
-      overrides?: Overrides
-    ): Promise<ContractTransaction>;
-
-    revokeRole(
-      role: BytesLike,
-      account: string,
-      overrides?: Overrides
-    ): Promise<ContractTransaction>;
-
-    "revokeRole(bytes32,address)"(
-      role: BytesLike,
-      account: string,
-      overrides?: Overrides
-    ): Promise<ContractTransaction>;
-
     royaltyInfo(
       _tokenId: BigNumberish,
       _salePrice: BigNumberish,
@@ -647,6 +576,18 @@ export class DynamicSerialMintable extends Contract {
       overrides?: Overrides
     ): Promise<ContractTransaction>;
 
+    setAllowedMinters(
+      serialId: BigNumberish,
+      allowedMinters: string[],
+      overrides?: Overrides
+    ): Promise<ContractTransaction>;
+
+    "setAllowedMinters(uint256,address[])"(
+      serialId: BigNumberish,
+      allowedMinters: string[],
+      overrides?: Overrides
+    ): Promise<ContractTransaction>;
+
     setApprovalForAll(
       operator: string,
       approved: boolean,
@@ -656,6 +597,18 @@ export class DynamicSerialMintable extends Contract {
     "setApprovalForAll(address,bool)"(
       operator: string,
       approved: boolean,
+      overrides?: Overrides
+    ): Promise<ContractTransaction>;
+
+    setOwner(
+      serialId: BigNumberish,
+      owner: string,
+      overrides?: Overrides
+    ): Promise<ContractTransaction>;
+
+    "setOwner(uint256,address)"(
+      serialId: BigNumberish,
+      owner: string,
       overrides?: Overrides
     ): Promise<ContractTransaction>;
 
@@ -728,19 +681,25 @@ export class DynamicSerialMintable extends Contract {
       newRecipient: string,
       overrides?: Overrides
     ): Promise<ContractTransaction>;
+
+    updateSerialURLs(
+      serialId: BigNumberish,
+      imageUrl: string,
+      animationUrl: string,
+      overrides?: Overrides
+    ): Promise<ContractTransaction>;
+
+    "updateSerialURLs(uint256,string,string)"(
+      serialId: BigNumberish,
+      imageUrl: string,
+      animationUrl: string,
+      overrides?: Overrides
+    ): Promise<ContractTransaction>;
   };
 
-  CREATE_SERIAL_ROLE(overrides?: CallOverrides): Promise<string>;
+  allowedCreator(overrides?: CallOverrides): Promise<string>;
 
-  "CREATE_SERIAL_ROLE()"(overrides?: CallOverrides): Promise<string>;
-
-  DEFAULT_ADMIN_ROLE(overrides?: CallOverrides): Promise<string>;
-
-  "DEFAULT_ADMIN_ROLE()"(overrides?: CallOverrides): Promise<string>;
-
-  MINTER_ROLE(overrides?: CallOverrides): Promise<string>;
-
-  "MINTER_ROLE()"(overrides?: CallOverrides): Promise<string>;
+  "allowedCreator()"(overrides?: CallOverrides): Promise<string>;
 
   approve(
     to: string,
@@ -764,19 +723,23 @@ export class DynamicSerialMintable extends Contract {
   createSerial(
     name: string,
     description: string,
-    imageStoragePath: string,
-    animationStoragePath: string,
+    imageUrl: string,
+    imageHash: BytesLike,
+    animationUrl: string,
+    animationHash: BytesLike,
     serialSize: BigNumberish,
     royaltyBPS: BigNumberish,
     royaltyRecipient: string,
     overrides?: Overrides
   ): Promise<ContractTransaction>;
 
-  "createSerial(string,string,string,string,uint256,uint256,address)"(
+  "createSerial(string,string,string,bytes32,string,bytes32,uint256,uint256,address)"(
     name: string,
     description: string,
-    imageStoragePath: string,
-    animationStoragePath: string,
+    imageUrl: string,
+    imageHash: BytesLike,
+    animationUrl: string,
+    animationHash: BytesLike,
     serialSize: BigNumberish,
     royaltyBPS: BigNumberish,
     royaltyRecipient: string,
@@ -797,51 +760,36 @@ export class DynamicSerialMintable extends Contract {
     overrides?: CallOverrides
   ): Promise<string>;
 
-  getContentBaseURLs(
-    tokenId: BigNumberish,
-    overrides?: CallOverrides
-  ): Promise<{
-    0: string;
-    1: string;
-  }>;
-
-  "getContentBaseURLs(uint256)"(
-    tokenId: BigNumberish,
-    overrides?: CallOverrides
-  ): Promise<{
-    0: string;
-    1: string;
-  }>;
-
-  getRoleAdmin(role: BytesLike, overrides?: CallOverrides): Promise<string>;
-
-  "getRoleAdmin(bytes32)"(
-    role: BytesLike,
-    overrides?: CallOverrides
-  ): Promise<string>;
-
   getSerial(
     serialId: BigNumberish,
     overrides?: CallOverrides
   ): Promise<{
     name: string;
     description: string;
-    animationStoragePath: string;
-    imageStoragePath: string;
+    animationUrl: string;
+    animationHash: string;
+    imageUrl: string;
+    imageHash: string;
+    owner: string;
     serialSize: BigNumber;
     atSerialId: BigNumber;
     firstReservedToken: BigNumber;
     royaltyRecipient: string;
     royaltyBPS: BigNumber;
+    allowedMinters: string[];
     0: string;
     1: string;
     2: string;
     3: string;
-    4: BigNumber;
-    5: BigNumber;
-    6: BigNumber;
-    7: string;
+    4: string;
+    5: string;
+    6: string;
+    7: BigNumber;
     8: BigNumber;
+    9: BigNumber;
+    10: string;
+    11: BigNumber;
+    12: string[];
   }>;
 
   "getSerial(uint256)"(
@@ -850,22 +798,30 @@ export class DynamicSerialMintable extends Contract {
   ): Promise<{
     name: string;
     description: string;
-    animationStoragePath: string;
-    imageStoragePath: string;
+    animationUrl: string;
+    animationHash: string;
+    imageUrl: string;
+    imageHash: string;
+    owner: string;
     serialSize: BigNumber;
     atSerialId: BigNumber;
     firstReservedToken: BigNumber;
     royaltyRecipient: string;
     royaltyBPS: BigNumber;
+    allowedMinters: string[];
     0: string;
     1: string;
     2: string;
     3: string;
-    4: BigNumber;
-    5: BigNumber;
-    6: BigNumber;
-    7: string;
+    4: string;
+    5: string;
+    6: string;
+    7: BigNumber;
     8: BigNumber;
+    9: BigNumber;
+    10: string;
+    11: BigNumber;
+    12: string[];
   }>;
 
   getSerialByToken(
@@ -874,22 +830,30 @@ export class DynamicSerialMintable extends Contract {
   ): Promise<{
     name: string;
     description: string;
-    animationStoragePath: string;
-    imageStoragePath: string;
+    animationUrl: string;
+    animationHash: string;
+    imageUrl: string;
+    imageHash: string;
+    owner: string;
     serialSize: BigNumber;
     atSerialId: BigNumber;
     firstReservedToken: BigNumber;
     royaltyRecipient: string;
     royaltyBPS: BigNumber;
+    allowedMinters: string[];
     0: string;
     1: string;
     2: string;
     3: string;
-    4: BigNumber;
-    5: BigNumber;
-    6: BigNumber;
-    7: string;
+    4: string;
+    5: string;
+    6: string;
+    7: BigNumber;
     8: BigNumber;
+    9: BigNumber;
+    10: string;
+    11: BigNumber;
+    12: string[];
   }>;
 
   "getSerialByToken(uint256)"(
@@ -898,47 +862,51 @@ export class DynamicSerialMintable extends Contract {
   ): Promise<{
     name: string;
     description: string;
-    animationStoragePath: string;
-    imageStoragePath: string;
+    animationUrl: string;
+    animationHash: string;
+    imageUrl: string;
+    imageHash: string;
+    owner: string;
     serialSize: BigNumber;
     atSerialId: BigNumber;
     firstReservedToken: BigNumber;
     royaltyRecipient: string;
     royaltyBPS: BigNumber;
+    allowedMinters: string[];
     0: string;
     1: string;
     2: string;
     3: string;
-    4: BigNumber;
-    5: BigNumber;
-    6: BigNumber;
-    7: string;
+    4: string;
+    5: string;
+    6: string;
+    7: BigNumber;
     8: BigNumber;
+    9: BigNumber;
+    10: string;
+    11: BigNumber;
+    12: string[];
   }>;
 
-  grantRole(
-    role: BytesLike,
-    account: string,
-    overrides?: Overrides
-  ): Promise<ContractTransaction>;
-
-  "grantRole(bytes32,address)"(
-    role: BytesLike,
-    account: string,
-    overrides?: Overrides
-  ): Promise<ContractTransaction>;
-
-  hasRole(
-    role: BytesLike,
-    account: string,
+  getURIs(
+    tokenId: BigNumberish,
     overrides?: CallOverrides
-  ): Promise<boolean>;
+  ): Promise<{
+    0: string;
+    1: string;
+    2: string;
+    3: string;
+  }>;
 
-  "hasRole(bytes32,address)"(
-    role: BytesLike,
-    account: string,
+  "getURIs(uint256)"(
+    tokenId: BigNumberish,
     overrides?: CallOverrides
-  ): Promise<boolean>;
+  ): Promise<{
+    0: string;
+    1: string;
+    2: string;
+    3: string;
+  }>;
 
   isApprovedForAll(
     owner: string,
@@ -974,30 +942,6 @@ export class DynamicSerialMintable extends Contract {
     tokenId: BigNumberish,
     overrides?: CallOverrides
   ): Promise<string>;
-
-  renounceRole(
-    role: BytesLike,
-    account: string,
-    overrides?: Overrides
-  ): Promise<ContractTransaction>;
-
-  "renounceRole(bytes32,address)"(
-    role: BytesLike,
-    account: string,
-    overrides?: Overrides
-  ): Promise<ContractTransaction>;
-
-  revokeRole(
-    role: BytesLike,
-    account: string,
-    overrides?: Overrides
-  ): Promise<ContractTransaction>;
-
-  "revokeRole(bytes32,address)"(
-    role: BytesLike,
-    account: string,
-    overrides?: Overrides
-  ): Promise<ContractTransaction>;
 
   royaltyInfo(
     _tokenId: BigNumberish,
@@ -1036,6 +980,18 @@ export class DynamicSerialMintable extends Contract {
     overrides?: Overrides
   ): Promise<ContractTransaction>;
 
+  setAllowedMinters(
+    serialId: BigNumberish,
+    allowedMinters: string[],
+    overrides?: Overrides
+  ): Promise<ContractTransaction>;
+
+  "setAllowedMinters(uint256,address[])"(
+    serialId: BigNumberish,
+    allowedMinters: string[],
+    overrides?: Overrides
+  ): Promise<ContractTransaction>;
+
   setApprovalForAll(
     operator: string,
     approved: boolean,
@@ -1045,6 +1001,18 @@ export class DynamicSerialMintable extends Contract {
   "setApprovalForAll(address,bool)"(
     operator: string,
     approved: boolean,
+    overrides?: Overrides
+  ): Promise<ContractTransaction>;
+
+  setOwner(
+    serialId: BigNumberish,
+    owner: string,
+    overrides?: Overrides
+  ): Promise<ContractTransaction>;
+
+  "setOwner(uint256,address)"(
+    serialId: BigNumberish,
+    owner: string,
     overrides?: Overrides
   ): Promise<ContractTransaction>;
 
@@ -1099,18 +1067,24 @@ export class DynamicSerialMintable extends Contract {
     overrides?: Overrides
   ): Promise<ContractTransaction>;
 
+  updateSerialURLs(
+    serialId: BigNumberish,
+    imageUrl: string,
+    animationUrl: string,
+    overrides?: Overrides
+  ): Promise<ContractTransaction>;
+
+  "updateSerialURLs(uint256,string,string)"(
+    serialId: BigNumberish,
+    imageUrl: string,
+    animationUrl: string,
+    overrides?: Overrides
+  ): Promise<ContractTransaction>;
+
   callStatic: {
-    CREATE_SERIAL_ROLE(overrides?: CallOverrides): Promise<string>;
+    allowedCreator(overrides?: CallOverrides): Promise<string>;
 
-    "CREATE_SERIAL_ROLE()"(overrides?: CallOverrides): Promise<string>;
-
-    DEFAULT_ADMIN_ROLE(overrides?: CallOverrides): Promise<string>;
-
-    "DEFAULT_ADMIN_ROLE()"(overrides?: CallOverrides): Promise<string>;
-
-    MINTER_ROLE(overrides?: CallOverrides): Promise<string>;
-
-    "MINTER_ROLE()"(overrides?: CallOverrides): Promise<string>;
+    "allowedCreator()"(overrides?: CallOverrides): Promise<string>;
 
     approve(
       to: string,
@@ -1134,19 +1108,23 @@ export class DynamicSerialMintable extends Contract {
     createSerial(
       name: string,
       description: string,
-      imageStoragePath: string,
-      animationStoragePath: string,
+      imageUrl: string,
+      imageHash: BytesLike,
+      animationUrl: string,
+      animationHash: BytesLike,
       serialSize: BigNumberish,
       royaltyBPS: BigNumberish,
       royaltyRecipient: string,
       overrides?: CallOverrides
     ): Promise<void>;
 
-    "createSerial(string,string,string,string,uint256,uint256,address)"(
+    "createSerial(string,string,string,bytes32,string,bytes32,uint256,uint256,address)"(
       name: string,
       description: string,
-      imageStoragePath: string,
-      animationStoragePath: string,
+      imageUrl: string,
+      imageHash: BytesLike,
+      animationUrl: string,
+      animationHash: BytesLike,
       serialSize: BigNumberish,
       royaltyBPS: BigNumberish,
       royaltyRecipient: string,
@@ -1167,51 +1145,36 @@ export class DynamicSerialMintable extends Contract {
       overrides?: CallOverrides
     ): Promise<string>;
 
-    getContentBaseURLs(
-      tokenId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<{
-      0: string;
-      1: string;
-    }>;
-
-    "getContentBaseURLs(uint256)"(
-      tokenId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<{
-      0: string;
-      1: string;
-    }>;
-
-    getRoleAdmin(role: BytesLike, overrides?: CallOverrides): Promise<string>;
-
-    "getRoleAdmin(bytes32)"(
-      role: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<string>;
-
     getSerial(
       serialId: BigNumberish,
       overrides?: CallOverrides
     ): Promise<{
       name: string;
       description: string;
-      animationStoragePath: string;
-      imageStoragePath: string;
+      animationUrl: string;
+      animationHash: string;
+      imageUrl: string;
+      imageHash: string;
+      owner: string;
       serialSize: BigNumber;
       atSerialId: BigNumber;
       firstReservedToken: BigNumber;
       royaltyRecipient: string;
       royaltyBPS: BigNumber;
+      allowedMinters: string[];
       0: string;
       1: string;
       2: string;
       3: string;
-      4: BigNumber;
-      5: BigNumber;
-      6: BigNumber;
-      7: string;
+      4: string;
+      5: string;
+      6: string;
+      7: BigNumber;
       8: BigNumber;
+      9: BigNumber;
+      10: string;
+      11: BigNumber;
+      12: string[];
     }>;
 
     "getSerial(uint256)"(
@@ -1220,22 +1183,30 @@ export class DynamicSerialMintable extends Contract {
     ): Promise<{
       name: string;
       description: string;
-      animationStoragePath: string;
-      imageStoragePath: string;
+      animationUrl: string;
+      animationHash: string;
+      imageUrl: string;
+      imageHash: string;
+      owner: string;
       serialSize: BigNumber;
       atSerialId: BigNumber;
       firstReservedToken: BigNumber;
       royaltyRecipient: string;
       royaltyBPS: BigNumber;
+      allowedMinters: string[];
       0: string;
       1: string;
       2: string;
       3: string;
-      4: BigNumber;
-      5: BigNumber;
-      6: BigNumber;
-      7: string;
+      4: string;
+      5: string;
+      6: string;
+      7: BigNumber;
       8: BigNumber;
+      9: BigNumber;
+      10: string;
+      11: BigNumber;
+      12: string[];
     }>;
 
     getSerialByToken(
@@ -1244,22 +1215,30 @@ export class DynamicSerialMintable extends Contract {
     ): Promise<{
       name: string;
       description: string;
-      animationStoragePath: string;
-      imageStoragePath: string;
+      animationUrl: string;
+      animationHash: string;
+      imageUrl: string;
+      imageHash: string;
+      owner: string;
       serialSize: BigNumber;
       atSerialId: BigNumber;
       firstReservedToken: BigNumber;
       royaltyRecipient: string;
       royaltyBPS: BigNumber;
+      allowedMinters: string[];
       0: string;
       1: string;
       2: string;
       3: string;
-      4: BigNumber;
-      5: BigNumber;
-      6: BigNumber;
-      7: string;
+      4: string;
+      5: string;
+      6: string;
+      7: BigNumber;
       8: BigNumber;
+      9: BigNumber;
+      10: string;
+      11: BigNumber;
+      12: string[];
     }>;
 
     "getSerialByToken(uint256)"(
@@ -1268,47 +1247,51 @@ export class DynamicSerialMintable extends Contract {
     ): Promise<{
       name: string;
       description: string;
-      animationStoragePath: string;
-      imageStoragePath: string;
+      animationUrl: string;
+      animationHash: string;
+      imageUrl: string;
+      imageHash: string;
+      owner: string;
       serialSize: BigNumber;
       atSerialId: BigNumber;
       firstReservedToken: BigNumber;
       royaltyRecipient: string;
       royaltyBPS: BigNumber;
+      allowedMinters: string[];
       0: string;
       1: string;
       2: string;
       3: string;
-      4: BigNumber;
-      5: BigNumber;
-      6: BigNumber;
-      7: string;
+      4: string;
+      5: string;
+      6: string;
+      7: BigNumber;
       8: BigNumber;
+      9: BigNumber;
+      10: string;
+      11: BigNumber;
+      12: string[];
     }>;
 
-    grantRole(
-      role: BytesLike,
-      account: string,
+    getURIs(
+      tokenId: BigNumberish,
       overrides?: CallOverrides
-    ): Promise<void>;
+    ): Promise<{
+      0: string;
+      1: string;
+      2: string;
+      3: string;
+    }>;
 
-    "grantRole(bytes32,address)"(
-      role: BytesLike,
-      account: string,
+    "getURIs(uint256)"(
+      tokenId: BigNumberish,
       overrides?: CallOverrides
-    ): Promise<void>;
-
-    hasRole(
-      role: BytesLike,
-      account: string,
-      overrides?: CallOverrides
-    ): Promise<boolean>;
-
-    "hasRole(bytes32,address)"(
-      role: BytesLike,
-      account: string,
-      overrides?: CallOverrides
-    ): Promise<boolean>;
+    ): Promise<{
+      0: string;
+      1: string;
+      2: string;
+      3: string;
+    }>;
 
     isApprovedForAll(
       owner: string,
@@ -1344,30 +1327,6 @@ export class DynamicSerialMintable extends Contract {
       tokenId: BigNumberish,
       overrides?: CallOverrides
     ): Promise<string>;
-
-    renounceRole(
-      role: BytesLike,
-      account: string,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    "renounceRole(bytes32,address)"(
-      role: BytesLike,
-      account: string,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    revokeRole(
-      role: BytesLike,
-      account: string,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    "revokeRole(bytes32,address)"(
-      role: BytesLike,
-      account: string,
-      overrides?: CallOverrides
-    ): Promise<void>;
 
     royaltyInfo(
       _tokenId: BigNumberish,
@@ -1406,6 +1365,18 @@ export class DynamicSerialMintable extends Contract {
       overrides?: CallOverrides
     ): Promise<void>;
 
+    setAllowedMinters(
+      serialId: BigNumberish,
+      allowedMinters: string[],
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    "setAllowedMinters(uint256,address[])"(
+      serialId: BigNumberish,
+      allowedMinters: string[],
+      overrides?: CallOverrides
+    ): Promise<void>;
+
     setApprovalForAll(
       operator: string,
       approved: boolean,
@@ -1415,6 +1386,18 @@ export class DynamicSerialMintable extends Contract {
     "setApprovalForAll(address,bool)"(
       operator: string,
       approved: boolean,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    setOwner(
+      serialId: BigNumberish,
+      owner: string,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    "setOwner(uint256,address)"(
+      serialId: BigNumberish,
+      owner: string,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -1468,6 +1451,20 @@ export class DynamicSerialMintable extends Contract {
       newRecipient: string,
       overrides?: CallOverrides
     ): Promise<void>;
+
+    updateSerialURLs(
+      serialId: BigNumberish,
+      imageUrl: string,
+      animationUrl: string,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    "updateSerialURLs(uint256,string,string)"(
+      serialId: BigNumberish,
+      imageUrl: string,
+      animationUrl: string,
+      overrides?: CallOverrides
+    ): Promise<void>;
   };
 
   filters: {
@@ -1487,24 +1484,6 @@ export class DynamicSerialMintable extends Contract {
 
     MintedSerial(serialId: null, tokenId: null, minter: null): EventFilter;
 
-    RoleAdminChanged(
-      role: BytesLike | null,
-      previousAdminRole: BytesLike | null,
-      newAdminRole: BytesLike | null
-    ): EventFilter;
-
-    RoleGranted(
-      role: BytesLike | null,
-      account: string | null,
-      sender: string | null
-    ): EventFilter;
-
-    RoleRevoked(
-      role: BytesLike | null,
-      account: string | null,
-      sender: string | null
-    ): EventFilter;
-
     Transfer(
       from: string | null,
       to: string | null,
@@ -1513,17 +1492,9 @@ export class DynamicSerialMintable extends Contract {
   };
 
   estimateGas: {
-    CREATE_SERIAL_ROLE(overrides?: CallOverrides): Promise<BigNumber>;
+    allowedCreator(overrides?: CallOverrides): Promise<BigNumber>;
 
-    "CREATE_SERIAL_ROLE()"(overrides?: CallOverrides): Promise<BigNumber>;
-
-    DEFAULT_ADMIN_ROLE(overrides?: CallOverrides): Promise<BigNumber>;
-
-    "DEFAULT_ADMIN_ROLE()"(overrides?: CallOverrides): Promise<BigNumber>;
-
-    MINTER_ROLE(overrides?: CallOverrides): Promise<BigNumber>;
-
-    "MINTER_ROLE()"(overrides?: CallOverrides): Promise<BigNumber>;
+    "allowedCreator()"(overrides?: CallOverrides): Promise<BigNumber>;
 
     approve(
       to: string,
@@ -1547,19 +1518,23 @@ export class DynamicSerialMintable extends Contract {
     createSerial(
       name: string,
       description: string,
-      imageStoragePath: string,
-      animationStoragePath: string,
+      imageUrl: string,
+      imageHash: BytesLike,
+      animationUrl: string,
+      animationHash: BytesLike,
       serialSize: BigNumberish,
       royaltyBPS: BigNumberish,
       royaltyRecipient: string,
       overrides?: Overrides
     ): Promise<BigNumber>;
 
-    "createSerial(string,string,string,string,uint256,uint256,address)"(
+    "createSerial(string,string,string,bytes32,string,bytes32,uint256,uint256,address)"(
       name: string,
       description: string,
-      imageStoragePath: string,
-      animationStoragePath: string,
+      imageUrl: string,
+      imageHash: BytesLike,
+      animationUrl: string,
+      animationHash: BytesLike,
       serialSize: BigNumberish,
       royaltyBPS: BigNumberish,
       royaltyRecipient: string,
@@ -1577,26 +1552,6 @@ export class DynamicSerialMintable extends Contract {
 
     "getApproved(uint256)"(
       tokenId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    getContentBaseURLs(
-      tokenId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    "getContentBaseURLs(uint256)"(
-      tokenId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    getRoleAdmin(
-      role: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    "getRoleAdmin(bytes32)"(
-      role: BytesLike,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
@@ -1620,27 +1575,13 @@ export class DynamicSerialMintable extends Contract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    grantRole(
-      role: BytesLike,
-      account: string,
-      overrides?: Overrides
-    ): Promise<BigNumber>;
-
-    "grantRole(bytes32,address)"(
-      role: BytesLike,
-      account: string,
-      overrides?: Overrides
-    ): Promise<BigNumber>;
-
-    hasRole(
-      role: BytesLike,
-      account: string,
+    getURIs(
+      tokenId: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    "hasRole(bytes32,address)"(
-      role: BytesLike,
-      account: string,
+    "getURIs(uint256)"(
+      tokenId: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
@@ -1682,30 +1623,6 @@ export class DynamicSerialMintable extends Contract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    renounceRole(
-      role: BytesLike,
-      account: string,
-      overrides?: Overrides
-    ): Promise<BigNumber>;
-
-    "renounceRole(bytes32,address)"(
-      role: BytesLike,
-      account: string,
-      overrides?: Overrides
-    ): Promise<BigNumber>;
-
-    revokeRole(
-      role: BytesLike,
-      account: string,
-      overrides?: Overrides
-    ): Promise<BigNumber>;
-
-    "revokeRole(bytes32,address)"(
-      role: BytesLike,
-      account: string,
-      overrides?: Overrides
-    ): Promise<BigNumber>;
-
     royaltyInfo(
       _tokenId: BigNumberish,
       _salePrice: BigNumberish,
@@ -1733,6 +1650,18 @@ export class DynamicSerialMintable extends Contract {
       overrides?: Overrides
     ): Promise<BigNumber>;
 
+    setAllowedMinters(
+      serialId: BigNumberish,
+      allowedMinters: string[],
+      overrides?: Overrides
+    ): Promise<BigNumber>;
+
+    "setAllowedMinters(uint256,address[])"(
+      serialId: BigNumberish,
+      allowedMinters: string[],
+      overrides?: Overrides
+    ): Promise<BigNumber>;
+
     setApprovalForAll(
       operator: string,
       approved: boolean,
@@ -1742,6 +1671,18 @@ export class DynamicSerialMintable extends Contract {
     "setApprovalForAll(address,bool)"(
       operator: string,
       approved: boolean,
+      overrides?: Overrides
+    ): Promise<BigNumber>;
+
+    setOwner(
+      serialId: BigNumberish,
+      owner: string,
+      overrides?: Overrides
+    ): Promise<BigNumber>;
+
+    "setOwner(uint256,address)"(
+      serialId: BigNumberish,
+      owner: string,
       overrides?: Overrides
     ): Promise<BigNumber>;
 
@@ -1798,28 +1739,28 @@ export class DynamicSerialMintable extends Contract {
       newRecipient: string,
       overrides?: Overrides
     ): Promise<BigNumber>;
+
+    updateSerialURLs(
+      serialId: BigNumberish,
+      imageUrl: string,
+      animationUrl: string,
+      overrides?: Overrides
+    ): Promise<BigNumber>;
+
+    "updateSerialURLs(uint256,string,string)"(
+      serialId: BigNumberish,
+      imageUrl: string,
+      animationUrl: string,
+      overrides?: Overrides
+    ): Promise<BigNumber>;
   };
 
   populateTransaction: {
-    CREATE_SERIAL_ROLE(
+    allowedCreator(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    "allowedCreator()"(
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
-
-    "CREATE_SERIAL_ROLE()"(
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    DEFAULT_ADMIN_ROLE(
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    "DEFAULT_ADMIN_ROLE()"(
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    MINTER_ROLE(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    "MINTER_ROLE()"(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     approve(
       to: string,
@@ -1846,19 +1787,23 @@ export class DynamicSerialMintable extends Contract {
     createSerial(
       name: string,
       description: string,
-      imageStoragePath: string,
-      animationStoragePath: string,
+      imageUrl: string,
+      imageHash: BytesLike,
+      animationUrl: string,
+      animationHash: BytesLike,
       serialSize: BigNumberish,
       royaltyBPS: BigNumberish,
       royaltyRecipient: string,
       overrides?: Overrides
     ): Promise<PopulatedTransaction>;
 
-    "createSerial(string,string,string,string,uint256,uint256,address)"(
+    "createSerial(string,string,string,bytes32,string,bytes32,uint256,uint256,address)"(
       name: string,
       description: string,
-      imageStoragePath: string,
-      animationStoragePath: string,
+      imageUrl: string,
+      imageHash: BytesLike,
+      animationUrl: string,
+      animationHash: BytesLike,
       serialSize: BigNumberish,
       royaltyBPS: BigNumberish,
       royaltyRecipient: string,
@@ -1876,26 +1821,6 @@ export class DynamicSerialMintable extends Contract {
 
     "getApproved(uint256)"(
       tokenId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    getContentBaseURLs(
-      tokenId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    "getContentBaseURLs(uint256)"(
-      tokenId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    getRoleAdmin(
-      role: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    "getRoleAdmin(bytes32)"(
-      role: BytesLike,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
@@ -1919,27 +1844,13 @@ export class DynamicSerialMintable extends Contract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    grantRole(
-      role: BytesLike,
-      account: string,
-      overrides?: Overrides
-    ): Promise<PopulatedTransaction>;
-
-    "grantRole(bytes32,address)"(
-      role: BytesLike,
-      account: string,
-      overrides?: Overrides
-    ): Promise<PopulatedTransaction>;
-
-    hasRole(
-      role: BytesLike,
-      account: string,
+    getURIs(
+      tokenId: BigNumberish,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    "hasRole(bytes32,address)"(
-      role: BytesLike,
-      account: string,
+    "getURIs(uint256)"(
+      tokenId: BigNumberish,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
@@ -1981,30 +1892,6 @@ export class DynamicSerialMintable extends Contract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    renounceRole(
-      role: BytesLike,
-      account: string,
-      overrides?: Overrides
-    ): Promise<PopulatedTransaction>;
-
-    "renounceRole(bytes32,address)"(
-      role: BytesLike,
-      account: string,
-      overrides?: Overrides
-    ): Promise<PopulatedTransaction>;
-
-    revokeRole(
-      role: BytesLike,
-      account: string,
-      overrides?: Overrides
-    ): Promise<PopulatedTransaction>;
-
-    "revokeRole(bytes32,address)"(
-      role: BytesLike,
-      account: string,
-      overrides?: Overrides
-    ): Promise<PopulatedTransaction>;
-
     royaltyInfo(
       _tokenId: BigNumberish,
       _salePrice: BigNumberish,
@@ -2032,6 +1919,18 @@ export class DynamicSerialMintable extends Contract {
       overrides?: Overrides
     ): Promise<PopulatedTransaction>;
 
+    setAllowedMinters(
+      serialId: BigNumberish,
+      allowedMinters: string[],
+      overrides?: Overrides
+    ): Promise<PopulatedTransaction>;
+
+    "setAllowedMinters(uint256,address[])"(
+      serialId: BigNumberish,
+      allowedMinters: string[],
+      overrides?: Overrides
+    ): Promise<PopulatedTransaction>;
+
     setApprovalForAll(
       operator: string,
       approved: boolean,
@@ -2041,6 +1940,18 @@ export class DynamicSerialMintable extends Contract {
     "setApprovalForAll(address,bool)"(
       operator: string,
       approved: boolean,
+      overrides?: Overrides
+    ): Promise<PopulatedTransaction>;
+
+    setOwner(
+      serialId: BigNumberish,
+      owner: string,
+      overrides?: Overrides
+    ): Promise<PopulatedTransaction>;
+
+    "setOwner(uint256,address)"(
+      serialId: BigNumberish,
+      owner: string,
       overrides?: Overrides
     ): Promise<PopulatedTransaction>;
 
@@ -2097,6 +2008,20 @@ export class DynamicSerialMintable extends Contract {
     "updateRoyaltyRecipient(uint256,address)"(
       serialId: BigNumberish,
       newRecipient: string,
+      overrides?: Overrides
+    ): Promise<PopulatedTransaction>;
+
+    updateSerialURLs(
+      serialId: BigNumberish,
+      imageUrl: string,
+      animationUrl: string,
+      overrides?: Overrides
+    ): Promise<PopulatedTransaction>;
+
+    "updateSerialURLs(uint256,string,string)"(
+      serialId: BigNumberish,
+      imageUrl: string,
+      animationUrl: string,
       overrides?: Overrides
     ): Promise<PopulatedTransaction>;
   };

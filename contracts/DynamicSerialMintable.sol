@@ -4,36 +4,45 @@ pragma solidity 0.8.6;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
-import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "base64-sol/base64.sol";
 import "./FundsRecoverable.sol";
 import "./ISerialMintable.sol";
 import "./IERC2981.sol";
 
-/**
-This is a smart contract for handling dynamic contract minting.
-*/
 
+/**
+    This is a smart contract for handling dynamic contract minting.
+*/
 contract DynamicSerialMintable is
     ISerialMintable,
     ERC721,
-    AccessControl,
     IERC2981,
     ReentrancyGuard
 {
     struct SerialConfig {
+        // metadata
         string name;
         string description;
-        string animationStoragePath;
-        string imageStoragePath;
+        // media links
+        string animationUrl;
+        bytes32 animationHash;
+        string imageUrl;
+        bytes32 imageHash;
+        // access + serial bookkeeping
+        address owner;
+        // total size of serial
         uint256 serialSize;
+        // current token id minted
         uint256 atSerialId;
+        // id serial starts at
         uint256 firstReservedToken;
-
-        // royalties
+        // royalty address
         address payable royaltyRecipient;
+        // royalty amount in bps
         uint256 royaltyBPS;
+        // addresses allowed to mint serial
+        address[] allowedMinters;
     }
 
     event MintedSerial(uint256 serialId, uint256 tokenId, address minter);
@@ -42,45 +51,88 @@ contract DynamicSerialMintable is
 
     uint256 public tokenIdsReserved = 1;
     uint256 public currentSerial = 0;
+    address public allowedCreator;
     SerialConfig[] private serials;
     mapping(uint256 => uint256) private tokenIdToSerialId;
-    bytes32 public constant CREATE_SERIAL_ROLE =
-        keccak256("CREATE_SERIAL_ROLE");
-    bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
 
-    constructor(string memory name, string memory symbol) ERC721(name, symbol) {
-        AccessControl._setupRole(AccessControl.DEFAULT_ADMIN_ROLE, msg.sender);
-        AccessControl._setupRole(CREATE_SERIAL_ROLE, msg.sender);
+    modifier serialExists(uint256 serialId) {
+        require(serials[serialId].serialSize > 0, "Serial needs to exist");
+        _;
+    }
+    modifier ownsSerial(uint256 serialId) {
+        require(msg.sender == serials[serialId].owner, "Serial wrong owner");
+        _;
     }
 
-    function supportsInterface(bytes4 interfaceId)
-        public
-        view
-        override(ERC721, AccessControl, IERC165)
-        returns (bool)
-    {
-        return
-            type(IERC2981).interfaceId == interfaceId ||
-            ERC721.supportsInterface(interfaceId) ||
-            AccessControl.supportsInterface(interfaceId);
+    constructor(
+        string memory name,
+        string memory symbol,
+        address creator
+    ) ERC721(name, symbol) {
+        allowedCreator = creator;
+    }
+
+    function _isAllowedToMint(uint256 serialId) internal view returns (bool) {
+        SerialConfig memory serial = getSerial(serialId);
+        uint256 allowedMintersCount = serial.allowedMinters.length;
+        if (allowedMintersCount == 0) {
+            return true;
+        }
+        for (uint256 i = 0; i < allowedMintersCount; i++) {
+            if (serial.allowedMinters[i] == msg.sender) {
+                return true;
+            }
+        }
+        return false;
     }
 
     function mintSerial(uint256 serialId, address to)
-        override
         external
+        override
         nonReentrant
-        onlyRole(MINTER_ROLE)
+        serialExists(serialId)
         returns (uint256)
     {
-        SerialConfig memory serial = serials[serialId];
-        return _mintSerial(serial, serialId, to);
+        require(_isAllowedToMint(serialId), "Needs to be an allowed minter");
+        return _mintSerial(serialId, to);
     }
 
-    function _mintSerial(
-        SerialConfig memory serial,
+    function setOwner(uint256 serialId, address owner)
+        public
+        serialExists(serialId)
+        ownsSerial(serialId)
+    {
+        serials[serialId].owner = owner;
+    }
+
+    function setAllowedMinters(
         uint256 serialId,
-        address to
-    ) private returns (uint256) {
+        address[] memory allowedMinters
+    ) public serialExists(serialId) ownsSerial(serialId) {
+        serials[serialId].allowedMinters = allowedMinters;
+    }
+
+    function updateSerialURLs(
+        uint256 serialId,
+        string memory imageUrl,
+        string memory animationUrl
+    ) public serialExists(serialId) ownsSerial(serialId) {
+        serials[serialId].imageUrl = imageUrl;
+        serials[serialId].animationUrl = animationUrl;
+    }
+
+    function updateRoyaltyRecipient(
+        uint256 serialId,
+        address payable newRecipient
+    ) public serialExists(serialId) ownsSerial(serialId) {
+        serials[serialId].royaltyRecipient = newRecipient;
+    }
+
+    function _mintSerial(uint256 serialId, address to)
+        private
+        returns (uint256)
+    {
+        SerialConfig memory serial = getSerial(serialId);
         require(serial.atSerialId < serial.serialSize, "SOLD OUT");
         uint256 tokenId = serial.firstReservedToken + serial.atSerialId;
         _mint(to, tokenId);
@@ -93,23 +145,36 @@ contract DynamicSerialMintable is
     function createSerial(
         string memory name,
         string memory description,
-        string memory imageStoragePath,
-        string memory animationStoragePath,
+        string memory imageUrl,
+        bytes32 imageHash,
+        string memory animationUrl,
+        bytes32 animationHash,
         uint256 serialSize,
         uint256 royaltyBPS,
         address payable royaltyRecipient
-    ) public onlyRole(CREATE_SERIAL_ROLE) {
+    ) public {
+        require(
+            allowedCreator == address(0x0) || allowedCreator == msg.sender,
+            "Only authed"
+        );
+        address[] memory allowedMinters = new address[](1);
+        allowedMinters[0] = msg.sender;
+
         serials.push(
             SerialConfig({
                 name: name,
                 description: description,
-                imageStoragePath: imageStoragePath,
-                animationStoragePath: animationStoragePath,
+                owner: msg.sender,
+                imageHash: imageHash,
+                imageUrl: imageUrl,
+                animationUrl: animationUrl,
+                animationHash: animationHash,
                 firstReservedToken: tokenIdsReserved,
                 serialSize: serialSize,
                 atSerialId: 0,
                 royaltyRecipient: royaltyRecipient,
-                royaltyBPS: royaltyBPS
+                royaltyBPS: royaltyBPS,
+                allowedMinters: allowedMinters
             })
         );
 
@@ -134,67 +199,66 @@ contract DynamicSerialMintable is
         return serials[tokenIdToSerialId[tokenId]];
     }
 
-    function getContentBaseURLs(uint256 tokenId)
+    function getURIs(uint256 tokenId)
         public
         view
-        returns (string memory, string memory)
+        returns (
+            string memory,
+            bytes32,
+            string memory,
+            bytes32
+        )
     {
+        SerialConfig memory serial = getSerialByToken(tokenId);
         return (
-            serials[tokenIdToSerialId[tokenId]].imageStoragePath,
-            serials[tokenIdToSerialId[tokenId]].animationStoragePath
+            serial.imageUrl,
+            serial.imageHash,
+            serial.animationUrl,
+            serial.animationHash
         );
-    }
-
-    function updateRoyaltyRecipient(
-        uint256 serialId,
-        address payable newRecipient
-    ) public onlyRole(AccessControl.DEFAULT_ADMIN_ROLE) {
-        serials[serialId].royaltyRecipient = newRecipient;
     }
 
     function _tokenMediaData(SerialConfig memory serial, uint256 tokenOfSerial)
         private
-        view
+        pure
         returns (string memory)
     {
-        if (
-            bytes(serial.imageStoragePath).length > 0 &&
-            bytes(serial.animationStoragePath).length > 0
-        ) {
+        bool hasImage = bytes(serial.imageUrl).length > 0;
+        bool hasAnimation = bytes(serial.animationUrl).length > 0;
+        if (hasImage && hasAnimation) {
             return
                 string(
                     abi.encodePacked(
                         'image": "',
-                        serial.animationStoragePath,
+                        serial.imageUrl,
                         "?id=",
                         Strings.toString(tokenOfSerial),
                         '", "animation_url": "',
-                        serial.animationStoragePath,
+                        serial.animationUrl,
                         "?id=",
                         Strings.toString(tokenOfSerial),
                         '", "'
                     )
                 );
         }
-        if (bytes(serial.imageStoragePath).length > 0) {
+        if (hasImage) {
             return
                 string(
                     abi.encodePacked(
                         'image": "',
-                        serial.imageStoragePath,
+                        serial.imageUrl,
                         "?id=",
                         Strings.toString(tokenOfSerial),
                         '", "'
                     )
                 );
         }
-        if (bytes(serial.animationStoragePath).length > 0) {
+        if (hasAnimation) {
             return
                 string(
                     abi.encodePacked(
                         'animation_url": "',
-                        serial.animationStoragePath,
-                        serial.animationStoragePath,
+                        serial.animationUrl,
                         "?id=",
                         '", "'
                     )
@@ -204,14 +268,12 @@ contract DynamicSerialMintable is
         return "";
     }
 
-    function royaltyInfo(
-        uint256 _tokenId,
-        uint256 _salePrice
-    ) external override view returns (
-        address receiver,
-        uint256 royaltyAmount
-    ) {
-
+    function royaltyInfo(uint256 _tokenId, uint256 _salePrice)
+        external
+        view
+        override
+        returns (address receiver, uint256 royaltyAmount)
+    {
         SerialConfig memory config = getSerialByToken(_tokenId);
         return (
             config.royaltyRecipient,
@@ -256,5 +318,16 @@ contract DynamicSerialMintable is
                     )
                 )
             );
+    }
+
+    function supportsInterface(bytes4 interfaceId)
+        public
+        view
+        override(ERC721, IERC165)
+        returns (bool)
+    {
+        return
+            type(IERC2981).interfaceId == interfaceId ||
+            ERC721.supportsInterface(interfaceId);
     }
 }

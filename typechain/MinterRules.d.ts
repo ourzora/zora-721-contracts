@@ -23,9 +23,9 @@ import { FunctionFragment, EventFragment, Result } from "@ethersproject/abi";
 
 interface MinterRulesInterface extends ethers.utils.Interface {
   functions: {
-    "createRelease(tuple,tuple,bool,uint256,uint256,address,address,uint256)": FunctionFragment;
+    "createRelease(bool,uint256,uint256,address,address,uint256)": FunctionFragment;
     "getRelease(uint256)": FunctionFragment;
-    "mint(uint256,uint256)": FunctionFragment;
+    "mint(uint256)": FunctionFragment;
     "owner()": FunctionFragment;
     "recoverERC20(address,uint256)": FunctionFragment;
     "recoverETH()": FunctionFragment;
@@ -36,34 +36,13 @@ interface MinterRulesInterface extends ethers.utils.Interface {
 
   encodeFunctionData(
     functionFragment: "createRelease",
-    values: [
-      {
-        maxGasAllowed: BigNumberish;
-        disallowZeroGas: boolean;
-        enabled: boolean;
-      },
-      {
-        tokenAddress: string;
-        tokenIdRangeStart: BigNumberish;
-        tokenIdRangeEnd: BigNumberish;
-        enabled: boolean;
-      },
-      boolean,
-      BigNumberish,
-      BigNumberish,
-      string,
-      string,
-      BigNumberish
-    ]
+    values: [boolean, BigNumberish, BigNumberish, string, string, BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "getRelease",
     values: [BigNumberish]
   ): string;
-  encodeFunctionData(
-    functionFragment: "mint",
-    values: [BigNumberish, BigNumberish]
-  ): string;
+  encodeFunctionData(functionFragment: "mint", values: [BigNumberish]): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "recoverERC20",
@@ -134,17 +113,6 @@ export class MinterRules extends Contract {
 
   functions: {
     createRelease(
-      sketchReleaseGasRule: {
-        maxGasAllowed: BigNumberish;
-        disallowZeroGas: boolean;
-        enabled: boolean;
-      },
-      sketchReleaseRuleOwnership: {
-        tokenAddress: string;
-        tokenIdRangeStart: BigNumberish;
-        tokenIdRangeEnd: BigNumberish;
-        enabled: boolean;
-      },
       isPaused: boolean,
       maxAllowed: BigNumberish,
       ethPrice: BigNumberish,
@@ -154,18 +122,7 @@ export class MinterRules extends Contract {
       overrides?: Overrides
     ): Promise<ContractTransaction>;
 
-    "createRelease(tuple,tuple,bool,uint256,uint256,address,address,uint256)"(
-      sketchReleaseGasRule: {
-        maxGasAllowed: BigNumberish;
-        disallowZeroGas: boolean;
-        enabled: boolean;
-      },
-      sketchReleaseRuleOwnership: {
-        tokenAddress: string;
-        tokenIdRangeStart: BigNumberish;
-        tokenIdRangeEnd: BigNumberish;
-        enabled: boolean;
-      },
+    "createRelease(bool,uint256,uint256,address,address,uint256)"(
       isPaused: boolean,
       maxAllowed: BigNumberish,
       ethPrice: BigNumberish,
@@ -180,24 +137,6 @@ export class MinterRules extends Contract {
       overrides?: CallOverrides
     ): Promise<{
       0: {
-        gasRule: {
-          maxGasAllowed: BigNumber;
-          disallowZeroGas: boolean;
-          enabled: boolean;
-          0: BigNumber;
-          1: boolean;
-          2: boolean;
-        };
-        ownershipRule: {
-          tokenAddress: string;
-          tokenIdRangeStart: BigNumber;
-          tokenIdRangeEnd: BigNumber;
-          enabled: boolean;
-          0: string;
-          1: BigNumber;
-          2: BigNumber;
-          3: boolean;
-        };
         isPaused: boolean;
         maxAllowed: BigNumber;
         currentReleased: BigNumber;
@@ -205,31 +144,13 @@ export class MinterRules extends Contract {
         recipient: string;
         mintableAddress: string;
         mintableCollection: BigNumber;
-        0: {
-          maxGasAllowed: BigNumber;
-          disallowZeroGas: boolean;
-          enabled: boolean;
-          0: BigNumber;
-          1: boolean;
-          2: boolean;
-        };
-        1: {
-          tokenAddress: string;
-          tokenIdRangeStart: BigNumber;
-          tokenIdRangeEnd: BigNumber;
-          enabled: boolean;
-          0: string;
-          1: BigNumber;
-          2: BigNumber;
-          3: boolean;
-        };
-        2: boolean;
+        0: boolean;
+        1: BigNumber;
+        2: BigNumber;
         3: BigNumber;
-        4: BigNumber;
-        5: BigNumber;
-        6: string;
-        7: string;
-        8: BigNumber;
+        4: string;
+        5: string;
+        6: BigNumber;
       };
     }>;
 
@@ -238,24 +159,6 @@ export class MinterRules extends Contract {
       overrides?: CallOverrides
     ): Promise<{
       0: {
-        gasRule: {
-          maxGasAllowed: BigNumber;
-          disallowZeroGas: boolean;
-          enabled: boolean;
-          0: BigNumber;
-          1: boolean;
-          2: boolean;
-        };
-        ownershipRule: {
-          tokenAddress: string;
-          tokenIdRangeStart: BigNumber;
-          tokenIdRangeEnd: BigNumber;
-          enabled: boolean;
-          0: string;
-          1: BigNumber;
-          2: BigNumber;
-          3: boolean;
-        };
         isPaused: boolean;
         maxAllowed: BigNumber;
         currentReleased: BigNumber;
@@ -263,43 +166,23 @@ export class MinterRules extends Contract {
         recipient: string;
         mintableAddress: string;
         mintableCollection: BigNumber;
-        0: {
-          maxGasAllowed: BigNumber;
-          disallowZeroGas: boolean;
-          enabled: boolean;
-          0: BigNumber;
-          1: boolean;
-          2: boolean;
-        };
-        1: {
-          tokenAddress: string;
-          tokenIdRangeStart: BigNumber;
-          tokenIdRangeEnd: BigNumber;
-          enabled: boolean;
-          0: string;
-          1: BigNumber;
-          2: BigNumber;
-          3: boolean;
-        };
-        2: boolean;
+        0: boolean;
+        1: BigNumber;
+        2: BigNumber;
         3: BigNumber;
-        4: BigNumber;
-        5: BigNumber;
-        6: string;
-        7: string;
-        8: BigNumber;
+        4: string;
+        5: string;
+        6: BigNumber;
       };
     }>;
 
     mint(
       releaseId: BigNumberish,
-      tokenOwned: BigNumberish,
       overrides?: PayableOverrides
     ): Promise<ContractTransaction>;
 
-    "mint(uint256,uint256)"(
+    "mint(uint256)"(
       releaseId: BigNumberish,
-      tokenOwned: BigNumberish,
       overrides?: PayableOverrides
     ): Promise<ContractTransaction>;
 
@@ -355,17 +238,6 @@ export class MinterRules extends Contract {
   };
 
   createRelease(
-    sketchReleaseGasRule: {
-      maxGasAllowed: BigNumberish;
-      disallowZeroGas: boolean;
-      enabled: boolean;
-    },
-    sketchReleaseRuleOwnership: {
-      tokenAddress: string;
-      tokenIdRangeStart: BigNumberish;
-      tokenIdRangeEnd: BigNumberish;
-      enabled: boolean;
-    },
     isPaused: boolean,
     maxAllowed: BigNumberish,
     ethPrice: BigNumberish,
@@ -375,18 +247,7 @@ export class MinterRules extends Contract {
     overrides?: Overrides
   ): Promise<ContractTransaction>;
 
-  "createRelease(tuple,tuple,bool,uint256,uint256,address,address,uint256)"(
-    sketchReleaseGasRule: {
-      maxGasAllowed: BigNumberish;
-      disallowZeroGas: boolean;
-      enabled: boolean;
-    },
-    sketchReleaseRuleOwnership: {
-      tokenAddress: string;
-      tokenIdRangeStart: BigNumberish;
-      tokenIdRangeEnd: BigNumberish;
-      enabled: boolean;
-    },
+  "createRelease(bool,uint256,uint256,address,address,uint256)"(
     isPaused: boolean,
     maxAllowed: BigNumberish,
     ethPrice: BigNumberish,
@@ -400,24 +261,6 @@ export class MinterRules extends Contract {
     releaseId: BigNumberish,
     overrides?: CallOverrides
   ): Promise<{
-    gasRule: {
-      maxGasAllowed: BigNumber;
-      disallowZeroGas: boolean;
-      enabled: boolean;
-      0: BigNumber;
-      1: boolean;
-      2: boolean;
-    };
-    ownershipRule: {
-      tokenAddress: string;
-      tokenIdRangeStart: BigNumber;
-      tokenIdRangeEnd: BigNumber;
-      enabled: boolean;
-      0: string;
-      1: BigNumber;
-      2: BigNumber;
-      3: boolean;
-    };
     isPaused: boolean;
     maxAllowed: BigNumber;
     currentReleased: BigNumber;
@@ -425,55 +268,19 @@ export class MinterRules extends Contract {
     recipient: string;
     mintableAddress: string;
     mintableCollection: BigNumber;
-    0: {
-      maxGasAllowed: BigNumber;
-      disallowZeroGas: boolean;
-      enabled: boolean;
-      0: BigNumber;
-      1: boolean;
-      2: boolean;
-    };
-    1: {
-      tokenAddress: string;
-      tokenIdRangeStart: BigNumber;
-      tokenIdRangeEnd: BigNumber;
-      enabled: boolean;
-      0: string;
-      1: BigNumber;
-      2: BigNumber;
-      3: boolean;
-    };
-    2: boolean;
+    0: boolean;
+    1: BigNumber;
+    2: BigNumber;
     3: BigNumber;
-    4: BigNumber;
-    5: BigNumber;
-    6: string;
-    7: string;
-    8: BigNumber;
+    4: string;
+    5: string;
+    6: BigNumber;
   }>;
 
   "getRelease(uint256)"(
     releaseId: BigNumberish,
     overrides?: CallOverrides
   ): Promise<{
-    gasRule: {
-      maxGasAllowed: BigNumber;
-      disallowZeroGas: boolean;
-      enabled: boolean;
-      0: BigNumber;
-      1: boolean;
-      2: boolean;
-    };
-    ownershipRule: {
-      tokenAddress: string;
-      tokenIdRangeStart: BigNumber;
-      tokenIdRangeEnd: BigNumber;
-      enabled: boolean;
-      0: string;
-      1: BigNumber;
-      2: BigNumber;
-      3: boolean;
-    };
     isPaused: boolean;
     maxAllowed: BigNumber;
     currentReleased: BigNumber;
@@ -481,42 +288,22 @@ export class MinterRules extends Contract {
     recipient: string;
     mintableAddress: string;
     mintableCollection: BigNumber;
-    0: {
-      maxGasAllowed: BigNumber;
-      disallowZeroGas: boolean;
-      enabled: boolean;
-      0: BigNumber;
-      1: boolean;
-      2: boolean;
-    };
-    1: {
-      tokenAddress: string;
-      tokenIdRangeStart: BigNumber;
-      tokenIdRangeEnd: BigNumber;
-      enabled: boolean;
-      0: string;
-      1: BigNumber;
-      2: BigNumber;
-      3: boolean;
-    };
-    2: boolean;
+    0: boolean;
+    1: BigNumber;
+    2: BigNumber;
     3: BigNumber;
-    4: BigNumber;
-    5: BigNumber;
-    6: string;
-    7: string;
-    8: BigNumber;
+    4: string;
+    5: string;
+    6: BigNumber;
   }>;
 
   mint(
     releaseId: BigNumberish,
-    tokenOwned: BigNumberish,
     overrides?: PayableOverrides
   ): Promise<ContractTransaction>;
 
-  "mint(uint256,uint256)"(
+  "mint(uint256)"(
     releaseId: BigNumberish,
-    tokenOwned: BigNumberish,
     overrides?: PayableOverrides
   ): Promise<ContractTransaction>;
 
@@ -568,17 +355,6 @@ export class MinterRules extends Contract {
 
   callStatic: {
     createRelease(
-      sketchReleaseGasRule: {
-        maxGasAllowed: BigNumberish;
-        disallowZeroGas: boolean;
-        enabled: boolean;
-      },
-      sketchReleaseRuleOwnership: {
-        tokenAddress: string;
-        tokenIdRangeStart: BigNumberish;
-        tokenIdRangeEnd: BigNumberish;
-        enabled: boolean;
-      },
       isPaused: boolean,
       maxAllowed: BigNumberish,
       ethPrice: BigNumberish,
@@ -588,18 +364,7 @@ export class MinterRules extends Contract {
       overrides?: CallOverrides
     ): Promise<void>;
 
-    "createRelease(tuple,tuple,bool,uint256,uint256,address,address,uint256)"(
-      sketchReleaseGasRule: {
-        maxGasAllowed: BigNumberish;
-        disallowZeroGas: boolean;
-        enabled: boolean;
-      },
-      sketchReleaseRuleOwnership: {
-        tokenAddress: string;
-        tokenIdRangeStart: BigNumberish;
-        tokenIdRangeEnd: BigNumberish;
-        enabled: boolean;
-      },
+    "createRelease(bool,uint256,uint256,address,address,uint256)"(
       isPaused: boolean,
       maxAllowed: BigNumberish,
       ethPrice: BigNumberish,
@@ -613,24 +378,6 @@ export class MinterRules extends Contract {
       releaseId: BigNumberish,
       overrides?: CallOverrides
     ): Promise<{
-      gasRule: {
-        maxGasAllowed: BigNumber;
-        disallowZeroGas: boolean;
-        enabled: boolean;
-        0: BigNumber;
-        1: boolean;
-        2: boolean;
-      };
-      ownershipRule: {
-        tokenAddress: string;
-        tokenIdRangeStart: BigNumber;
-        tokenIdRangeEnd: BigNumber;
-        enabled: boolean;
-        0: string;
-        1: BigNumber;
-        2: BigNumber;
-        3: boolean;
-      };
       isPaused: boolean;
       maxAllowed: BigNumber;
       currentReleased: BigNumber;
@@ -638,55 +385,19 @@ export class MinterRules extends Contract {
       recipient: string;
       mintableAddress: string;
       mintableCollection: BigNumber;
-      0: {
-        maxGasAllowed: BigNumber;
-        disallowZeroGas: boolean;
-        enabled: boolean;
-        0: BigNumber;
-        1: boolean;
-        2: boolean;
-      };
-      1: {
-        tokenAddress: string;
-        tokenIdRangeStart: BigNumber;
-        tokenIdRangeEnd: BigNumber;
-        enabled: boolean;
-        0: string;
-        1: BigNumber;
-        2: BigNumber;
-        3: boolean;
-      };
-      2: boolean;
+      0: boolean;
+      1: BigNumber;
+      2: BigNumber;
       3: BigNumber;
-      4: BigNumber;
-      5: BigNumber;
-      6: string;
-      7: string;
-      8: BigNumber;
+      4: string;
+      5: string;
+      6: BigNumber;
     }>;
 
     "getRelease(uint256)"(
       releaseId: BigNumberish,
       overrides?: CallOverrides
     ): Promise<{
-      gasRule: {
-        maxGasAllowed: BigNumber;
-        disallowZeroGas: boolean;
-        enabled: boolean;
-        0: BigNumber;
-        1: boolean;
-        2: boolean;
-      };
-      ownershipRule: {
-        tokenAddress: string;
-        tokenIdRangeStart: BigNumber;
-        tokenIdRangeEnd: BigNumber;
-        enabled: boolean;
-        0: string;
-        1: BigNumber;
-        2: BigNumber;
-        3: boolean;
-      };
       isPaused: boolean;
       maxAllowed: BigNumber;
       currentReleased: BigNumber;
@@ -694,42 +405,22 @@ export class MinterRules extends Contract {
       recipient: string;
       mintableAddress: string;
       mintableCollection: BigNumber;
-      0: {
-        maxGasAllowed: BigNumber;
-        disallowZeroGas: boolean;
-        enabled: boolean;
-        0: BigNumber;
-        1: boolean;
-        2: boolean;
-      };
-      1: {
-        tokenAddress: string;
-        tokenIdRangeStart: BigNumber;
-        tokenIdRangeEnd: BigNumber;
-        enabled: boolean;
-        0: string;
-        1: BigNumber;
-        2: BigNumber;
-        3: boolean;
-      };
-      2: boolean;
+      0: boolean;
+      1: BigNumber;
+      2: BigNumber;
       3: BigNumber;
-      4: BigNumber;
-      5: BigNumber;
-      6: string;
-      7: string;
-      8: BigNumber;
+      4: string;
+      5: string;
+      6: BigNumber;
     }>;
 
     mint(
       releaseId: BigNumberish,
-      tokenOwned: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    "mint(uint256,uint256)"(
+    "mint(uint256)"(
       releaseId: BigNumberish,
-      tokenOwned: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
@@ -793,17 +484,6 @@ export class MinterRules extends Contract {
 
   estimateGas: {
     createRelease(
-      sketchReleaseGasRule: {
-        maxGasAllowed: BigNumberish;
-        disallowZeroGas: boolean;
-        enabled: boolean;
-      },
-      sketchReleaseRuleOwnership: {
-        tokenAddress: string;
-        tokenIdRangeStart: BigNumberish;
-        tokenIdRangeEnd: BigNumberish;
-        enabled: boolean;
-      },
       isPaused: boolean,
       maxAllowed: BigNumberish,
       ethPrice: BigNumberish,
@@ -813,18 +493,7 @@ export class MinterRules extends Contract {
       overrides?: Overrides
     ): Promise<BigNumber>;
 
-    "createRelease(tuple,tuple,bool,uint256,uint256,address,address,uint256)"(
-      sketchReleaseGasRule: {
-        maxGasAllowed: BigNumberish;
-        disallowZeroGas: boolean;
-        enabled: boolean;
-      },
-      sketchReleaseRuleOwnership: {
-        tokenAddress: string;
-        tokenIdRangeStart: BigNumberish;
-        tokenIdRangeEnd: BigNumberish;
-        enabled: boolean;
-      },
+    "createRelease(bool,uint256,uint256,address,address,uint256)"(
       isPaused: boolean,
       maxAllowed: BigNumberish,
       ethPrice: BigNumberish,
@@ -846,13 +515,11 @@ export class MinterRules extends Contract {
 
     mint(
       releaseId: BigNumberish,
-      tokenOwned: BigNumberish,
       overrides?: PayableOverrides
     ): Promise<BigNumber>;
 
-    "mint(uint256,uint256)"(
+    "mint(uint256)"(
       releaseId: BigNumberish,
-      tokenOwned: BigNumberish,
       overrides?: PayableOverrides
     ): Promise<BigNumber>;
 
@@ -905,17 +572,6 @@ export class MinterRules extends Contract {
 
   populateTransaction: {
     createRelease(
-      sketchReleaseGasRule: {
-        maxGasAllowed: BigNumberish;
-        disallowZeroGas: boolean;
-        enabled: boolean;
-      },
-      sketchReleaseRuleOwnership: {
-        tokenAddress: string;
-        tokenIdRangeStart: BigNumberish;
-        tokenIdRangeEnd: BigNumberish;
-        enabled: boolean;
-      },
       isPaused: boolean,
       maxAllowed: BigNumberish,
       ethPrice: BigNumberish,
@@ -925,18 +581,7 @@ export class MinterRules extends Contract {
       overrides?: Overrides
     ): Promise<PopulatedTransaction>;
 
-    "createRelease(tuple,tuple,bool,uint256,uint256,address,address,uint256)"(
-      sketchReleaseGasRule: {
-        maxGasAllowed: BigNumberish;
-        disallowZeroGas: boolean;
-        enabled: boolean;
-      },
-      sketchReleaseRuleOwnership: {
-        tokenAddress: string;
-        tokenIdRangeStart: BigNumberish;
-        tokenIdRangeEnd: BigNumberish;
-        enabled: boolean;
-      },
+    "createRelease(bool,uint256,uint256,address,address,uint256)"(
       isPaused: boolean,
       maxAllowed: BigNumberish,
       ethPrice: BigNumberish,
@@ -958,13 +603,11 @@ export class MinterRules extends Contract {
 
     mint(
       releaseId: BigNumberish,
-      tokenOwned: BigNumberish,
       overrides?: PayableOverrides
     ): Promise<PopulatedTransaction>;
 
-    "mint(uint256,uint256)"(
+    "mint(uint256)"(
       releaseId: BigNumberish,
-      tokenOwned: BigNumberish,
       overrides?: PayableOverrides
     ): Promise<PopulatedTransaction>;
 

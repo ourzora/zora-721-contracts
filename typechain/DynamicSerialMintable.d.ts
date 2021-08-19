@@ -34,6 +34,7 @@ interface DynamicSerialMintableInterface extends ethers.utils.Interface {
     "getURIs(uint256)": FunctionFragment;
     "isApprovedForAll(address,address)": FunctionFragment;
     "mintSerial(uint256,address)": FunctionFragment;
+    "mintSerials(uint256,address[])": FunctionFragment;
     "name()": FunctionFragment;
     "ownerOf(uint256)": FunctionFragment;
     "royaltyInfo(uint256,uint256)": FunctionFragment;
@@ -104,6 +105,10 @@ interface DynamicSerialMintableInterface extends ethers.utils.Interface {
   encodeFunctionData(
     functionFragment: "mintSerial",
     values: [BigNumberish, string]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "mintSerials",
+    values: [BigNumberish, string[]]
   ): string;
   encodeFunctionData(functionFragment: "name", values?: undefined): string;
   encodeFunctionData(
@@ -186,6 +191,10 @@ interface DynamicSerialMintableInterface extends ethers.utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "mintSerial", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "mintSerials",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "name", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "ownerOf", data: BytesLike): Result;
   decodeFunctionResult(
@@ -233,6 +242,7 @@ interface DynamicSerialMintableInterface extends ethers.utils.Interface {
     "ApprovalForAll(address,address,bool)": EventFragment;
     "CreatedSerial(uint256,address,uint256,uint256)": EventFragment;
     "MintedSerial(uint256,uint256,address)": EventFragment;
+    "MintedSerials(uint256,uint256,uint256,address[])": EventFragment;
     "Transfer(address,address,uint256)": EventFragment;
   };
 
@@ -240,6 +250,7 @@ interface DynamicSerialMintableInterface extends ethers.utils.Interface {
   getEvent(nameOrSignatureOrTopic: "ApprovalForAll"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "CreatedSerial"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "MintedSerial"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "MintedSerials"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Transfer"): EventFragment;
 }
 
@@ -534,6 +545,18 @@ export class DynamicSerialMintable extends Contract {
     "mintSerial(uint256,address)"(
       serialId: BigNumberish,
       to: string,
+      overrides?: Overrides
+    ): Promise<ContractTransaction>;
+
+    mintSerials(
+      serialId: BigNumberish,
+      recipients: string[],
+      overrides?: Overrides
+    ): Promise<ContractTransaction>;
+
+    "mintSerials(uint256,address[])"(
+      serialId: BigNumberish,
+      recipients: string[],
       overrides?: Overrides
     ): Promise<ContractTransaction>;
 
@@ -959,6 +982,18 @@ export class DynamicSerialMintable extends Contract {
     overrides?: Overrides
   ): Promise<ContractTransaction>;
 
+  mintSerials(
+    serialId: BigNumberish,
+    recipients: string[],
+    overrides?: Overrides
+  ): Promise<ContractTransaction>;
+
+  "mintSerials(uint256,address[])"(
+    serialId: BigNumberish,
+    recipients: string[],
+    overrides?: Overrides
+  ): Promise<ContractTransaction>;
+
   name(overrides?: CallOverrides): Promise<string>;
 
   "name()"(overrides?: CallOverrides): Promise<string>;
@@ -1351,6 +1386,18 @@ export class DynamicSerialMintable extends Contract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
+    mintSerials(
+      serialId: BigNumberish,
+      recipients: string[],
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    "mintSerials(uint256,address[])"(
+      serialId: BigNumberish,
+      recipients: string[],
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
     name(overrides?: CallOverrides): Promise<string>;
 
     "name()"(overrides?: CallOverrides): Promise<string>;
@@ -1523,6 +1570,13 @@ export class DynamicSerialMintable extends Contract {
 
     MintedSerial(serialId: null, tokenId: null, minter: null): EventFilter;
 
+    MintedSerials(
+      serialId: null,
+      startTokenId: null,
+      amount: null,
+      recipients: null
+    ): EventFilter;
+
     Transfer(
       from: string | null,
       to: string | null,
@@ -1655,6 +1709,18 @@ export class DynamicSerialMintable extends Contract {
     "mintSerial(uint256,address)"(
       serialId: BigNumberish,
       to: string,
+      overrides?: Overrides
+    ): Promise<BigNumber>;
+
+    mintSerials(
+      serialId: BigNumberish,
+      recipients: string[],
+      overrides?: Overrides
+    ): Promise<BigNumber>;
+
+    "mintSerials(uint256,address[])"(
+      serialId: BigNumberish,
+      recipients: string[],
       overrides?: Overrides
     ): Promise<BigNumber>;
 
@@ -1934,6 +2000,18 @@ export class DynamicSerialMintable extends Contract {
     "mintSerial(uint256,address)"(
       serialId: BigNumberish,
       to: string,
+      overrides?: Overrides
+    ): Promise<PopulatedTransaction>;
+
+    mintSerials(
+      serialId: BigNumberish,
+      recipients: string[],
+      overrides?: Overrides
+    ): Promise<PopulatedTransaction>;
+
+    "mintSerials(uint256,address[])"(
+      serialId: BigNumberish,
+      recipients: string[],
       overrides?: Overrides
     ): Promise<PopulatedTransaction>;
 

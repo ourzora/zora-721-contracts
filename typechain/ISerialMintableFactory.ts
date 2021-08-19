@@ -41,4 +41,28 @@ const _abi = [
     stateMutability: "nonpayable",
     type: "function",
   },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "collectionId",
+        type: "uint256",
+      },
+      {
+        internalType: "address[]",
+        name: "to",
+        type: "address[]",
+      },
+    ],
+    name: "mintSerials",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
 ];

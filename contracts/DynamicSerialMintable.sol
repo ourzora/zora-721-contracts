@@ -45,12 +45,6 @@ contract DynamicSerialMintable is
     }
 
     event MintedSerial(uint256 serialId, uint256 tokenId, address minter);
-    event MintedSerials(
-        uint256 serialId,
-        uint256 startTokenId,
-        uint256 amount,
-        address[] recipients
-    );
 
     event CreatedSerial(
         uint256 serialId,
@@ -153,20 +147,6 @@ contract DynamicSerialMintable is
         address payable newRecipient
     ) public serialExists(serialId) ownsSerial(serialId) {
         serials[serialId].royaltyRecipient = newRecipient;
-    }
-
-    function _mintSerial(uint256 serialId, address to)
-        private
-        returns (uint256)
-    {
-        SerialConfig memory serial = getSerial(serialId);
-        require(serial.atSerialId < serial.serialSize, "SOLD OUT");
-        uint256 tokenId = serial.firstReservedToken + serial.atSerialId;
-        _mint(to, tokenId);
-        tokenIdToSerialId[tokenId] = serialId;
-        serials[serialId].atSerialId += 1;
-        emit MintedSerial(serialId, tokenId, to);
-        return tokenId;
     }
 
     function _mintSerials(uint256 serialId, address[] memory recipients)

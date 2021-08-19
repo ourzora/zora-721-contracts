@@ -242,7 +242,6 @@ interface DynamicSerialMintableInterface extends ethers.utils.Interface {
     "ApprovalForAll(address,address,bool)": EventFragment;
     "CreatedSerial(uint256,address,uint256,uint256)": EventFragment;
     "MintedSerial(uint256,uint256,address)": EventFragment;
-    "MintedSerials(uint256,uint256,uint256,address[])": EventFragment;
     "Transfer(address,address,uint256)": EventFragment;
   };
 
@@ -250,7 +249,6 @@ interface DynamicSerialMintableInterface extends ethers.utils.Interface {
   getEvent(nameOrSignatureOrTopic: "ApprovalForAll"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "CreatedSerial"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "MintedSerial"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "MintedSerials"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Transfer"): EventFragment;
 }
 
@@ -1569,13 +1567,6 @@ export class DynamicSerialMintable extends Contract {
     ): EventFilter;
 
     MintedSerial(serialId: null, tokenId: null, minter: null): EventFilter;
-
-    MintedSerials(
-      serialId: null,
-      startTokenId: null,
-      amount: null,
-      recipients: null
-    ): EventFilter;
 
     Transfer(
       from: string | null,

@@ -10,7 +10,7 @@ import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "./ISerialMintable.sol";
 import "./FundsRecoverable.sol";
 
-contract MinterRules is Ownable, ReentrancyGuard, FundsRecoverable {
+contract SeriesSale is Ownable, ReentrancyGuard, FundsRecoverable {
     event OnPauseChange(uint256 releaseId, bool pauseStatus);
     event OnNewRelease(uint256 releaseId);
 
@@ -51,7 +51,11 @@ contract MinterRules is Ownable, ReentrancyGuard, FundsRecoverable {
         emit OnPauseChange(releaseId, isPaused);
     }
 
-    function getRelease(uint256 releaseId) public view returns (SketchRelease memory) {
+    function getRelease(uint256 releaseId)
+        public
+        view
+        returns (SketchRelease memory)
+    {
         return releases[releaseId];
     }
 
@@ -62,8 +66,8 @@ contract MinterRules is Ownable, ReentrancyGuard, FundsRecoverable {
         returns (uint256)
     {
         SketchRelease memory release = getRelease(releaseId);
-        require(!release.isPaused, "PAUSED");
         require(release.currentReleased < release.maxAllowed, "FINISHED");
+        require(!release.isPaused, "PAUSED");
 
         if (release.ethPrice > 0) {
             require(release.ethPrice == msg.value, "PRICE");
@@ -74,10 +78,9 @@ contract MinterRules is Ownable, ReentrancyGuard, FundsRecoverable {
             require(sent, "Failed to send Ether");
         }
 
-        release.currentReleased += 1;
-        uint256 mintedToken = ISerialMintable(release.mintableAddress).mintSerial(
-            releaseId, msg.sender
-        );
+        releases[releaseId].currentReleased += 1;
+        uint256 mintedToken = ISerialMintable(release.mintableAddress)
+            .mintSerial(release.mintableCollection, msg.sender);
 
         return mintedToken;
     }

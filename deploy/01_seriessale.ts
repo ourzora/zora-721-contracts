@@ -2,11 +2,11 @@ module.exports = async ({ getNamedAccounts, deployments }: any) => {
 	const { deploy } = deployments;
 	const { deployer } = await getNamedAccounts();
       
-	await deploy("MinterRules", {
+	await deploy("SeriesSale", {
 	  from: deployer,
 	  args: [],
 	  log: true,
 	});
       };
-      module.exports.tags = ["MinterRules"];
+      module.exports.tags = ["SeriesSale"];
       

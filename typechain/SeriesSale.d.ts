@@ -21,7 +21,7 @@ import { BytesLike } from "@ethersproject/bytes";
 import { Listener, Provider } from "@ethersproject/providers";
 import { FunctionFragment, EventFragment, Result } from "@ethersproject/abi";
 
-interface MinterRulesInterface extends ethers.utils.Interface {
+interface SeriesSaleInterface extends ethers.utils.Interface {
   functions: {
     "createRelease(bool,uint256,uint256,address,address,uint256)": FunctionFragment;
     "getRelease(uint256)": FunctionFragment;
@@ -98,7 +98,7 @@ interface MinterRulesInterface extends ethers.utils.Interface {
   getEvent(nameOrSignatureOrTopic: "OwnershipTransferred"): EventFragment;
 }
 
-export class MinterRules extends Contract {
+export class SeriesSale extends Contract {
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
@@ -109,7 +109,7 @@ export class MinterRules extends Contract {
   removeAllListeners(eventName: EventFilter | string): this;
   removeListener(eventName: any, listener: Listener): this;
 
-  interface: MinterRulesInterface;
+  interface: SeriesSaleInterface;
 
   functions: {
     createRelease(

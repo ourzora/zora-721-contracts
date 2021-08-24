@@ -26,9 +26,9 @@ task("accounts", "Prints the list of accounts", async (args, hre) => {
  */
 const config: HardhatUserConfig = {
   defaultNetwork: 'hardhat',
-  // etherscan: {
-  //   apiKey: apikeys.etherscan,
-  // },
+  etherscan: {
+    apiKey: apikeys.etherscan,
+  },
   gasReporter: {
     currency: 'USD',
     gasPrice: 20, 
@@ -50,7 +50,7 @@ const config: HardhatUserConfig = {
     settings: {
       optimizer: {
         enabled: true,
-        runs: 200,
+        runs: 100,
       },
     },
   },

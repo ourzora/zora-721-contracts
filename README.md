@@ -8,3 +8,12 @@ Creating editions allows for anyone to mint an edition for a given ETH fee that 
 
 This is useful for Ticket type interactions and has some benfits over ERC1155s where each edition is unique (earlier editions can be )
 
+### Deploying:
+(Replace network with desired network)
+`hardhat deploy --network rinkeby --tags DynamicSerialMintable`
+
+### Verifying:
+`hardhat sourcify --network rinkeby && hardhat etherscan-verify --network rinkeby`
+
+### Minting:
+

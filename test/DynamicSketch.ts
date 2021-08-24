@@ -109,6 +109,30 @@ describe("DynamicSerialMintable", () => {
         await signer1.getAddress()
       );
     });
+    it("creates a set of serials", async () => {
+      const [s1, s2, s3] = await ethers.getSigners();
+      await dynamicSketch.mintSerials(0, [
+        await s1.getAddress(),
+        await s2.getAddress(),
+        await s3.getAddress(),
+      ]);
+      expect(await dynamicSketch.ownerOf(1)).to.equal(await s1.getAddress());
+      expect(await dynamicSketch.ownerOf(2)).to.equal(await s2.getAddress());
+      expect(await dynamicSketch.ownerOf(3)).to.equal(await s3.getAddress());
+      await dynamicSketch.mintSerials(0, [
+        await s1.getAddress(),
+        await s2.getAddress(),
+        await s3.getAddress(),
+        await s2.getAddress(),
+        await s3.getAddress(),
+        await s2.getAddress(),
+        await s3.getAddress(),
+      ]);
+      await expect(dynamicSketch.mintSerials(0, [
+        signerAddress
+      ])).to.be.reverted;
+      await expect(dynamicSketch.mintSerial(0, signerAddress)).to.be.reverted;
+    });
     it("stops after serials are sold out", async () => {
       const [_, signer1] = await ethers.getSigners();
 

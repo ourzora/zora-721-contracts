@@ -94,6 +94,11 @@ contract DynamicSerialMintable is
         return getSerialByToken(tokenId).owner;
     }
 
+    function setAllowedCreator(address newCreator) public {
+        require(msg.sender == allowedCreator, "Wrong serial owner");
+        allowedCreator = newCreator;
+    }
+
     function mintSerial(uint256 serialId, address to)
         external
         override
@@ -102,7 +107,20 @@ contract DynamicSerialMintable is
         returns (uint256)
     {
         require(_isAllowedToMint(serialId), "Needs to be an allowed minter");
-        return _mintSerial(serialId, to);
+        address[] memory toMint = new address[](1);
+        toMint[0] = to;
+        return _mintSerials(serialId, toMint);
+    }
+
+    function mintSerials(uint256 serialId, address[] memory recipients)
+        external
+        override
+        nonReentrant
+        serialExists(serialId)
+        returns (uint256)
+    {
+        require(_isAllowedToMint(serialId), "Needs to be an allowed minter");
+        return _mintSerials(serialId, recipients);
     }
 
     function setOwner(uint256 serialId, address owner)
@@ -136,17 +154,26 @@ contract DynamicSerialMintable is
         serials[serialId].royaltyRecipient = newRecipient;
     }
 
-    function _mintSerial(uint256 serialId, address to)
+    function _mintSerials(uint256 serialId, address[] memory recipients)
         private
         returns (uint256)
     {
         SerialConfig memory serial = getSerial(serialId);
-        require(serial.atSerialId < serial.serialSize, "SOLD OUT");
-        uint256 tokenId = serial.firstReservedToken + serial.atSerialId;
-        _mint(to, tokenId);
-        tokenIdToSerialId[tokenId] = serialId;
-        serials[serialId].atSerialId += 1;
-        emit MintedSerial(serialId, tokenId, to);
+        uint256 startId = serial.firstReservedToken + serial.atSerialId;
+        require(
+            serial.atSerialId + recipients.length <= serial.serialSize,
+            "SOLD OUT"
+        );
+        uint256 toMint = 0;
+        uint256 tokenId;
+        while (toMint < recipients.length) {
+            tokenId = startId + toMint;
+            _mint(recipients[toMint], tokenId);
+            tokenIdToSerialId[tokenId] = serialId;
+            emit MintedSerial(serialId, tokenId, recipients[toMint]);
+            toMint += 1;
+        }
+        serials[serialId].atSerialId += recipients.length;
         return tokenId;
     }
 

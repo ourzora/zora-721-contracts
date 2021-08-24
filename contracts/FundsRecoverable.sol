@@ -9,7 +9,10 @@ contract FundsRecoverable is Ownable {
     /**
     Recover accidental tokens sent to contract
     */
-    function recoverERC20(address tokenAddress, uint256 tokenAmount) public onlyOwner {
+    function recoverERC20(address tokenAddress, uint256 tokenAmount)
+        public
+        onlyOwner
+    {
         IERC20(tokenAddress).transfer(msg.sender, tokenAmount);
     }
 
@@ -18,6 +21,7 @@ contract FundsRecoverable is Ownable {
     */
     function recoverETH() public onlyOwner {
         uint256 balance = address(this).balance;
-        msg.sender.call{value: balance}("");
+        (bool success, ) = msg.sender.call{value: balance}("");
+        require(success, "TransferFailed");
     }
 }

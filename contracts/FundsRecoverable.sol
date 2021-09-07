@@ -2,10 +2,10 @@
 
 pragma solidity 0.8.6;
 
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 
-contract FundsRecoverable is Ownable {
+contract FundsRecoverable is OwnableUpgradeable {
     /**
     Recover accidental tokens sent to contract
     */
@@ -13,7 +13,7 @@ contract FundsRecoverable is Ownable {
         public
         onlyOwner
     {
-        IERC20(tokenAddress).transfer(msg.sender, tokenAmount);
+        IERC20Upgradeable(tokenAddress).transfer(msg.sender, tokenAmount);
     }
 
     /**

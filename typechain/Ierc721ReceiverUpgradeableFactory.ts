@@ -5,14 +5,18 @@
 import { Contract, Signer } from "ethers";
 import { Provider } from "@ethersproject/providers";
 
-import type { ISerialMintable } from "./ISerialMintable";
+import type { Ierc721ReceiverUpgradeable } from "./Ierc721ReceiverUpgradeable";
 
-export class ISerialMintableFactory {
+export class Ierc721ReceiverUpgradeableFactory {
   static connect(
     address: string,
     signerOrProvider: Signer | Provider
-  ): ISerialMintable {
-    return new Contract(address, _abi, signerOrProvider) as ISerialMintable;
+  ): Ierc721ReceiverUpgradeable {
+    return new Contract(
+      address,
+      _abi,
+      signerOrProvider
+    ) as Ierc721ReceiverUpgradeable;
   }
 }
 
@@ -21,35 +25,31 @@ const _abi = [
     inputs: [
       {
         internalType: "address",
-        name: "to",
+        name: "operator",
         type: "address",
       },
-    ],
-    name: "mintSerial",
-    outputs: [
+      {
+        internalType: "address",
+        name: "from",
+        type: "address",
+      },
       {
         internalType: "uint256",
-        name: "",
+        name: "tokenId",
         type: "uint256",
       },
-    ],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
       {
-        internalType: "address[]",
-        name: "to",
-        type: "address[]",
+        internalType: "bytes",
+        name: "data",
+        type: "bytes",
       },
     ],
-    name: "mintSerials",
+    name: "onERC721Received",
     outputs: [
       {
-        internalType: "uint256",
+        internalType: "bytes4",
         name: "",
-        type: "uint256",
+        type: "bytes4",
       },
     ],
     stateMutability: "nonpayable",

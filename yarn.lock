@@ -521,10 +521,10 @@
     "@types/sinon-chai" "^3.2.3"
     "@types/web3" "1.0.19"
 
-"@openzeppelin/contracts@^4.2.0":
-  version "4.2.0"
-  resolved "https://registry.yarnpkg.com/@openzeppelin/contracts/-/contracts-4.2.0.tgz#260d921d99356e48013d9d760caaa6cea35dc642"
-  integrity sha512-LD4NnkKpHHSMo5z9MvFsG4g1xxZUDqV3A3Futu3nvyfs4wPwXxqOgMaxOoa2PeyGL2VNeSlbxT54enbQzGcgJQ==
+"@openzeppelin/contracts-upgradeable@^4.3.1":
+  version "4.3.1"
+  resolved "https://registry.yarnpkg.com/@openzeppelin/contracts-upgradeable/-/contracts-upgradeable-4.3.1.tgz#d2fdbacd010f9bc2228d58f9d3d3db4e49818ea6"
+  integrity sha512-vqS3gb1J5xlKc+7a931a5Qmg3HDR168E6aCfPY6lPrdFZV4TymN2+HVJNCqCo+KP2UMYDtqRsXu+KB/0L0E34g==
 
 "@resolver-engine/core@^0.3.3":
   version "0.3.3"

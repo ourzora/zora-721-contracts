@@ -22,98 +22,83 @@ import { FunctionFragment, EventFragment, Result } from "@ethersproject/abi";
 
 interface DynamicSerialMintableInterface extends ethers.utils.Interface {
   functions: {
-    "allowedCreator()": FunctionFragment;
     "approve(address,uint256)": FunctionFragment;
     "balanceOf(address)": FunctionFragment;
-    "createSerial(string,string,string,bytes32,string,bytes32,uint256,uint256,address)": FunctionFragment;
-    "creator(uint256)": FunctionFragment;
-    "currentSerial()": FunctionFragment;
+    "base64Encode(bytes)": FunctionFragment;
     "getApproved(uint256)": FunctionFragment;
-    "getSerial(uint256)": FunctionFragment;
-    "getSerialByToken(uint256)": FunctionFragment;
-    "getURIs(uint256)": FunctionFragment;
+    "getURIs()": FunctionFragment;
+    "initialize(string,string,string,string,bytes32,string,bytes32,uint256,uint256)": FunctionFragment;
     "isApprovedForAll(address,address)": FunctionFragment;
-    "mintSerial(uint256,address)": FunctionFragment;
-    "mintSerials(uint256,address[])": FunctionFragment;
+    "mintSerial(address)": FunctionFragment;
+    "mintSerials(address[])": FunctionFragment;
     "name()": FunctionFragment;
+    "numberToString(uint256)": FunctionFragment;
+    "owner()": FunctionFragment;
     "ownerOf(uint256)": FunctionFragment;
+    "renounceOwnership()": FunctionFragment;
     "royaltyInfo(uint256,uint256)": FunctionFragment;
     "safeTransferFrom(address,address,uint256)": FunctionFragment;
-    "setAllowedMinters(uint256,address[])": FunctionFragment;
+    "serialSize()": FunctionFragment;
+    "setAllowedMinters(address[])": FunctionFragment;
     "setApprovalForAll(address,bool)": FunctionFragment;
-    "setOwner(uint256,address)": FunctionFragment;
     "supportsInterface(bytes4)": FunctionFragment;
     "symbol()": FunctionFragment;
-    "tokenIdsReserved()": FunctionFragment;
     "tokenURI(uint256)": FunctionFragment;
     "transferFrom(address,address,uint256)": FunctionFragment;
-    "updateRoyaltyRecipient(uint256,address)": FunctionFragment;
-    "updateSerialURLs(uint256,string,string)": FunctionFragment;
+    "transferOwnership(address)": FunctionFragment;
+    "updateSerialURLs(string,string)": FunctionFragment;
   };
 
-  encodeFunctionData(
-    functionFragment: "allowedCreator",
-    values?: undefined
-  ): string;
   encodeFunctionData(
     functionFragment: "approve",
     values: [string, BigNumberish]
   ): string;
   encodeFunctionData(functionFragment: "balanceOf", values: [string]): string;
   encodeFunctionData(
-    functionFragment: "createSerial",
-    values: [
-      string,
-      string,
-      string,
-      BytesLike,
-      string,
-      BytesLike,
-      BigNumberish,
-      BigNumberish,
-      string
-    ]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "creator",
-    values: [BigNumberish]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "currentSerial",
-    values?: undefined
+    functionFragment: "base64Encode",
+    values: [BytesLike]
   ): string;
   encodeFunctionData(
     functionFragment: "getApproved",
     values: [BigNumberish]
   ): string;
+  encodeFunctionData(functionFragment: "getURIs", values?: undefined): string;
   encodeFunctionData(
-    functionFragment: "getSerial",
-    values: [BigNumberish]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "getSerialByToken",
-    values: [BigNumberish]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "getURIs",
-    values: [BigNumberish]
+    functionFragment: "initialize",
+    values: [
+      string,
+      string,
+      string,
+      string,
+      BytesLike,
+      string,
+      BytesLike,
+      BigNumberish,
+      BigNumberish
+    ]
   ): string;
   encodeFunctionData(
     functionFragment: "isApprovedForAll",
     values: [string, string]
   ): string;
-  encodeFunctionData(
-    functionFragment: "mintSerial",
-    values: [BigNumberish, string]
-  ): string;
+  encodeFunctionData(functionFragment: "mintSerial", values: [string]): string;
   encodeFunctionData(
     functionFragment: "mintSerials",
-    values: [BigNumberish, string[]]
+    values: [string[]]
   ): string;
   encodeFunctionData(functionFragment: "name", values?: undefined): string;
   encodeFunctionData(
+    functionFragment: "numberToString",
+    values: [BigNumberish]
+  ): string;
+  encodeFunctionData(functionFragment: "owner", values?: undefined): string;
+  encodeFunctionData(
     functionFragment: "ownerOf",
     values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "renounceOwnership",
+    values?: undefined
   ): string;
   encodeFunctionData(
     functionFragment: "royaltyInfo",
@@ -124,26 +109,22 @@ interface DynamicSerialMintableInterface extends ethers.utils.Interface {
     values: [string, string, BigNumberish]
   ): string;
   encodeFunctionData(
+    functionFragment: "serialSize",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
     functionFragment: "setAllowedMinters",
-    values: [BigNumberish, string[]]
+    values: [string[]]
   ): string;
   encodeFunctionData(
     functionFragment: "setApprovalForAll",
     values: [string, boolean]
   ): string;
   encodeFunctionData(
-    functionFragment: "setOwner",
-    values: [BigNumberish, string]
-  ): string;
-  encodeFunctionData(
     functionFragment: "supportsInterface",
     values: [BytesLike]
   ): string;
   encodeFunctionData(functionFragment: "symbol", values?: undefined): string;
-  encodeFunctionData(
-    functionFragment: "tokenIdsReserved",
-    values?: undefined
-  ): string;
   encodeFunctionData(
     functionFragment: "tokenURI",
     values: [BigNumberish]
@@ -153,39 +134,26 @@ interface DynamicSerialMintableInterface extends ethers.utils.Interface {
     values: [string, string, BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "updateRoyaltyRecipient",
-    values: [BigNumberish, string]
+    functionFragment: "transferOwnership",
+    values: [string]
   ): string;
   encodeFunctionData(
     functionFragment: "updateSerialURLs",
-    values: [BigNumberish, string, string]
+    values: [string, string]
   ): string;
 
-  decodeFunctionResult(
-    functionFragment: "allowedCreator",
-    data: BytesLike
-  ): Result;
   decodeFunctionResult(functionFragment: "approve", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "balanceOf", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "createSerial",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "creator", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "currentSerial",
+    functionFragment: "base64Encode",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
     functionFragment: "getApproved",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "getSerial", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "getSerialByToken",
-    data: BytesLike
-  ): Result;
   decodeFunctionResult(functionFragment: "getURIs", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "initialize", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "isApprovedForAll",
     data: BytesLike
@@ -196,7 +164,16 @@ interface DynamicSerialMintableInterface extends ethers.utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "name", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "numberToString",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "ownerOf", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "renounceOwnership",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: "royaltyInfo",
     data: BytesLike
@@ -205,6 +182,7 @@ interface DynamicSerialMintableInterface extends ethers.utils.Interface {
     functionFragment: "safeTransferFrom",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "serialSize", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "setAllowedMinters",
     data: BytesLike
@@ -213,23 +191,18 @@ interface DynamicSerialMintableInterface extends ethers.utils.Interface {
     functionFragment: "setApprovalForAll",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "setOwner", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "supportsInterface",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "symbol", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "tokenIdsReserved",
-    data: BytesLike
-  ): Result;
   decodeFunctionResult(functionFragment: "tokenURI", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "transferFrom",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "updateRoyaltyRecipient",
+    functionFragment: "transferOwnership",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -240,15 +213,13 @@ interface DynamicSerialMintableInterface extends ethers.utils.Interface {
   events: {
     "Approval(address,address,uint256)": EventFragment;
     "ApprovalForAll(address,address,bool)": EventFragment;
-    "CreatedSerial(uint256,address,uint256,uint256)": EventFragment;
-    "MintedSerial(uint256,uint256,address)": EventFragment;
+    "OwnershipTransferred(address,address)": EventFragment;
     "Transfer(address,address,uint256)": EventFragment;
   };
 
   getEvent(nameOrSignatureOrTopic: "Approval"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "ApprovalForAll"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "CreatedSerial"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "MintedSerial"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "OwnershipTransferred"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Transfer"): EventFragment;
 }
 
@@ -266,14 +237,6 @@ export class DynamicSerialMintable extends Contract {
   interface: DynamicSerialMintableInterface;
 
   functions: {
-    allowedCreator(overrides?: CallOverrides): Promise<{
-      0: string;
-    }>;
-
-    "allowedCreator()"(overrides?: CallOverrides): Promise<{
-      0: string;
-    }>;
-
     approve(
       to: string,
       tokenId: BigNumberish,
@@ -300,52 +263,18 @@ export class DynamicSerialMintable extends Contract {
       0: BigNumber;
     }>;
 
-    createSerial(
-      name: string,
-      description: string,
-      imageUrl: string,
-      imageHash: BytesLike,
-      animationUrl: string,
-      animationHash: BytesLike,
-      serialSize: BigNumberish,
-      royaltyBPS: BigNumberish,
-      royaltyRecipient: string,
-      overrides?: Overrides
-    ): Promise<ContractTransaction>;
-
-    "createSerial(string,string,string,bytes32,string,bytes32,uint256,uint256,address)"(
-      name: string,
-      description: string,
-      imageUrl: string,
-      imageHash: BytesLike,
-      animationUrl: string,
-      animationHash: BytesLike,
-      serialSize: BigNumberish,
-      royaltyBPS: BigNumberish,
-      royaltyRecipient: string,
-      overrides?: Overrides
-    ): Promise<ContractTransaction>;
-
-    creator(
-      tokenId: BigNumberish,
+    base64Encode(
+      args: BytesLike,
       overrides?: CallOverrides
     ): Promise<{
       0: string;
     }>;
 
-    "creator(uint256)"(
-      tokenId: BigNumberish,
+    "base64Encode(bytes)"(
+      args: BytesLike,
       overrides?: CallOverrides
     ): Promise<{
       0: string;
-    }>;
-
-    currentSerial(overrides?: CallOverrides): Promise<{
-      0: BigNumber;
-    }>;
-
-    "currentSerial()"(overrides?: CallOverrides): Promise<{
-      0: BigNumber;
     }>;
 
     getApproved(
@@ -362,161 +291,45 @@ export class DynamicSerialMintable extends Contract {
       0: string;
     }>;
 
-    getSerial(
-      serialId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<{
-      0: {
-        name: string;
-        description: string;
-        animationUrl: string;
-        animationHash: string;
-        imageUrl: string;
-        imageHash: string;
-        owner: string;
-        serialSize: BigNumber;
-        atSerialId: BigNumber;
-        firstReservedToken: BigNumber;
-        royaltyRecipient: string;
-        royaltyBPS: BigNumber;
-        allowedMinters: string[];
-        0: string;
-        1: string;
-        2: string;
-        3: string;
-        4: string;
-        5: string;
-        6: string;
-        7: BigNumber;
-        8: BigNumber;
-        9: BigNumber;
-        10: string;
-        11: BigNumber;
-        12: string[];
-      };
-    }>;
-
-    "getSerial(uint256)"(
-      serialId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<{
-      0: {
-        name: string;
-        description: string;
-        animationUrl: string;
-        animationHash: string;
-        imageUrl: string;
-        imageHash: string;
-        owner: string;
-        serialSize: BigNumber;
-        atSerialId: BigNumber;
-        firstReservedToken: BigNumber;
-        royaltyRecipient: string;
-        royaltyBPS: BigNumber;
-        allowedMinters: string[];
-        0: string;
-        1: string;
-        2: string;
-        3: string;
-        4: string;
-        5: string;
-        6: string;
-        7: BigNumber;
-        8: BigNumber;
-        9: BigNumber;
-        10: string;
-        11: BigNumber;
-        12: string[];
-      };
-    }>;
-
-    getSerialByToken(
-      tokenId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<{
-      0: {
-        name: string;
-        description: string;
-        animationUrl: string;
-        animationHash: string;
-        imageUrl: string;
-        imageHash: string;
-        owner: string;
-        serialSize: BigNumber;
-        atSerialId: BigNumber;
-        firstReservedToken: BigNumber;
-        royaltyRecipient: string;
-        royaltyBPS: BigNumber;
-        allowedMinters: string[];
-        0: string;
-        1: string;
-        2: string;
-        3: string;
-        4: string;
-        5: string;
-        6: string;
-        7: BigNumber;
-        8: BigNumber;
-        9: BigNumber;
-        10: string;
-        11: BigNumber;
-        12: string[];
-      };
-    }>;
-
-    "getSerialByToken(uint256)"(
-      tokenId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<{
-      0: {
-        name: string;
-        description: string;
-        animationUrl: string;
-        animationHash: string;
-        imageUrl: string;
-        imageHash: string;
-        owner: string;
-        serialSize: BigNumber;
-        atSerialId: BigNumber;
-        firstReservedToken: BigNumber;
-        royaltyRecipient: string;
-        royaltyBPS: BigNumber;
-        allowedMinters: string[];
-        0: string;
-        1: string;
-        2: string;
-        3: string;
-        4: string;
-        5: string;
-        6: string;
-        7: BigNumber;
-        8: BigNumber;
-        9: BigNumber;
-        10: string;
-        11: BigNumber;
-        12: string[];
-      };
-    }>;
-
-    getURIs(
-      tokenId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<{
+    getURIs(overrides?: CallOverrides): Promise<{
       0: string;
       1: string;
       2: string;
       3: string;
     }>;
 
-    "getURIs(uint256)"(
-      tokenId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<{
+    "getURIs()"(overrides?: CallOverrides): Promise<{
       0: string;
       1: string;
       2: string;
       3: string;
     }>;
+
+    initialize(
+      _name: string,
+      _symbol: string,
+      _description: string,
+      _animationUrl: string,
+      _animationHash: BytesLike,
+      _imageUrl: string,
+      _imageHash: BytesLike,
+      _serialSize: BigNumberish,
+      _royaltyBPS: BigNumberish,
+      overrides?: Overrides
+    ): Promise<ContractTransaction>;
+
+    "initialize(string,string,string,string,bytes32,string,bytes32,uint256,uint256)"(
+      _name: string,
+      _symbol: string,
+      _description: string,
+      _animationUrl: string,
+      _animationHash: BytesLike,
+      _imageUrl: string,
+      _imageHash: BytesLike,
+      _serialSize: BigNumberish,
+      _royaltyBPS: BigNumberish,
+      overrides?: Overrides
+    ): Promise<ContractTransaction>;
 
     isApprovedForAll(
       owner: string,
@@ -534,26 +347,19 @@ export class DynamicSerialMintable extends Contract {
       0: boolean;
     }>;
 
-    mintSerial(
-      serialId: BigNumberish,
-      to: string,
-      overrides?: Overrides
-    ): Promise<ContractTransaction>;
+    mintSerial(to: string, overrides?: Overrides): Promise<ContractTransaction>;
 
-    "mintSerial(uint256,address)"(
-      serialId: BigNumberish,
+    "mintSerial(address)"(
       to: string,
       overrides?: Overrides
     ): Promise<ContractTransaction>;
 
     mintSerials(
-      serialId: BigNumberish,
       recipients: string[],
       overrides?: Overrides
     ): Promise<ContractTransaction>;
 
-    "mintSerials(uint256,address[])"(
-      serialId: BigNumberish,
+    "mintSerials(address[])"(
       recipients: string[],
       overrides?: Overrides
     ): Promise<ContractTransaction>;
@@ -563,6 +369,28 @@ export class DynamicSerialMintable extends Contract {
     }>;
 
     "name()"(overrides?: CallOverrides): Promise<{
+      0: string;
+    }>;
+
+    numberToString(
+      value: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<{
+      0: string;
+    }>;
+
+    "numberToString(uint256)"(
+      value: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<{
+      0: string;
+    }>;
+
+    owner(overrides?: CallOverrides): Promise<{
+      0: string;
+    }>;
+
+    "owner()"(overrides?: CallOverrides): Promise<{
       0: string;
     }>;
 
@@ -580,8 +408,12 @@ export class DynamicSerialMintable extends Contract {
       0: string;
     }>;
 
+    renounceOwnership(overrides?: Overrides): Promise<ContractTransaction>;
+
+    "renounceOwnership()"(overrides?: Overrides): Promise<ContractTransaction>;
+
     royaltyInfo(
-      _tokenId: BigNumberish,
+      arg0: BigNumberish,
       _salePrice: BigNumberish,
       overrides?: CallOverrides
     ): Promise<{
@@ -592,7 +424,7 @@ export class DynamicSerialMintable extends Contract {
     }>;
 
     "royaltyInfo(uint256,uint256)"(
-      _tokenId: BigNumberish,
+      arg0: BigNumberish,
       _salePrice: BigNumberish,
       overrides?: CallOverrides
     ): Promise<{
@@ -617,15 +449,21 @@ export class DynamicSerialMintable extends Contract {
       overrides?: Overrides
     ): Promise<ContractTransaction>;
 
+    serialSize(overrides?: CallOverrides): Promise<{
+      0: BigNumber;
+    }>;
+
+    "serialSize()"(overrides?: CallOverrides): Promise<{
+      0: BigNumber;
+    }>;
+
     setAllowedMinters(
-      serialId: BigNumberish,
-      allowedMinters: string[],
+      _allowedMinters: string[],
       overrides?: Overrides
     ): Promise<ContractTransaction>;
 
-    "setAllowedMinters(uint256,address[])"(
-      serialId: BigNumberish,
-      allowedMinters: string[],
+    "setAllowedMinters(address[])"(
+      _allowedMinters: string[],
       overrides?: Overrides
     ): Promise<ContractTransaction>;
 
@@ -638,18 +476,6 @@ export class DynamicSerialMintable extends Contract {
     "setApprovalForAll(address,bool)"(
       operator: string,
       approved: boolean,
-      overrides?: Overrides
-    ): Promise<ContractTransaction>;
-
-    setOwner(
-      serialId: BigNumberish,
-      owner: string,
-      overrides?: Overrides
-    ): Promise<ContractTransaction>;
-
-    "setOwner(uint256,address)"(
-      serialId: BigNumberish,
-      owner: string,
       overrides?: Overrides
     ): Promise<ContractTransaction>;
 
@@ -675,14 +501,6 @@ export class DynamicSerialMintable extends Contract {
       0: string;
     }>;
 
-    tokenIdsReserved(overrides?: CallOverrides): Promise<{
-      0: BigNumber;
-    }>;
-
-    "tokenIdsReserved()"(overrides?: CallOverrides): Promise<{
-      0: BigNumber;
-    }>;
-
     tokenURI(
       tokenId: BigNumberish,
       overrides?: CallOverrides
@@ -711,36 +529,28 @@ export class DynamicSerialMintable extends Contract {
       overrides?: Overrides
     ): Promise<ContractTransaction>;
 
-    updateRoyaltyRecipient(
-      serialId: BigNumberish,
-      newRecipient: string,
+    transferOwnership(
+      newOwner: string,
       overrides?: Overrides
     ): Promise<ContractTransaction>;
 
-    "updateRoyaltyRecipient(uint256,address)"(
-      serialId: BigNumberish,
-      newRecipient: string,
+    "transferOwnership(address)"(
+      newOwner: string,
       overrides?: Overrides
     ): Promise<ContractTransaction>;
 
     updateSerialURLs(
-      serialId: BigNumberish,
-      imageUrl: string,
-      animationUrl: string,
+      _imageUrl: string,
+      _animationUrl: string,
       overrides?: Overrides
     ): Promise<ContractTransaction>;
 
-    "updateSerialURLs(uint256,string,string)"(
-      serialId: BigNumberish,
-      imageUrl: string,
-      animationUrl: string,
+    "updateSerialURLs(string,string)"(
+      _imageUrl: string,
+      _animationUrl: string,
       overrides?: Overrides
     ): Promise<ContractTransaction>;
   };
-
-  allowedCreator(overrides?: CallOverrides): Promise<string>;
-
-  "allowedCreator()"(overrides?: CallOverrides): Promise<string>;
 
   approve(
     to: string,
@@ -761,42 +571,12 @@ export class DynamicSerialMintable extends Contract {
     overrides?: CallOverrides
   ): Promise<BigNumber>;
 
-  createSerial(
-    name: string,
-    description: string,
-    imageUrl: string,
-    imageHash: BytesLike,
-    animationUrl: string,
-    animationHash: BytesLike,
-    serialSize: BigNumberish,
-    royaltyBPS: BigNumberish,
-    royaltyRecipient: string,
-    overrides?: Overrides
-  ): Promise<ContractTransaction>;
+  base64Encode(args: BytesLike, overrides?: CallOverrides): Promise<string>;
 
-  "createSerial(string,string,string,bytes32,string,bytes32,uint256,uint256,address)"(
-    name: string,
-    description: string,
-    imageUrl: string,
-    imageHash: BytesLike,
-    animationUrl: string,
-    animationHash: BytesLike,
-    serialSize: BigNumberish,
-    royaltyBPS: BigNumberish,
-    royaltyRecipient: string,
-    overrides?: Overrides
-  ): Promise<ContractTransaction>;
-
-  creator(tokenId: BigNumberish, overrides?: CallOverrides): Promise<string>;
-
-  "creator(uint256)"(
-    tokenId: BigNumberish,
+  "base64Encode(bytes)"(
+    args: BytesLike,
     overrides?: CallOverrides
   ): Promise<string>;
-
-  currentSerial(overrides?: CallOverrides): Promise<BigNumber>;
-
-  "currentSerial()"(overrides?: CallOverrides): Promise<BigNumber>;
 
   getApproved(
     tokenId: BigNumberish,
@@ -808,153 +588,45 @@ export class DynamicSerialMintable extends Contract {
     overrides?: CallOverrides
   ): Promise<string>;
 
-  getSerial(
-    serialId: BigNumberish,
-    overrides?: CallOverrides
-  ): Promise<{
-    name: string;
-    description: string;
-    animationUrl: string;
-    animationHash: string;
-    imageUrl: string;
-    imageHash: string;
-    owner: string;
-    serialSize: BigNumber;
-    atSerialId: BigNumber;
-    firstReservedToken: BigNumber;
-    royaltyRecipient: string;
-    royaltyBPS: BigNumber;
-    allowedMinters: string[];
-    0: string;
-    1: string;
-    2: string;
-    3: string;
-    4: string;
-    5: string;
-    6: string;
-    7: BigNumber;
-    8: BigNumber;
-    9: BigNumber;
-    10: string;
-    11: BigNumber;
-    12: string[];
-  }>;
-
-  "getSerial(uint256)"(
-    serialId: BigNumberish,
-    overrides?: CallOverrides
-  ): Promise<{
-    name: string;
-    description: string;
-    animationUrl: string;
-    animationHash: string;
-    imageUrl: string;
-    imageHash: string;
-    owner: string;
-    serialSize: BigNumber;
-    atSerialId: BigNumber;
-    firstReservedToken: BigNumber;
-    royaltyRecipient: string;
-    royaltyBPS: BigNumber;
-    allowedMinters: string[];
-    0: string;
-    1: string;
-    2: string;
-    3: string;
-    4: string;
-    5: string;
-    6: string;
-    7: BigNumber;
-    8: BigNumber;
-    9: BigNumber;
-    10: string;
-    11: BigNumber;
-    12: string[];
-  }>;
-
-  getSerialByToken(
-    tokenId: BigNumberish,
-    overrides?: CallOverrides
-  ): Promise<{
-    name: string;
-    description: string;
-    animationUrl: string;
-    animationHash: string;
-    imageUrl: string;
-    imageHash: string;
-    owner: string;
-    serialSize: BigNumber;
-    atSerialId: BigNumber;
-    firstReservedToken: BigNumber;
-    royaltyRecipient: string;
-    royaltyBPS: BigNumber;
-    allowedMinters: string[];
-    0: string;
-    1: string;
-    2: string;
-    3: string;
-    4: string;
-    5: string;
-    6: string;
-    7: BigNumber;
-    8: BigNumber;
-    9: BigNumber;
-    10: string;
-    11: BigNumber;
-    12: string[];
-  }>;
-
-  "getSerialByToken(uint256)"(
-    tokenId: BigNumberish,
-    overrides?: CallOverrides
-  ): Promise<{
-    name: string;
-    description: string;
-    animationUrl: string;
-    animationHash: string;
-    imageUrl: string;
-    imageHash: string;
-    owner: string;
-    serialSize: BigNumber;
-    atSerialId: BigNumber;
-    firstReservedToken: BigNumber;
-    royaltyRecipient: string;
-    royaltyBPS: BigNumber;
-    allowedMinters: string[];
-    0: string;
-    1: string;
-    2: string;
-    3: string;
-    4: string;
-    5: string;
-    6: string;
-    7: BigNumber;
-    8: BigNumber;
-    9: BigNumber;
-    10: string;
-    11: BigNumber;
-    12: string[];
-  }>;
-
-  getURIs(
-    tokenId: BigNumberish,
-    overrides?: CallOverrides
-  ): Promise<{
+  getURIs(overrides?: CallOverrides): Promise<{
     0: string;
     1: string;
     2: string;
     3: string;
   }>;
 
-  "getURIs(uint256)"(
-    tokenId: BigNumberish,
-    overrides?: CallOverrides
-  ): Promise<{
+  "getURIs()"(overrides?: CallOverrides): Promise<{
     0: string;
     1: string;
     2: string;
     3: string;
   }>;
+
+  initialize(
+    _name: string,
+    _symbol: string,
+    _description: string,
+    _animationUrl: string,
+    _animationHash: BytesLike,
+    _imageUrl: string,
+    _imageHash: BytesLike,
+    _serialSize: BigNumberish,
+    _royaltyBPS: BigNumberish,
+    overrides?: Overrides
+  ): Promise<ContractTransaction>;
+
+  "initialize(string,string,string,string,bytes32,string,bytes32,uint256,uint256)"(
+    _name: string,
+    _symbol: string,
+    _description: string,
+    _animationUrl: string,
+    _animationHash: BytesLike,
+    _imageUrl: string,
+    _imageHash: BytesLike,
+    _serialSize: BigNumberish,
+    _royaltyBPS: BigNumberish,
+    overrides?: Overrides
+  ): Promise<ContractTransaction>;
 
   isApprovedForAll(
     owner: string,
@@ -968,26 +640,19 @@ export class DynamicSerialMintable extends Contract {
     overrides?: CallOverrides
   ): Promise<boolean>;
 
-  mintSerial(
-    serialId: BigNumberish,
-    to: string,
-    overrides?: Overrides
-  ): Promise<ContractTransaction>;
+  mintSerial(to: string, overrides?: Overrides): Promise<ContractTransaction>;
 
-  "mintSerial(uint256,address)"(
-    serialId: BigNumberish,
+  "mintSerial(address)"(
     to: string,
     overrides?: Overrides
   ): Promise<ContractTransaction>;
 
   mintSerials(
-    serialId: BigNumberish,
     recipients: string[],
     overrides?: Overrides
   ): Promise<ContractTransaction>;
 
-  "mintSerials(uint256,address[])"(
-    serialId: BigNumberish,
+  "mintSerials(address[])"(
     recipients: string[],
     overrides?: Overrides
   ): Promise<ContractTransaction>;
@@ -996,6 +661,20 @@ export class DynamicSerialMintable extends Contract {
 
   "name()"(overrides?: CallOverrides): Promise<string>;
 
+  numberToString(
+    value: BigNumberish,
+    overrides?: CallOverrides
+  ): Promise<string>;
+
+  "numberToString(uint256)"(
+    value: BigNumberish,
+    overrides?: CallOverrides
+  ): Promise<string>;
+
+  owner(overrides?: CallOverrides): Promise<string>;
+
+  "owner()"(overrides?: CallOverrides): Promise<string>;
+
   ownerOf(tokenId: BigNumberish, overrides?: CallOverrides): Promise<string>;
 
   "ownerOf(uint256)"(
@@ -1003,8 +682,12 @@ export class DynamicSerialMintable extends Contract {
     overrides?: CallOverrides
   ): Promise<string>;
 
+  renounceOwnership(overrides?: Overrides): Promise<ContractTransaction>;
+
+  "renounceOwnership()"(overrides?: Overrides): Promise<ContractTransaction>;
+
   royaltyInfo(
-    _tokenId: BigNumberish,
+    arg0: BigNumberish,
     _salePrice: BigNumberish,
     overrides?: CallOverrides
   ): Promise<{
@@ -1015,7 +698,7 @@ export class DynamicSerialMintable extends Contract {
   }>;
 
   "royaltyInfo(uint256,uint256)"(
-    _tokenId: BigNumberish,
+    arg0: BigNumberish,
     _salePrice: BigNumberish,
     overrides?: CallOverrides
   ): Promise<{
@@ -1040,15 +723,17 @@ export class DynamicSerialMintable extends Contract {
     overrides?: Overrides
   ): Promise<ContractTransaction>;
 
+  serialSize(overrides?: CallOverrides): Promise<BigNumber>;
+
+  "serialSize()"(overrides?: CallOverrides): Promise<BigNumber>;
+
   setAllowedMinters(
-    serialId: BigNumberish,
-    allowedMinters: string[],
+    _allowedMinters: string[],
     overrides?: Overrides
   ): Promise<ContractTransaction>;
 
-  "setAllowedMinters(uint256,address[])"(
-    serialId: BigNumberish,
-    allowedMinters: string[],
+  "setAllowedMinters(address[])"(
+    _allowedMinters: string[],
     overrides?: Overrides
   ): Promise<ContractTransaction>;
 
@@ -1061,18 +746,6 @@ export class DynamicSerialMintable extends Contract {
   "setApprovalForAll(address,bool)"(
     operator: string,
     approved: boolean,
-    overrides?: Overrides
-  ): Promise<ContractTransaction>;
-
-  setOwner(
-    serialId: BigNumberish,
-    owner: string,
-    overrides?: Overrides
-  ): Promise<ContractTransaction>;
-
-  "setOwner(uint256,address)"(
-    serialId: BigNumberish,
-    owner: string,
     overrides?: Overrides
   ): Promise<ContractTransaction>;
 
@@ -1089,10 +762,6 @@ export class DynamicSerialMintable extends Contract {
   symbol(overrides?: CallOverrides): Promise<string>;
 
   "symbol()"(overrides?: CallOverrides): Promise<string>;
-
-  tokenIdsReserved(overrides?: CallOverrides): Promise<BigNumber>;
-
-  "tokenIdsReserved()"(overrides?: CallOverrides): Promise<BigNumber>;
 
   tokenURI(tokenId: BigNumberish, overrides?: CallOverrides): Promise<string>;
 
@@ -1115,37 +784,29 @@ export class DynamicSerialMintable extends Contract {
     overrides?: Overrides
   ): Promise<ContractTransaction>;
 
-  updateRoyaltyRecipient(
-    serialId: BigNumberish,
-    newRecipient: string,
+  transferOwnership(
+    newOwner: string,
     overrides?: Overrides
   ): Promise<ContractTransaction>;
 
-  "updateRoyaltyRecipient(uint256,address)"(
-    serialId: BigNumberish,
-    newRecipient: string,
+  "transferOwnership(address)"(
+    newOwner: string,
     overrides?: Overrides
   ): Promise<ContractTransaction>;
 
   updateSerialURLs(
-    serialId: BigNumberish,
-    imageUrl: string,
-    animationUrl: string,
+    _imageUrl: string,
+    _animationUrl: string,
     overrides?: Overrides
   ): Promise<ContractTransaction>;
 
-  "updateSerialURLs(uint256,string,string)"(
-    serialId: BigNumberish,
-    imageUrl: string,
-    animationUrl: string,
+  "updateSerialURLs(string,string)"(
+    _imageUrl: string,
+    _animationUrl: string,
     overrides?: Overrides
   ): Promise<ContractTransaction>;
 
   callStatic: {
-    allowedCreator(overrides?: CallOverrides): Promise<string>;
-
-    "allowedCreator()"(overrides?: CallOverrides): Promise<string>;
-
     approve(
       to: string,
       tokenId: BigNumberish,
@@ -1165,42 +826,12 @@ export class DynamicSerialMintable extends Contract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    createSerial(
-      name: string,
-      description: string,
-      imageUrl: string,
-      imageHash: BytesLike,
-      animationUrl: string,
-      animationHash: BytesLike,
-      serialSize: BigNumberish,
-      royaltyBPS: BigNumberish,
-      royaltyRecipient: string,
-      overrides?: CallOverrides
-    ): Promise<void>;
+    base64Encode(args: BytesLike, overrides?: CallOverrides): Promise<string>;
 
-    "createSerial(string,string,string,bytes32,string,bytes32,uint256,uint256,address)"(
-      name: string,
-      description: string,
-      imageUrl: string,
-      imageHash: BytesLike,
-      animationUrl: string,
-      animationHash: BytesLike,
-      serialSize: BigNumberish,
-      royaltyBPS: BigNumberish,
-      royaltyRecipient: string,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    creator(tokenId: BigNumberish, overrides?: CallOverrides): Promise<string>;
-
-    "creator(uint256)"(
-      tokenId: BigNumberish,
+    "base64Encode(bytes)"(
+      args: BytesLike,
       overrides?: CallOverrides
     ): Promise<string>;
-
-    currentSerial(overrides?: CallOverrides): Promise<BigNumber>;
-
-    "currentSerial()"(overrides?: CallOverrides): Promise<BigNumber>;
 
     getApproved(
       tokenId: BigNumberish,
@@ -1212,153 +843,45 @@ export class DynamicSerialMintable extends Contract {
       overrides?: CallOverrides
     ): Promise<string>;
 
-    getSerial(
-      serialId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<{
-      name: string;
-      description: string;
-      animationUrl: string;
-      animationHash: string;
-      imageUrl: string;
-      imageHash: string;
-      owner: string;
-      serialSize: BigNumber;
-      atSerialId: BigNumber;
-      firstReservedToken: BigNumber;
-      royaltyRecipient: string;
-      royaltyBPS: BigNumber;
-      allowedMinters: string[];
-      0: string;
-      1: string;
-      2: string;
-      3: string;
-      4: string;
-      5: string;
-      6: string;
-      7: BigNumber;
-      8: BigNumber;
-      9: BigNumber;
-      10: string;
-      11: BigNumber;
-      12: string[];
-    }>;
-
-    "getSerial(uint256)"(
-      serialId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<{
-      name: string;
-      description: string;
-      animationUrl: string;
-      animationHash: string;
-      imageUrl: string;
-      imageHash: string;
-      owner: string;
-      serialSize: BigNumber;
-      atSerialId: BigNumber;
-      firstReservedToken: BigNumber;
-      royaltyRecipient: string;
-      royaltyBPS: BigNumber;
-      allowedMinters: string[];
-      0: string;
-      1: string;
-      2: string;
-      3: string;
-      4: string;
-      5: string;
-      6: string;
-      7: BigNumber;
-      8: BigNumber;
-      9: BigNumber;
-      10: string;
-      11: BigNumber;
-      12: string[];
-    }>;
-
-    getSerialByToken(
-      tokenId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<{
-      name: string;
-      description: string;
-      animationUrl: string;
-      animationHash: string;
-      imageUrl: string;
-      imageHash: string;
-      owner: string;
-      serialSize: BigNumber;
-      atSerialId: BigNumber;
-      firstReservedToken: BigNumber;
-      royaltyRecipient: string;
-      royaltyBPS: BigNumber;
-      allowedMinters: string[];
-      0: string;
-      1: string;
-      2: string;
-      3: string;
-      4: string;
-      5: string;
-      6: string;
-      7: BigNumber;
-      8: BigNumber;
-      9: BigNumber;
-      10: string;
-      11: BigNumber;
-      12: string[];
-    }>;
-
-    "getSerialByToken(uint256)"(
-      tokenId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<{
-      name: string;
-      description: string;
-      animationUrl: string;
-      animationHash: string;
-      imageUrl: string;
-      imageHash: string;
-      owner: string;
-      serialSize: BigNumber;
-      atSerialId: BigNumber;
-      firstReservedToken: BigNumber;
-      royaltyRecipient: string;
-      royaltyBPS: BigNumber;
-      allowedMinters: string[];
-      0: string;
-      1: string;
-      2: string;
-      3: string;
-      4: string;
-      5: string;
-      6: string;
-      7: BigNumber;
-      8: BigNumber;
-      9: BigNumber;
-      10: string;
-      11: BigNumber;
-      12: string[];
-    }>;
-
-    getURIs(
-      tokenId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<{
+    getURIs(overrides?: CallOverrides): Promise<{
       0: string;
       1: string;
       2: string;
       3: string;
     }>;
 
-    "getURIs(uint256)"(
-      tokenId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<{
+    "getURIs()"(overrides?: CallOverrides): Promise<{
       0: string;
       1: string;
       2: string;
       3: string;
     }>;
+
+    initialize(
+      _name: string,
+      _symbol: string,
+      _description: string,
+      _animationUrl: string,
+      _animationHash: BytesLike,
+      _imageUrl: string,
+      _imageHash: BytesLike,
+      _serialSize: BigNumberish,
+      _royaltyBPS: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    "initialize(string,string,string,string,bytes32,string,bytes32,uint256,uint256)"(
+      _name: string,
+      _symbol: string,
+      _description: string,
+      _animationUrl: string,
+      _animationHash: BytesLike,
+      _imageUrl: string,
+      _imageHash: BytesLike,
+      _serialSize: BigNumberish,
+      _royaltyBPS: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<void>;
 
     isApprovedForAll(
       owner: string,
@@ -1372,26 +895,19 @@ export class DynamicSerialMintable extends Contract {
       overrides?: CallOverrides
     ): Promise<boolean>;
 
-    mintSerial(
-      serialId: BigNumberish,
-      to: string,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
+    mintSerial(to: string, overrides?: CallOverrides): Promise<BigNumber>;
 
-    "mintSerial(uint256,address)"(
-      serialId: BigNumberish,
+    "mintSerial(address)"(
       to: string,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     mintSerials(
-      serialId: BigNumberish,
       recipients: string[],
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    "mintSerials(uint256,address[])"(
-      serialId: BigNumberish,
+    "mintSerials(address[])"(
       recipients: string[],
       overrides?: CallOverrides
     ): Promise<BigNumber>;
@@ -1400,6 +916,20 @@ export class DynamicSerialMintable extends Contract {
 
     "name()"(overrides?: CallOverrides): Promise<string>;
 
+    numberToString(
+      value: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<string>;
+
+    "numberToString(uint256)"(
+      value: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<string>;
+
+    owner(overrides?: CallOverrides): Promise<string>;
+
+    "owner()"(overrides?: CallOverrides): Promise<string>;
+
     ownerOf(tokenId: BigNumberish, overrides?: CallOverrides): Promise<string>;
 
     "ownerOf(uint256)"(
@@ -1407,8 +937,12 @@ export class DynamicSerialMintable extends Contract {
       overrides?: CallOverrides
     ): Promise<string>;
 
+    renounceOwnership(overrides?: CallOverrides): Promise<void>;
+
+    "renounceOwnership()"(overrides?: CallOverrides): Promise<void>;
+
     royaltyInfo(
-      _tokenId: BigNumberish,
+      arg0: BigNumberish,
       _salePrice: BigNumberish,
       overrides?: CallOverrides
     ): Promise<{
@@ -1419,7 +953,7 @@ export class DynamicSerialMintable extends Contract {
     }>;
 
     "royaltyInfo(uint256,uint256)"(
-      _tokenId: BigNumberish,
+      arg0: BigNumberish,
       _salePrice: BigNumberish,
       overrides?: CallOverrides
     ): Promise<{
@@ -1444,15 +978,17 @@ export class DynamicSerialMintable extends Contract {
       overrides?: CallOverrides
     ): Promise<void>;
 
+    serialSize(overrides?: CallOverrides): Promise<BigNumber>;
+
+    "serialSize()"(overrides?: CallOverrides): Promise<BigNumber>;
+
     setAllowedMinters(
-      serialId: BigNumberish,
-      allowedMinters: string[],
+      _allowedMinters: string[],
       overrides?: CallOverrides
     ): Promise<void>;
 
-    "setAllowedMinters(uint256,address[])"(
-      serialId: BigNumberish,
-      allowedMinters: string[],
+    "setAllowedMinters(address[])"(
+      _allowedMinters: string[],
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -1465,18 +1001,6 @@ export class DynamicSerialMintable extends Contract {
     "setApprovalForAll(address,bool)"(
       operator: string,
       approved: boolean,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    setOwner(
-      serialId: BigNumberish,
-      owner: string,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    "setOwner(uint256,address)"(
-      serialId: BigNumberish,
-      owner: string,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -1493,10 +1017,6 @@ export class DynamicSerialMintable extends Contract {
     symbol(overrides?: CallOverrides): Promise<string>;
 
     "symbol()"(overrides?: CallOverrides): Promise<string>;
-
-    tokenIdsReserved(overrides?: CallOverrides): Promise<BigNumber>;
-
-    "tokenIdsReserved()"(overrides?: CallOverrides): Promise<BigNumber>;
 
     tokenURI(tokenId: BigNumberish, overrides?: CallOverrides): Promise<string>;
 
@@ -1519,29 +1039,25 @@ export class DynamicSerialMintable extends Contract {
       overrides?: CallOverrides
     ): Promise<void>;
 
-    updateRoyaltyRecipient(
-      serialId: BigNumberish,
-      newRecipient: string,
+    transferOwnership(
+      newOwner: string,
       overrides?: CallOverrides
     ): Promise<void>;
 
-    "updateRoyaltyRecipient(uint256,address)"(
-      serialId: BigNumberish,
-      newRecipient: string,
+    "transferOwnership(address)"(
+      newOwner: string,
       overrides?: CallOverrides
     ): Promise<void>;
 
     updateSerialURLs(
-      serialId: BigNumberish,
-      imageUrl: string,
-      animationUrl: string,
+      _imageUrl: string,
+      _animationUrl: string,
       overrides?: CallOverrides
     ): Promise<void>;
 
-    "updateSerialURLs(uint256,string,string)"(
-      serialId: BigNumberish,
-      imageUrl: string,
-      animationUrl: string,
+    "updateSerialURLs(string,string)"(
+      _imageUrl: string,
+      _animationUrl: string,
       overrides?: CallOverrides
     ): Promise<void>;
   };
@@ -1559,14 +1075,10 @@ export class DynamicSerialMintable extends Contract {
       approved: null
     ): EventFilter;
 
-    CreatedSerial(
-      serialId: null,
-      creator: null,
-      startToken: null,
-      serialSize: null
+    OwnershipTransferred(
+      previousOwner: string | null,
+      newOwner: string | null
     ): EventFilter;
-
-    MintedSerial(serialId: null, tokenId: null, minter: null): EventFilter;
 
     Transfer(
       from: string | null,
@@ -1576,10 +1088,6 @@ export class DynamicSerialMintable extends Contract {
   };
 
   estimateGas: {
-    allowedCreator(overrides?: CallOverrides): Promise<BigNumber>;
-
-    "allowedCreator()"(overrides?: CallOverrides): Promise<BigNumber>;
-
     approve(
       to: string,
       tokenId: BigNumberish,
@@ -1599,45 +1107,15 @@ export class DynamicSerialMintable extends Contract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    createSerial(
-      name: string,
-      description: string,
-      imageUrl: string,
-      imageHash: BytesLike,
-      animationUrl: string,
-      animationHash: BytesLike,
-      serialSize: BigNumberish,
-      royaltyBPS: BigNumberish,
-      royaltyRecipient: string,
-      overrides?: Overrides
-    ): Promise<BigNumber>;
-
-    "createSerial(string,string,string,bytes32,string,bytes32,uint256,uint256,address)"(
-      name: string,
-      description: string,
-      imageUrl: string,
-      imageHash: BytesLike,
-      animationUrl: string,
-      animationHash: BytesLike,
-      serialSize: BigNumberish,
-      royaltyBPS: BigNumberish,
-      royaltyRecipient: string,
-      overrides?: Overrides
-    ): Promise<BigNumber>;
-
-    creator(
-      tokenId: BigNumberish,
+    base64Encode(
+      args: BytesLike,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    "creator(uint256)"(
-      tokenId: BigNumberish,
+    "base64Encode(bytes)"(
+      args: BytesLike,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
-
-    currentSerial(overrides?: CallOverrides): Promise<BigNumber>;
-
-    "currentSerial()"(overrides?: CallOverrides): Promise<BigNumber>;
 
     getApproved(
       tokenId: BigNumberish,
@@ -1649,34 +1127,34 @@ export class DynamicSerialMintable extends Contract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    getSerial(
-      serialId: BigNumberish,
-      overrides?: CallOverrides
+    getURIs(overrides?: CallOverrides): Promise<BigNumber>;
+
+    "getURIs()"(overrides?: CallOverrides): Promise<BigNumber>;
+
+    initialize(
+      _name: string,
+      _symbol: string,
+      _description: string,
+      _animationUrl: string,
+      _animationHash: BytesLike,
+      _imageUrl: string,
+      _imageHash: BytesLike,
+      _serialSize: BigNumberish,
+      _royaltyBPS: BigNumberish,
+      overrides?: Overrides
     ): Promise<BigNumber>;
 
-    "getSerial(uint256)"(
-      serialId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    getSerialByToken(
-      tokenId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    "getSerialByToken(uint256)"(
-      tokenId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    getURIs(
-      tokenId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    "getURIs(uint256)"(
-      tokenId: BigNumberish,
-      overrides?: CallOverrides
+    "initialize(string,string,string,string,bytes32,string,bytes32,uint256,uint256)"(
+      _name: string,
+      _symbol: string,
+      _description: string,
+      _animationUrl: string,
+      _animationHash: BytesLike,
+      _imageUrl: string,
+      _imageHash: BytesLike,
+      _serialSize: BigNumberish,
+      _royaltyBPS: BigNumberish,
+      overrides?: Overrides
     ): Promise<BigNumber>;
 
     isApprovedForAll(
@@ -1691,26 +1169,19 @@ export class DynamicSerialMintable extends Contract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    mintSerial(
-      serialId: BigNumberish,
-      to: string,
-      overrides?: Overrides
-    ): Promise<BigNumber>;
+    mintSerial(to: string, overrides?: Overrides): Promise<BigNumber>;
 
-    "mintSerial(uint256,address)"(
-      serialId: BigNumberish,
+    "mintSerial(address)"(
       to: string,
       overrides?: Overrides
     ): Promise<BigNumber>;
 
     mintSerials(
-      serialId: BigNumberish,
       recipients: string[],
       overrides?: Overrides
     ): Promise<BigNumber>;
 
-    "mintSerials(uint256,address[])"(
-      serialId: BigNumberish,
+    "mintSerials(address[])"(
       recipients: string[],
       overrides?: Overrides
     ): Promise<BigNumber>;
@@ -1718,6 +1189,20 @@ export class DynamicSerialMintable extends Contract {
     name(overrides?: CallOverrides): Promise<BigNumber>;
 
     "name()"(overrides?: CallOverrides): Promise<BigNumber>;
+
+    numberToString(
+      value: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    "numberToString(uint256)"(
+      value: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    owner(overrides?: CallOverrides): Promise<BigNumber>;
+
+    "owner()"(overrides?: CallOverrides): Promise<BigNumber>;
 
     ownerOf(
       tokenId: BigNumberish,
@@ -1729,14 +1214,18 @@ export class DynamicSerialMintable extends Contract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
+    renounceOwnership(overrides?: Overrides): Promise<BigNumber>;
+
+    "renounceOwnership()"(overrides?: Overrides): Promise<BigNumber>;
+
     royaltyInfo(
-      _tokenId: BigNumberish,
+      arg0: BigNumberish,
       _salePrice: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     "royaltyInfo(uint256,uint256)"(
-      _tokenId: BigNumberish,
+      arg0: BigNumberish,
       _salePrice: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
@@ -1756,15 +1245,17 @@ export class DynamicSerialMintable extends Contract {
       overrides?: Overrides
     ): Promise<BigNumber>;
 
+    serialSize(overrides?: CallOverrides): Promise<BigNumber>;
+
+    "serialSize()"(overrides?: CallOverrides): Promise<BigNumber>;
+
     setAllowedMinters(
-      serialId: BigNumberish,
-      allowedMinters: string[],
+      _allowedMinters: string[],
       overrides?: Overrides
     ): Promise<BigNumber>;
 
-    "setAllowedMinters(uint256,address[])"(
-      serialId: BigNumberish,
-      allowedMinters: string[],
+    "setAllowedMinters(address[])"(
+      _allowedMinters: string[],
       overrides?: Overrides
     ): Promise<BigNumber>;
 
@@ -1777,18 +1268,6 @@ export class DynamicSerialMintable extends Contract {
     "setApprovalForAll(address,bool)"(
       operator: string,
       approved: boolean,
-      overrides?: Overrides
-    ): Promise<BigNumber>;
-
-    setOwner(
-      serialId: BigNumberish,
-      owner: string,
-      overrides?: Overrides
-    ): Promise<BigNumber>;
-
-    "setOwner(uint256,address)"(
-      serialId: BigNumberish,
-      owner: string,
       overrides?: Overrides
     ): Promise<BigNumber>;
 
@@ -1805,10 +1284,6 @@ export class DynamicSerialMintable extends Contract {
     symbol(overrides?: CallOverrides): Promise<BigNumber>;
 
     "symbol()"(overrides?: CallOverrides): Promise<BigNumber>;
-
-    tokenIdsReserved(overrides?: CallOverrides): Promise<BigNumber>;
-
-    "tokenIdsReserved()"(overrides?: CallOverrides): Promise<BigNumber>;
 
     tokenURI(
       tokenId: BigNumberish,
@@ -1834,40 +1309,30 @@ export class DynamicSerialMintable extends Contract {
       overrides?: Overrides
     ): Promise<BigNumber>;
 
-    updateRoyaltyRecipient(
-      serialId: BigNumberish,
-      newRecipient: string,
+    transferOwnership(
+      newOwner: string,
       overrides?: Overrides
     ): Promise<BigNumber>;
 
-    "updateRoyaltyRecipient(uint256,address)"(
-      serialId: BigNumberish,
-      newRecipient: string,
+    "transferOwnership(address)"(
+      newOwner: string,
       overrides?: Overrides
     ): Promise<BigNumber>;
 
     updateSerialURLs(
-      serialId: BigNumberish,
-      imageUrl: string,
-      animationUrl: string,
+      _imageUrl: string,
+      _animationUrl: string,
       overrides?: Overrides
     ): Promise<BigNumber>;
 
-    "updateSerialURLs(uint256,string,string)"(
-      serialId: BigNumberish,
-      imageUrl: string,
-      animationUrl: string,
+    "updateSerialURLs(string,string)"(
+      _imageUrl: string,
+      _animationUrl: string,
       overrides?: Overrides
     ): Promise<BigNumber>;
   };
 
   populateTransaction: {
-    allowedCreator(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    "allowedCreator()"(
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
     approve(
       to: string,
       tokenId: BigNumberish,
@@ -1890,45 +1355,15 @@ export class DynamicSerialMintable extends Contract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    createSerial(
-      name: string,
-      description: string,
-      imageUrl: string,
-      imageHash: BytesLike,
-      animationUrl: string,
-      animationHash: BytesLike,
-      serialSize: BigNumberish,
-      royaltyBPS: BigNumberish,
-      royaltyRecipient: string,
-      overrides?: Overrides
-    ): Promise<PopulatedTransaction>;
-
-    "createSerial(string,string,string,bytes32,string,bytes32,uint256,uint256,address)"(
-      name: string,
-      description: string,
-      imageUrl: string,
-      imageHash: BytesLike,
-      animationUrl: string,
-      animationHash: BytesLike,
-      serialSize: BigNumberish,
-      royaltyBPS: BigNumberish,
-      royaltyRecipient: string,
-      overrides?: Overrides
-    ): Promise<PopulatedTransaction>;
-
-    creator(
-      tokenId: BigNumberish,
+    base64Encode(
+      args: BytesLike,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    "creator(uint256)"(
-      tokenId: BigNumberish,
+    "base64Encode(bytes)"(
+      args: BytesLike,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
-
-    currentSerial(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    "currentSerial()"(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     getApproved(
       tokenId: BigNumberish,
@@ -1940,34 +1375,34 @@ export class DynamicSerialMintable extends Contract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    getSerial(
-      serialId: BigNumberish,
-      overrides?: CallOverrides
+    getURIs(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    "getURIs()"(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    initialize(
+      _name: string,
+      _symbol: string,
+      _description: string,
+      _animationUrl: string,
+      _animationHash: BytesLike,
+      _imageUrl: string,
+      _imageHash: BytesLike,
+      _serialSize: BigNumberish,
+      _royaltyBPS: BigNumberish,
+      overrides?: Overrides
     ): Promise<PopulatedTransaction>;
 
-    "getSerial(uint256)"(
-      serialId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    getSerialByToken(
-      tokenId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    "getSerialByToken(uint256)"(
-      tokenId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    getURIs(
-      tokenId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    "getURIs(uint256)"(
-      tokenId: BigNumberish,
-      overrides?: CallOverrides
+    "initialize(string,string,string,string,bytes32,string,bytes32,uint256,uint256)"(
+      _name: string,
+      _symbol: string,
+      _description: string,
+      _animationUrl: string,
+      _animationHash: BytesLike,
+      _imageUrl: string,
+      _imageHash: BytesLike,
+      _serialSize: BigNumberish,
+      _royaltyBPS: BigNumberish,
+      overrides?: Overrides
     ): Promise<PopulatedTransaction>;
 
     isApprovedForAll(
@@ -1983,25 +1418,21 @@ export class DynamicSerialMintable extends Contract {
     ): Promise<PopulatedTransaction>;
 
     mintSerial(
-      serialId: BigNumberish,
       to: string,
       overrides?: Overrides
     ): Promise<PopulatedTransaction>;
 
-    "mintSerial(uint256,address)"(
-      serialId: BigNumberish,
+    "mintSerial(address)"(
       to: string,
       overrides?: Overrides
     ): Promise<PopulatedTransaction>;
 
     mintSerials(
-      serialId: BigNumberish,
       recipients: string[],
       overrides?: Overrides
     ): Promise<PopulatedTransaction>;
 
-    "mintSerials(uint256,address[])"(
-      serialId: BigNumberish,
+    "mintSerials(address[])"(
       recipients: string[],
       overrides?: Overrides
     ): Promise<PopulatedTransaction>;
@@ -2009,6 +1440,20 @@ export class DynamicSerialMintable extends Contract {
     name(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     "name()"(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    numberToString(
+      value: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    "numberToString(uint256)"(
+      value: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    "owner()"(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     ownerOf(
       tokenId: BigNumberish,
@@ -2020,14 +1465,18 @@ export class DynamicSerialMintable extends Contract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
+    renounceOwnership(overrides?: Overrides): Promise<PopulatedTransaction>;
+
+    "renounceOwnership()"(overrides?: Overrides): Promise<PopulatedTransaction>;
+
     royaltyInfo(
-      _tokenId: BigNumberish,
+      arg0: BigNumberish,
       _salePrice: BigNumberish,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     "royaltyInfo(uint256,uint256)"(
-      _tokenId: BigNumberish,
+      arg0: BigNumberish,
       _salePrice: BigNumberish,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
@@ -2047,15 +1496,17 @@ export class DynamicSerialMintable extends Contract {
       overrides?: Overrides
     ): Promise<PopulatedTransaction>;
 
+    serialSize(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    "serialSize()"(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
     setAllowedMinters(
-      serialId: BigNumberish,
-      allowedMinters: string[],
+      _allowedMinters: string[],
       overrides?: Overrides
     ): Promise<PopulatedTransaction>;
 
-    "setAllowedMinters(uint256,address[])"(
-      serialId: BigNumberish,
-      allowedMinters: string[],
+    "setAllowedMinters(address[])"(
+      _allowedMinters: string[],
       overrides?: Overrides
     ): Promise<PopulatedTransaction>;
 
@@ -2068,18 +1519,6 @@ export class DynamicSerialMintable extends Contract {
     "setApprovalForAll(address,bool)"(
       operator: string,
       approved: boolean,
-      overrides?: Overrides
-    ): Promise<PopulatedTransaction>;
-
-    setOwner(
-      serialId: BigNumberish,
-      owner: string,
-      overrides?: Overrides
-    ): Promise<PopulatedTransaction>;
-
-    "setOwner(uint256,address)"(
-      serialId: BigNumberish,
-      owner: string,
       overrides?: Overrides
     ): Promise<PopulatedTransaction>;
 
@@ -2096,12 +1535,6 @@ export class DynamicSerialMintable extends Contract {
     symbol(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     "symbol()"(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    tokenIdsReserved(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    "tokenIdsReserved()"(
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
 
     tokenURI(
       tokenId: BigNumberish,
@@ -2127,29 +1560,25 @@ export class DynamicSerialMintable extends Contract {
       overrides?: Overrides
     ): Promise<PopulatedTransaction>;
 
-    updateRoyaltyRecipient(
-      serialId: BigNumberish,
-      newRecipient: string,
+    transferOwnership(
+      newOwner: string,
       overrides?: Overrides
     ): Promise<PopulatedTransaction>;
 
-    "updateRoyaltyRecipient(uint256,address)"(
-      serialId: BigNumberish,
-      newRecipient: string,
+    "transferOwnership(address)"(
+      newOwner: string,
       overrides?: Overrides
     ): Promise<PopulatedTransaction>;
 
     updateSerialURLs(
-      serialId: BigNumberish,
-      imageUrl: string,
-      animationUrl: string,
+      _imageUrl: string,
+      _animationUrl: string,
       overrides?: Overrides
     ): Promise<PopulatedTransaction>;
 
-    "updateSerialURLs(uint256,string,string)"(
-      serialId: BigNumberish,
-      imageUrl: string,
-      animationUrl: string,
+    "updateSerialURLs(string,string)"(
+      _imageUrl: string,
+      _animationUrl: string,
       overrides?: Overrides
     ): Promise<PopulatedTransaction>;
   };

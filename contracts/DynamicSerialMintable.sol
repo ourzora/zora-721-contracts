@@ -2,13 +2,13 @@
 
 pragma solidity 0.8.6;
 
-import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-import "@openzeppelin/contracts/utils/Strings.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/interfaces/IERC2981Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/StringsUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "base64-sol/base64.sol";
-import "./FundsRecoverable.sol";
 import "./ISerialMintable.sol";
-import "./IERC2981.sol";
 
 /**
     This is a smart contract for handling dynamic contract minting.
@@ -19,107 +19,86 @@ import "./IERC2981.sol";
 */
 contract DynamicSerialMintable is
     ISerialMintable,
-    ERC721,
-    IERC2981,
-    ReentrancyGuard
+    ERC721Upgradeable,
+    OwnableUpgradeable,
+    IERC2981Upgradeable,
+    ReentrancyGuardUpgradeable
 {
-    struct SerialConfig {
-        // metadata
-        // name for the nft metadata in format $NAME $ID/$COUNT
-        string name;
-        // description for the nft metadata
-        string description;
-        // media urls
-        // animation_url field in the metadata
-        string animationUrl;
-        // hash for the associated animation
-        bytes32 animationHash;
-        // image in the metadata
-        string imageUrl;
-        // hash for the associated image
-        bytes32 imageHash;
-        // allowed to update urls and royalty address, can reassign ownership + serial bookkeeping for creator
-        address owner;
-        // total size of serial that can be minted
-        uint256 serialSize;
-        // current token id minted
-        uint256 atSerialId;
-        // id serial starts at
-        uint256 firstReservedToken;
-        // royalty address
-        address payable royaltyRecipient;
-        // royalty amount in bps
-        uint256 royaltyBPS;
-        // addresses allowed to mint serial
-        address[] allowedMinters;
-    }
+    // metadata
+    string private description;
 
-    // Emitted when a serial is minted for indexing purposes.
-    event MintedSerial(uint256 serialId, uint256 tokenId, address minter);
+    // media urls
+    // animation_url field in the metadata
+    string private animationUrl;
+    // hash for the associated animation
+    bytes32 private animationHash;
+    // image in the metadata
+    string private imageUrl;
+    // hash for the associated image
+    bytes32 private imageHash;
 
-    // Emitted when a serial is created reserving the corresponding token IDs.
-    event CreatedSerial(
-        uint256 serialId,
-        address creator,
-        uint256 startToken,
-        uint256 serialSize
-    );
-
-    // Public counter keeping tracked of the token ids reserved
-    uint256 public tokenIdsReserved = 1;
-
-    // Keeps track of the next serial ID to be created (at 0 = no serials, at 1 = 0th serial is created)
-    uint256 public currentSerial = 0;
-
-    // Account that is allowed to create serials. This can be re-assigned and when is the ZeroAddress anyone can create serials with this contract.
-    address public allowedCreator;
-
-    // List of serials that can be minted on this contract.
-    SerialConfig[] private serials;
-
-    // Mapping from token id to serial id. Used to lookup serial information
-    // Optimization for runtime gas that prevents searching through an array of serials.
-    mapping(uint256 => uint256) private tokenIdToSerialId;
-
-    // Used to check that the serial passed in exists in the config.
-    modifier serialExists(uint256 serialId) {
-        require(serials[serialId].serialSize > 0, "Serial needs to exist");
-        _;
-    }
-
-    // Used to check that the serial owner is the person sending the request.
-    modifier ownsSerial(uint256 serialId) {
-        require(msg.sender == serials[serialId].owner, "Serial wrong owner");
-        _;
-    }
+    // total size of serial that can be minted
+    uint256 public serialSize;
+    // current token id minted
+    uint256 private atSerialId = 1;
+    // royalty amount in bps
+    uint256 royaltyBPS;
+    // addresses allowed to mint serial
+    address[] allowedMinters;
 
     /**
-      @param name Name of NFT contract
-      @param symbol Symbol of NFT contract
-      @param _allowedCreator address allowed to create new Serials (aka Owner)
-      @dev Sets up the serial contract with a name, symbol, and an initial allowed creator.
+      @param _name Name of serial, used in the title as "$NAME NUMBER/TOTAL"
+      @param _symbol Symbol of the new token contract
+      @param _description Description of serial, used in the description field of the NFT
+      @param _imageUrl Image URL of the serial. Strongly encouraged to be used, if necessary, only animation URL can be used. One of animation and image url need to exist in a serial to render the NFT.
+      @param _imageHash SHA256 of the given image in bytes32 format (0xHASH). If no image is included, the hash can be zero (bytes32 type)
+      @param _animationUrl Animation URL of the serial. Not required, but if omitted image URL needs to be included. This follows the opensea spec for NFTs
+      @param _animationHash The associated hash of the animation in sha-256 bytes32 format. If animation is omitted 
+      @param _serialSize Number of serials that can be minted in total.
+      @param _royaltyBPS BPS of the royalty set on the contract. Can be 0 for no royalty.
+      @dev Function to create a new serial. Can only be called by the allowed creator
+           Sets the only allowed minter to the address that creates/owns the serial.
+           This can be re-assigned or updated later
      */
-    constructor(
-        string memory name,
-        string memory symbol,
-        address _allowedCreator
-    ) ERC721(name, symbol) {
-        allowedCreator = _allowedCreator;
+    function initialize(
+        string memory _name,
+        string memory _symbol,
+        string memory _description,
+        string memory _animationUrl,
+        bytes32 _animationHash,
+        string memory _imageUrl,
+        bytes32 _imageHash,
+        uint256 _serialSize,
+        uint256 _royaltyBPS
+    ) public initializer {
+        __ERC721_init(_name, _symbol);
+        __Ownable_init();
+        __ReentrancyGuard_init();
+        description = _description;
+        animationUrl = _animationUrl;
+        animationHash = _animationHash;
+        imageUrl = _imageUrl;
+        imageHash = _imageHash;
+        serialSize = _serialSize;
+        royaltyBPS = _royaltyBPS;
+        allowedMinters.push(msg.sender);
     }
 
     /**
-      @param serialId id of the serial to check if the msg.sender is allowed to mint
       @dev This helper function checks if the msg.sender is allowed to mint the
             given serial id.
      */
-    function _isAllowedToMint(uint256 serialId) internal view returns (bool) {
-        SerialConfig memory serial = getSerial(serialId);
-        uint256 allowedMintersCount = serial.allowedMinters.length;
+    function _isAllowedToMint() internal view returns (bool) {
+        if (owner() == msg.sender) {
+            return true;
+        }
+        uint256 allowedMintersCount = allowedMinters.length;
+        // todo(iain): update allowed minters?
         if (allowedMintersCount == 0) {
             return true;
         }
         for (uint256 i = 0; i < allowedMintersCount; i++) {
-            if (serial.allowedMinters[i] == msg.sender) {
+            if (allowedMinters[i] == msg.sender) {
                 return true;
             }
         }
@@ -127,82 +106,45 @@ contract DynamicSerialMintable is
     }
 
     /**
-      @param tokenId token id to retrieve the owner for
-      @dev This retrieves the original owner/creator of the serial for a given tokenId
-     */
-    function creator(uint256 tokenId) public view returns (address) {
-        return getSerialByToken(tokenId).owner;
-    }
-
-    /**
-      @param newCreator address to re-assign the creator permission to
-      @dev This re-assigns the ethereum address that is allowed to create serials on this contract.
-      To "freeze" a contract to prevent any more serials being created, this can be set to 0x0.
-     */
-    function setAllowedCreator(address newCreator) public {
-        require(msg.sender == allowedCreator, "Wrong serial owner");
-        allowedCreator = newCreator;
-    }
-
-    /**
-      @param serialId ID of the serial to mint
       @param to address to send the newly minted serial to
       @dev This mints one serial to the given address by an allowed minter on the serial instance.
      */
-    function mintSerial(uint256 serialId, address to)
+    function mintSerial(address to)
         external
         override
         nonReentrant
-        serialExists(serialId)
         returns (uint256)
     {
-        require(_isAllowedToMint(serialId), "Needs to be an allowed minter");
+        require(_isAllowedToMint(), "Needs to be an allowed minter");
         address[] memory toMint = new address[](1);
         toMint[0] = to;
-        return _mintSerials(serialId, toMint);
+        return _mintSerials(toMint);
     }
 
     /**
-      @param serialId ID of the serial to mint
       @param recipients list of addresses to send the newly minted serials to
       @dev This mints multiple serials to the given list of addresses.
      */
-    function mintSerials(uint256 serialId, address[] memory recipients)
+    function mintSerials(address[] memory recipients)
         external
         override
         nonReentrant
-        serialExists(serialId)
         returns (uint256)
     {
-        require(_isAllowedToMint(serialId), "Needs to be an allowed minter");
-        return _mintSerials(serialId, recipients);
+        require(_isAllowedToMint(), "Needs to be an allowed minter");
+        return _mintSerials(recipients);
     }
 
     /**
-      @param serialId id of the serial to re-assign owner of
-      @param owner Owner to reassign serial of
-      @dev Reassigns the serial id to a new owners.
-           Owners can update allowed minters and update URLs of a serial.
-     */
-    function setOwner(uint256 serialId, address owner)
-        public
-        serialExists(serialId)
-        ownsSerial(serialId)
-    {
-        serials[serialId].owner = owner;
-    }
-
-    /**
-      @param serialId serial to to update the minters for
-      @param allowedMinters list of addresses allowed to mint this serial
+      @param _allowedMinters list of addresses allowed to mint this serial
       @dev Set the allowed minters array for a given serial id
            This requires that msg.sender is the owner of the given serial id.
      */
-    function setAllowedMinters(
-        uint256 serialId,
-        address[] memory allowedMinters
-    ) public serialExists(serialId) ownsSerial(serialId) {
-        serials[serialId].allowedMinters = allowedMinters;
+    function setAllowedMinters(address[] memory _allowedMinters)
+        public
+        onlyOwner
+    {
+        allowedMinters = _allowedMinters;
     }
 
     /**
@@ -210,129 +152,31 @@ contract DynamicSerialMintable is
            Only URLs can be updated (data-uris are supported), hashes cannot be updated.
      */
     function updateSerialURLs(
-        uint256 serialId,
-        string memory imageUrl,
-        string memory animationUrl
-    ) public serialExists(serialId) ownsSerial(serialId) {
-        serials[serialId].imageUrl = imageUrl;
-        serials[serialId].animationUrl = animationUrl;
+        string memory _imageUrl,
+        string memory _animationUrl
+    ) public onlyOwner {
+        imageUrl = _imageUrl;
+        animationUrl = _animationUrl;
     }
 
     /**
-      @dev Update the royalty recipient address
-           Can only be called by the serial owner.
-     */
-    function updateRoyaltyRecipient(
-        uint256 serialId,
-        address payable newRecipient
-    ) public serialExists(serialId) ownsSerial(serialId) {
-        serials[serialId].royaltyRecipient = newRecipient;
-    }
-
-    /**
-      @dev Private function to mint serials without any access checks.
+      @dev Private function to mint als without any access checks.
            Called by the public serial minting functions.
      */
-    function _mintSerials(uint256 serialId, address[] memory recipients)
-        private
+    function _mintSerials(address[] memory recipients)
+        internal
         returns (uint256)
     {
-        SerialConfig memory serial = getSerial(serialId);
-        uint256 startId = serial.firstReservedToken + serial.atSerialId;
-        require(
-            serial.atSerialId + recipients.length <= serial.serialSize,
-            "SOLD OUT"
-        );
-        uint256 toMint = 0;
-        uint256 tokenId;
-        while (toMint < recipients.length) {
-            tokenId = startId + toMint;
-            _mint(recipients[toMint], tokenId);
-            tokenIdToSerialId[tokenId] = serialId;
-            emit MintedSerial(serialId, tokenId, recipients[toMint]);
-            toMint += 1;
+        uint256 endAt = atSerialId + recipients.length;
+        require(endAt <= serialSize, "SOLD OUT");
+        while (atSerialId < endAt) {
+            atSerialId++;
+            _mint(msg.sender, atSerialId);
         }
-        serials[serialId].atSerialId += recipients.length;
-        return tokenId;
+        return atSerialId;
     }
 
-    /**
-      @param name Name of serial, used in the title as "$NAME NUMBER/TOTAL"
-      @param description Description of serial, used in the description field of the NFT
-      @param imageUrl Image URL of the serial. Strongly encouraged to be used, if necessary, only animation URL can be used. One of animation and image url need to exist in a serial to render the NFT.
-      @param imageHash SHA256 of the given image in bytes32 format (0xHASH). If no image is included, the hash can be zero (bytes32 type)
-      @param animationUrl Animation URL of the serial. Not required, but if omitted image URL needs to be included. This follows the opensea spec for NFTs
-      @param animationHash The associated hash of the animation in sha-256 bytes32 format. If animation is omitted 
-      @param serialSize Number of serials that can be minted in total.
-      @param royaltyBPS BPS of the royalty set on the contract. Can be 0 for no royalty.
-      @param royaltyRecipient Recipient address of the royalty for resales
-      @dev Function to create a new serial. Can only be called by the allowed creator
-           Sets the only allowed minter to the address that creates/owns the serial.
-           This can be re-assigned or updated later
-     */
-    function createSerial(
-        string memory name,
-        string memory description,
-        string memory imageUrl,
-        bytes32 imageHash,
-        string memory animationUrl,
-        bytes32 animationHash,
-        uint256 serialSize,
-        uint256 royaltyBPS,
-        address payable royaltyRecipient
-    ) public {
-        require(
-            allowedCreator == address(0x0) || allowedCreator == msg.sender,
-            "Only authed"
-        );
-        address[] memory allowedMinters = new address[](1);
-        allowedMinters[0] = msg.sender;
-
-        serials.push(
-            SerialConfig({
-                name: name,
-                description: description,
-                owner: msg.sender,
-                imageHash: imageHash,
-                imageUrl: imageUrl,
-                animationUrl: animationUrl,
-                animationHash: animationHash,
-                firstReservedToken: tokenIdsReserved,
-                serialSize: serialSize,
-                atSerialId: 0,
-                royaltyRecipient: royaltyRecipient,
-                royaltyBPS: royaltyBPS,
-                allowedMinters: allowedMinters
-            })
-        );
-
-        emit CreatedSerial(
-            serials.length - 1,
-            msg.sender,
-            tokenIdsReserved,
-            serialSize
-        );
-
-        tokenIdsReserved += serialSize;
-    }
-
-    function getSerial(uint256 serialId)
-        public
-        view
-        returns (SerialConfig memory)
-    {
-        return serials[serialId];
-    }
-
-    function getSerialByToken(uint256 tokenId)
-        public
-        view
-        returns (SerialConfig memory)
-    {
-        return serials[tokenIdToSerialId[tokenId]];
-    }
-
-    function getURIs(uint256 tokenId)
+    function getURIs()
         public
         view
         returns (
@@ -342,34 +186,40 @@ contract DynamicSerialMintable is
             bytes32
         )
     {
-        SerialConfig memory serial = getSerialByToken(tokenId);
-        return (
-            serial.imageUrl,
-            serial.imageHash,
-            serial.animationUrl,
-            serial.animationHash
-        );
+        return (imageUrl, imageHash, animationUrl, animationHash);
     }
 
-    function _tokenMediaData(SerialConfig memory serial, uint256 tokenOfSerial)
-        private
+    function base64Encode(bytes memory args)
+        public
         pure
         returns (string memory)
     {
-        bool hasImage = bytes(serial.imageUrl).length > 0;
-        bool hasAnimation = bytes(serial.animationUrl).length > 0;
+        return Base64.encode(args);
+    }
+
+    function numberToString(uint256 value) public pure returns (string memory) {
+        return StringsUpgradeable.toString(value);
+    }
+
+    function _tokenMediaData(uint256 tokenOfSerial)
+        private
+        view
+        returns (string memory)
+    {
+        bool hasImage = bytes(imageUrl).length > 0;
+        bool hasAnimation = bytes(animationUrl).length > 0;
         if (hasImage && hasAnimation) {
             return
                 string(
                     abi.encodePacked(
                         'image": "',
-                        serial.imageUrl,
+                        imageUrl,
                         "?id=",
-                        Strings.toString(tokenOfSerial),
+                        numberToString(tokenOfSerial),
                         '", "animation_url": "',
-                        serial.animationUrl,
+                        animationUrl,
                         "?id=",
-                        Strings.toString(tokenOfSerial),
+                        numberToString(tokenOfSerial),
                         '", "'
                     )
                 );
@@ -379,9 +229,9 @@ contract DynamicSerialMintable is
                 string(
                     abi.encodePacked(
                         'image": "',
-                        serial.imageUrl,
+                        imageUrl,
                         "?id=",
-                        Strings.toString(tokenOfSerial),
+                        numberToString(tokenOfSerial),
                         '", "'
                     )
                 );
@@ -391,7 +241,7 @@ contract DynamicSerialMintable is
                 string(
                     abi.encodePacked(
                         'animation_url": "',
-                        serial.animationUrl,
+                        animationUrl,
                         "?id=",
                         '", "'
                     )
@@ -401,17 +251,13 @@ contract DynamicSerialMintable is
         return "";
     }
 
-    function royaltyInfo(uint256 _tokenId, uint256 _salePrice)
+    function royaltyInfo(uint256, uint256 _salePrice)
         external
         view
         override
         returns (address receiver, uint256 royaltyAmount)
     {
-        SerialConfig memory config = getSerialByToken(_tokenId);
-        return (
-            config.royaltyRecipient,
-            (_salePrice * config.royaltyBPS) / 10_000
-        );
+        return (owner(), (_salePrice * royaltyBPS) / 10_000);
     }
 
     function tokenURI(uint256 tokenId)
@@ -422,31 +268,26 @@ contract DynamicSerialMintable is
     {
         require(_exists(tokenId), "NO TOKEN");
 
-        SerialConfig memory serial = serials[tokenIdToSerialId[tokenId]];
-        uint256 tokenOfSerial = tokenId - serial.firstReservedToken + 1;
-
         return
             string(
                 abi.encodePacked(
                     "data:application/json;base64,",
-                    Base64.encode(
+                    base64Encode(
                         abi.encodePacked(
                             '{"name": "',
-                            serial.name,
+                            name(),
                             " ",
-                            Strings.toString(tokenOfSerial),
+                            StringsUpgradeable.toString(tokenId),
                             "/",
-                            Strings.toString(serial.serialSize),
+                            StringsUpgradeable.toString(serialSize),
                             '", "',
                             'description": "',
-                            serial.description,
+                            description,
                             '", "',
-                            _tokenMediaData(serial, tokenOfSerial),
+                            _tokenMediaData(tokenId),
                             'properties": {"number": ',
-                            Strings.toString(tokenOfSerial),
-                            ', "name": "',
-                            serial.name,
-                            '"}}'
+                            StringsUpgradeable.toString(tokenId),
+                            "}"
                         )
                     )
                 )
@@ -456,11 +297,11 @@ contract DynamicSerialMintable is
     function supportsInterface(bytes4 interfaceId)
         public
         view
-        override(ERC721, IERC165)
+        override(ERC721Upgradeable, IERC165Upgradeable)
         returns (bool)
     {
         return
-            type(IERC2981).interfaceId == interfaceId ||
-            ERC721.supportsInterface(interfaceId);
+            type(IERC2981Upgradeable).interfaceId == interfaceId ||
+            ERC721Upgradeable.supportsInterface(interfaceId);
     }
 }

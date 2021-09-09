@@ -10,12 +10,9 @@
 
 pragma solidity 0.8.6;
 
-import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-import "@openzeppelin/contracts/utils/Strings.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-import "@openzeppelin/contracts/interfaces/IERC2981.sol";
-import "base64-sol/base64.sol";
-import "./FundsRecoverable.sol";
+import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
+import {IERC2981, IERC165} from "@openzeppelin/contracts/interfaces/IERC2981.sol";
 import "./ISerialMultipleMintable.sol";
 import "./SharedNFTLogic.sol";
 
@@ -29,8 +26,7 @@ import "./SharedNFTLogic.sol";
 contract SharedEditionsMintable is
     ISerialMultipleMintable,
     ERC721,
-    IERC2981,
-    ReentrancyGuard
+    IERC2981
 {
     struct SerialConfig {
         // metadata
@@ -165,7 +161,6 @@ contract SharedEditionsMintable is
     function mintSerial(uint256 serialId, address to)
         external
         override
-        nonReentrant
         serialExists(serialId)
         returns (uint256)
     {
@@ -183,7 +178,6 @@ contract SharedEditionsMintable is
     function mintSerials(uint256 serialId, address[] memory recipients)
         external
         override
-        nonReentrant
         serialExists(serialId)
         returns (uint256)
     {
@@ -388,20 +382,14 @@ contract SharedEditionsMintable is
         SerialConfig memory serial = serials[tokenIdToSerialId[tokenId]];
         uint256 tokenOfSerial = tokenId - serial.firstReservedToken + 1;
 
-        return
-            sharedNFTLogic.encodeMetadataJSON(
-                sharedNFTLogic.createMetadataJSON(
-                    serial.name,
-                    serial.description,
-                    sharedNFTLogic.tokenMediaData(
-                        serial.imageUrl,
-                        serial.animationUrl,
-                        tokenOfSerial
-                    ),
-                    serial.serialSize,
-                    tokenOfSerial
-                )
-            );
+        return sharedNFTLogic.createMetadataSerial(
+            serial.name,
+            serial.description,
+            serial.imageUrl,
+            serial.animationUrl,
+            tokenOfSerial,
+            serial.serialSize
+        );
     }
 
     function supportsInterface(bytes4 interfaceId)

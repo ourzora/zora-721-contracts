@@ -6,26 +6,26 @@ import parseDataURI from "data-urls";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { SharedEditionsMintable } from "../typechain";
 
-describe("DynamicSerialMintable", () => {
+describe("SharedEditionsMintable", () => {
   let signer: SignerWithAddress;
   let signerAddress: string;
-  let dynamicSketch: DynamicSerialMintable;
+  let sharedEditionsMintableInstance: SharedEditionsMintable;
 
   beforeEach(async () => {
-    await deployments.fixture(["DynamicSerialMintable"]);
-    dynamicSketch = (await ethers.getContractAt(
-      "DynamicSerialMintable",
+    await deployments.fixture(["SharedEditionsMintable"]);
+    sharedEditionsMintableInstance = (await ethers.getContractAt(
+      "SharedEditionsMintable",
       (
-        await deployments.get("DynamicSerialMintable")
+        await deployments.get("SharedEditionsMintable")
       ).address
-    )) as DynamicSerialMintable;
+    )) as SharedEditionsMintable;
 
     signer = (await ethers.getSigners())[0];
     signerAddress = await signer.getAddress();
   });
 
   it("makes a new serial", async () => {
-    await dynamicSketch.createSerial(
+    await sharedEditionsMintableInstance.createSerial(
       "test",
       "test",
       "https://ipfs.io/ipfsbafybeify52a63pgcshhbtkff4nxxxp2zp5yjn2xw43jcy4knwful7ymmgy",
@@ -37,7 +37,7 @@ describe("DynamicSerialMintable", () => {
       signerAddress
     );
 
-    const serialResult = await dynamicSketch.getSerial(0);
+    const serialResult = await sharedEditionsMintableInstance.getSerial(0);
     expect(serialResult.name).to.be.equal("test");
     expect(serialResult.description).to.be.equal("test");
     expect(serialResult.imageUrl).to.be.equal(
@@ -52,7 +52,7 @@ describe("DynamicSerialMintable", () => {
     let signer1: SignerWithAddress;
     beforeEach(async () => {
       signer1 = (await ethers.getSigners())[1];
-      await dynamicSketch.createSerial(
+      await sharedEditionsMintableInstance.createSerial(
         "test",
         "test",
         "https://ipfs.io/ipfsbafybeify52a63pgcshhbtkff4nxxxp2zp5yjn2xw43jcy4knwful7ymmgy",
@@ -70,15 +70,15 @@ describe("DynamicSerialMintable", () => {
       );
 
       // Mint first serial
-      await expect(dynamicSketch.mintSerial(0, signerAddress))
-        .to.emit(dynamicSketch, "Transfer")
+      await expect(sharedEditionsMintableInstance.mintSerial(0, signerAddress))
+        .to.emit(sharedEditionsMintableInstance, "Transfer")
         .withArgs(
           "0x0000000000000000000000000000000000000000",
           signerAddress,
           1
         );
 
-      const tokenURI = await dynamicSketch.tokenURI(1);
+      const tokenURI = await sharedEditionsMintableInstance.tokenURI(1);
       const parsedTokenURI = parseDataURI(tokenURI);
       if (!parsedTokenURI) {
         throw "No parsed token uri";
@@ -104,22 +104,22 @@ describe("DynamicSerialMintable", () => {
       );
     });
     it("creates an authenticated serial", async () => {
-      await dynamicSketch.mintSerial(0, await signer1.getAddress());
-      expect(await dynamicSketch.ownerOf(1)).to.equal(
+      await sharedEditionsMintableInstance.mintSerial(0, await signer1.getAddress());
+      expect(await sharedEditionsMintableInstance.ownerOf(1)).to.equal(
         await signer1.getAddress()
       );
     });
     it("creates a set of serials", async () => {
       const [s1, s2, s3] = await ethers.getSigners();
-      await dynamicSketch.mintSerials(0, [
+      await sharedEditionsMintableInstance.mintSerials(0, [
         await s1.getAddress(),
         await s2.getAddress(),
         await s3.getAddress(),
       ]);
-      expect(await dynamicSketch.ownerOf(1)).to.equal(await s1.getAddress());
-      expect(await dynamicSketch.ownerOf(2)).to.equal(await s2.getAddress());
-      expect(await dynamicSketch.ownerOf(3)).to.equal(await s3.getAddress());
-      await dynamicSketch.mintSerials(0, [
+      expect(await sharedEditionsMintableInstance.ownerOf(1)).to.equal(await s1.getAddress());
+      expect(await sharedEditionsMintableInstance.ownerOf(2)).to.equal(await s2.getAddress());
+      expect(await sharedEditionsMintableInstance.ownerOf(3)).to.equal(await s3.getAddress());
+      await sharedEditionsMintableInstance.mintSerials(0, [
         await s1.getAddress(),
         await s2.getAddress(),
         await s3.getAddress(),
@@ -128,18 +128,18 @@ describe("DynamicSerialMintable", () => {
         await s2.getAddress(),
         await s3.getAddress(),
       ]);
-      await expect(dynamicSketch.mintSerials(0, [
+      await expect(sharedEditionsMintableInstance.mintSerials(0, [
         signerAddress
       ])).to.be.reverted;
-      await expect(dynamicSketch.mintSerial(0, signerAddress)).to.be.reverted;
+      await expect(sharedEditionsMintableInstance.mintSerial(0, signerAddress)).to.be.reverted;
     });
     it("stops after serials are sold out", async () => {
       const [_, signer1] = await ethers.getSigners();
 
       // Mint first serial
       for (var i = 1; i <= 10; i++) {
-        await expect(dynamicSketch.mintSerial(0, await signer1.getAddress()))
-          .to.emit(dynamicSketch, "Transfer")
+        await expect(sharedEditionsMintableInstance.mintSerial(0, await signer1.getAddress()))
+          .to.emit(sharedEditionsMintableInstance, "Transfer")
           .withArgs(
             "0x0000000000000000000000000000000000000000",
             await signer1.getAddress(),
@@ -148,10 +148,10 @@ describe("DynamicSerialMintable", () => {
       }
 
       await expect(
-        dynamicSketch.mintSerial(0, signerAddress)
+        sharedEditionsMintableInstance.mintSerial(0, signerAddress)
       ).to.be.revertedWith("SOLD OUT");
 
-      const tokenURI = await dynamicSketch.tokenURI(10);
+      const tokenURI = await sharedEditionsMintableInstance.tokenURI(10);
       const parsedTokenURI = parseDataURI(tokenURI);
       if (!parsedTokenURI) {
         throw "No parsed token uri";

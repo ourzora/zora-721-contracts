@@ -23,6 +23,7 @@ interface SharedNftLogicInterface extends ethers.utils.Interface {
   functions: {
     "base64Encode(bytes)": FunctionFragment;
     "createMetadataJSON(string,string,string,uint256,uint256)": FunctionFragment;
+    "createMetadataSerial(string,string,string,string,uint256,uint256)": FunctionFragment;
     "encodeMetadataJSON(bytes)": FunctionFragment;
     "numberToString(uint256)": FunctionFragment;
     "tokenMediaData(string,string,uint256)": FunctionFragment;
@@ -35,6 +36,10 @@ interface SharedNftLogicInterface extends ethers.utils.Interface {
   encodeFunctionData(
     functionFragment: "createMetadataJSON",
     values: [string, string, string, BigNumberish, BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "createMetadataSerial",
+    values: [string, string, string, string, BigNumberish, BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "encodeMetadataJSON",
@@ -55,6 +60,10 @@ interface SharedNftLogicInterface extends ethers.utils.Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "createMetadataJSON",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "createMetadataSerial",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -116,6 +125,30 @@ export class SharedNftLogic extends Contract {
       name: string,
       description: string,
       mediaData: string,
+      tokenOfSerial: BigNumberish,
+      serialSize: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<{
+      0: string;
+    }>;
+
+    createMetadataSerial(
+      name: string,
+      description: string,
+      imageUrl: string,
+      animationUrl: string,
+      tokenOfSerial: BigNumberish,
+      serialSize: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<{
+      0: string;
+    }>;
+
+    "createMetadataSerial(string,string,string,string,uint256,uint256)"(
+      name: string,
+      description: string,
+      imageUrl: string,
+      animationUrl: string,
       tokenOfSerial: BigNumberish,
       serialSize: BigNumberish,
       overrides?: CallOverrides
@@ -195,6 +228,26 @@ export class SharedNftLogic extends Contract {
     overrides?: CallOverrides
   ): Promise<string>;
 
+  createMetadataSerial(
+    name: string,
+    description: string,
+    imageUrl: string,
+    animationUrl: string,
+    tokenOfSerial: BigNumberish,
+    serialSize: BigNumberish,
+    overrides?: CallOverrides
+  ): Promise<string>;
+
+  "createMetadataSerial(string,string,string,string,uint256,uint256)"(
+    name: string,
+    description: string,
+    imageUrl: string,
+    animationUrl: string,
+    tokenOfSerial: BigNumberish,
+    serialSize: BigNumberish,
+    overrides?: CallOverrides
+  ): Promise<string>;
+
   encodeMetadataJSON(
     json: BytesLike,
     overrides?: CallOverrides
@@ -250,6 +303,26 @@ export class SharedNftLogic extends Contract {
       name: string,
       description: string,
       mediaData: string,
+      tokenOfSerial: BigNumberish,
+      serialSize: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<string>;
+
+    createMetadataSerial(
+      name: string,
+      description: string,
+      imageUrl: string,
+      animationUrl: string,
+      tokenOfSerial: BigNumberish,
+      serialSize: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<string>;
+
+    "createMetadataSerial(string,string,string,string,uint256,uint256)"(
+      name: string,
+      description: string,
+      imageUrl: string,
+      animationUrl: string,
       tokenOfSerial: BigNumberish,
       serialSize: BigNumberish,
       overrides?: CallOverrides
@@ -321,6 +394,26 @@ export class SharedNftLogic extends Contract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
+    createMetadataSerial(
+      name: string,
+      description: string,
+      imageUrl: string,
+      animationUrl: string,
+      tokenOfSerial: BigNumberish,
+      serialSize: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    "createMetadataSerial(string,string,string,string,uint256,uint256)"(
+      name: string,
+      description: string,
+      imageUrl: string,
+      animationUrl: string,
+      tokenOfSerial: BigNumberish,
+      serialSize: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
     encodeMetadataJSON(
       json: BytesLike,
       overrides?: CallOverrides
@@ -380,6 +473,26 @@ export class SharedNftLogic extends Contract {
       name: string,
       description: string,
       mediaData: string,
+      tokenOfSerial: BigNumberish,
+      serialSize: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    createMetadataSerial(
+      name: string,
+      description: string,
+      imageUrl: string,
+      animationUrl: string,
+      tokenOfSerial: BigNumberish,
+      serialSize: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    "createMetadataSerial(string,string,string,string,uint256,uint256)"(
+      name: string,
+      description: string,
+      imageUrl: string,
+      animationUrl: string,
       tokenOfSerial: BigNumberish,
       serialSize: BigNumberish,
       overrides?: CallOverrides

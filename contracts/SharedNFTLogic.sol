@@ -16,13 +16,36 @@ contract SharedNFTLogic {
         return Strings.toString(value);
     }
 
+    function createMetadataSerial(
+        string memory name,
+        string memory description,
+        string memory imageUrl,
+        string memory animationUrl,
+        uint256 tokenOfSerial,
+        uint256 serialSize
+    ) external pure returns (string memory) {
+        string memory _tokenMediaData = tokenMediaData(
+            imageUrl,
+            animationUrl,
+            tokenOfSerial
+        );
+        bytes memory json = createMetadataJSON( 
+            name,
+            description,
+            _tokenMediaData,
+            tokenOfSerial,
+            serialSize
+        );
+        return encodeMetadataJSON(json);
+    }
+
     function createMetadataJSON(
         string memory name,
         string memory description,
         string memory mediaData,
         uint256 tokenOfSerial,
         uint256 serialSize
-    ) external pure returns (bytes memory) {
+    ) public pure returns (bytes memory) {
         return
             abi.encodePacked(
                 '{"name": "',
@@ -62,7 +85,7 @@ contract SharedNFTLogic {
         string memory imageUrl,
         string memory animationUrl,
         uint256 tokenOfSerial
-    ) external pure returns (string memory) {
+    ) public pure returns (string memory) {
         bool hasImage = bytes(imageUrl).length > 0;
         bool hasAnimation = bytes(animationUrl).length > 0;
         if (hasImage && hasAnimation) {

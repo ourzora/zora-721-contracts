@@ -232,19 +232,15 @@ contract SingleEditionMintable is
     {
         require(_exists(tokenId), "NO TOKEN");
 
-        string memory mediaData = sharedNFTLogic.tokenMediaData(
-            imageUrl,
-            animationUrl,
-            tokenId
-        );
-        bytes memory metadata = sharedNFTLogic.createMetadataJSON(
-            name(),
-            description,
-            mediaData,
-            tokenId,
-            serialSize
-        );
-        return sharedNFTLogic.encodeMetadataJSON(metadata);
+        return
+            sharedNFTLogic.createMetadataSerial(
+                name(),
+                description,
+                imageUrl,
+                animationUrl,
+                tokenId,
+                serialSize
+            );
     }
 
     function supportsInterface(bytes4 interfaceId)

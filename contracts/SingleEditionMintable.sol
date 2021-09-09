@@ -13,7 +13,6 @@ pragma solidity 0.8.6;
 import {ERC721Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
 import {IERC2981Upgradeable, IERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/interfaces/IERC2981Upgradeable.sol";
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-import {Base64} from "base64-sol/base64.sol";
 import {SharedNFTLogic} from "./SharedNFTLogic.sol";
 import {ISerialSingleMintable} from "./ISerialSingleMintable.sol";
 

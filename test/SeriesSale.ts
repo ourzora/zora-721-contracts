@@ -43,7 +43,7 @@ describe("SeriesSale", () => {
         10,
         signerAddress
       );
-      await dynamicSketch.setAllowedMinters(0, [seriesSale.address]);
+      await dynamicSketch.setAllowedMinters([seriesSale.address]);
     });
     it("allows creating an ETH sale", async () => {
       const [_, s2, s3] = await ethers.getSigners();

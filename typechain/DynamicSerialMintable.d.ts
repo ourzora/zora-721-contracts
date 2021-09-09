@@ -27,7 +27,7 @@ interface DynamicSerialMintableInterface extends ethers.utils.Interface {
     "base64Encode(bytes)": FunctionFragment;
     "getApproved(uint256)": FunctionFragment;
     "getURIs()": FunctionFragment;
-    "initialize(string,string,string,string,bytes32,string,bytes32,uint256,uint256)": FunctionFragment;
+    "initialize(address,string,string,string,string,bytes32,string,bytes32,uint256,uint256)": FunctionFragment;
     "isApprovedForAll(address,address)": FunctionFragment;
     "mintSerial(address)": FunctionFragment;
     "mintSerials(address[])": FunctionFragment;
@@ -66,6 +66,7 @@ interface DynamicSerialMintableInterface extends ethers.utils.Interface {
   encodeFunctionData(
     functionFragment: "initialize",
     values: [
+      string,
       string,
       string,
       string,
@@ -306,6 +307,7 @@ export class DynamicSerialMintable extends Contract {
     }>;
 
     initialize(
+      _owner: string,
       _name: string,
       _symbol: string,
       _description: string,
@@ -318,7 +320,8 @@ export class DynamicSerialMintable extends Contract {
       overrides?: Overrides
     ): Promise<ContractTransaction>;
 
-    "initialize(string,string,string,string,bytes32,string,bytes32,uint256,uint256)"(
+    "initialize(address,string,string,string,string,bytes32,string,bytes32,uint256,uint256)"(
+      _owner: string,
       _name: string,
       _symbol: string,
       _description: string,
@@ -603,6 +606,7 @@ export class DynamicSerialMintable extends Contract {
   }>;
 
   initialize(
+    _owner: string,
     _name: string,
     _symbol: string,
     _description: string,
@@ -615,7 +619,8 @@ export class DynamicSerialMintable extends Contract {
     overrides?: Overrides
   ): Promise<ContractTransaction>;
 
-  "initialize(string,string,string,string,bytes32,string,bytes32,uint256,uint256)"(
+  "initialize(address,string,string,string,string,bytes32,string,bytes32,uint256,uint256)"(
+    _owner: string,
     _name: string,
     _symbol: string,
     _description: string,
@@ -858,6 +863,7 @@ export class DynamicSerialMintable extends Contract {
     }>;
 
     initialize(
+      _owner: string,
       _name: string,
       _symbol: string,
       _description: string,
@@ -870,7 +876,8 @@ export class DynamicSerialMintable extends Contract {
       overrides?: CallOverrides
     ): Promise<void>;
 
-    "initialize(string,string,string,string,bytes32,string,bytes32,uint256,uint256)"(
+    "initialize(address,string,string,string,string,bytes32,string,bytes32,uint256,uint256)"(
+      _owner: string,
       _name: string,
       _symbol: string,
       _description: string,
@@ -1132,6 +1139,7 @@ export class DynamicSerialMintable extends Contract {
     "getURIs()"(overrides?: CallOverrides): Promise<BigNumber>;
 
     initialize(
+      _owner: string,
       _name: string,
       _symbol: string,
       _description: string,
@@ -1144,7 +1152,8 @@ export class DynamicSerialMintable extends Contract {
       overrides?: Overrides
     ): Promise<BigNumber>;
 
-    "initialize(string,string,string,string,bytes32,string,bytes32,uint256,uint256)"(
+    "initialize(address,string,string,string,string,bytes32,string,bytes32,uint256,uint256)"(
+      _owner: string,
       _name: string,
       _symbol: string,
       _description: string,
@@ -1380,6 +1389,7 @@ export class DynamicSerialMintable extends Contract {
     "getURIs()"(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     initialize(
+      _owner: string,
       _name: string,
       _symbol: string,
       _description: string,
@@ -1392,7 +1402,8 @@ export class DynamicSerialMintable extends Contract {
       overrides?: Overrides
     ): Promise<PopulatedTransaction>;
 
-    "initialize(string,string,string,string,bytes32,string,bytes32,uint256,uint256)"(
+    "initialize(address,string,string,string,string,bytes32,string,bytes32,uint256,uint256)"(
+      _owner: string,
       _name: string,
       _symbol: string,
       _description: string,

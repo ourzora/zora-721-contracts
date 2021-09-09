@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import "@nomiclabs/hardhat-ethers";
-import { ethers, deployments } from "hardhat";
+import { ethers, deployments, getNamedAccounts } from "hardhat";
 import parseDataURI from "data-urls";
 
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
@@ -12,13 +12,16 @@ describe("DynamicSerialMintable", () => {
   let dynamicSketch: DynamicSerialCreator;
 
   beforeEach(async () => {
-    const {DynamicSerialCreator} = await deployments.fixture(["DynamicSerialCreator", "DynamicSerialMintable"]);
+    const { DynamicSerialCreator } = await deployments.fixture([
+      "DynamicSerialCreator",
+      "DynamicSerialMintable",
+    ]);
     const dynamicMintableAddress = (
-        await deployments.get("DynamicSerialMintable")
-      ).address;
+      await deployments.get("DynamicSerialMintable")
+    ).address;
     dynamicSketch = (await ethers.getContractAt(
       "DynamicSerialCreator",
-      DynamicSerialCreator.address,
+      DynamicSerialCreator.address
     )) as DynamicSerialCreator;
 
     signer = (await ethers.getSigners())[0];
@@ -45,12 +48,17 @@ describe("DynamicSerialMintable", () => {
     )) as DynamicSerialMintable;
     expect(await minterContract.name()).to.be.equal("Testing Token");
     expect(await minterContract.symbol()).to.be.equal("TEST");
-    expect(await minterContract.getURIs()).to.be.equal([
-      "",
-      "",
-      "https://ipfs.io/ipfsbafybeify52a63pgcshhbtkff4nxxxp2zp5yjn2xw43jcy4knwful7ymmgy",
-      "",
-    ]);
+    const serialUris = await minterContract.getURIs();
+    expect(serialUris[0]).to.be.equal("");
+    expect(serialUris[1]).to.be.equal(
+      "0x0000000000000000000000000000000000000000000000000000000000000000"
+    );
+    expect(serialUris[2]).to.be.equal(
+      "https://ipfs.io/ipfsbafybeify52a63pgcshhbtkff4nxxxp2zp5yjn2xw43jcy4knwful7ymmgy"
+    );
+    expect(serialUris[3]).to.be.equal(
+      "0x0000000000000000000000000000000000000000000000000000000000000000"
+    );
     expect(await minterContract.serialSize()).to.be.equal(10);
     // TODO(iain): check bps
     expect(await minterContract.owner()).to.be.equal(signerAddress);
@@ -71,7 +79,7 @@ describe("DynamicSerialMintable", () => {
         10,
         10
       );
-  
+
       const serialResult = await dynamicSketch.getSerialAtId(0);
       minterContract = (await ethers.getContractAt(
         "DynamicSerialMintable",
@@ -93,6 +101,7 @@ describe("DynamicSerialMintable", () => {
         );
 
       const tokenURI = await minterContract.tokenURI(1);
+      console.log(tokenURI);
       const parsedTokenURI = parseDataURI(tokenURI);
       if (!parsedTokenURI) {
         throw "No parsed token uri";
@@ -109,11 +118,11 @@ describe("DynamicSerialMintable", () => {
       // );
       expect(JSON.stringify(metadata)).to.equal(
         JSON.stringify({
-          name: "test 1/10",
-          description: "test",
-          image:
+          name: "Testing Token 1/10",
+          description: "This is a testing token for all",
+          animation_url:
             "https://ipfs.io/ipfsbafybeify52a63pgcshhbtkff4nxxxp2zp5yjn2xw43jcy4knwful7ymmgy?id=1",
-          properties: { number: 1, name: "test" },
+          properties: { number: 1 },
         })
       );
     });
@@ -142,9 +151,8 @@ describe("DynamicSerialMintable", () => {
         await s2.getAddress(),
         await s3.getAddress(),
       ]);
-      await expect(dynamicSketch.mintSerials(0, [signerAddress])).to.be
-        .reverted;
-      await expect(dynamicSketch.mintSerial(0, signerAddress)).to.be.reverted;
+      await expect(minterContract.mintSerials([signerAddress])).to.be.reverted;
+      await expect(minterContract.mintSerial(signerAddress)).to.be.reverted;
     });
     it("stops after serials are sold out", async () => {
       const [_, signer1] = await ethers.getSigners();
@@ -152,7 +160,7 @@ describe("DynamicSerialMintable", () => {
       // Mint first serial
       for (var i = 1; i <= 10; i++) {
         await expect(minterContract.mintSerial(await signer1.getAddress()))
-          .to.emit(dynamicSketch, "Transfer")
+          .to.emit(minterContract, "Transfer")
           .withArgs(
             "0x0000000000000000000000000000000000000000",
             await signer1.getAddress(),
@@ -160,11 +168,11 @@ describe("DynamicSerialMintable", () => {
           );
       }
 
-      await expect(
-        dynamicSketch.mintSerial(0, signerAddress)
-      ).to.be.revertedWith("SOLD OUT");
+      await expect(minterContract.mintSerial(signerAddress)).to.be.revertedWith(
+        "SOLD OUT"
+      );
 
-      const tokenURI = await dynamicSketch.tokenURI(10);
+      const tokenURI = await minterContract.tokenURI(10);
       const parsedTokenURI = parseDataURI(tokenURI);
       if (!parsedTokenURI) {
         throw "No parsed token uri";
@@ -179,11 +187,11 @@ describe("DynamicSerialMintable", () => {
       expect(parsedTokenURI.mimeType.subtype).to.equal("json");
       expect(JSON.stringify(metadata)).to.equal(
         JSON.stringify({
-          name: "test 10/10",
-          description: "test",
-          image:
+          name: "Testing Token 10/10",
+          description: "This is a testing token for all",
+          animation_url:
             "https://ipfs.io/ipfsbafybeify52a63pgcshhbtkff4nxxxp2zp5yjn2xw43jcy4knwful7ymmgy?id=10",
-          properties: { number: 10, name: "test" },
+          properties: { number: 10 },
         })
       );
     });

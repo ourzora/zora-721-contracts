@@ -30,8 +30,8 @@ contract DynamicSerialCreator {
                 implementation,
                 bytes32(abi.encodePacked(atContract))
             );
-        console.log(newContract);
         DynamicSerialMintable(newContract).initialize(
+            msg.sender,
             _name,
             _symbol,
             _description,

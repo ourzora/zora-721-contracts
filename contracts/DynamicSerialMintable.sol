@@ -47,6 +47,7 @@ contract DynamicSerialMintable is
     address[] allowedMinters;
 
     /**
+      @param _owner Owner of serial
       @param _name Name of serial, used in the title as "$NAME NUMBER/TOTAL"
       @param _symbol Symbol of the new token contract
       @param _description Description of serial, used in the description field of the NFT
@@ -61,6 +62,7 @@ contract DynamicSerialMintable is
            This can be re-assigned or updated later
      */
     function initialize(
+        address _owner,
         string memory _name,
         string memory _symbol,
         string memory _description,
@@ -73,6 +75,7 @@ contract DynamicSerialMintable is
     ) public initializer {
         __ERC721_init(_name, _symbol);
         __Ownable_init();
+        transferOwnership(_owner);
         __ReentrancyGuard_init();
         description = _description;
         animationUrl = _animationUrl;
@@ -82,6 +85,7 @@ contract DynamicSerialMintable is
         serialSize = _serialSize;
         royaltyBPS = _royaltyBPS;
         allowedMinters.push(msg.sender);
+        atSerialId=1;
     }
 
     /**
@@ -167,11 +171,12 @@ contract DynamicSerialMintable is
         internal
         returns (uint256)
     {
-        uint256 endAt = atSerialId + recipients.length;
+        uint256 startAt = atSerialId;
+        uint256 endAt = startAt + recipients.length - 1;
         require(endAt <= serialSize, "SOLD OUT");
-        while (atSerialId < endAt) {
+        while (atSerialId <= endAt) {
+            _mint(recipients[atSerialId - startAt], atSerialId);
             atSerialId++;
-            _mint(msg.sender, atSerialId);
         }
         return atSerialId;
     }
@@ -243,6 +248,7 @@ contract DynamicSerialMintable is
                         'animation_url": "',
                         animationUrl,
                         "?id=",
+                        numberToString(tokenOfSerial),
                         '", "'
                     )
                 );
@@ -287,7 +293,7 @@ contract DynamicSerialMintable is
                             _tokenMediaData(tokenId),
                             'properties": {"number": ',
                             StringsUpgradeable.toString(tokenId),
-                            "}"
+                            "}}"
                         )
                     )
                 )

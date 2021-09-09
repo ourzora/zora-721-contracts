@@ -5,14 +5,18 @@
 import { Contract, Signer } from "ethers";
 import { Provider } from "@ethersproject/providers";
 
-import type { ISerialMintable } from "./ISerialMintable";
+import type { ISerialSingleMintable } from "./ISerialSingleMintable";
 
-export class ISerialMintableFactory {
+export class ISerialSingleMintableFactory {
   static connect(
     address: string,
     signerOrProvider: Signer | Provider
-  ): ISerialMintable {
-    return new Contract(address, _abi, signerOrProvider) as ISerialMintable;
+  ): ISerialSingleMintable {
+    return new Contract(
+      address,
+      _abi,
+      signerOrProvider
+    ) as ISerialSingleMintable;
   }
 }
 

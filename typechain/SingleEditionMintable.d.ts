@@ -24,7 +24,6 @@ interface SingleEditionMintableInterface extends ethers.utils.Interface {
   functions: {
     "approve(address,uint256)": FunctionFragment;
     "balanceOf(address)": FunctionFragment;
-    "base64Encode(bytes)": FunctionFragment;
     "getApproved(uint256)": FunctionFragment;
     "getURIs()": FunctionFragment;
     "initialize(address,string,string,string,string,bytes32,string,bytes32,uint256,uint256)": FunctionFragment;
@@ -32,7 +31,6 @@ interface SingleEditionMintableInterface extends ethers.utils.Interface {
     "mintSerial(address)": FunctionFragment;
     "mintSerials(address[])": FunctionFragment;
     "name()": FunctionFragment;
-    "numberToString(uint256)": FunctionFragment;
     "owner()": FunctionFragment;
     "ownerOf(uint256)": FunctionFragment;
     "renounceOwnership()": FunctionFragment;
@@ -54,10 +52,6 @@ interface SingleEditionMintableInterface extends ethers.utils.Interface {
     values: [string, BigNumberish]
   ): string;
   encodeFunctionData(functionFragment: "balanceOf", values: [string]): string;
-  encodeFunctionData(
-    functionFragment: "base64Encode",
-    values: [BytesLike]
-  ): string;
   encodeFunctionData(
     functionFragment: "getApproved",
     values: [BigNumberish]
@@ -88,10 +82,6 @@ interface SingleEditionMintableInterface extends ethers.utils.Interface {
     values: [string[]]
   ): string;
   encodeFunctionData(functionFragment: "name", values?: undefined): string;
-  encodeFunctionData(
-    functionFragment: "numberToString",
-    values: [BigNumberish]
-  ): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "ownerOf",
@@ -146,10 +136,6 @@ interface SingleEditionMintableInterface extends ethers.utils.Interface {
   decodeFunctionResult(functionFragment: "approve", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "balanceOf", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "base64Encode",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
     functionFragment: "getApproved",
     data: BytesLike
   ): Result;
@@ -165,10 +151,6 @@ interface SingleEditionMintableInterface extends ethers.utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "name", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "numberToString",
-    data: BytesLike
-  ): Result;
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "ownerOf", data: BytesLike): Result;
   decodeFunctionResult(
@@ -262,20 +244,6 @@ export class SingleEditionMintable extends Contract {
       overrides?: CallOverrides
     ): Promise<{
       0: BigNumber;
-    }>;
-
-    base64Encode(
-      args: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<{
-      0: string;
-    }>;
-
-    "base64Encode(bytes)"(
-      args: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<{
-      0: string;
     }>;
 
     getApproved(
@@ -372,20 +340,6 @@ export class SingleEditionMintable extends Contract {
     }>;
 
     "name()"(overrides?: CallOverrides): Promise<{
-      0: string;
-    }>;
-
-    numberToString(
-      value: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<{
-      0: string;
-    }>;
-
-    "numberToString(uint256)"(
-      value: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<{
       0: string;
     }>;
 
@@ -574,13 +528,6 @@ export class SingleEditionMintable extends Contract {
     overrides?: CallOverrides
   ): Promise<BigNumber>;
 
-  base64Encode(args: BytesLike, overrides?: CallOverrides): Promise<string>;
-
-  "base64Encode(bytes)"(
-    args: BytesLike,
-    overrides?: CallOverrides
-  ): Promise<string>;
-
   getApproved(
     tokenId: BigNumberish,
     overrides?: CallOverrides
@@ -665,16 +612,6 @@ export class SingleEditionMintable extends Contract {
   name(overrides?: CallOverrides): Promise<string>;
 
   "name()"(overrides?: CallOverrides): Promise<string>;
-
-  numberToString(
-    value: BigNumberish,
-    overrides?: CallOverrides
-  ): Promise<string>;
-
-  "numberToString(uint256)"(
-    value: BigNumberish,
-    overrides?: CallOverrides
-  ): Promise<string>;
 
   owner(overrides?: CallOverrides): Promise<string>;
 
@@ -831,13 +768,6 @@ export class SingleEditionMintable extends Contract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    base64Encode(args: BytesLike, overrides?: CallOverrides): Promise<string>;
-
-    "base64Encode(bytes)"(
-      args: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<string>;
-
     getApproved(
       tokenId: BigNumberish,
       overrides?: CallOverrides
@@ -922,16 +852,6 @@ export class SingleEditionMintable extends Contract {
     name(overrides?: CallOverrides): Promise<string>;
 
     "name()"(overrides?: CallOverrides): Promise<string>;
-
-    numberToString(
-      value: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<string>;
-
-    "numberToString(uint256)"(
-      value: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<string>;
 
     owner(overrides?: CallOverrides): Promise<string>;
 
@@ -1114,16 +1034,6 @@ export class SingleEditionMintable extends Contract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    base64Encode(
-      args: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    "base64Encode(bytes)"(
-      args: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
     getApproved(
       tokenId: BigNumberish,
       overrides?: CallOverrides
@@ -1198,16 +1108,6 @@ export class SingleEditionMintable extends Contract {
     name(overrides?: CallOverrides): Promise<BigNumber>;
 
     "name()"(overrides?: CallOverrides): Promise<BigNumber>;
-
-    numberToString(
-      value: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    "numberToString(uint256)"(
-      value: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
 
     owner(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -1364,16 +1264,6 @@ export class SingleEditionMintable extends Contract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    base64Encode(
-      args: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    "base64Encode(bytes)"(
-      args: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
     getApproved(
       tokenId: BigNumberish,
       overrides?: CallOverrides
@@ -1451,16 +1341,6 @@ export class SingleEditionMintable extends Contract {
     name(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     "name()"(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    numberToString(
-      value: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    "numberToString(uint256)"(
-      value: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
 
     owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 

@@ -20,16 +20,19 @@ import { BytesLike } from "@ethersproject/bytes";
 import { Listener, Provider } from "@ethersproject/providers";
 import { FunctionFragment, EventFragment, Result } from "@ethersproject/abi";
 
-interface ISerialMintableInterface extends ethers.utils.Interface {
+interface ISerialMultipleMintableInterface extends ethers.utils.Interface {
   functions: {
-    "mintSerial(address)": FunctionFragment;
-    "mintSerials(address[])": FunctionFragment;
+    "mintSerial(uint256,address)": FunctionFragment;
+    "mintSerials(uint256,address[])": FunctionFragment;
   };
 
-  encodeFunctionData(functionFragment: "mintSerial", values: [string]): string;
+  encodeFunctionData(
+    functionFragment: "mintSerial",
+    values: [BigNumberish, string]
+  ): string;
   encodeFunctionData(
     functionFragment: "mintSerials",
-    values: [string[]]
+    values: [BigNumberish, string[]]
   ): string;
 
   decodeFunctionResult(functionFragment: "mintSerial", data: BytesLike): Result;
@@ -41,7 +44,7 @@ interface ISerialMintableInterface extends ethers.utils.Interface {
   events: {};
 }
 
-export class ISerialMintable extends Contract {
+export class ISerialMultipleMintable extends Contract {
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
@@ -52,55 +55,79 @@ export class ISerialMintable extends Contract {
   removeAllListeners(eventName: EventFilter | string): this;
   removeListener(eventName: any, listener: Listener): this;
 
-  interface: ISerialMintableInterface;
+  interface: ISerialMultipleMintableInterface;
 
   functions: {
-    mintSerial(to: string, overrides?: Overrides): Promise<ContractTransaction>;
+    mintSerial(
+      serialId: BigNumberish,
+      to: string,
+      overrides?: Overrides
+    ): Promise<ContractTransaction>;
 
-    "mintSerial(address)"(
+    "mintSerial(uint256,address)"(
+      serialId: BigNumberish,
       to: string,
       overrides?: Overrides
     ): Promise<ContractTransaction>;
 
     mintSerials(
+      serialId: BigNumberish,
       to: string[],
       overrides?: Overrides
     ): Promise<ContractTransaction>;
 
-    "mintSerials(address[])"(
+    "mintSerials(uint256,address[])"(
+      serialId: BigNumberish,
       to: string[],
       overrides?: Overrides
     ): Promise<ContractTransaction>;
   };
 
-  mintSerial(to: string, overrides?: Overrides): Promise<ContractTransaction>;
+  mintSerial(
+    serialId: BigNumberish,
+    to: string,
+    overrides?: Overrides
+  ): Promise<ContractTransaction>;
 
-  "mintSerial(address)"(
+  "mintSerial(uint256,address)"(
+    serialId: BigNumberish,
     to: string,
     overrides?: Overrides
   ): Promise<ContractTransaction>;
 
   mintSerials(
+    serialId: BigNumberish,
     to: string[],
     overrides?: Overrides
   ): Promise<ContractTransaction>;
 
-  "mintSerials(address[])"(
+  "mintSerials(uint256,address[])"(
+    serialId: BigNumberish,
     to: string[],
     overrides?: Overrides
   ): Promise<ContractTransaction>;
 
   callStatic: {
-    mintSerial(to: string, overrides?: CallOverrides): Promise<BigNumber>;
-
-    "mintSerial(address)"(
+    mintSerial(
+      serialId: BigNumberish,
       to: string,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    mintSerials(to: string[], overrides?: CallOverrides): Promise<BigNumber>;
+    "mintSerial(uint256,address)"(
+      serialId: BigNumberish,
+      to: string,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
 
-    "mintSerials(address[])"(
+    mintSerials(
+      serialId: BigNumberish,
+      to: string[],
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    "mintSerials(uint256,address[])"(
+      serialId: BigNumberish,
       to: string[],
       overrides?: CallOverrides
     ): Promise<BigNumber>;
@@ -109,16 +136,26 @@ export class ISerialMintable extends Contract {
   filters: {};
 
   estimateGas: {
-    mintSerial(to: string, overrides?: Overrides): Promise<BigNumber>;
-
-    "mintSerial(address)"(
+    mintSerial(
+      serialId: BigNumberish,
       to: string,
       overrides?: Overrides
     ): Promise<BigNumber>;
 
-    mintSerials(to: string[], overrides?: Overrides): Promise<BigNumber>;
+    "mintSerial(uint256,address)"(
+      serialId: BigNumberish,
+      to: string,
+      overrides?: Overrides
+    ): Promise<BigNumber>;
 
-    "mintSerials(address[])"(
+    mintSerials(
+      serialId: BigNumberish,
+      to: string[],
+      overrides?: Overrides
+    ): Promise<BigNumber>;
+
+    "mintSerials(uint256,address[])"(
+      serialId: BigNumberish,
       to: string[],
       overrides?: Overrides
     ): Promise<BigNumber>;
@@ -126,21 +163,25 @@ export class ISerialMintable extends Contract {
 
   populateTransaction: {
     mintSerial(
+      serialId: BigNumberish,
       to: string,
       overrides?: Overrides
     ): Promise<PopulatedTransaction>;
 
-    "mintSerial(address)"(
+    "mintSerial(uint256,address)"(
+      serialId: BigNumberish,
       to: string,
       overrides?: Overrides
     ): Promise<PopulatedTransaction>;
 
     mintSerials(
+      serialId: BigNumberish,
       to: string[],
       overrides?: Overrides
     ): Promise<PopulatedTransaction>;
 
-    "mintSerials(address[])"(
+    "mintSerials(uint256,address[])"(
+      serialId: BigNumberish,
       to: string[],
       overrides?: Overrides
     ): Promise<PopulatedTransaction>;

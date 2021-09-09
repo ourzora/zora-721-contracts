@@ -2,15 +2,15 @@
 
 pragma solidity 0.8.6;
 
-import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/utils/Strings.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-import "./ISerialMintable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/StringsUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
+import "./ISerialSingleMintable.sol";
 import "./FundsRecoverable.sol";
 
-contract SeriesSale is Ownable, ReentrancyGuard, FundsRecoverable {
+contract SeriesSale is ReentrancyGuardUpgradeable, FundsRecoverable {
     event OnPauseChange(uint256 releaseId, bool pauseStatus);
     event OnNewRelease(uint256 releaseId);
 
@@ -79,8 +79,8 @@ contract SeriesSale is Ownable, ReentrancyGuard, FundsRecoverable {
         }
 
         releases[releaseId].currentReleased += 1;
-        uint256 mintedToken = ISerialMintable(release.mintableAddress)
-            .mintSerial(release.mintableCollection, msg.sender);
+        uint256 mintedToken = ISerialSingleMintable(release.mintableAddress)
+            .mintSerial(msg.sender);
 
         return mintedToken;
     }

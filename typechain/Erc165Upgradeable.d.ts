@@ -19,25 +19,16 @@ import { BytesLike } from "@ethersproject/bytes";
 import { Listener, Provider } from "@ethersproject/providers";
 import { FunctionFragment, EventFragment, Result } from "@ethersproject/abi";
 
-interface Ierc2981Interface extends ethers.utils.Interface {
+interface Erc165UpgradeableInterface extends ethers.utils.Interface {
   functions: {
-    "royaltyInfo(uint256,uint256)": FunctionFragment;
     "supportsInterface(bytes4)": FunctionFragment;
   };
 
-  encodeFunctionData(
-    functionFragment: "royaltyInfo",
-    values: [BigNumberish, BigNumberish]
-  ): string;
   encodeFunctionData(
     functionFragment: "supportsInterface",
     values: [BytesLike]
   ): string;
 
-  decodeFunctionResult(
-    functionFragment: "royaltyInfo",
-    data: BytesLike
-  ): Result;
   decodeFunctionResult(
     functionFragment: "supportsInterface",
     data: BytesLike
@@ -46,7 +37,7 @@ interface Ierc2981Interface extends ethers.utils.Interface {
   events: {};
 }
 
-export class Ierc2981 extends Contract {
+export class Erc165Upgradeable extends Contract {
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
@@ -57,31 +48,9 @@ export class Ierc2981 extends Contract {
   removeAllListeners(eventName: EventFilter | string): this;
   removeListener(eventName: any, listener: Listener): this;
 
-  interface: Ierc2981Interface;
+  interface: Erc165UpgradeableInterface;
 
   functions: {
-    royaltyInfo(
-      tokenId: BigNumberish,
-      salePrice: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<{
-      receiver: string;
-      royaltyAmount: BigNumber;
-      0: string;
-      1: BigNumber;
-    }>;
-
-    "royaltyInfo(uint256,uint256)"(
-      tokenId: BigNumberish,
-      salePrice: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<{
-      receiver: string;
-      royaltyAmount: BigNumber;
-      0: string;
-      1: BigNumber;
-    }>;
-
     supportsInterface(
       interfaceId: BytesLike,
       overrides?: CallOverrides
@@ -97,28 +66,6 @@ export class Ierc2981 extends Contract {
     }>;
   };
 
-  royaltyInfo(
-    tokenId: BigNumberish,
-    salePrice: BigNumberish,
-    overrides?: CallOverrides
-  ): Promise<{
-    receiver: string;
-    royaltyAmount: BigNumber;
-    0: string;
-    1: BigNumber;
-  }>;
-
-  "royaltyInfo(uint256,uint256)"(
-    tokenId: BigNumberish,
-    salePrice: BigNumberish,
-    overrides?: CallOverrides
-  ): Promise<{
-    receiver: string;
-    royaltyAmount: BigNumber;
-    0: string;
-    1: BigNumber;
-  }>;
-
   supportsInterface(
     interfaceId: BytesLike,
     overrides?: CallOverrides
@@ -130,28 +77,6 @@ export class Ierc2981 extends Contract {
   ): Promise<boolean>;
 
   callStatic: {
-    royaltyInfo(
-      tokenId: BigNumberish,
-      salePrice: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<{
-      receiver: string;
-      royaltyAmount: BigNumber;
-      0: string;
-      1: BigNumber;
-    }>;
-
-    "royaltyInfo(uint256,uint256)"(
-      tokenId: BigNumberish,
-      salePrice: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<{
-      receiver: string;
-      royaltyAmount: BigNumber;
-      0: string;
-      1: BigNumber;
-    }>;
-
     supportsInterface(
       interfaceId: BytesLike,
       overrides?: CallOverrides
@@ -166,18 +91,6 @@ export class Ierc2981 extends Contract {
   filters: {};
 
   estimateGas: {
-    royaltyInfo(
-      tokenId: BigNumberish,
-      salePrice: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    "royaltyInfo(uint256,uint256)"(
-      tokenId: BigNumberish,
-      salePrice: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
     supportsInterface(
       interfaceId: BytesLike,
       overrides?: CallOverrides
@@ -190,18 +103,6 @@ export class Ierc2981 extends Contract {
   };
 
   populateTransaction: {
-    royaltyInfo(
-      tokenId: BigNumberish,
-      salePrice: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    "royaltyInfo(uint256,uint256)"(
-      tokenId: BigNumberish,
-      salePrice: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
     supportsInterface(
       interfaceId: BytesLike,
       overrides?: CallOverrides

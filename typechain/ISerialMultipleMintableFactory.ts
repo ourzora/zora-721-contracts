@@ -5,20 +5,29 @@
 import { Contract, Signer } from "ethers";
 import { Provider } from "@ethersproject/providers";
 
-import type { ISerialMintable } from "./ISerialMintable";
+import type { ISerialMultipleMintable } from "./ISerialMultipleMintable";
 
-export class ISerialMintableFactory {
+export class ISerialMultipleMintableFactory {
   static connect(
     address: string,
     signerOrProvider: Signer | Provider
-  ): ISerialMintable {
-    return new Contract(address, _abi, signerOrProvider) as ISerialMintable;
+  ): ISerialMultipleMintable {
+    return new Contract(
+      address,
+      _abi,
+      signerOrProvider
+    ) as ISerialMultipleMintable;
   }
 }
 
 const _abi = [
   {
     inputs: [
+      {
+        internalType: "uint256",
+        name: "serialId",
+        type: "uint256",
+      },
       {
         internalType: "address",
         name: "to",
@@ -38,6 +47,11 @@ const _abi = [
   },
   {
     inputs: [
+      {
+        internalType: "uint256",
+        name: "serialId",
+        type: "uint256",
+      },
       {
         internalType: "address[]",
         name: "to",

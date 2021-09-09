@@ -20,7 +20,7 @@ import { BytesLike } from "@ethersproject/bytes";
 import { Listener, Provider } from "@ethersproject/providers";
 import { FunctionFragment, EventFragment, Result } from "@ethersproject/abi";
 
-interface ISerialMintableInterface extends ethers.utils.Interface {
+interface ISerialSingleMintableInterface extends ethers.utils.Interface {
   functions: {
     "mintSerial(address)": FunctionFragment;
     "mintSerials(address[])": FunctionFragment;
@@ -41,7 +41,7 @@ interface ISerialMintableInterface extends ethers.utils.Interface {
   events: {};
 }
 
-export class ISerialMintable extends Contract {
+export class ISerialSingleMintable extends Contract {
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
@@ -52,7 +52,7 @@ export class ISerialMintable extends Contract {
   removeAllListeners(eventName: EventFilter | string): this;
   removeListener(eventName: any, listener: Listener): this;
 
-  interface: ISerialMintableInterface;
+  interface: ISerialSingleMintableInterface;
 
   functions: {
     mintSerial(to: string, overrides?: Overrides): Promise<ContractTransaction>;

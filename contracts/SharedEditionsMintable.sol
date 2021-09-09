@@ -1,14 +1,20 @@
 // SPDX-License-Identifier: GPL-3.0
 
+/**
+█▄░█ █▀▀ ▀█▀   █▀▀ █▀▄ █ ▀█▀ █ █▀█ █▄░█ █▀
+█░▀█ █▀░ ░█░   ██▄ █▄▀ █ ░█░ █ █▄█ █░▀█ ▄█
+
+▀█ █▀█ █▀█ ▄▀█
+█▄ █▄█ █▀▄ █▀█
+ */
+
 pragma solidity 0.8.6;
 
-import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-import "@openzeppelin/contracts/utils/Strings.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-import "base64-sol/base64.sol";
-import "./FundsRecoverable.sol";
-import "./ISerialMintable.sol";
-import "./IERC2981.sol";
+import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
+import {IERC2981, IERC165} from "@openzeppelin/contracts/interfaces/IERC2981.sol";
+import "./ISerialMultipleMintable.sol";
+import "./SharedNFTLogic.sol";
 
 /**
     This is a smart contract for handling dynamic contract minting.
@@ -17,11 +23,10 @@ import "./IERC2981.sol";
     @author iain nash
     Repository: https://github.com/ourzora/nft-serial-contracts/
 */
-contract DynamicSerialMintable is
-    ISerialMintable,
+contract SharedEditionsMintable is
+    ISerialMultipleMintable,
     ERC721,
-    IERC2981,
-    ReentrancyGuard
+    IERC2981
 {
     struct SerialConfig {
         // metadata
@@ -74,6 +79,8 @@ contract DynamicSerialMintable is
     // Account that is allowed to create serials. This can be re-assigned and when is the ZeroAddress anyone can create serials with this contract.
     address public allowedCreator;
 
+    SharedNFTLogic private immutable sharedNFTLogic;
+
     // List of serials that can be minted on this contract.
     SerialConfig[] private serials;
 
@@ -102,9 +109,11 @@ contract DynamicSerialMintable is
     constructor(
         string memory name,
         string memory symbol,
+        SharedNFTLogic _sharedNFTLogic,
         address _allowedCreator
     ) ERC721(name, symbol) {
         allowedCreator = _allowedCreator;
+        sharedNFTLogic = _sharedNFTLogic;
     }
 
     /**
@@ -152,7 +161,6 @@ contract DynamicSerialMintable is
     function mintSerial(uint256 serialId, address to)
         external
         override
-        nonReentrant
         serialExists(serialId)
         returns (uint256)
     {
@@ -170,7 +178,6 @@ contract DynamicSerialMintable is
     function mintSerials(uint256 serialId, address[] memory recipients)
         external
         override
-        nonReentrant
         serialExists(serialId)
         returns (uint256)
     {
@@ -351,56 +358,6 @@ contract DynamicSerialMintable is
         );
     }
 
-    function _tokenMediaData(SerialConfig memory serial, uint256 tokenOfSerial)
-        private
-        pure
-        returns (string memory)
-    {
-        bool hasImage = bytes(serial.imageUrl).length > 0;
-        bool hasAnimation = bytes(serial.animationUrl).length > 0;
-        if (hasImage && hasAnimation) {
-            return
-                string(
-                    abi.encodePacked(
-                        'image": "',
-                        serial.imageUrl,
-                        "?id=",
-                        Strings.toString(tokenOfSerial),
-                        '", "animation_url": "',
-                        serial.animationUrl,
-                        "?id=",
-                        Strings.toString(tokenOfSerial),
-                        '", "'
-                    )
-                );
-        }
-        if (hasImage) {
-            return
-                string(
-                    abi.encodePacked(
-                        'image": "',
-                        serial.imageUrl,
-                        "?id=",
-                        Strings.toString(tokenOfSerial),
-                        '", "'
-                    )
-                );
-        }
-        if (hasAnimation) {
-            return
-                string(
-                    abi.encodePacked(
-                        'animation_url": "',
-                        serial.animationUrl,
-                        "?id=",
-                        '", "'
-                    )
-                );
-        }
-
-        return "";
-    }
-
     function royaltyInfo(uint256 _tokenId, uint256 _salePrice)
         external
         view
@@ -425,32 +382,14 @@ contract DynamicSerialMintable is
         SerialConfig memory serial = serials[tokenIdToSerialId[tokenId]];
         uint256 tokenOfSerial = tokenId - serial.firstReservedToken + 1;
 
-        return
-            string(
-                abi.encodePacked(
-                    "data:application/json;base64,",
-                    Base64.encode(
-                        abi.encodePacked(
-                            '{"name": "',
-                            serial.name,
-                            " ",
-                            Strings.toString(tokenOfSerial),
-                            "/",
-                            Strings.toString(serial.serialSize),
-                            '", "',
-                            'description": "',
-                            serial.description,
-                            '", "',
-                            _tokenMediaData(serial, tokenOfSerial),
-                            'properties": {"number": ',
-                            Strings.toString(tokenOfSerial),
-                            ', "name": "',
-                            serial.name,
-                            '"}}'
-                        )
-                    )
-                )
-            );
+        return sharedNFTLogic.createMetadataSerial(
+            serial.name,
+            serial.description,
+            serial.imageUrl,
+            serial.animationUrl,
+            tokenOfSerial,
+            serial.serialSize
+        );
     }
 
     function supportsInterface(bytes4 interfaceId)

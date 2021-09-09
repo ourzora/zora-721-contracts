@@ -4,23 +4,23 @@ import { ethers, deployments } from "hardhat";
 import parseDataURI from "data-urls";
 
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { DynamicSerialMintable, SeriesSale } from "../typechain";
+import { SingleEditionMintable, SeriesSale } from "../typechain";
 
 describe("SeriesSale", () => {
   let signer: SignerWithAddress;
   let signerAddress: string;
-  let dynamicSketch: DynamicSerialMintable;
+  let dynamicSketch: SingleEditionMintable;
   let seriesSale: SeriesSale;
 
   beforeEach(async () => {
-    const { DynamicSerialMintable, SeriesSale } = await deployments.fixture([
-      "DynamicSerialMintable",
+    const { SingleEditionMintable, SeriesSale } = await deployments.fixture([
+      "SingleEditionMintable",
       "SeriesSale",
     ]);
     dynamicSketch = (await ethers.getContractAt(
-      "DynamicSerialMintable",
-      DynamicSerialMintable.address
-    )) as DynamicSerialMintable;
+      "SingleEditionMintable",
+      SingleEditionMintable.address
+    )) as SingleEditionMintable;
     seriesSale = (await ethers.getContractAt(
       "SeriesSale",
       SeriesSale.address

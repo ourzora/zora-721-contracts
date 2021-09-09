@@ -3,11 +3,17 @@
 /* eslint-disable */
 export { Erc721UpgradeableFactory } from "./Erc721UpgradeableFactory";
 export type { Erc721Upgradeable } from "./Erc721Upgradeable";
-export { DynamicSerialCreatorFactory } from "./DynamicSerialCreatorFactory";
-export type { DynamicSerialCreator } from "./DynamicSerialCreator";
-export { DynamicSerialMintableFactory } from "./DynamicSerialMintableFactory";
-export type { DynamicSerialMintable } from "./DynamicSerialMintable";
+export { Erc721Factory } from "./Erc721Factory";
+export type { Erc721 } from "./Erc721";
 export { FundsRecoverableFactory } from "./FundsRecoverableFactory";
 export type { FundsRecoverable } from "./FundsRecoverable";
 export { SeriesSaleFactory } from "./SeriesSaleFactory";
 export type { SeriesSale } from "./SeriesSale";
+export { SharedEditionsMintableFactory } from "./SharedEditionsMintableFactory";
+export type { SharedEditionsMintable } from "./SharedEditionsMintable";
+export { SharedNftLogicFactory } from "./SharedNftLogicFactory";
+export type { SharedNftLogic } from "./SharedNftLogic";
+export { SingleEditionMintableFactory } from "./SingleEditionMintableFactory";
+export type { SingleEditionMintable } from "./SingleEditionMintable";
+export { SingleEditionMintableCreatorFactory } from "./SingleEditionMintableCreatorFactory";
+export type { SingleEditionMintableCreator } from "./SingleEditionMintableCreator";

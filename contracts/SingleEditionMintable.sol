@@ -1,28 +1,34 @@
 // SPDX-License-Identifier: GPL-3.0
 
+/**
+█▄░█ █▀▀ ▀█▀   █▀▀ █▀▄ █ ▀█▀ █ █▀█ █▄░█ █▀
+█░▀█ █▀░ ░█░   ██▄ █▄▀ █ ░█░ █ █▄█ █░▀█ ▄█
+
+▀█ █▀█ █▀█ ▄▀█
+█▄ █▄█ █▀▄ █▀█
+ */
+
 pragma solidity 0.8.6;
 
-import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/interfaces/IERC2981Upgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/StringsUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-import "base64-sol/base64.sol";
-import "./ISerialMintable.sol";
+import {ERC721Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
+import {IERC2981Upgradeable, IERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/interfaces/IERC2981Upgradeable.sol";
+import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import {Base64} from "base64-sol/base64.sol";
+import {SharedNFTLogic} from "./SharedNFTLogic.sol";
+import {ISerialSingleMintable} from "./ISerialSingleMintable.sol";
 
 /**
     This is a smart contract for handling dynamic contract minting.
 
-    @dev This allows creators to mint a series 
+    @dev This allows creators to mint a unique series within a custom contract
     @author iain nash
-    Repository: https://github.com/ourzora/nft-serial-contracts/
+    Repository: https://github.com/ourzora/nft-editions
 */
-contract DynamicSerialMintable is
-    ISerialMintable,
+contract SingleEditionMintable is
+    ISerialSingleMintable,
     ERC721Upgradeable,
     OwnableUpgradeable,
-    IERC2981Upgradeable,
-    ReentrancyGuardUpgradeable
+    IERC2981Upgradeable
 {
     // metadata
     string private description;
@@ -40,11 +46,16 @@ contract DynamicSerialMintable is
     // total size of serial that can be minted
     uint256 public serialSize;
     // current token id minted
-    uint256 private atSerialId = 1;
+    uint256 private atSerialId;
     // royalty amount in bps
     uint256 royaltyBPS;
     // addresses allowed to mint serial
     address[] allowedMinters;
+    SharedNFTLogic private immutable sharedNFTLogic;
+
+    constructor(SharedNFTLogic _sharedNFTLogic) {
+        sharedNFTLogic = _sharedNFTLogic;
+    }
 
     /**
       @param _owner Owner of serial
@@ -75,8 +86,8 @@ contract DynamicSerialMintable is
     ) public initializer {
         __ERC721_init(_name, _symbol);
         __Ownable_init();
+        // Set ownership to original sender of contract call
         transferOwnership(_owner);
-        __ReentrancyGuard_init();
         description = _description;
         animationUrl = _animationUrl;
         animationHash = _animationHash;
@@ -85,7 +96,8 @@ contract DynamicSerialMintable is
         serialSize = _serialSize;
         royaltyBPS = _royaltyBPS;
         allowedMinters.push(msg.sender);
-        atSerialId=1;
+        // Set serial id
+        atSerialId = 1;
     }
 
     /**
@@ -113,12 +125,7 @@ contract DynamicSerialMintable is
       @param to address to send the newly minted serial to
       @dev This mints one serial to the given address by an allowed minter on the serial instance.
      */
-    function mintSerial(address to)
-        external
-        override
-        nonReentrant
-        returns (uint256)
-    {
+    function mintSerial(address to) external override returns (uint256) {
         require(_isAllowedToMint(), "Needs to be an allowed minter");
         address[] memory toMint = new address[](1);
         toMint[0] = to;
@@ -132,7 +139,6 @@ contract DynamicSerialMintable is
     function mintSerials(address[] memory recipients)
         external
         override
-        nonReentrant
         returns (uint256)
     {
         require(_isAllowedToMint(), "Needs to be an allowed minter");
@@ -181,6 +187,10 @@ contract DynamicSerialMintable is
         return atSerialId;
     }
 
+    /**
+      @dev Get URIs for serial NFT
+      @return imageUrl, imageHash, animationUrl, animationHash
+     */
     function getURIs()
         public
         view
@@ -194,78 +204,27 @@ contract DynamicSerialMintable is
         return (imageUrl, imageHash, animationUrl, animationHash);
     }
 
-    function base64Encode(bytes memory args)
-        public
-        pure
-        returns (string memory)
-    {
-        return Base64.encode(args);
-    }
-
-    function numberToString(uint256 value) public pure returns (string memory) {
-        return StringsUpgradeable.toString(value);
-    }
-
-    function _tokenMediaData(uint256 tokenOfSerial)
-        private
-        view
-        returns (string memory)
-    {
-        bool hasImage = bytes(imageUrl).length > 0;
-        bool hasAnimation = bytes(animationUrl).length > 0;
-        if (hasImage && hasAnimation) {
-            return
-                string(
-                    abi.encodePacked(
-                        'image": "',
-                        imageUrl,
-                        "?id=",
-                        numberToString(tokenOfSerial),
-                        '", "animation_url": "',
-                        animationUrl,
-                        "?id=",
-                        numberToString(tokenOfSerial),
-                        '", "'
-                    )
-                );
-        }
-        if (hasImage) {
-            return
-                string(
-                    abi.encodePacked(
-                        'image": "',
-                        imageUrl,
-                        "?id=",
-                        numberToString(tokenOfSerial),
-                        '", "'
-                    )
-                );
-        }
-        if (hasAnimation) {
-            return
-                string(
-                    abi.encodePacked(
-                        'animation_url": "',
-                        animationUrl,
-                        "?id=",
-                        numberToString(tokenOfSerial),
-                        '", "'
-                    )
-                );
-        }
-
-        return "";
-    }
-
+    /**
+        @dev Get royalty information for token
+        @param _salePrice Sale price for the token
+     */
     function royaltyInfo(uint256, uint256 _salePrice)
         external
         view
         override
         returns (address receiver, uint256 royaltyAmount)
     {
+        if (owner() == address(0x0)) {
+            return (owner(), 0);
+        }
         return (owner(), (_salePrice * royaltyBPS) / 10_000);
     }
 
+    /**
+        @dev Get URI for given token id
+        @param tokenId token id to get uri for
+        @return base64-encoded json metadata object
+    */
     function tokenURI(uint256 tokenId)
         public
         view
@@ -274,30 +233,19 @@ contract DynamicSerialMintable is
     {
         require(_exists(tokenId), "NO TOKEN");
 
-        return
-            string(
-                abi.encodePacked(
-                    "data:application/json;base64,",
-                    base64Encode(
-                        abi.encodePacked(
-                            '{"name": "',
-                            name(),
-                            " ",
-                            StringsUpgradeable.toString(tokenId),
-                            "/",
-                            StringsUpgradeable.toString(serialSize),
-                            '", "',
-                            'description": "',
-                            description,
-                            '", "',
-                            _tokenMediaData(tokenId),
-                            'properties": {"number": ',
-                            StringsUpgradeable.toString(tokenId),
-                            "}}"
-                        )
-                    )
-                )
-            );
+        string memory mediaData = sharedNFTLogic.tokenMediaData(
+            imageUrl,
+            animationUrl,
+            tokenId
+        );
+        bytes memory metadata = sharedNFTLogic.createMetadataJSON(
+            name(),
+            description,
+            mediaData,
+            tokenId,
+            serialSize
+        );
+        return sharedNFTLogic.encodeMetadataJSON(metadata);
     }
 
     function supportsInterface(bytes4 interfaceId)

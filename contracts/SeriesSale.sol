@@ -7,10 +7,10 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/StringsUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
-import "./ISerialMintable.sol";
+import "./ISerialSingleMintable.sol";
 import "./FundsRecoverable.sol";
 
-contract SeriesSale is OwnableUpgradeable, ReentrancyGuardUpgradeable, FundsRecoverable {
+contract SeriesSale is ReentrancyGuardUpgradeable, FundsRecoverable {
     event OnPauseChange(uint256 releaseId, bool pauseStatus);
     event OnNewRelease(uint256 releaseId);
 
@@ -79,7 +79,7 @@ contract SeriesSale is OwnableUpgradeable, ReentrancyGuardUpgradeable, FundsReco
         }
 
         releases[releaseId].currentReleased += 1;
-        uint256 mintedToken = ISerialMintable(release.mintableAddress)
+        uint256 mintedToken = ISerialSingleMintable(release.mintableAddress)
             .mintSerial(msg.sender);
 
         return mintedToken;

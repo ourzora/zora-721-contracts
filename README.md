@@ -10,7 +10,7 @@ This is useful for Ticket type interactions and has some benfits over ERC1155s w
 
 ### Deploying:
 (Replace network with desired network)
-`hardhat deploy --network rinkeby --tags DynamicSerialMintable`
+`hardhat deploy --network rinkeby --tags SingleEditionMintable`
 
 ### Verifying:
 `hardhat sourcify --network rinkeby && hardhat etherscan-verify --network rinkeby`

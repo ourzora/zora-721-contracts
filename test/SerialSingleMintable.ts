@@ -4,25 +4,28 @@ import { ethers, deployments, getNamedAccounts } from "hardhat";
 import parseDataURI from "data-urls";
 
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { DynamicSerialCreator, DynamicSerialMintable } from "../typechain";
+import {
+  SingleEditionMintableCreator,
+  SingleEditionMintable,
+} from "../typechain";
 
-describe("DynamicSerialMintable", () => {
+describe("SingleEditionMintable", () => {
   let signer: SignerWithAddress;
   let signerAddress: string;
-  let dynamicSketch: DynamicSerialCreator;
+  let dynamicSketch: SingleEditionMintableCreator;
 
   beforeEach(async () => {
-    const { DynamicSerialCreator } = await deployments.fixture([
-      "DynamicSerialCreator",
-      "DynamicSerialMintable",
+    const { SingleEditionMintableCreator } = await deployments.fixture([
+      "SingleEditionMintableCreator",
+      "SingleEditionMintable",
     ]);
     const dynamicMintableAddress = (
-      await deployments.get("DynamicSerialMintable")
+      await deployments.get("SingleEditionMintable")
     ).address;
     dynamicSketch = (await ethers.getContractAt(
-      "DynamicSerialCreator",
-      DynamicSerialCreator.address
-    )) as DynamicSerialCreator;
+      "SingleEditionMintableCreator",
+      SingleEditionMintableCreator.address
+    )) as SingleEditionMintableCreator;
 
     signer = (await ethers.getSigners())[0];
     signerAddress = await signer.getAddress();
@@ -43,9 +46,9 @@ describe("DynamicSerialMintable", () => {
 
     const serialResult = await dynamicSketch.getSerialAtId(0);
     const minterContract = (await ethers.getContractAt(
-      "DynamicSerialMintable",
+      "SingleEditionMintable",
       serialResult
-    )) as DynamicSerialMintable;
+    )) as SingleEditionMintable;
     expect(await minterContract.name()).to.be.equal("Testing Token");
     expect(await minterContract.symbol()).to.be.equal("TEST");
     const serialUris = await minterContract.getURIs();
@@ -65,7 +68,7 @@ describe("DynamicSerialMintable", () => {
   });
   describe("with a serial", () => {
     let signer1: SignerWithAddress;
-    let minterContract: DynamicSerialMintable;
+    let minterContract: SingleEditionMintable;
     beforeEach(async () => {
       signer1 = (await ethers.getSigners())[1];
       await dynamicSketch.createSerial(
@@ -82,9 +85,9 @@ describe("DynamicSerialMintable", () => {
 
       const serialResult = await dynamicSketch.getSerialAtId(0);
       minterContract = (await ethers.getContractAt(
-        "DynamicSerialMintable",
+        "SingleEditionMintable",
         serialResult
-      )) as DynamicSerialMintable;
+      )) as SingleEditionMintable;
     });
     it("creates a new serial", async () => {
       expect(await signer1.getBalance()).to.eq(
@@ -122,7 +125,7 @@ describe("DynamicSerialMintable", () => {
           description: "This is a testing token for all",
           animation_url:
             "https://ipfs.io/ipfsbafybeify52a63pgcshhbtkff4nxxxp2zp5yjn2xw43jcy4knwful7ymmgy?id=1",
-          properties: { number: 1 },
+          properties: { number: 1, name: "Testing Token" },
         })
       );
     });
@@ -191,7 +194,7 @@ describe("DynamicSerialMintable", () => {
           description: "This is a testing token for all",
           animation_url:
             "https://ipfs.io/ipfsbafybeify52a63pgcshhbtkff4nxxxp2zp5yjn2xw43jcy4knwful7ymmgy?id=10",
-          properties: { number: 10 },
+          properties: { number: 10, name: "Testing Token" },
         })
       );
     });

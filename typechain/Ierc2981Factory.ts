@@ -21,12 +21,12 @@ const _abi = [
     inputs: [
       {
         internalType: "uint256",
-        name: "_tokenId",
+        name: "tokenId",
         type: "uint256",
       },
       {
         internalType: "uint256",
-        name: "_salePrice",
+        name: "salePrice",
         type: "uint256",
       },
     ],

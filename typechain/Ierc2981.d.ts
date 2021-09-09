@@ -61,8 +61,8 @@ export class Ierc2981 extends Contract {
 
   functions: {
     royaltyInfo(
-      _tokenId: BigNumberish,
-      _salePrice: BigNumberish,
+      tokenId: BigNumberish,
+      salePrice: BigNumberish,
       overrides?: CallOverrides
     ): Promise<{
       receiver: string;
@@ -72,8 +72,8 @@ export class Ierc2981 extends Contract {
     }>;
 
     "royaltyInfo(uint256,uint256)"(
-      _tokenId: BigNumberish,
-      _salePrice: BigNumberish,
+      tokenId: BigNumberish,
+      salePrice: BigNumberish,
       overrides?: CallOverrides
     ): Promise<{
       receiver: string;
@@ -98,8 +98,8 @@ export class Ierc2981 extends Contract {
   };
 
   royaltyInfo(
-    _tokenId: BigNumberish,
-    _salePrice: BigNumberish,
+    tokenId: BigNumberish,
+    salePrice: BigNumberish,
     overrides?: CallOverrides
   ): Promise<{
     receiver: string;
@@ -109,8 +109,8 @@ export class Ierc2981 extends Contract {
   }>;
 
   "royaltyInfo(uint256,uint256)"(
-    _tokenId: BigNumberish,
-    _salePrice: BigNumberish,
+    tokenId: BigNumberish,
+    salePrice: BigNumberish,
     overrides?: CallOverrides
   ): Promise<{
     receiver: string;
@@ -131,8 +131,8 @@ export class Ierc2981 extends Contract {
 
   callStatic: {
     royaltyInfo(
-      _tokenId: BigNumberish,
-      _salePrice: BigNumberish,
+      tokenId: BigNumberish,
+      salePrice: BigNumberish,
       overrides?: CallOverrides
     ): Promise<{
       receiver: string;
@@ -142,8 +142,8 @@ export class Ierc2981 extends Contract {
     }>;
 
     "royaltyInfo(uint256,uint256)"(
-      _tokenId: BigNumberish,
-      _salePrice: BigNumberish,
+      tokenId: BigNumberish,
+      salePrice: BigNumberish,
       overrides?: CallOverrides
     ): Promise<{
       receiver: string;
@@ -167,14 +167,14 @@ export class Ierc2981 extends Contract {
 
   estimateGas: {
     royaltyInfo(
-      _tokenId: BigNumberish,
-      _salePrice: BigNumberish,
+      tokenId: BigNumberish,
+      salePrice: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     "royaltyInfo(uint256,uint256)"(
-      _tokenId: BigNumberish,
-      _salePrice: BigNumberish,
+      tokenId: BigNumberish,
+      salePrice: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
@@ -191,14 +191,14 @@ export class Ierc2981 extends Contract {
 
   populateTransaction: {
     royaltyInfo(
-      _tokenId: BigNumberish,
-      _salePrice: BigNumberish,
+      tokenId: BigNumberish,
+      salePrice: BigNumberish,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     "royaltyInfo(uint256,uint256)"(
-      _tokenId: BigNumberish,
-      _salePrice: BigNumberish,
+      tokenId: BigNumberish,
+      salePrice: BigNumberish,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 

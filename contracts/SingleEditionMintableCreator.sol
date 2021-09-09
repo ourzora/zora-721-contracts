@@ -1,12 +1,21 @@
 // SPDX-License-Identifier: GPL-3.0
 
+/**
+█▄░█ █▀▀ ▀█▀   █▀▀ █▀▄ █ ▀█▀ █ █▀█ █▄░█ █▀
+█░▀█ █▀░ ░█░   ██▄ █▄▀ █ ░█░ █ █▄█ █░▀█ ▄█
+
+▀█ █▀█ █▀█ ▄▀█
+█▄ █▄█ █▀▄ █▀█
+ */
+
+
 pragma solidity 0.8.6;
 
 import "@openzeppelin/contracts-upgradeable/proxy/ClonesUpgradeable.sol";
-import "./DynamicSerialMintable.sol";
+import "./SingleEditionMintable.sol";
 import "hardhat/console.sol";
 
-contract DynamicSerialCreator {
+contract SingleEditionMintableCreator {
     uint256 atContract = 0;
     address public implementation;
 
@@ -30,7 +39,7 @@ contract DynamicSerialCreator {
                 implementation,
                 bytes32(abi.encodePacked(atContract))
             );
-        DynamicSerialMintable(newContract).initialize(
+        SingleEditionMintable(newContract).initialize(
             msg.sender,
             _name,
             _symbol,

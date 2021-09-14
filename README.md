@@ -5,7 +5,7 @@
    Each edition is a unique contract.
    This allows for easy royalty collection, clear ownership of the collection, and your own contract 🎉
 2. `SingleEditionMintableCreator`
-   Gas-optimized factory contract allowing you to create your own edition mintable contract without etherscan.
+   Gas-optimized factory contract allowing you to easily + for a low gas transaction create your own edition mintable contract.
 3. `SharedNFTLogic`
    Contract that includes dynamic metadata generation for your editions removing the need for a centralized server.
    imageUrl and animationUrl can be base64-encoded data-uris for these contracts totally removing the need for IPFS

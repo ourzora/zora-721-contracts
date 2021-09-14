@@ -1,30 +1,50 @@
-# Bounded Unique Media Editions Contract
+# Zora NFT Editions
 
-These contracts allow for creating on-chain nft media editions.
-
-They include Zora cryptomedia features such as the ability to update canonical urls and include content hashes.
-
-They can be minted by the owner or an arbitary set of addresses – Sales contracts are coming soon.
-
-There are two flavors of contracts
-1. SingleEditionMintable (+ SingleEditionMintableCreator factory contract)
+### What are these contracts?
+1. `SingleEditionMintable`
    Each edition is a unique contract.
    This allows for easy royalty collection, clear ownership of the collection, and your own contract 🎉
+2. `SingleEditionMintableCreator`
+   Gas-optimized factory contract allowing you to create your own edition mintable contract without etherscan.
+3. `SharedNFTLogic`
+   Contract that includes dynamic metadata generation for your editions removing the need for a centralized server.
+   imageUrl and animationUrl can be base64-encoded data-uris for these contracts totally removing the need for IPFS
 
-2. SharedEditionMintable
-   A traditional shared contract where different editions all resolve to the same contract.
-   Useful for a brand or organization that wants to keep their editions all in one collection.
+### How do I create a new contract?
 
-3. SeriesSale
-   Prototype contract for selling editions for a fixed amount of ETH.
-   Ties into the contract by being an approved minter.
+1. Find/Deploy the `SingleEditionMintableCreator` contract
+2. Call createSerial on the `SingleEditionMintableCreator`
+
+### How do I sell/distribute editions?
+
+Now that you have a edition, there are multiple options for lazy-minting and sales:
+
+1. To sell editions for ETH you can call `setSalePrice`
+2. To allow certain accounts to mint `setApprovedMinter(address, approved)`.
+3. To mint yourself to a list of addresses you can call `mintSerial(addresses[])` to mint an edition to each address in the list.
+
+### Benefits of these contracts:
+* Full ownership of your own created minting contract
+* Each serial gets its own minting contract
+* Gas-optimized over creating individual NFTs
+* Fully compatible with ERC721 marketplaces / auction houses / tools
+* Supports tracking unique parts (edition 1 vs 24 may have different pricing implications) of editions
+* Supports free public minting (by approving the 0x0 (zeroaddress) to mint)
+* Supports smart-contract based minting (by approving the custom minting smart contract) using an interface.
+* All metadata is stored/generated on-chain -- only image/video assets are stored off-chain
+* Permissionless and open-source
+* Simple integrated ethereum-based sales, can be easily extended with custom interface code
+
+### Potential use cases for these contracts:
+* Giveaways for events showing if you’ve attended 
+* Serial editioned artworks that can be sold in the Zora auction house / work in any ERC721 market
+* Fundraisers for fixed-eth amounts
+* Can be used to issue tokens in response for contributing to a fundraiser
+* Tickets/access tokens allowing holders to access a discord or mint
 
 ### Deploying:
 (Replace network with desired network)
-`hardhat deploy --network rinkeby --tags SingleEditionMintable`
+`hardhat deploy --network rinkeby`
 
 ### Verifying:
 `hardhat sourcify --network rinkeby && hardhat etherscan-verify --network rinkeby`
-
-### Minting:
-

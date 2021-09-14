@@ -14,6 +14,7 @@ import {
   Contract,
   ContractTransaction,
   Overrides,
+  PayableOverrides,
   CallOverrides,
 } from "@ethersproject/contracts";
 import { BytesLike } from "@ethersproject/bytes";
@@ -33,18 +34,22 @@ interface SingleEditionMintableInterface extends ethers.utils.Interface {
     "name()": FunctionFragment;
     "owner()": FunctionFragment;
     "ownerOf(uint256)": FunctionFragment;
+    "purchase()": FunctionFragment;
     "renounceOwnership()": FunctionFragment;
     "royaltyInfo(uint256,uint256)": FunctionFragment;
     "safeTransferFrom(address,address,uint256)": FunctionFragment;
+    "salePrice()": FunctionFragment;
     "serialSize()": FunctionFragment;
-    "setAllowedMinters(address[])": FunctionFragment;
     "setApprovalForAll(address,bool)": FunctionFragment;
+    "setApprovedMinter(address,bool)": FunctionFragment;
+    "setSalePrice(uint256)": FunctionFragment;
     "supportsInterface(bytes4)": FunctionFragment;
     "symbol()": FunctionFragment;
     "tokenURI(uint256)": FunctionFragment;
     "transferFrom(address,address,uint256)": FunctionFragment;
     "transferOwnership(address)": FunctionFragment;
     "updateSerialURLs(string,string)": FunctionFragment;
+    "withdraw()": FunctionFragment;
   };
 
   encodeFunctionData(
@@ -87,6 +92,7 @@ interface SingleEditionMintableInterface extends ethers.utils.Interface {
     functionFragment: "ownerOf",
     values: [BigNumberish]
   ): string;
+  encodeFunctionData(functionFragment: "purchase", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "renounceOwnership",
     values?: undefined
@@ -99,17 +105,22 @@ interface SingleEditionMintableInterface extends ethers.utils.Interface {
     functionFragment: "safeTransferFrom",
     values: [string, string, BigNumberish]
   ): string;
+  encodeFunctionData(functionFragment: "salePrice", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "serialSize",
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "setAllowedMinters",
-    values: [string[]]
-  ): string;
-  encodeFunctionData(
     functionFragment: "setApprovalForAll",
     values: [string, boolean]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "setApprovedMinter",
+    values: [string, boolean]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "setSalePrice",
+    values: [BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "supportsInterface",
@@ -132,6 +143,7 @@ interface SingleEditionMintableInterface extends ethers.utils.Interface {
     functionFragment: "updateSerialURLs",
     values: [string, string]
   ): string;
+  encodeFunctionData(functionFragment: "withdraw", values?: undefined): string;
 
   decodeFunctionResult(functionFragment: "approve", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "balanceOf", data: BytesLike): Result;
@@ -153,6 +165,7 @@ interface SingleEditionMintableInterface extends ethers.utils.Interface {
   decodeFunctionResult(functionFragment: "name", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "ownerOf", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "purchase", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "renounceOwnership",
     data: BytesLike
@@ -165,13 +178,18 @@ interface SingleEditionMintableInterface extends ethers.utils.Interface {
     functionFragment: "safeTransferFrom",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "salePrice", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "serialSize", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "setAllowedMinters",
+    functionFragment: "setApprovalForAll",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "setApprovalForAll",
+    functionFragment: "setApprovedMinter",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "setSalePrice",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -192,17 +210,22 @@ interface SingleEditionMintableInterface extends ethers.utils.Interface {
     functionFragment: "updateSerialURLs",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "withdraw", data: BytesLike): Result;
 
   events: {
     "Approval(address,address,uint256)": EventFragment;
     "ApprovalForAll(address,address,bool)": EventFragment;
+    "EditionSold(uint256,address)": EventFragment;
     "OwnershipTransferred(address,address)": EventFragment;
+    "PriceChanged(uint256)": EventFragment;
     "Transfer(address,address,uint256)": EventFragment;
   };
 
   getEvent(nameOrSignatureOrTopic: "Approval"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "ApprovalForAll"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "EditionSold"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "OwnershipTransferred"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "PriceChanged"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Transfer"): EventFragment;
 }
 
@@ -365,6 +388,10 @@ export class SingleEditionMintable extends Contract {
       0: string;
     }>;
 
+    purchase(overrides?: PayableOverrides): Promise<ContractTransaction>;
+
+    "purchase()"(overrides?: PayableOverrides): Promise<ContractTransaction>;
+
     renounceOwnership(overrides?: Overrides): Promise<ContractTransaction>;
 
     "renounceOwnership()"(overrides?: Overrides): Promise<ContractTransaction>;
@@ -406,6 +433,14 @@ export class SingleEditionMintable extends Contract {
       overrides?: Overrides
     ): Promise<ContractTransaction>;
 
+    salePrice(overrides?: CallOverrides): Promise<{
+      0: BigNumber;
+    }>;
+
+    "salePrice()"(overrides?: CallOverrides): Promise<{
+      0: BigNumber;
+    }>;
+
     serialSize(overrides?: CallOverrides): Promise<{
       0: BigNumber;
     }>;
@@ -413,16 +448,6 @@ export class SingleEditionMintable extends Contract {
     "serialSize()"(overrides?: CallOverrides): Promise<{
       0: BigNumber;
     }>;
-
-    setAllowedMinters(
-      _allowedMinters: string[],
-      overrides?: Overrides
-    ): Promise<ContractTransaction>;
-
-    "setAllowedMinters(address[])"(
-      _allowedMinters: string[],
-      overrides?: Overrides
-    ): Promise<ContractTransaction>;
 
     setApprovalForAll(
       operator: string,
@@ -433,6 +458,28 @@ export class SingleEditionMintable extends Contract {
     "setApprovalForAll(address,bool)"(
       operator: string,
       approved: boolean,
+      overrides?: Overrides
+    ): Promise<ContractTransaction>;
+
+    setApprovedMinter(
+      minter: string,
+      allowed: boolean,
+      overrides?: Overrides
+    ): Promise<ContractTransaction>;
+
+    "setApprovedMinter(address,bool)"(
+      minter: string,
+      allowed: boolean,
+      overrides?: Overrides
+    ): Promise<ContractTransaction>;
+
+    setSalePrice(
+      _salePrice: BigNumberish,
+      overrides?: Overrides
+    ): Promise<ContractTransaction>;
+
+    "setSalePrice(uint256)"(
+      _salePrice: BigNumberish,
       overrides?: Overrides
     ): Promise<ContractTransaction>;
 
@@ -507,6 +554,10 @@ export class SingleEditionMintable extends Contract {
       _animationUrl: string,
       overrides?: Overrides
     ): Promise<ContractTransaction>;
+
+    withdraw(overrides?: Overrides): Promise<ContractTransaction>;
+
+    "withdraw()"(overrides?: Overrides): Promise<ContractTransaction>;
   };
 
   approve(
@@ -624,6 +675,10 @@ export class SingleEditionMintable extends Contract {
     overrides?: CallOverrides
   ): Promise<string>;
 
+  purchase(overrides?: PayableOverrides): Promise<ContractTransaction>;
+
+  "purchase()"(overrides?: PayableOverrides): Promise<ContractTransaction>;
+
   renounceOwnership(overrides?: Overrides): Promise<ContractTransaction>;
 
   "renounceOwnership()"(overrides?: Overrides): Promise<ContractTransaction>;
@@ -665,19 +720,13 @@ export class SingleEditionMintable extends Contract {
     overrides?: Overrides
   ): Promise<ContractTransaction>;
 
+  salePrice(overrides?: CallOverrides): Promise<BigNumber>;
+
+  "salePrice()"(overrides?: CallOverrides): Promise<BigNumber>;
+
   serialSize(overrides?: CallOverrides): Promise<BigNumber>;
 
   "serialSize()"(overrides?: CallOverrides): Promise<BigNumber>;
-
-  setAllowedMinters(
-    _allowedMinters: string[],
-    overrides?: Overrides
-  ): Promise<ContractTransaction>;
-
-  "setAllowedMinters(address[])"(
-    _allowedMinters: string[],
-    overrides?: Overrides
-  ): Promise<ContractTransaction>;
 
   setApprovalForAll(
     operator: string,
@@ -688,6 +737,28 @@ export class SingleEditionMintable extends Contract {
   "setApprovalForAll(address,bool)"(
     operator: string,
     approved: boolean,
+    overrides?: Overrides
+  ): Promise<ContractTransaction>;
+
+  setApprovedMinter(
+    minter: string,
+    allowed: boolean,
+    overrides?: Overrides
+  ): Promise<ContractTransaction>;
+
+  "setApprovedMinter(address,bool)"(
+    minter: string,
+    allowed: boolean,
+    overrides?: Overrides
+  ): Promise<ContractTransaction>;
+
+  setSalePrice(
+    _salePrice: BigNumberish,
+    overrides?: Overrides
+  ): Promise<ContractTransaction>;
+
+  "setSalePrice(uint256)"(
+    _salePrice: BigNumberish,
     overrides?: Overrides
   ): Promise<ContractTransaction>;
 
@@ -747,6 +818,10 @@ export class SingleEditionMintable extends Contract {
     _animationUrl: string,
     overrides?: Overrides
   ): Promise<ContractTransaction>;
+
+  withdraw(overrides?: Overrides): Promise<ContractTransaction>;
+
+  "withdraw()"(overrides?: Overrides): Promise<ContractTransaction>;
 
   callStatic: {
     approve(
@@ -864,6 +939,10 @@ export class SingleEditionMintable extends Contract {
       overrides?: CallOverrides
     ): Promise<string>;
 
+    purchase(overrides?: CallOverrides): Promise<BigNumber>;
+
+    "purchase()"(overrides?: CallOverrides): Promise<BigNumber>;
+
     renounceOwnership(overrides?: CallOverrides): Promise<void>;
 
     "renounceOwnership()"(overrides?: CallOverrides): Promise<void>;
@@ -905,19 +984,13 @@ export class SingleEditionMintable extends Contract {
       overrides?: CallOverrides
     ): Promise<void>;
 
+    salePrice(overrides?: CallOverrides): Promise<BigNumber>;
+
+    "salePrice()"(overrides?: CallOverrides): Promise<BigNumber>;
+
     serialSize(overrides?: CallOverrides): Promise<BigNumber>;
 
     "serialSize()"(overrides?: CallOverrides): Promise<BigNumber>;
-
-    setAllowedMinters(
-      _allowedMinters: string[],
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    "setAllowedMinters(address[])"(
-      _allowedMinters: string[],
-      overrides?: CallOverrides
-    ): Promise<void>;
 
     setApprovalForAll(
       operator: string,
@@ -928,6 +1001,28 @@ export class SingleEditionMintable extends Contract {
     "setApprovalForAll(address,bool)"(
       operator: string,
       approved: boolean,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    setApprovedMinter(
+      minter: string,
+      allowed: boolean,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    "setApprovedMinter(address,bool)"(
+      minter: string,
+      allowed: boolean,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    setSalePrice(
+      _salePrice: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    "setSalePrice(uint256)"(
+      _salePrice: BigNumberish,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -987,6 +1082,10 @@ export class SingleEditionMintable extends Contract {
       _animationUrl: string,
       overrides?: CallOverrides
     ): Promise<void>;
+
+    withdraw(overrides?: CallOverrides): Promise<void>;
+
+    "withdraw()"(overrides?: CallOverrides): Promise<void>;
   };
 
   filters: {
@@ -1002,10 +1101,14 @@ export class SingleEditionMintable extends Contract {
       approved: null
     ): EventFilter;
 
+    EditionSold(price: null, owner: null): EventFilter;
+
     OwnershipTransferred(
       previousOwner: string | null,
       newOwner: string | null
     ): EventFilter;
+
+    PriceChanged(amount: null): EventFilter;
 
     Transfer(
       from: string | null,
@@ -1123,6 +1226,10 @@ export class SingleEditionMintable extends Contract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
+    purchase(overrides?: PayableOverrides): Promise<BigNumber>;
+
+    "purchase()"(overrides?: PayableOverrides): Promise<BigNumber>;
+
     renounceOwnership(overrides?: Overrides): Promise<BigNumber>;
 
     "renounceOwnership()"(overrides?: Overrides): Promise<BigNumber>;
@@ -1154,19 +1261,13 @@ export class SingleEditionMintable extends Contract {
       overrides?: Overrides
     ): Promise<BigNumber>;
 
+    salePrice(overrides?: CallOverrides): Promise<BigNumber>;
+
+    "salePrice()"(overrides?: CallOverrides): Promise<BigNumber>;
+
     serialSize(overrides?: CallOverrides): Promise<BigNumber>;
 
     "serialSize()"(overrides?: CallOverrides): Promise<BigNumber>;
-
-    setAllowedMinters(
-      _allowedMinters: string[],
-      overrides?: Overrides
-    ): Promise<BigNumber>;
-
-    "setAllowedMinters(address[])"(
-      _allowedMinters: string[],
-      overrides?: Overrides
-    ): Promise<BigNumber>;
 
     setApprovalForAll(
       operator: string,
@@ -1177,6 +1278,28 @@ export class SingleEditionMintable extends Contract {
     "setApprovalForAll(address,bool)"(
       operator: string,
       approved: boolean,
+      overrides?: Overrides
+    ): Promise<BigNumber>;
+
+    setApprovedMinter(
+      minter: string,
+      allowed: boolean,
+      overrides?: Overrides
+    ): Promise<BigNumber>;
+
+    "setApprovedMinter(address,bool)"(
+      minter: string,
+      allowed: boolean,
+      overrides?: Overrides
+    ): Promise<BigNumber>;
+
+    setSalePrice(
+      _salePrice: BigNumberish,
+      overrides?: Overrides
+    ): Promise<BigNumber>;
+
+    "setSalePrice(uint256)"(
+      _salePrice: BigNumberish,
       overrides?: Overrides
     ): Promise<BigNumber>;
 
@@ -1239,6 +1362,10 @@ export class SingleEditionMintable extends Contract {
       _animationUrl: string,
       overrides?: Overrides
     ): Promise<BigNumber>;
+
+    withdraw(overrides?: Overrides): Promise<BigNumber>;
+
+    "withdraw()"(overrides?: Overrides): Promise<BigNumber>;
   };
 
   populateTransaction: {
@@ -1356,6 +1483,10 @@ export class SingleEditionMintable extends Contract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
+    purchase(overrides?: PayableOverrides): Promise<PopulatedTransaction>;
+
+    "purchase()"(overrides?: PayableOverrides): Promise<PopulatedTransaction>;
+
     renounceOwnership(overrides?: Overrides): Promise<PopulatedTransaction>;
 
     "renounceOwnership()"(overrides?: Overrides): Promise<PopulatedTransaction>;
@@ -1387,19 +1518,13 @@ export class SingleEditionMintable extends Contract {
       overrides?: Overrides
     ): Promise<PopulatedTransaction>;
 
+    salePrice(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    "salePrice()"(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
     serialSize(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     "serialSize()"(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    setAllowedMinters(
-      _allowedMinters: string[],
-      overrides?: Overrides
-    ): Promise<PopulatedTransaction>;
-
-    "setAllowedMinters(address[])"(
-      _allowedMinters: string[],
-      overrides?: Overrides
-    ): Promise<PopulatedTransaction>;
 
     setApprovalForAll(
       operator: string,
@@ -1410,6 +1535,28 @@ export class SingleEditionMintable extends Contract {
     "setApprovalForAll(address,bool)"(
       operator: string,
       approved: boolean,
+      overrides?: Overrides
+    ): Promise<PopulatedTransaction>;
+
+    setApprovedMinter(
+      minter: string,
+      allowed: boolean,
+      overrides?: Overrides
+    ): Promise<PopulatedTransaction>;
+
+    "setApprovedMinter(address,bool)"(
+      minter: string,
+      allowed: boolean,
+      overrides?: Overrides
+    ): Promise<PopulatedTransaction>;
+
+    setSalePrice(
+      _salePrice: BigNumberish,
+      overrides?: Overrides
+    ): Promise<PopulatedTransaction>;
+
+    "setSalePrice(uint256)"(
+      _salePrice: BigNumberish,
       overrides?: Overrides
     ): Promise<PopulatedTransaction>;
 
@@ -1472,5 +1619,9 @@ export class SingleEditionMintable extends Contract {
       _animationUrl: string,
       overrides?: Overrides
     ): Promise<PopulatedTransaction>;
+
+    withdraw(overrides?: Overrides): Promise<PopulatedTransaction>;
+
+    "withdraw()"(overrides?: Overrides): Promise<PopulatedTransaction>;
   };
 }

@@ -185,7 +185,7 @@ export class SingleEditionMintableCreator extends Contract {
       _serialSize: BigNumberish,
       _royaltyBPS: BigNumberish,
       overrides?: CallOverrides
-    ): Promise<void>;
+    ): Promise<BigNumber>;
 
     "createSerial(string,string,string,string,bytes32,string,bytes32,uint256,uint256)"(
       _name: string,
@@ -198,7 +198,7 @@ export class SingleEditionMintableCreator extends Contract {
       _serialSize: BigNumberish,
       _royaltyBPS: BigNumberish,
       overrides?: CallOverrides
-    ): Promise<void>;
+    ): Promise<BigNumber>;
 
     getSerialAtId(
       serialId: BigNumberish,

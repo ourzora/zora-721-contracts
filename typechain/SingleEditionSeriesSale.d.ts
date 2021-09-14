@@ -21,9 +21,9 @@ import { BytesLike } from "@ethersproject/bytes";
 import { Listener, Provider } from "@ethersproject/providers";
 import { FunctionFragment, EventFragment, Result } from "@ethersproject/abi";
 
-interface SeriesSaleInterface extends ethers.utils.Interface {
+interface SingleEditionSeriesSaleInterface extends ethers.utils.Interface {
   functions: {
-    "createRelease(bool,uint256,uint256,address,address)": FunctionFragment;
+    "createRelease(bool,uint256,uint256,address)": FunctionFragment;
     "mint(uint256)": FunctionFragment;
     "releases(uint256)": FunctionFragment;
     "setPaused(uint256,bool)": FunctionFragment;
@@ -31,7 +31,7 @@ interface SeriesSaleInterface extends ethers.utils.Interface {
 
   encodeFunctionData(
     functionFragment: "createRelease",
-    values: [boolean, BigNumberish, BigNumberish, string, string]
+    values: [boolean, BigNumberish, BigNumberish, string]
   ): string;
   encodeFunctionData(functionFragment: "mint", values: [BigNumberish]): string;
   encodeFunctionData(
@@ -60,7 +60,7 @@ interface SeriesSaleInterface extends ethers.utils.Interface {
   getEvent(nameOrSignatureOrTopic: "OnPauseChange"): EventFragment;
 }
 
-export class SeriesSale extends Contract {
+export class SingleEditionSeriesSale extends Contract {
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
@@ -71,24 +71,22 @@ export class SeriesSale extends Contract {
   removeAllListeners(eventName: EventFilter | string): this;
   removeListener(eventName: any, listener: Listener): this;
 
-  interface: SeriesSaleInterface;
+  interface: SingleEditionSeriesSaleInterface;
 
   functions: {
     createRelease(
       isPaused: boolean,
       maxAllowed: BigNumberish,
       ethPrice: BigNumberish,
-      recipient: string,
-      mintableAddress: string,
+      mintable: string,
       overrides?: Overrides
     ): Promise<ContractTransaction>;
 
-    "createRelease(bool,uint256,uint256,address,address)"(
+    "createRelease(bool,uint256,uint256,address)"(
       isPaused: boolean,
       maxAllowed: BigNumberish,
       ethPrice: BigNumberish,
-      recipient: string,
-      mintableAddress: string,
+      mintable: string,
       overrides?: Overrides
     ): Promise<ContractTransaction>;
 
@@ -106,36 +104,32 @@ export class SeriesSale extends Contract {
       arg0: BigNumberish,
       overrides?: CallOverrides
     ): Promise<{
-      isPaused: boolean;
       maxAllowed: BigNumber;
       currentReleased: BigNumber;
       ethPrice: BigNumber;
-      recipient: string;
-      mintableAddress: string;
-      0: boolean;
+      mintable: string;
+      isPaused: boolean;
+      0: BigNumber;
       1: BigNumber;
       2: BigNumber;
-      3: BigNumber;
-      4: string;
-      5: string;
+      3: string;
+      4: boolean;
     }>;
 
     "releases(uint256)"(
       arg0: BigNumberish,
       overrides?: CallOverrides
     ): Promise<{
-      isPaused: boolean;
       maxAllowed: BigNumber;
       currentReleased: BigNumber;
       ethPrice: BigNumber;
-      recipient: string;
-      mintableAddress: string;
-      0: boolean;
+      mintable: string;
+      isPaused: boolean;
+      0: BigNumber;
       1: BigNumber;
       2: BigNumber;
-      3: BigNumber;
-      4: string;
-      5: string;
+      3: string;
+      4: boolean;
     }>;
 
     setPaused(
@@ -155,17 +149,15 @@ export class SeriesSale extends Contract {
     isPaused: boolean,
     maxAllowed: BigNumberish,
     ethPrice: BigNumberish,
-    recipient: string,
-    mintableAddress: string,
+    mintable: string,
     overrides?: Overrides
   ): Promise<ContractTransaction>;
 
-  "createRelease(bool,uint256,uint256,address,address)"(
+  "createRelease(bool,uint256,uint256,address)"(
     isPaused: boolean,
     maxAllowed: BigNumberish,
     ethPrice: BigNumberish,
-    recipient: string,
-    mintableAddress: string,
+    mintable: string,
     overrides?: Overrides
   ): Promise<ContractTransaction>;
 
@@ -183,36 +175,32 @@ export class SeriesSale extends Contract {
     arg0: BigNumberish,
     overrides?: CallOverrides
   ): Promise<{
-    isPaused: boolean;
     maxAllowed: BigNumber;
     currentReleased: BigNumber;
     ethPrice: BigNumber;
-    recipient: string;
-    mintableAddress: string;
-    0: boolean;
+    mintable: string;
+    isPaused: boolean;
+    0: BigNumber;
     1: BigNumber;
     2: BigNumber;
-    3: BigNumber;
-    4: string;
-    5: string;
+    3: string;
+    4: boolean;
   }>;
 
   "releases(uint256)"(
     arg0: BigNumberish,
     overrides?: CallOverrides
   ): Promise<{
-    isPaused: boolean;
     maxAllowed: BigNumber;
     currentReleased: BigNumber;
     ethPrice: BigNumber;
-    recipient: string;
-    mintableAddress: string;
-    0: boolean;
+    mintable: string;
+    isPaused: boolean;
+    0: BigNumber;
     1: BigNumber;
     2: BigNumber;
-    3: BigNumber;
-    4: string;
-    5: string;
+    3: string;
+    4: boolean;
   }>;
 
   setPaused(
@@ -232,17 +220,15 @@ export class SeriesSale extends Contract {
       isPaused: boolean,
       maxAllowed: BigNumberish,
       ethPrice: BigNumberish,
-      recipient: string,
-      mintableAddress: string,
+      mintable: string,
       overrides?: CallOverrides
     ): Promise<void>;
 
-    "createRelease(bool,uint256,uint256,address,address)"(
+    "createRelease(bool,uint256,uint256,address)"(
       isPaused: boolean,
       maxAllowed: BigNumberish,
       ethPrice: BigNumberish,
-      recipient: string,
-      mintableAddress: string,
+      mintable: string,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -260,36 +246,32 @@ export class SeriesSale extends Contract {
       arg0: BigNumberish,
       overrides?: CallOverrides
     ): Promise<{
-      isPaused: boolean;
       maxAllowed: BigNumber;
       currentReleased: BigNumber;
       ethPrice: BigNumber;
-      recipient: string;
-      mintableAddress: string;
-      0: boolean;
+      mintable: string;
+      isPaused: boolean;
+      0: BigNumber;
       1: BigNumber;
       2: BigNumber;
-      3: BigNumber;
-      4: string;
-      5: string;
+      3: string;
+      4: boolean;
     }>;
 
     "releases(uint256)"(
       arg0: BigNumberish,
       overrides?: CallOverrides
     ): Promise<{
-      isPaused: boolean;
       maxAllowed: BigNumber;
       currentReleased: BigNumber;
       ethPrice: BigNumber;
-      recipient: string;
-      mintableAddress: string;
-      0: boolean;
+      mintable: string;
+      isPaused: boolean;
+      0: BigNumber;
       1: BigNumber;
       2: BigNumber;
-      3: BigNumber;
-      4: string;
-      5: string;
+      3: string;
+      4: boolean;
     }>;
 
     setPaused(
@@ -316,17 +298,15 @@ export class SeriesSale extends Contract {
       isPaused: boolean,
       maxAllowed: BigNumberish,
       ethPrice: BigNumberish,
-      recipient: string,
-      mintableAddress: string,
+      mintable: string,
       overrides?: Overrides
     ): Promise<BigNumber>;
 
-    "createRelease(bool,uint256,uint256,address,address)"(
+    "createRelease(bool,uint256,uint256,address)"(
       isPaused: boolean,
       maxAllowed: BigNumberish,
       ethPrice: BigNumberish,
-      recipient: string,
-      mintableAddress: string,
+      mintable: string,
       overrides?: Overrides
     ): Promise<BigNumber>;
 
@@ -365,17 +345,15 @@ export class SeriesSale extends Contract {
       isPaused: boolean,
       maxAllowed: BigNumberish,
       ethPrice: BigNumberish,
-      recipient: string,
-      mintableAddress: string,
+      mintable: string,
       overrides?: Overrides
     ): Promise<PopulatedTransaction>;
 
-    "createRelease(bool,uint256,uint256,address,address)"(
+    "createRelease(bool,uint256,uint256,address)"(
       isPaused: boolean,
       maxAllowed: BigNumberish,
       ethPrice: BigNumberish,
-      recipient: string,
-      mintableAddress: string,
+      mintable: string,
       overrides?: Overrides
     ): Promise<PopulatedTransaction>;
 

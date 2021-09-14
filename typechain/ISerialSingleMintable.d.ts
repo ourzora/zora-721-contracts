@@ -24,6 +24,7 @@ interface ISerialSingleMintableInterface extends ethers.utils.Interface {
   functions: {
     "mintSerial(address)": FunctionFragment;
     "mintSerials(address[])": FunctionFragment;
+    "owner()": FunctionFragment;
   };
 
   encodeFunctionData(functionFragment: "mintSerial", values: [string]): string;
@@ -31,12 +32,14 @@ interface ISerialSingleMintableInterface extends ethers.utils.Interface {
     functionFragment: "mintSerials",
     values: [string[]]
   ): string;
+  encodeFunctionData(functionFragment: "owner", values?: undefined): string;
 
   decodeFunctionResult(functionFragment: "mintSerial", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "mintSerials",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
 
   events: {};
 }
@@ -71,6 +74,14 @@ export class ISerialSingleMintable extends Contract {
       to: string[],
       overrides?: Overrides
     ): Promise<ContractTransaction>;
+
+    owner(overrides?: CallOverrides): Promise<{
+      0: string;
+    }>;
+
+    "owner()"(overrides?: CallOverrides): Promise<{
+      0: string;
+    }>;
   };
 
   mintSerial(to: string, overrides?: Overrides): Promise<ContractTransaction>;
@@ -90,6 +101,10 @@ export class ISerialSingleMintable extends Contract {
     overrides?: Overrides
   ): Promise<ContractTransaction>;
 
+  owner(overrides?: CallOverrides): Promise<string>;
+
+  "owner()"(overrides?: CallOverrides): Promise<string>;
+
   callStatic: {
     mintSerial(to: string, overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -104,6 +119,10 @@ export class ISerialSingleMintable extends Contract {
       to: string[],
       overrides?: CallOverrides
     ): Promise<BigNumber>;
+
+    owner(overrides?: CallOverrides): Promise<string>;
+
+    "owner()"(overrides?: CallOverrides): Promise<string>;
   };
 
   filters: {};
@@ -122,6 +141,10 @@ export class ISerialSingleMintable extends Contract {
       to: string[],
       overrides?: Overrides
     ): Promise<BigNumber>;
+
+    owner(overrides?: CallOverrides): Promise<BigNumber>;
+
+    "owner()"(overrides?: CallOverrides): Promise<BigNumber>;
   };
 
   populateTransaction: {
@@ -144,5 +167,9 @@ export class ISerialSingleMintable extends Contract {
       to: string[],
       overrides?: Overrides
     ): Promise<PopulatedTransaction>;
+
+    owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    "owner()"(overrides?: CallOverrides): Promise<PopulatedTransaction>;
   };
 }

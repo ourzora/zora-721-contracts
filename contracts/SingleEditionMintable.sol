@@ -29,29 +29,38 @@ contract SingleEditionMintable is
     OwnableUpgradeable,
     IERC2981Upgradeable
 {
+    event PriceChanged(uint256 amount);
+    event EditionSold(uint256 price, address owner);
+
     // metadata
     string private description;
 
-    // media urls
-    // animation_url field in the metadata
+    // Media Urls
+    // Animation_url field in the metadata
     string private animationUrl;
-    // hash for the associated animation
+    // Hash for the associated animation
     bytes32 private animationHash;
-    // image in the metadata
+    // Image in the metadata
     string private imageUrl;
-    // hash for the associated image
+    // Hash for the associated image
     bytes32 private imageHash;
 
-    // total size of serial that can be minted
+    // Total size of serial that can be minted
     uint256 public serialSize;
-    // current token id minted
+    // Current token id minted
     uint256 private atSerialId;
-    // royalty amount in bps
+    // Royalty amount in bps
     uint256 royaltyBPS;
-    // addresses allowed to mint serial
-    address[] allowedMinters;
+    // Addresses allowed to mint serial
+    mapping(address => bool) allowedMinters;
+
+    // Price for sale
+    uint256 public salePrice;
+
+    // NFT rendering logic contract
     SharedNFTLogic private immutable sharedNFTLogic;
 
+    // Global constructor for factory
     constructor(SharedNFTLogic _sharedNFTLogic) {
         sharedNFTLogic = _sharedNFTLogic;
     }
@@ -94,9 +103,49 @@ contract SingleEditionMintable is
         imageHash = _imageHash;
         serialSize = _serialSize;
         royaltyBPS = _royaltyBPS;
-        allowedMinters.push(msg.sender);
         // Set serial id
         atSerialId = 1;
+    }
+
+
+    /**
+        Simple eth-based sales function
+     */
+
+    /**
+      @dev This allows the user to purchase a serial edition
+           at the given price in the contract.
+     */
+    function purchase() external payable returns (uint256) {
+        require(salePrice > 0, "Not for sale");
+        require(msg.value == salePrice, "Wrong price");
+        address[] memory toMint = new address[](1);
+        toMint[0] = msg.sender;
+        emit EditionSold(salePrice, msg.sender);
+        return _mintSerials(toMint); 
+    }
+
+    /**
+      @param _salePrice if sale price is 0 sale is stopped, otherwise that amount 
+                       of ETH is needed to start the sale.
+      @dev This sets a simple ETH sales price
+           Setting a sales price allows users to mint the serial until it sells out.
+           For more granular sales, use an external sales contract.
+     */
+    function setSalePrice(uint256 _salePrice) external onlyOwner {
+        salePrice = _salePrice;
+        emit PriceChanged(salePrice);
+    }
+
+    /**
+      @dev This withdraws ETH from the contract to the contract owner.
+     */
+    function withdraw() external onlyOwner {
+        (bool sent, ) = owner().call{
+            value: address(this).balance,
+            gas: 34_000
+        }("");
+        require(sent, "Failed to send Eth");
     }
 
     /**
@@ -107,17 +156,10 @@ contract SingleEditionMintable is
         if (owner() == msg.sender) {
             return true;
         }
-        uint256 allowedMintersCount = allowedMinters.length;
-        // todo(iain): update allowed minters?
-        if (allowedMintersCount == 0) {
+        if (allowedMinters[address(0x0)]) {
             return true;
         }
-        for (uint256 i = 0; i < allowedMintersCount; i++) {
-            if (allowedMinters[i] == msg.sender) {
-                return true;
-            }
-        }
-        return false;
+        return allowedMinters[msg.sender];
     }
 
     /**
@@ -145,15 +187,28 @@ contract SingleEditionMintable is
     }
 
     /**
-      @param _allowedMinters list of addresses allowed to mint this serial
-      @dev Set the allowed minters array for a given serial id
-           This requires that msg.sender is the owner of the given serial id.
+        Simple override for owner interface.
      */
-    function setAllowedMinters(address[] memory _allowedMinters)
+    function owner()
         public
-        onlyOwner
+        view
+        override(OwnableUpgradeable, ISerialSingleMintable)
+        returns (address)
     {
-        allowedMinters = _allowedMinters;
+        return super.owner();
+    }
+
+    /**
+      @param minter address to set approved minting status for
+      @param allowed boolean if that address is allowed to mint
+      @dev Sets the approved minting status of the given address.
+           This requires that msg.sender is the owner of the given serial id.
+           If the ZeroAddress (address(0x0)) is set as a minter,
+             anyone will be allowed to mint.
+           This setup is similar to setApprovalForAll in the ERC721 spec.
+     */
+    function setApprovedMinter(address minter, bool allowed) public onlyOwner {
+        allowedMinters[minter] = allowed;
     }
 
     /**

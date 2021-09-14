@@ -1,30 +1,35 @@
 import { expect } from "chai";
 import "@nomiclabs/hardhat-ethers";
 import { ethers, deployments } from "hardhat";
-import parseDataURI from "data-urls";
 
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { SingleEditionMintable, SeriesSale } from "../typechain";
+import {
+  SingleEditionMintable,
+  SingleEditionMintableCreator,
+  SingleEditionSeriesSale,
+} from "../typechain";
 
-describe("SeriesSale", () => {
+describe("SingleEditionSeriesSale", () => {
   let signer: SignerWithAddress;
   let signerAddress: string;
+  let dynamicSketchCreator: SingleEditionMintableCreator;
   let dynamicSketch: SingleEditionMintable;
-  let seriesSale: SeriesSale;
+  let seriesSale: SingleEditionSeriesSale;
 
   beforeEach(async () => {
-    const { SingleEditionMintable, SeriesSale } = await deployments.fixture([
-      "SingleEditionMintable",
-      "SeriesSale",
-    ]);
-    dynamicSketch = (await ethers.getContractAt(
-      "SingleEditionMintable",
-      SingleEditionMintable.address
-    )) as SingleEditionMintable;
+    const { SingleEditionMintableCreator, SingleEditionSeriesSale } =
+      await deployments.fixture([
+        "SingleEditionMintableCreator",
+        "SingleEditionSeriesSale",
+      ]);
+    dynamicSketchCreator = (await ethers.getContractAt(
+      "SingleEditionMintableCreator",
+      SingleEditionMintableCreator.address
+    )) as SingleEditionMintableCreator;
     seriesSale = (await ethers.getContractAt(
-      "SeriesSale",
-      SeriesSale.address
-    )) as SeriesSale;
+      "SingleEditionSeriesSale",
+      SingleEditionSeriesSale.address
+    )) as SingleEditionSeriesSale;
 
     signer = (await ethers.getSigners())[0];
     signerAddress = await signer.getAddress();
@@ -32,18 +37,23 @@ describe("SeriesSale", () => {
 
   describe("with a serial", () => {
     beforeEach(async () => {
-      await dynamicSketch.createSerial(
-        "test",
-        "test",
+      await dynamicSketchCreator.createSerial(
+        "test sale serial",
+        "TSALE",
+        "Serial for testing the sale",
         "https://ipfs.io/ipfsbafybeify52a63pgcshhbtkff4nxxxp2zp5yjn2xw43jcy4knwful7ymmgy",
         "0x0000000000000000000000000000000000000000000000000000000000000000",
         "",
         "0x0000000000000000000000000000000000000000000000000000000000000000",
         10,
-        10,
-        signerAddress
+        10
       );
-      await dynamicSketch.setAllowedMinters([seriesSale.address]);
+      const newSerialAddress = await dynamicSketchCreator.getSerialAtId(0);
+      dynamicSketch = (await ethers.getContractAt(
+        "SingleEditionMintable",
+        newSerialAddress
+      )) as SingleEditionMintable;
+      await dynamicSketch.setApprovedMinter(seriesSale.address, true);
     });
     it("allows creating an ETH sale", async () => {
       const [_, s2, s3] = await ethers.getSigners();
@@ -51,16 +61,17 @@ describe("SeriesSale", () => {
         true,
         3,
         ethers.utils.parseEther("0.1"),
-        await s2.getAddress(),
-        dynamicSketch.address,
-        0
+        dynamicSketch.address
       );
-      await expect(seriesSale.connect(s3).mint(0)).to.be.revertedWith("PAUSED");
+      await expect(seriesSale.connect(s3).mint(0)).to.be.revertedWith("Paused");
       await seriesSale.setPaused(0, false);
-      await expect(seriesSale.connect(s3).mint(0)).to.be.revertedWith("PRICE");
+      expect(seriesSale.connect(s2).setPaused(0, false)).to.be.revertedWith(
+        "Not owner"
+      );
+      await expect(seriesSale.connect(s3).mint(0)).to.be.revertedWith("Wrong price");
       await expect(
         seriesSale.connect(s3).mint(0, { value: 100 })
-      ).to.be.revertedWith("PRICE");
+      ).to.be.revertedWith("Wrong price");
       await seriesSale
         .connect(s3)
         .mint(0, { value: ethers.utils.parseEther("0.1") });
@@ -77,7 +88,7 @@ describe("SeriesSale", () => {
         seriesSale
           .connect(s3)
           .mint(0, { value: ethers.utils.parseEther("0.1") })
-      ).to.be.revertedWith("FINISHED");
+      ).to.be.revertedWith("Sold out");
     });
   });
 });

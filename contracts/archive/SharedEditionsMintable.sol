@@ -8,13 +8,20 @@
 █▄ █▄█ █▀▄ █▀█
  */
 
+
+/**
+  This is a shared serial contract, primarily for use with Zora partners.
+  This contract allows multiple serials to exist in one contract similar to the shared zora.co minting contracts.
+  We are moving ahead with unique contracts per serial for individual creators, but using this contract for unique pieces.
+ */
+
 pragma solidity 0.8.6;
 
 import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import {IERC2981, IERC165} from "@openzeppelin/contracts/interfaces/IERC2981.sol";
 import "./ISerialMultipleMintable.sol";
-import "./SharedNFTLogic.sol";
+import "../SharedNFTLogic.sol";
 
 /**
     This is a smart contract for handling dynamic contract minting.
@@ -399,6 +406,7 @@ contract SharedEditionsMintable is
         returns (bool)
     {
         return
+            type(ISerialMultipleMintable).interfaceId == interfaceId ||
             type(IERC2981).interfaceId == interfaceId ||
             ERC721.supportsInterface(interfaceId);
     }

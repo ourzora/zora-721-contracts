@@ -19,7 +19,7 @@ import {IEditionSingleMintable} from "./IEditionSingleMintable.sol";
 /**
     This is a smart contract for handling dynamic contract minting.
 
-    @dev This allows creators to mint a unique serial edition within a custom contract
+    @dev This allows creators to mint a unique serial edition of the same media within a custom contract
     @author iain nash
     Repository: https://github.com/ourzora/nft-editions
 */

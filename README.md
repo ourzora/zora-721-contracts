@@ -52,3 +52,7 @@ Now that you have a edition, there are multiple options for lazy-minting and sal
 ### Verifying:
 
 `hardhat sourcify --network rinkeby && hardhat etherscan-verify --network rinkeby`
+
+### Bug Bounty
+5 ETH for any critical bugs that could result in loss of funds.
+Rewards will be given for smaller bugs or ideas.

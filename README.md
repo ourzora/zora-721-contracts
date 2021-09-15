@@ -13,7 +13,7 @@
 ### How do I create a new contract?
 
 1. Find/Deploy the `SingleEditionMintableCreator` contract
-2. Call createSerial on the `SingleEditionMintableCreator`
+2. Call `createEdition` on the `SingleEditionMintableCreator`
 
 ### How do I sell/distribute editions?
 
@@ -24,6 +24,7 @@ Now that you have a edition, there are multiple options for lazy-minting and sal
 3. To mint yourself to a list of addresses you can call `mintSerial(addresses[])` to mint an edition to each address in the list.
 
 ### Benefits of these contracts:
+
 * Full ownership of your own created minting contract
 * Each serial gets its own minting contract
 * Gas-optimized over creating individual NFTs
@@ -36,6 +37,7 @@ Now that you have a edition, there are multiple options for lazy-minting and sal
 * Simple integrated ethereum-based sales, can be easily extended with custom interface code
 
 ### Potential use cases for these contracts:
+
 * Giveaways for events showing if you’ve attended 
 * Serial editioned artworks that can be sold in the Zora auction house / work in any ERC721 market
 * Fundraisers for fixed-eth amounts
@@ -44,7 +46,9 @@ Now that you have a edition, there are multiple options for lazy-minting and sal
 
 ### Deploying:
 (Replace network with desired network)
+
 `hardhat deploy --network rinkeby`
 
 ### Verifying:
+
 `hardhat sourcify --network rinkeby && hardhat etherscan-verify --network rinkeby`

@@ -1,6 +1,6 @@
 import "@nomiclabs/hardhat-waffle";
+import "@typechain/hardhat";
 import "hardhat-gas-reporter";
-import "hardhat-typechain";
 import "hardhat-deploy";
 import "@nomiclabs/hardhat-etherscan";
 import { HardhatUserConfig } from "hardhat/config";

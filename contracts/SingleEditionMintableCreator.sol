@@ -23,18 +23,18 @@ contract SingleEditionMintableCreator {
         implementation = _implementation;
     }
 
-    /// Creates a new serial contract as a factory with a deterministic address
+    /// Creates a new edition contract as a factory with a deterministic address
     /// Important: None of these fields (except the Url fields with the same hash) can be changed after calling
-    /// @param _name Name of the serial contract
-    /// @param _symbol Symbol of the serial contract
-    /// @param _description Metadata: Description of the serial entry
-    /// @param _animationUrl Metadata: Animation url (optional) of the serial entry
+    /// @param _name Name of the edition contract
+    /// @param _symbol Symbol of the edition contract
+    /// @param _description Metadata: Description of the edition entry
+    /// @param _animationUrl Metadata: Animation url (optional) of the edition entry
     /// @param _animationHash Metadata: SHA-256 Hash of the animation (if no animation url, can be 0x0)
-    /// @param _imageUrl Metadata: Image url (semi-required) of the serial entry
-    /// @param _imageHash Metadata: SHA-256 hash of the Image of the serial entry (if not image, can be 0x0)
-    /// @param _serialSize Total size of the serial (number of possible editions)
+    /// @param _imageUrl Metadata: Image url (semi-required) of the edition entry
+    /// @param _imageHash Metadata: SHA-256 hash of the Image of the edition entry (if not image, can be 0x0)
+    /// @param _editionSize Total size of the edition (number of possible editions)
     /// @param _royaltyBPS BPS amount of royalty
-    function createSerial(
+    function createEdition(
         string memory _name,
         string memory _symbol,
         string memory _description,
@@ -42,7 +42,7 @@ contract SingleEditionMintableCreator {
         bytes32 _animationHash,
         string memory _imageUrl,
         bytes32 _imageHash,
-        uint256 _serialSize,
+        uint256 _editionSize,
         uint256 _royaltyBPS
     ) external returns (uint256) {
         address newContract = ClonesUpgradeable.cloneDeterministic(
@@ -58,19 +58,19 @@ contract SingleEditionMintableCreator {
             _animationHash,
             _imageUrl,
             _imageHash,
-            _serialSize,
+            _editionSize,
             _royaltyBPS
         );
-        emit CreatedSerial(atContract, msg.sender, _serialSize);
+        emit CreatedEdition(atContract, msg.sender, _editionSize);
         // Returns the ID of the recently created minting contract 
         // Also increments for the next contract creation call
         return ++atContract;
     }
 
-    /// Get serial given the created ID
-    /// @param serialId id of serial to get contract for
+    /// Get edition given the created ID
+    /// @param editionId id of edition to get contract for
     /// @return SingleEditionMintable Edition NFT contract
-    function getSerialAtId(uint256 serialId)
+    function getEditionAtId(uint256 editionId)
         external
         view
         returns (SingleEditionMintable)
@@ -79,13 +79,13 @@ contract SingleEditionMintableCreator {
             SingleEditionMintable(
                 ClonesUpgradeable.predictDeterministicAddress(
                     implementation,
-                    bytes32(abi.encodePacked(serialId)),
+                    bytes32(abi.encodePacked(editionId)),
                     address(this)
                 )
             );
     }
 
-    /// Emitted when a serial is created reserving the corresponding token IDs.
-    /// @param serialId ID of newly created serial
-    event CreatedSerial(uint256 serialId, address creator, uint256 serialSize);
+    /// Emitted when a edition is created reserving the corresponding token IDs.
+    /// @param editionId ID of newly created edition
+    event CreatedEdition(uint256 editionId, address creator, uint256 editionSize);
 }

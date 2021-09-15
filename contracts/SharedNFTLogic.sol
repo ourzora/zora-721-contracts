@@ -16,25 +16,25 @@ contract SharedNFTLogic {
         return Strings.toString(value);
     }
 
-    function createMetadataSerial(
+    function createMetadataEdition(
         string memory name,
         string memory description,
         string memory imageUrl,
         string memory animationUrl,
-        uint256 tokenOfSerial,
-        uint256 serialSize
+        uint256 tokenOfEdition,
+        uint256 editionSize
     ) external pure returns (string memory) {
         string memory _tokenMediaData = tokenMediaData(
             imageUrl,
             animationUrl,
-            tokenOfSerial
+            tokenOfEdition
         );
         bytes memory json = createMetadataJSON( 
             name,
             description,
             _tokenMediaData,
-            tokenOfSerial,
-            serialSize
+            tokenOfEdition,
+            editionSize
         );
         return encodeMetadataJSON(json);
     }
@@ -43,24 +43,24 @@ contract SharedNFTLogic {
         string memory name,
         string memory description,
         string memory mediaData,
-        uint256 tokenOfSerial,
-        uint256 serialSize
+        uint256 tokenOfEdition,
+        uint256 editionSize
     ) public pure returns (bytes memory) {
         return
             abi.encodePacked(
                 '{"name": "',
                 name,
                 " ",
-                Strings.toString(tokenOfSerial),
+                Strings.toString(tokenOfEdition),
                 "/",
-                Strings.toString(serialSize),
+                Strings.toString(editionSize),
                 '", "',
                 'description": "',
                 description,
                 '", "',
                 mediaData,
                 'properties": {"number": ',
-                Strings.toString(tokenOfSerial),
+                Strings.toString(tokenOfEdition),
                 ', "name": "',
                 name,
                 '"}}'
@@ -84,7 +84,7 @@ contract SharedNFTLogic {
     function tokenMediaData(
         string memory imageUrl,
         string memory animationUrl,
-        uint256 tokenOfSerial
+        uint256 tokenOfEdition
     ) public pure returns (string memory) {
         bool hasImage = bytes(imageUrl).length > 0;
         bool hasAnimation = bytes(animationUrl).length > 0;
@@ -95,11 +95,11 @@ contract SharedNFTLogic {
                         'image": "',
                         imageUrl,
                         "?id=",
-                        numberToString(tokenOfSerial),
+                        numberToString(tokenOfEdition),
                         '", "animation_url": "',
                         animationUrl,
                         "?id=",
-                        numberToString(tokenOfSerial),
+                        numberToString(tokenOfEdition),
                         '", "'
                     )
                 );
@@ -111,7 +111,7 @@ contract SharedNFTLogic {
                         'image": "',
                         imageUrl,
                         "?id=",
-                        numberToString(tokenOfSerial),
+                        numberToString(tokenOfEdition),
                         '", "'
                     )
                 );
@@ -123,7 +123,7 @@ contract SharedNFTLogic {
                         'animation_url": "',
                         animationUrl,
                         "?id=",
-                        numberToString(tokenOfSerial),
+                        numberToString(tokenOfEdition),
                         '", "'
                     )
                 );

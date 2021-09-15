@@ -22,13 +22,13 @@ import { FunctionFragment, EventFragment, Result } from "@ethersproject/abi";
 
 interface SingleEditionMintableCreatorInterface extends ethers.utils.Interface {
   functions: {
-    "createSerial(string,string,string,string,bytes32,string,bytes32,uint256,uint256)": FunctionFragment;
-    "getSerialAtId(uint256)": FunctionFragment;
+    "createEdition(string,string,string,string,bytes32,string,bytes32,uint256,uint256)": FunctionFragment;
+    "getEditionAtId(uint256)": FunctionFragment;
     "implementation()": FunctionFragment;
   };
 
   encodeFunctionData(
-    functionFragment: "createSerial",
+    functionFragment: "createEdition",
     values: [
       string,
       string,
@@ -42,7 +42,7 @@ interface SingleEditionMintableCreatorInterface extends ethers.utils.Interface {
     ]
   ): string;
   encodeFunctionData(
-    functionFragment: "getSerialAtId",
+    functionFragment: "getEditionAtId",
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
@@ -51,11 +51,11 @@ interface SingleEditionMintableCreatorInterface extends ethers.utils.Interface {
   ): string;
 
   decodeFunctionResult(
-    functionFragment: "createSerial",
+    functionFragment: "createEdition",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "getSerialAtId",
+    functionFragment: "getEditionAtId",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -64,10 +64,10 @@ interface SingleEditionMintableCreatorInterface extends ethers.utils.Interface {
   ): Result;
 
   events: {
-    "CreatedSerial(uint256,address,uint256)": EventFragment;
+    "CreatedEdition(uint256,address,uint256)": EventFragment;
   };
 
-  getEvent(nameOrSignatureOrTopic: "CreatedSerial"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "CreatedEdition"): EventFragment;
 }
 
 export class SingleEditionMintableCreator extends Contract {
@@ -84,7 +84,7 @@ export class SingleEditionMintableCreator extends Contract {
   interface: SingleEditionMintableCreatorInterface;
 
   functions: {
-    createSerial(
+    createEdition(
       _name: string,
       _symbol: string,
       _description: string,
@@ -92,12 +92,12 @@ export class SingleEditionMintableCreator extends Contract {
       _animationHash: BytesLike,
       _imageUrl: string,
       _imageHash: BytesLike,
-      _serialSize: BigNumberish,
+      _editionSize: BigNumberish,
       _royaltyBPS: BigNumberish,
       overrides?: Overrides
     ): Promise<ContractTransaction>;
 
-    "createSerial(string,string,string,string,bytes32,string,bytes32,uint256,uint256)"(
+    "createEdition(string,string,string,string,bytes32,string,bytes32,uint256,uint256)"(
       _name: string,
       _symbol: string,
       _description: string,
@@ -105,20 +105,20 @@ export class SingleEditionMintableCreator extends Contract {
       _animationHash: BytesLike,
       _imageUrl: string,
       _imageHash: BytesLike,
-      _serialSize: BigNumberish,
+      _editionSize: BigNumberish,
       _royaltyBPS: BigNumberish,
       overrides?: Overrides
     ): Promise<ContractTransaction>;
 
-    getSerialAtId(
-      serialId: BigNumberish,
+    getEditionAtId(
+      editionId: BigNumberish,
       overrides?: CallOverrides
     ): Promise<{
       0: string;
     }>;
 
-    "getSerialAtId(uint256)"(
-      serialId: BigNumberish,
+    "getEditionAtId(uint256)"(
+      editionId: BigNumberish,
       overrides?: CallOverrides
     ): Promise<{
       0: string;
@@ -133,7 +133,7 @@ export class SingleEditionMintableCreator extends Contract {
     }>;
   };
 
-  createSerial(
+  createEdition(
     _name: string,
     _symbol: string,
     _description: string,
@@ -141,12 +141,12 @@ export class SingleEditionMintableCreator extends Contract {
     _animationHash: BytesLike,
     _imageUrl: string,
     _imageHash: BytesLike,
-    _serialSize: BigNumberish,
+    _editionSize: BigNumberish,
     _royaltyBPS: BigNumberish,
     overrides?: Overrides
   ): Promise<ContractTransaction>;
 
-  "createSerial(string,string,string,string,bytes32,string,bytes32,uint256,uint256)"(
+  "createEdition(string,string,string,string,bytes32,string,bytes32,uint256,uint256)"(
     _name: string,
     _symbol: string,
     _description: string,
@@ -154,18 +154,18 @@ export class SingleEditionMintableCreator extends Contract {
     _animationHash: BytesLike,
     _imageUrl: string,
     _imageHash: BytesLike,
-    _serialSize: BigNumberish,
+    _editionSize: BigNumberish,
     _royaltyBPS: BigNumberish,
     overrides?: Overrides
   ): Promise<ContractTransaction>;
 
-  getSerialAtId(
-    serialId: BigNumberish,
+  getEditionAtId(
+    editionId: BigNumberish,
     overrides?: CallOverrides
   ): Promise<string>;
 
-  "getSerialAtId(uint256)"(
-    serialId: BigNumberish,
+  "getEditionAtId(uint256)"(
+    editionId: BigNumberish,
     overrides?: CallOverrides
   ): Promise<string>;
 
@@ -174,7 +174,7 @@ export class SingleEditionMintableCreator extends Contract {
   "implementation()"(overrides?: CallOverrides): Promise<string>;
 
   callStatic: {
-    createSerial(
+    createEdition(
       _name: string,
       _symbol: string,
       _description: string,
@@ -182,12 +182,12 @@ export class SingleEditionMintableCreator extends Contract {
       _animationHash: BytesLike,
       _imageUrl: string,
       _imageHash: BytesLike,
-      _serialSize: BigNumberish,
+      _editionSize: BigNumberish,
       _royaltyBPS: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    "createSerial(string,string,string,string,bytes32,string,bytes32,uint256,uint256)"(
+    "createEdition(string,string,string,string,bytes32,string,bytes32,uint256,uint256)"(
       _name: string,
       _symbol: string,
       _description: string,
@@ -195,18 +195,18 @@ export class SingleEditionMintableCreator extends Contract {
       _animationHash: BytesLike,
       _imageUrl: string,
       _imageHash: BytesLike,
-      _serialSize: BigNumberish,
+      _editionSize: BigNumberish,
       _royaltyBPS: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    getSerialAtId(
-      serialId: BigNumberish,
+    getEditionAtId(
+      editionId: BigNumberish,
       overrides?: CallOverrides
     ): Promise<string>;
 
-    "getSerialAtId(uint256)"(
-      serialId: BigNumberish,
+    "getEditionAtId(uint256)"(
+      editionId: BigNumberish,
       overrides?: CallOverrides
     ): Promise<string>;
 
@@ -216,11 +216,15 @@ export class SingleEditionMintableCreator extends Contract {
   };
 
   filters: {
-    CreatedSerial(serialId: null, creator: null, serialSize: null): EventFilter;
+    CreatedEdition(
+      editionId: null,
+      creator: null,
+      editionSize: null
+    ): EventFilter;
   };
 
   estimateGas: {
-    createSerial(
+    createEdition(
       _name: string,
       _symbol: string,
       _description: string,
@@ -228,12 +232,12 @@ export class SingleEditionMintableCreator extends Contract {
       _animationHash: BytesLike,
       _imageUrl: string,
       _imageHash: BytesLike,
-      _serialSize: BigNumberish,
+      _editionSize: BigNumberish,
       _royaltyBPS: BigNumberish,
       overrides?: Overrides
     ): Promise<BigNumber>;
 
-    "createSerial(string,string,string,string,bytes32,string,bytes32,uint256,uint256)"(
+    "createEdition(string,string,string,string,bytes32,string,bytes32,uint256,uint256)"(
       _name: string,
       _symbol: string,
       _description: string,
@@ -241,18 +245,18 @@ export class SingleEditionMintableCreator extends Contract {
       _animationHash: BytesLike,
       _imageUrl: string,
       _imageHash: BytesLike,
-      _serialSize: BigNumberish,
+      _editionSize: BigNumberish,
       _royaltyBPS: BigNumberish,
       overrides?: Overrides
     ): Promise<BigNumber>;
 
-    getSerialAtId(
-      serialId: BigNumberish,
+    getEditionAtId(
+      editionId: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    "getSerialAtId(uint256)"(
-      serialId: BigNumberish,
+    "getEditionAtId(uint256)"(
+      editionId: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
@@ -262,7 +266,7 @@ export class SingleEditionMintableCreator extends Contract {
   };
 
   populateTransaction: {
-    createSerial(
+    createEdition(
       _name: string,
       _symbol: string,
       _description: string,
@@ -270,12 +274,12 @@ export class SingleEditionMintableCreator extends Contract {
       _animationHash: BytesLike,
       _imageUrl: string,
       _imageHash: BytesLike,
-      _serialSize: BigNumberish,
+      _editionSize: BigNumberish,
       _royaltyBPS: BigNumberish,
       overrides?: Overrides
     ): Promise<PopulatedTransaction>;
 
-    "createSerial(string,string,string,string,bytes32,string,bytes32,uint256,uint256)"(
+    "createEdition(string,string,string,string,bytes32,string,bytes32,uint256,uint256)"(
       _name: string,
       _symbol: string,
       _description: string,
@@ -283,18 +287,18 @@ export class SingleEditionMintableCreator extends Contract {
       _animationHash: BytesLike,
       _imageUrl: string,
       _imageHash: BytesLike,
-      _serialSize: BigNumberish,
+      _editionSize: BigNumberish,
       _royaltyBPS: BigNumberish,
       overrides?: Overrides
     ): Promise<PopulatedTransaction>;
 
-    getSerialAtId(
-      serialId: BigNumberish,
+    getEditionAtId(
+      editionId: BigNumberish,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    "getSerialAtId(uint256)"(
-      serialId: BigNumberish,
+    "getEditionAtId(uint256)"(
+      editionId: BigNumberish,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 

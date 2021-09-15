@@ -31,8 +31,8 @@ describe("SingleEditionMintable", () => {
     signerAddress = await signer.getAddress();
   });
 
-  it("makes a new serial", async () => {
-    await dynamicSketch.createSerial(
+  it("makes a new edition", async () => {
+    await dynamicSketch.createEdition(
       "Testing Token",
       "TEST",
       "This is a testing token for all",
@@ -44,34 +44,34 @@ describe("SingleEditionMintable", () => {
       10
     );
 
-    const serialResult = await dynamicSketch.getSerialAtId(0);
+    const editionResult = await dynamicSketch.getEditionAtId(0);
     const minterContract = (await ethers.getContractAt(
       "SingleEditionMintable",
-      serialResult
+      editionResult
     )) as SingleEditionMintable;
     expect(await minterContract.name()).to.be.equal("Testing Token");
     expect(await minterContract.symbol()).to.be.equal("TEST");
-    const serialUris = await minterContract.getURIs();
-    expect(serialUris[0]).to.be.equal("");
-    expect(serialUris[1]).to.be.equal(
+    const editionUris = await minterContract.getURIs();
+    expect(editionUris[0]).to.be.equal("");
+    expect(editionUris[1]).to.be.equal(
       "0x0000000000000000000000000000000000000000000000000000000000000000"
     );
-    expect(serialUris[2]).to.be.equal(
+    expect(editionUris[2]).to.be.equal(
       "https://ipfs.io/ipfsbafybeify52a63pgcshhbtkff4nxxxp2zp5yjn2xw43jcy4knwful7ymmgy"
     );
-    expect(serialUris[3]).to.be.equal(
+    expect(editionUris[3]).to.be.equal(
       "0x0000000000000000000000000000000000000000000000000000000000000000"
     );
-    expect(await minterContract.serialSize()).to.be.equal(10);
+    expect(await minterContract.editionSize()).to.be.equal(10);
     // TODO(iain): check bps
     expect(await minterContract.owner()).to.be.equal(signerAddress);
   });
-  describe("with a serial", () => {
+  describe("with a edition", () => {
     let signer1: SignerWithAddress;
     let minterContract: SingleEditionMintable;
     beforeEach(async () => {
       signer1 = (await ethers.getSigners())[1];
-      await dynamicSketch.createSerial(
+      await dynamicSketch.createEdition(
         "Testing Token",
         "TEST",
         "This is a testing token for all",
@@ -83,19 +83,19 @@ describe("SingleEditionMintable", () => {
         10
       );
 
-      const serialResult = await dynamicSketch.getSerialAtId(0);
+      const editionResult = await dynamicSketch.getEditionAtId(0);
       minterContract = (await ethers.getContractAt(
         "SingleEditionMintable",
-        serialResult
+        editionResult
       )) as SingleEditionMintable;
     });
-    it("creates a new serial", async () => {
+    it("creates a new edition", async () => {
       expect(await signer1.getBalance()).to.eq(
         ethers.utils.parseEther("10000")
       );
 
-      // Mint first serial
-      await expect(minterContract.mintSerial(signerAddress))
+      // Mint first edition
+      await expect(minterContract.mintEdition(signerAddress))
         .to.emit(minterContract, "Transfer")
         .withArgs(
           "0x0000000000000000000000000000000000000000",
@@ -110,7 +110,7 @@ describe("SingleEditionMintable", () => {
         throw "No parsed token uri";
       }
 
-      // Check metadata from serial
+      // Check metadata from edition
       const uriData = Buffer.from(parsedTokenURI.body).toString("utf-8");
       const metadata = JSON.parse(uriData);
 
@@ -129,15 +129,15 @@ describe("SingleEditionMintable", () => {
         })
       );
     });
-    it("creates an authenticated serial", async () => {
-      await minterContract.mintSerial(await signer1.getAddress());
+    it("creates an authenticated edition", async () => {
+      await minterContract.mintEdition(await signer1.getAddress());
       expect(await minterContract.ownerOf(1)).to.equal(
         await signer1.getAddress()
       );
     });
-    it("creates a set of serials", async () => {
+    it("creates a set of editions", async () => {
       const [s1, s2, s3] = await ethers.getSigners();
-      await minterContract.mintSerials([
+      await minterContract.mintEditions([
         await s1.getAddress(),
         await s2.getAddress(),
         await s3.getAddress(),
@@ -145,7 +145,7 @@ describe("SingleEditionMintable", () => {
       expect(await minterContract.ownerOf(1)).to.equal(await s1.getAddress());
       expect(await minterContract.ownerOf(2)).to.equal(await s2.getAddress());
       expect(await minterContract.ownerOf(3)).to.equal(await s3.getAddress());
-      await minterContract.mintSerials([
+      await minterContract.mintEditions([
         await s1.getAddress(),
         await s2.getAddress(),
         await s3.getAddress(),
@@ -154,15 +154,15 @@ describe("SingleEditionMintable", () => {
         await s2.getAddress(),
         await s3.getAddress(),
       ]);
-      await expect(minterContract.mintSerials([signerAddress])).to.be.reverted;
-      await expect(minterContract.mintSerial(signerAddress)).to.be.reverted;
+      await expect(minterContract.mintEditions([signerAddress])).to.be.reverted;
+      await expect(minterContract.mintEdition(signerAddress)).to.be.reverted;
     });
-    it("stops after serials are sold out", async () => {
+    it("stops after editions are sold out", async () => {
       const [_, signer1] = await ethers.getSigners();
 
-      // Mint first serial
+      // Mint first edition
       for (var i = 1; i <= 10; i++) {
-        await expect(minterContract.mintSerial(await signer1.getAddress()))
+        await expect(minterContract.mintEdition(await signer1.getAddress()))
           .to.emit(minterContract, "Transfer")
           .withArgs(
             "0x0000000000000000000000000000000000000000",
@@ -171,7 +171,7 @@ describe("SingleEditionMintable", () => {
           );
       }
 
-      await expect(minterContract.mintSerial(signerAddress)).to.be.revertedWith(
+      await expect(minterContract.mintEdition(signerAddress)).to.be.revertedWith(
         "SOLD OUT"
       );
 
@@ -181,7 +181,7 @@ describe("SingleEditionMintable", () => {
         throw "No parsed token uri";
       }
 
-      // Check metadata from serial
+      // Check metadata from edition
       const uriData = Buffer.from(parsedTokenURI.body).toString("utf-8");
       console.log({ tokenURI, uriData });
       const metadata = JSON.parse(uriData);

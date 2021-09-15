@@ -31,8 +31,8 @@ describe("SingleEditionMintable", () => {
     signerAddress = await signer.getAddress();
   });
 
-  it("purchases a serial", async () => {
-    await dynamicSketch.createSerial(
+  it("purchases a edition", async () => {
+    await dynamicSketch.createEdition(
       "Testing Token",
       "TEST",
       "This is a testing token for all",
@@ -44,10 +44,10 @@ describe("SingleEditionMintable", () => {
       10
     );
 
-    const serialResult = await dynamicSketch.getSerialAtId(0);
+    const editionResult = await dynamicSketch.getEditionAtId(0);
     const minterContract = (await ethers.getContractAt(
       "SingleEditionMintable",
-      serialResult
+      editionResult
     )) as SingleEditionMintable;
     expect(await minterContract.name()).to.be.equal("Testing Token");
     expect(await minterContract.symbol()).to.be.equal("TEST");

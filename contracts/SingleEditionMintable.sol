@@ -14,17 +14,17 @@ import {ERC721Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC72
 import {IERC2981Upgradeable, IERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/interfaces/IERC2981Upgradeable.sol";
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import {SharedNFTLogic} from "./SharedNFTLogic.sol";
-import {ISerialSingleMintable} from "./ISerialSingleMintable.sol";
+import {IEditionSingleMintable} from "./IEditionSingleMintable.sol";
 
 /**
     This is a smart contract for handling dynamic contract minting.
 
-    @dev This allows creators to mint a unique series within a custom contract
+    @dev This allows creators to mint a unique serial edition within a custom contract
     @author iain nash
     Repository: https://github.com/ourzora/nft-editions
 */
 contract SingleEditionMintable is
-    ISerialSingleMintable,
+    IEditionSingleMintable,
     ERC721Upgradeable,
     OwnableUpgradeable,
     IERC2981Upgradeable
@@ -45,13 +45,13 @@ contract SingleEditionMintable is
     // Hash for the associated image
     bytes32 private imageHash;
 
-    // Total size of serial that can be minted
-    uint256 public serialSize;
+    // Total size of edition that can be minted
+    uint256 public editionSize;
     // Current token id minted
-    uint256 private atSerialId;
+    uint256 private atEditionId;
     // Royalty amount in bps
     uint256 royaltyBPS;
-    // Addresses allowed to mint serial
+    // Addresses allowed to mint edition
     mapping(address => bool) allowedMinters;
 
     // Price for sale
@@ -66,18 +66,18 @@ contract SingleEditionMintable is
     }
 
     /**
-      @param _owner Owner of serial
-      @param _name Name of serial, used in the title as "$NAME NUMBER/TOTAL"
+      @param _owner Owner of edition
+      @param _name Name of edition, used in the title as "$NAME NUMBER/TOTAL"
       @param _symbol Symbol of the new token contract
-      @param _description Description of serial, used in the description field of the NFT
-      @param _imageUrl Image URL of the serial. Strongly encouraged to be used, if necessary, only animation URL can be used. One of animation and image url need to exist in a serial to render the NFT.
+      @param _description Description of edition, used in the description field of the NFT
+      @param _imageUrl Image URL of the edition. Strongly encouraged to be used, if necessary, only animation URL can be used. One of animation and image url need to exist in a edition to render the NFT.
       @param _imageHash SHA256 of the given image in bytes32 format (0xHASH). If no image is included, the hash can be zero (bytes32 type)
-      @param _animationUrl Animation URL of the serial. Not required, but if omitted image URL needs to be included. This follows the opensea spec for NFTs
+      @param _animationUrl Animation URL of the edition. Not required, but if omitted image URL needs to be included. This follows the opensea spec for NFTs
       @param _animationHash The associated hash of the animation in sha-256 bytes32 format. If animation is omitted 
-      @param _serialSize Number of serials that can be minted in total.
+      @param _editionSize Number of editions that can be minted in total.
       @param _royaltyBPS BPS of the royalty set on the contract. Can be 0 for no royalty.
-      @dev Function to create a new serial. Can only be called by the allowed creator
-           Sets the only allowed minter to the address that creates/owns the serial.
+      @dev Function to create a new edition. Can only be called by the allowed creator
+           Sets the only allowed minter to the address that creates/owns the edition.
            This can be re-assigned or updated later
      */
     function initialize(
@@ -89,7 +89,7 @@ contract SingleEditionMintable is
         bytes32 _animationHash,
         string memory _imageUrl,
         bytes32 _imageHash,
-        uint256 _serialSize,
+        uint256 _editionSize,
         uint256 _royaltyBPS
     ) public initializer {
         __ERC721_init(_name, _symbol);
@@ -101,10 +101,10 @@ contract SingleEditionMintable is
         animationHash = _animationHash;
         imageUrl = _imageUrl;
         imageHash = _imageHash;
-        serialSize = _serialSize;
+        editionSize = _editionSize;
         royaltyBPS = _royaltyBPS;
-        // Set serial id
-        atSerialId = 1;
+        // Set edition id
+        atEditionId = 1;
     }
 
 
@@ -113,7 +113,7 @@ contract SingleEditionMintable is
      */
 
     /**
-      @dev This allows the user to purchase a serial edition
+      @dev This allows the user to purchase a edition edition
            at the given price in the contract.
      */
     function purchase() external payable returns (uint256) {
@@ -122,14 +122,14 @@ contract SingleEditionMintable is
         address[] memory toMint = new address[](1);
         toMint[0] = msg.sender;
         emit EditionSold(salePrice, msg.sender);
-        return _mintSerials(toMint); 
+        return _mintEditions(toMint); 
     }
 
     /**
       @param _salePrice if sale price is 0 sale is stopped, otherwise that amount 
                        of ETH is needed to start the sale.
       @dev This sets a simple ETH sales price
-           Setting a sales price allows users to mint the serial until it sells out.
+           Setting a sales price allows users to mint the edition until it sells out.
            For more granular sales, use an external sales contract.
      */
     function setSalePrice(uint256 _salePrice) external onlyOwner {
@@ -150,7 +150,7 @@ contract SingleEditionMintable is
 
     /**
       @dev This helper function checks if the msg.sender is allowed to mint the
-            given serial id.
+            given edition id.
      */
     function _isAllowedToMint() internal view returns (bool) {
         if (owner() == msg.sender) {
@@ -163,27 +163,27 @@ contract SingleEditionMintable is
     }
 
     /**
-      @param to address to send the newly minted serial to
-      @dev This mints one serial to the given address by an allowed minter on the serial instance.
+      @param to address to send the newly minted edition to
+      @dev This mints one edition to the given address by an allowed minter on the edition instance.
      */
-    function mintSerial(address to) external override returns (uint256) {
+    function mintEdition(address to) external override returns (uint256) {
         require(_isAllowedToMint(), "Needs to be an allowed minter");
         address[] memory toMint = new address[](1);
         toMint[0] = to;
-        return _mintSerials(toMint);
+        return _mintEditions(toMint);
     }
 
     /**
-      @param recipients list of addresses to send the newly minted serials to
-      @dev This mints multiple serials to the given list of addresses.
+      @param recipients list of addresses to send the newly minted editions to
+      @dev This mints multiple editions to the given list of addresses.
      */
-    function mintSerials(address[] memory recipients)
+    function mintEditions(address[] memory recipients)
         external
         override
         returns (uint256)
     {
         require(_isAllowedToMint(), "Needs to be an allowed minter");
-        return _mintSerials(recipients);
+        return _mintEditions(recipients);
     }
 
     /**
@@ -192,7 +192,7 @@ contract SingleEditionMintable is
     function owner()
         public
         view
-        override(OwnableUpgradeable, ISerialSingleMintable)
+        override(OwnableUpgradeable, IEditionSingleMintable)
         returns (address)
     {
         return super.owner();
@@ -202,7 +202,7 @@ contract SingleEditionMintable is
       @param minter address to set approved minting status for
       @param allowed boolean if that address is allowed to mint
       @dev Sets the approved minting status of the given address.
-           This requires that msg.sender is the owner of the given serial id.
+           This requires that msg.sender is the owner of the given edition id.
            If the ZeroAddress (address(0x0)) is set as a minter,
              anyone will be allowed to mint.
            This setup is similar to setApprovalForAll in the ERC721 spec.
@@ -212,10 +212,10 @@ contract SingleEditionMintable is
     }
 
     /**
-      @dev Allows for updates of serial urls by the owner of the serial.
+      @dev Allows for updates of edition urls by the owner of the edition.
            Only URLs can be updated (data-uris are supported), hashes cannot be updated.
      */
-    function updateSerialURLs(
+    function updateEditionURLs(
         string memory _imageUrl,
         string memory _animationUrl
     ) public onlyOwner {
@@ -225,24 +225,24 @@ contract SingleEditionMintable is
 
     /**
       @dev Private function to mint als without any access checks.
-           Called by the public serial minting functions.
+           Called by the public edition minting functions.
      */
-    function _mintSerials(address[] memory recipients)
+    function _mintEditions(address[] memory recipients)
         internal
         returns (uint256)
     {
-        uint256 startAt = atSerialId;
+        uint256 startAt = atEditionId;
         uint256 endAt = startAt + recipients.length - 1;
-        require(endAt <= serialSize, "SOLD OUT");
-        while (atSerialId <= endAt) {
-            _mint(recipients[atSerialId - startAt], atSerialId);
-            atSerialId++;
+        require(endAt <= editionSize, "SOLD OUT");
+        while (atEditionId <= endAt) {
+            _mint(recipients[atEditionId - startAt], atEditionId);
+            atEditionId++;
         }
-        return atSerialId;
+        return atEditionId;
     }
 
     /**
-      @dev Get URIs for serial NFT
+      @dev Get URIs for edition NFT
       @return imageUrl, imageHash, animationUrl, animationHash
      */
     function getURIs()
@@ -288,13 +288,13 @@ contract SingleEditionMintable is
         require(_exists(tokenId), "NO TOKEN");
 
         return
-            sharedNFTLogic.createMetadataSerial(
+            sharedNFTLogic.createMetadataEdition(
                 name(),
                 description,
                 imageUrl,
                 animationUrl,
                 tokenId,
-                serialSize
+                editionSize
             );
     }
 

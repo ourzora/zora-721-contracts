@@ -25,12 +25,13 @@ interface SingleEditionMintableInterface extends ethers.utils.Interface {
   functions: {
     "approve(address,uint256)": FunctionFragment;
     "balanceOf(address)": FunctionFragment;
+    "editionSize()": FunctionFragment;
     "getApproved(uint256)": FunctionFragment;
     "getURIs()": FunctionFragment;
     "initialize(address,string,string,string,string,bytes32,string,bytes32,uint256,uint256)": FunctionFragment;
     "isApprovedForAll(address,address)": FunctionFragment;
-    "mintSerial(address)": FunctionFragment;
-    "mintSerials(address[])": FunctionFragment;
+    "mintEdition(address)": FunctionFragment;
+    "mintEditions(address[])": FunctionFragment;
     "name()": FunctionFragment;
     "owner()": FunctionFragment;
     "ownerOf(uint256)": FunctionFragment;
@@ -39,7 +40,6 @@ interface SingleEditionMintableInterface extends ethers.utils.Interface {
     "royaltyInfo(uint256,uint256)": FunctionFragment;
     "safeTransferFrom(address,address,uint256)": FunctionFragment;
     "salePrice()": FunctionFragment;
-    "serialSize()": FunctionFragment;
     "setApprovalForAll(address,bool)": FunctionFragment;
     "setApprovedMinter(address,bool)": FunctionFragment;
     "setSalePrice(uint256)": FunctionFragment;
@@ -48,7 +48,7 @@ interface SingleEditionMintableInterface extends ethers.utils.Interface {
     "tokenURI(uint256)": FunctionFragment;
     "transferFrom(address,address,uint256)": FunctionFragment;
     "transferOwnership(address)": FunctionFragment;
-    "updateSerialURLs(string,string)": FunctionFragment;
+    "updateEditionURLs(string,string)": FunctionFragment;
     "withdraw()": FunctionFragment;
   };
 
@@ -57,6 +57,10 @@ interface SingleEditionMintableInterface extends ethers.utils.Interface {
     values: [string, BigNumberish]
   ): string;
   encodeFunctionData(functionFragment: "balanceOf", values: [string]): string;
+  encodeFunctionData(
+    functionFragment: "editionSize",
+    values?: undefined
+  ): string;
   encodeFunctionData(
     functionFragment: "getApproved",
     values: [BigNumberish]
@@ -81,9 +85,9 @@ interface SingleEditionMintableInterface extends ethers.utils.Interface {
     functionFragment: "isApprovedForAll",
     values: [string, string]
   ): string;
-  encodeFunctionData(functionFragment: "mintSerial", values: [string]): string;
+  encodeFunctionData(functionFragment: "mintEdition", values: [string]): string;
   encodeFunctionData(
-    functionFragment: "mintSerials",
+    functionFragment: "mintEditions",
     values: [string[]]
   ): string;
   encodeFunctionData(functionFragment: "name", values?: undefined): string;
@@ -106,10 +110,6 @@ interface SingleEditionMintableInterface extends ethers.utils.Interface {
     values: [string, string, BigNumberish]
   ): string;
   encodeFunctionData(functionFragment: "salePrice", values?: undefined): string;
-  encodeFunctionData(
-    functionFragment: "serialSize",
-    values?: undefined
-  ): string;
   encodeFunctionData(
     functionFragment: "setApprovalForAll",
     values: [string, boolean]
@@ -140,13 +140,17 @@ interface SingleEditionMintableInterface extends ethers.utils.Interface {
     values: [string]
   ): string;
   encodeFunctionData(
-    functionFragment: "updateSerialURLs",
+    functionFragment: "updateEditionURLs",
     values: [string, string]
   ): string;
   encodeFunctionData(functionFragment: "withdraw", values?: undefined): string;
 
   decodeFunctionResult(functionFragment: "approve", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "balanceOf", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "editionSize",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: "getApproved",
     data: BytesLike
@@ -157,9 +161,12 @@ interface SingleEditionMintableInterface extends ethers.utils.Interface {
     functionFragment: "isApprovedForAll",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "mintSerial", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "mintSerials",
+    functionFragment: "mintEdition",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "mintEditions",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "name", data: BytesLike): Result;
@@ -179,7 +186,6 @@ interface SingleEditionMintableInterface extends ethers.utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "salePrice", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "serialSize", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "setApprovalForAll",
     data: BytesLike
@@ -207,7 +213,7 @@ interface SingleEditionMintableInterface extends ethers.utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "updateSerialURLs",
+    functionFragment: "updateEditionURLs",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "withdraw", data: BytesLike): Result;
@@ -269,6 +275,14 @@ export class SingleEditionMintable extends Contract {
       0: BigNumber;
     }>;
 
+    editionSize(overrides?: CallOverrides): Promise<{
+      0: BigNumber;
+    }>;
+
+    "editionSize()"(overrides?: CallOverrides): Promise<{
+      0: BigNumber;
+    }>;
+
     getApproved(
       tokenId: BigNumberish,
       overrides?: CallOverrides
@@ -306,7 +320,7 @@ export class SingleEditionMintable extends Contract {
       _animationHash: BytesLike,
       _imageUrl: string,
       _imageHash: BytesLike,
-      _serialSize: BigNumberish,
+      _editionSize: BigNumberish,
       _royaltyBPS: BigNumberish,
       overrides?: Overrides
     ): Promise<ContractTransaction>;
@@ -320,7 +334,7 @@ export class SingleEditionMintable extends Contract {
       _animationHash: BytesLike,
       _imageUrl: string,
       _imageHash: BytesLike,
-      _serialSize: BigNumberish,
+      _editionSize: BigNumberish,
       _royaltyBPS: BigNumberish,
       overrides?: Overrides
     ): Promise<ContractTransaction>;
@@ -341,19 +355,22 @@ export class SingleEditionMintable extends Contract {
       0: boolean;
     }>;
 
-    mintSerial(to: string, overrides?: Overrides): Promise<ContractTransaction>;
-
-    "mintSerial(address)"(
+    mintEdition(
       to: string,
       overrides?: Overrides
     ): Promise<ContractTransaction>;
 
-    mintSerials(
+    "mintEdition(address)"(
+      to: string,
+      overrides?: Overrides
+    ): Promise<ContractTransaction>;
+
+    mintEditions(
       recipients: string[],
       overrides?: Overrides
     ): Promise<ContractTransaction>;
 
-    "mintSerials(address[])"(
+    "mintEditions(address[])"(
       recipients: string[],
       overrides?: Overrides
     ): Promise<ContractTransaction>;
@@ -438,14 +455,6 @@ export class SingleEditionMintable extends Contract {
     }>;
 
     "salePrice()"(overrides?: CallOverrides): Promise<{
-      0: BigNumber;
-    }>;
-
-    serialSize(overrides?: CallOverrides): Promise<{
-      0: BigNumber;
-    }>;
-
-    "serialSize()"(overrides?: CallOverrides): Promise<{
       0: BigNumber;
     }>;
 
@@ -543,13 +552,13 @@ export class SingleEditionMintable extends Contract {
       overrides?: Overrides
     ): Promise<ContractTransaction>;
 
-    updateSerialURLs(
+    updateEditionURLs(
       _imageUrl: string,
       _animationUrl: string,
       overrides?: Overrides
     ): Promise<ContractTransaction>;
 
-    "updateSerialURLs(string,string)"(
+    "updateEditionURLs(string,string)"(
       _imageUrl: string,
       _animationUrl: string,
       overrides?: Overrides
@@ -578,6 +587,10 @@ export class SingleEditionMintable extends Contract {
     owner: string,
     overrides?: CallOverrides
   ): Promise<BigNumber>;
+
+  editionSize(overrides?: CallOverrides): Promise<BigNumber>;
+
+  "editionSize()"(overrides?: CallOverrides): Promise<BigNumber>;
 
   getApproved(
     tokenId: BigNumberish,
@@ -612,7 +625,7 @@ export class SingleEditionMintable extends Contract {
     _animationHash: BytesLike,
     _imageUrl: string,
     _imageHash: BytesLike,
-    _serialSize: BigNumberish,
+    _editionSize: BigNumberish,
     _royaltyBPS: BigNumberish,
     overrides?: Overrides
   ): Promise<ContractTransaction>;
@@ -626,7 +639,7 @@ export class SingleEditionMintable extends Contract {
     _animationHash: BytesLike,
     _imageUrl: string,
     _imageHash: BytesLike,
-    _serialSize: BigNumberish,
+    _editionSize: BigNumberish,
     _royaltyBPS: BigNumberish,
     overrides?: Overrides
   ): Promise<ContractTransaction>;
@@ -643,19 +656,19 @@ export class SingleEditionMintable extends Contract {
     overrides?: CallOverrides
   ): Promise<boolean>;
 
-  mintSerial(to: string, overrides?: Overrides): Promise<ContractTransaction>;
+  mintEdition(to: string, overrides?: Overrides): Promise<ContractTransaction>;
 
-  "mintSerial(address)"(
+  "mintEdition(address)"(
     to: string,
     overrides?: Overrides
   ): Promise<ContractTransaction>;
 
-  mintSerials(
+  mintEditions(
     recipients: string[],
     overrides?: Overrides
   ): Promise<ContractTransaction>;
 
-  "mintSerials(address[])"(
+  "mintEditions(address[])"(
     recipients: string[],
     overrides?: Overrides
   ): Promise<ContractTransaction>;
@@ -723,10 +736,6 @@ export class SingleEditionMintable extends Contract {
   salePrice(overrides?: CallOverrides): Promise<BigNumber>;
 
   "salePrice()"(overrides?: CallOverrides): Promise<BigNumber>;
-
-  serialSize(overrides?: CallOverrides): Promise<BigNumber>;
-
-  "serialSize()"(overrides?: CallOverrides): Promise<BigNumber>;
 
   setApprovalForAll(
     operator: string,
@@ -807,13 +816,13 @@ export class SingleEditionMintable extends Contract {
     overrides?: Overrides
   ): Promise<ContractTransaction>;
 
-  updateSerialURLs(
+  updateEditionURLs(
     _imageUrl: string,
     _animationUrl: string,
     overrides?: Overrides
   ): Promise<ContractTransaction>;
 
-  "updateSerialURLs(string,string)"(
+  "updateEditionURLs(string,string)"(
     _imageUrl: string,
     _animationUrl: string,
     overrides?: Overrides
@@ -842,6 +851,10 @@ export class SingleEditionMintable extends Contract {
       owner: string,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
+
+    editionSize(overrides?: CallOverrides): Promise<BigNumber>;
+
+    "editionSize()"(overrides?: CallOverrides): Promise<BigNumber>;
 
     getApproved(
       tokenId: BigNumberish,
@@ -876,7 +889,7 @@ export class SingleEditionMintable extends Contract {
       _animationHash: BytesLike,
       _imageUrl: string,
       _imageHash: BytesLike,
-      _serialSize: BigNumberish,
+      _editionSize: BigNumberish,
       _royaltyBPS: BigNumberish,
       overrides?: CallOverrides
     ): Promise<void>;
@@ -890,7 +903,7 @@ export class SingleEditionMintable extends Contract {
       _animationHash: BytesLike,
       _imageUrl: string,
       _imageHash: BytesLike,
-      _serialSize: BigNumberish,
+      _editionSize: BigNumberish,
       _royaltyBPS: BigNumberish,
       overrides?: CallOverrides
     ): Promise<void>;
@@ -907,19 +920,19 @@ export class SingleEditionMintable extends Contract {
       overrides?: CallOverrides
     ): Promise<boolean>;
 
-    mintSerial(to: string, overrides?: CallOverrides): Promise<BigNumber>;
+    mintEdition(to: string, overrides?: CallOverrides): Promise<BigNumber>;
 
-    "mintSerial(address)"(
+    "mintEdition(address)"(
       to: string,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    mintSerials(
+    mintEditions(
       recipients: string[],
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    "mintSerials(address[])"(
+    "mintEditions(address[])"(
       recipients: string[],
       overrides?: CallOverrides
     ): Promise<BigNumber>;
@@ -987,10 +1000,6 @@ export class SingleEditionMintable extends Contract {
     salePrice(overrides?: CallOverrides): Promise<BigNumber>;
 
     "salePrice()"(overrides?: CallOverrides): Promise<BigNumber>;
-
-    serialSize(overrides?: CallOverrides): Promise<BigNumber>;
-
-    "serialSize()"(overrides?: CallOverrides): Promise<BigNumber>;
 
     setApprovalForAll(
       operator: string,
@@ -1071,13 +1080,13 @@ export class SingleEditionMintable extends Contract {
       overrides?: CallOverrides
     ): Promise<void>;
 
-    updateSerialURLs(
+    updateEditionURLs(
       _imageUrl: string,
       _animationUrl: string,
       overrides?: CallOverrides
     ): Promise<void>;
 
-    "updateSerialURLs(string,string)"(
+    "updateEditionURLs(string,string)"(
       _imageUrl: string,
       _animationUrl: string,
       overrides?: CallOverrides
@@ -1137,6 +1146,10 @@ export class SingleEditionMintable extends Contract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
+    editionSize(overrides?: CallOverrides): Promise<BigNumber>;
+
+    "editionSize()"(overrides?: CallOverrides): Promise<BigNumber>;
+
     getApproved(
       tokenId: BigNumberish,
       overrides?: CallOverrides
@@ -1160,7 +1173,7 @@ export class SingleEditionMintable extends Contract {
       _animationHash: BytesLike,
       _imageUrl: string,
       _imageHash: BytesLike,
-      _serialSize: BigNumberish,
+      _editionSize: BigNumberish,
       _royaltyBPS: BigNumberish,
       overrides?: Overrides
     ): Promise<BigNumber>;
@@ -1174,7 +1187,7 @@ export class SingleEditionMintable extends Contract {
       _animationHash: BytesLike,
       _imageUrl: string,
       _imageHash: BytesLike,
-      _serialSize: BigNumberish,
+      _editionSize: BigNumberish,
       _royaltyBPS: BigNumberish,
       overrides?: Overrides
     ): Promise<BigNumber>;
@@ -1191,19 +1204,19 @@ export class SingleEditionMintable extends Contract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    mintSerial(to: string, overrides?: Overrides): Promise<BigNumber>;
+    mintEdition(to: string, overrides?: Overrides): Promise<BigNumber>;
 
-    "mintSerial(address)"(
+    "mintEdition(address)"(
       to: string,
       overrides?: Overrides
     ): Promise<BigNumber>;
 
-    mintSerials(
+    mintEditions(
       recipients: string[],
       overrides?: Overrides
     ): Promise<BigNumber>;
 
-    "mintSerials(address[])"(
+    "mintEditions(address[])"(
       recipients: string[],
       overrides?: Overrides
     ): Promise<BigNumber>;
@@ -1264,10 +1277,6 @@ export class SingleEditionMintable extends Contract {
     salePrice(overrides?: CallOverrides): Promise<BigNumber>;
 
     "salePrice()"(overrides?: CallOverrides): Promise<BigNumber>;
-
-    serialSize(overrides?: CallOverrides): Promise<BigNumber>;
-
-    "serialSize()"(overrides?: CallOverrides): Promise<BigNumber>;
 
     setApprovalForAll(
       operator: string,
@@ -1351,13 +1360,13 @@ export class SingleEditionMintable extends Contract {
       overrides?: Overrides
     ): Promise<BigNumber>;
 
-    updateSerialURLs(
+    updateEditionURLs(
       _imageUrl: string,
       _animationUrl: string,
       overrides?: Overrides
     ): Promise<BigNumber>;
 
-    "updateSerialURLs(string,string)"(
+    "updateEditionURLs(string,string)"(
       _imageUrl: string,
       _animationUrl: string,
       overrides?: Overrides
@@ -1391,6 +1400,10 @@ export class SingleEditionMintable extends Contract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
+    editionSize(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    "editionSize()"(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
     getApproved(
       tokenId: BigNumberish,
       overrides?: CallOverrides
@@ -1414,7 +1427,7 @@ export class SingleEditionMintable extends Contract {
       _animationHash: BytesLike,
       _imageUrl: string,
       _imageHash: BytesLike,
-      _serialSize: BigNumberish,
+      _editionSize: BigNumberish,
       _royaltyBPS: BigNumberish,
       overrides?: Overrides
     ): Promise<PopulatedTransaction>;
@@ -1428,7 +1441,7 @@ export class SingleEditionMintable extends Contract {
       _animationHash: BytesLike,
       _imageUrl: string,
       _imageHash: BytesLike,
-      _serialSize: BigNumberish,
+      _editionSize: BigNumberish,
       _royaltyBPS: BigNumberish,
       overrides?: Overrides
     ): Promise<PopulatedTransaction>;
@@ -1445,22 +1458,22 @@ export class SingleEditionMintable extends Contract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    mintSerial(
+    mintEdition(
       to: string,
       overrides?: Overrides
     ): Promise<PopulatedTransaction>;
 
-    "mintSerial(address)"(
+    "mintEdition(address)"(
       to: string,
       overrides?: Overrides
     ): Promise<PopulatedTransaction>;
 
-    mintSerials(
+    mintEditions(
       recipients: string[],
       overrides?: Overrides
     ): Promise<PopulatedTransaction>;
 
-    "mintSerials(address[])"(
+    "mintEditions(address[])"(
       recipients: string[],
       overrides?: Overrides
     ): Promise<PopulatedTransaction>;
@@ -1521,10 +1534,6 @@ export class SingleEditionMintable extends Contract {
     salePrice(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     "salePrice()"(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    serialSize(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    "serialSize()"(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     setApprovalForAll(
       operator: string,
@@ -1608,13 +1617,13 @@ export class SingleEditionMintable extends Contract {
       overrides?: Overrides
     ): Promise<PopulatedTransaction>;
 
-    updateSerialURLs(
+    updateEditionURLs(
       _imageUrl: string,
       _animationUrl: string,
       overrides?: Overrides
     ): Promise<PopulatedTransaction>;
 
-    "updateSerialURLs(string,string)"(
+    "updateEditionURLs(string,string)"(
       _imageUrl: string,
       _animationUrl: string,
       overrides?: Overrides

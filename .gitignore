@@ -5,3 +5,4 @@ cache
 ./networks.private.json
 typechain
 .DS_Store
+.env

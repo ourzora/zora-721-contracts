@@ -21,7 +21,7 @@ Now that you have a edition, there are multiple options for lazy-minting and sal
 
 1. To sell editions for ETH you can call `setSalePrice`
 2. To allow certain accounts to mint `setApprovedMinter(address, approved)`.
-3. To mint yourself to a list of addresses you can call `mintSerial(addresses[])` to mint an edition to each address in the list.
+3. To mint yourself to a list of addresses you can call `mintEditions(addresses[])` to mint an edition to each address in the list.
 
 ### Benefits of these contracts:
 

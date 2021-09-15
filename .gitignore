@@ -3,3 +3,5 @@ node_modules
 cache
 *.private.json
 ./networks.private.json
+typechain
+.DS_Store

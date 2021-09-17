@@ -7,7 +7,6 @@ dotenv.config();
 const networks: NetworksUserConfig = {};
 
 if (process.env.DEV_MNEMONIC) {
-  console.log('here we are')
   networks.mumbai = {
     chainId: 80001,
     url: "https://rpc-mumbai.maticvigil.com",

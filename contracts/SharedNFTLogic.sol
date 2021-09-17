@@ -29,7 +29,7 @@ contract SharedNFTLogic {
             animationUrl,
             tokenOfEdition
         );
-        bytes memory json = createMetadataJSON( 
+        bytes memory json = createMetadataJSON(
             name,
             description,
             _tokenMediaData,
@@ -46,14 +46,20 @@ contract SharedNFTLogic {
         uint256 tokenOfEdition,
         uint256 editionSize
     ) public pure returns (bytes memory) {
+        bytes memory editionSizeText;
+        if (editionSize > 0) {
+            editionSizeText = abi.encodePacked(
+                "/",
+                Strings.toString(editionSize)
+            );
+        }
         return
             abi.encodePacked(
                 '{"name": "',
                 name,
                 " ",
                 Strings.toString(tokenOfEdition),
-                "/",
-                Strings.toString(editionSize),
+                editionSizeText,
                 '", "',
                 'description": "',
                 description,

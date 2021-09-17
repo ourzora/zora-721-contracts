@@ -129,6 +129,58 @@ describe("SingleEditionMintable", () => {
         })
       );
     });
+    it("creates an unbounded edition", async () => {
+      // no limit for edition size
+      await dynamicSketch.createEdition(
+        "Testing Token",
+        "TEST",
+        "This is a testing token for all",
+        "https://ipfs.io/ipfsbafybeify52a63pgcshhbtkff4nxxxp2zp5yjn2xw43jcy4knwful7ymmgy",
+        "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "",
+        "0x0000000000000000000000000000000000000000000000000000000000000000",
+        0,
+        0
+      );
+
+      const editionResult = await dynamicSketch.getEditionAtId(1);
+      minterContract = (await ethers.getContractAt(
+        "SingleEditionMintable",
+        editionResult
+      )) as SingleEditionMintable;
+
+      // Mint first edition
+      await expect(minterContract.mintEdition(signerAddress))
+        .to.emit(minterContract, "Transfer")
+        .withArgs(
+          "0x0000000000000000000000000000000000000000",
+          signerAddress,
+          1
+        );
+
+      const tokenURI = await minterContract.tokenURI(1);
+      console.log(tokenURI);
+      const parsedTokenURI = parseDataURI(tokenURI);
+      if (!parsedTokenURI) {
+        throw "No parsed token uri";
+      }
+
+      // Check metadata from edition
+      const uriData = Buffer.from(parsedTokenURI.body).toString("utf-8");
+      const metadata = JSON.parse(uriData);
+
+      expect(parsedTokenURI.mimeType.type).to.equal("application");
+      expect(parsedTokenURI.mimeType.subtype).to.equal("json");
+      expect(JSON.stringify(metadata)).to.equal(
+        JSON.stringify({
+          name: "Testing Token 1",
+          description: "This is a testing token for all",
+          animation_url:
+            "https://ipfs.io/ipfsbafybeify52a63pgcshhbtkff4nxxxp2zp5yjn2xw43jcy4knwful7ymmgy?id=1",
+          properties: { number: 1, name: "Testing Token" },
+        })
+      );
+    });
     it("creates an authenticated edition", async () => {
       await minterContract.mintEdition(await signer1.getAddress());
       expect(await minterContract.ownerOf(1)).to.equal(
@@ -157,6 +209,36 @@ describe("SingleEditionMintable", () => {
       await expect(minterContract.mintEditions([signerAddress])).to.be.reverted;
       await expect(minterContract.mintEdition(signerAddress)).to.be.reverted;
     });
+    it('mints a large batch', async () => {
+      // no limit for edition size
+      await dynamicSketch.createEdition(
+        "Testing Token",
+        "TEST",
+        "This is a testing token for all",
+        "https://ipfs.io/ipfsbafybeify52a63pgcshhbtkff4nxxxp2zp5yjn2xw43jcy4knwful7ymmgy",
+        "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "",
+        "0x0000000000000000000000000000000000000000000000000000000000000000",
+        0,
+        0
+      );
+
+      const editionResult = await dynamicSketch.getEditionAtId(1);
+      minterContract = (await ethers.getContractAt(
+        "SingleEditionMintable",
+        editionResult
+      )) as SingleEditionMintable;
+
+      const [s1, s2, s3] = await ethers.getSigners();
+      const [s1a, s2a, s3a] = [await s1.getAddress(), await s2.getAddress(), await s3.getAddress()];
+      const toAddresses = [];
+      for (let i = 0; i < 33; i++) {
+        toAddresses.push(s1a);
+        toAddresses.push(s2a);
+        toAddresses.push(s3a);
+      }
+      await minterContract.mintEditions(toAddresses);
+    })
     it("stops after editions are sold out", async () => {
       const [_, signer1] = await ethers.getSigners();
 
@@ -172,7 +254,7 @@ describe("SingleEditionMintable", () => {
       }
 
       await expect(minterContract.mintEdition(signerAddress)).to.be.revertedWith(
-        "SOLD OUT"
+        "Sold out"
       );
 
       const tokenURI = await minterContract.tokenURI(10);

@@ -36,7 +36,7 @@ contract SingleEditionMintable is
     string private description;
 
     // Media Urls
-    // Animation_url field in the metadata
+    // animation_url field in the metadata
     string private animationUrl;
     // Hash for the associated animation
     bytes32 private animationHash;
@@ -107,7 +107,6 @@ contract SingleEditionMintable is
         atEditionId = 1;
     }
 
-
     /**
         Simple eth-based sales function
      */
@@ -122,7 +121,7 @@ contract SingleEditionMintable is
         address[] memory toMint = new address[](1);
         toMint[0] = msg.sender;
         emit EditionSold(salePrice, msg.sender);
-        return _mintEditions(toMint); 
+        return _mintEditions(toMint);
     }
 
     /**
@@ -141,11 +140,10 @@ contract SingleEditionMintable is
       @dev This withdraws ETH from the contract to the contract owner.
      */
     function withdraw() external onlyOwner {
-        (bool sent, ) = owner().call{
-            value: address(this).balance,
-            gas: 34_000
-        }("");
-        require(sent, "Failed to send Eth");
+        (bool sent, ) = owner().call{value: address(this).balance, gas: 34_000}(
+            ""
+        );
+        require(sent, "Failed to send ETH");
     }
 
     /**
@@ -233,7 +231,7 @@ contract SingleEditionMintable is
     {
         uint256 startAt = atEditionId;
         uint256 endAt = startAt + recipients.length - 1;
-        require(endAt <= editionSize, "SOLD OUT");
+        require(editionSize == 0 || endAt <= editionSize, "Sold out");
         while (atEditionId <= endAt) {
             _mint(recipients[atEditionId - startAt], atEditionId);
             atEditionId++;
@@ -285,7 +283,7 @@ contract SingleEditionMintable is
         override
         returns (string memory)
     {
-        require(_exists(tokenId), "NO TOKEN");
+        require(_exists(tokenId), "No token");
 
         return
             sharedNFTLogic.createMetadataEdition(

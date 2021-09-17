@@ -15,6 +15,14 @@
 1. Find/Deploy the `SingleEditionMintableCreator` contract
 2. Call `createEdition` on the `SingleEditionMintableCreator`
 
+### Where is the factory contract deployed:
+
+**Mainnet ETH**: Soon
+**Rinkeby**: [0x7E335506443252196cd5A61bd4a1906D79791Fc6](https://etherscan.io/address/0x7E335506443252196cd5A61bd4a1906D79791Fc6)
+**Polygon**: Soon
+**Mumbai**: [0xb655386104f475c087b7460525a5676CaFc8b13f](https://etherscan.io/address/0xb655386104f475c087b7460525a5676CaFc8b13f)
+
+
 ### How do I sell/distribute editions?
 
 Now that you have a edition, there are multiple options for lazy-minting and sales:

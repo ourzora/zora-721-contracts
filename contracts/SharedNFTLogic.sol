@@ -3,6 +3,9 @@
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import {Base64} from "base64-sol/base64.sol";
 
+pragma solidity 0.8.6;
+
+
 contract SharedNFTLogic {
     function base64Encode(bytes memory args)
         public

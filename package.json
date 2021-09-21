@@ -36,8 +36,7 @@
   "dependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.2",
     "@nomiclabs/hardhat-etherscan": "^2.1.4",
-    "@openzeppelin/contracts": "^4.3.1",
-    "@openzeppelin/contracts-upgradeable": "^4.3.1",
+    "@openzeppelin/contracts-upgradeable": "^4.3.2",
     "@typechain/ethers-v5": "^7.1.0",
     "@typechain/hardhat": "^2.3.0",
     "base64-sol": "^1.0.1",

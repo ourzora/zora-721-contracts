@@ -1,16 +1,22 @@
 {
-  "name": "nft-factory-contracts",
+  "name": "@zoralabs/nft-editions-contracts",
   "version": "1.0.0",
   "description": "NFT Factory Contracts",
   "main": "index.js",
-  "author": "iain nash",
-  "license": "MIT",
+  "author": "ZORA",
+  "license": "GPL-3.0",
   "private": false,
+  "files": [
+    "typechain",
+    "contracts"
+  ],
   "scripts": {
     "typechain": "hardhat typechain",
     "compile": "hardhat compile",
     "deploy": "hardhat deploy",
-    "test": "hardhat test"
+    "test": "hardhat test",
+    "build": "yarn run prepack",
+    "prepack": "hardhat compile"
   },
   "devDependencies": {
     "@nomiclabs/hardhat-waffle": "^2.0.1",

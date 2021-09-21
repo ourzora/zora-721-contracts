@@ -1,21 +1,35 @@
 // SPDX-License-Identifier: GPL-3.0
 
-import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
+import {StringsUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/StringsUpgradeable.sol";
 import {Base64} from "base64-sol/base64.sol";
 
+/// Shared NFT logic for rendering metadata associated with editions
+/// @dev Can safely be used for generic base64Encode and numberToString functions
 contract SharedNFTLogic {
-    function base64Encode(bytes memory args)
+
+    /// @param unencoded bytes to base64-encode
+    function base64Encode(bytes memory unencoded)
         public
         pure
         returns (string memory)
     {
-        return Base64.encode(args);
+        return Base64.encode(unencoded);
     }
 
+    /// Proxy to openzeppelin's toString function
+    /// @param value number to return as a string
     function numberToString(uint256 value) public pure returns (string memory) {
-        return Strings.toString(value);
+        return StringsUpgradeable.toString(value);
     }
 
+    /// Generate edition metadata from storage information as base64-json blob
+    /// Combines the media data and metadata
+    /// @param name Name of NFT in metadata
+    /// @param description Description of NFT in metadata
+    /// @param imageUrl URL of image to render for edition
+    /// @param animationUrl URL of animation to render for edition
+    /// @param tokenOfEdition Token ID for specific token
+    /// @param editionSize Size of entire edition to show
     function createMetadataEdition(
         string memory name,
         string memory description,
@@ -39,6 +53,12 @@ contract SharedNFTLogic {
         return encodeMetadataJSON(json);
     }
 
+    /// Function to create the metadata json string for the nft edition
+    /// @param name Name of NFT in metadata
+    /// @param description Description of NFT in metadata
+    /// @param mediaData Data for media to include in json object
+    /// @param tokenOfEdition Token ID for specific token
+    /// @param editionSize Size of entire edition to show
     function createMetadataJSON(
         string memory name,
         string memory description,
@@ -50,7 +70,7 @@ contract SharedNFTLogic {
         if (editionSize > 0) {
             editionSizeText = abi.encodePacked(
                 "/",
-                Strings.toString(editionSize)
+                numberToString(editionSize)
             );
         }
         return
@@ -58,7 +78,7 @@ contract SharedNFTLogic {
                 '{"name": "',
                 name,
                 " ",
-                Strings.toString(tokenOfEdition),
+                numberToString(tokenOfEdition),
                 editionSizeText,
                 '", "',
                 'description": "',
@@ -66,13 +86,15 @@ contract SharedNFTLogic {
                 '", "',
                 mediaData,
                 'properties": {"number": ',
-                Strings.toString(tokenOfEdition),
+                numberToString(tokenOfEdition),
                 ', "name": "',
                 name,
                 '"}}'
             );
     }
 
+    /// Encodes the argument json bytes into base64-data uri format
+    /// @param json Raw json to base64 and turn into a data-uri
     function encodeMetadataJSON(bytes memory json)
         public
         pure
@@ -87,6 +109,10 @@ contract SharedNFTLogic {
             );
     }
 
+    /// Generates edition metadata from storage information as base64-json blob
+    /// Combines the media data and metadata
+    /// @param imageUrl URL of image to render for edition
+    /// @param animationUrl URL of animation to render for edition
     function tokenMediaData(
         string memory imageUrl,
         string memory animationUrl,

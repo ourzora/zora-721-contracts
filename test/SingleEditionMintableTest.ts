@@ -247,10 +247,12 @@ describe("SingleEditionMintable", () => {
       await expect(minterContract.mintEditions([signerAddress])).to.be.reverted;
       await expect(minterContract.mintEdition(signerAddress)).to.be.reverted;
     });
+    it("returns interfaces correctly", async () => {
+      expect(await minterContract.supportsInterface("0x2a55205a")).to.be.true;
+      expect(await minterContract.supportsInterface("0x01ffc9a7")).to.be.true;
+      expect(await minterContract.supportsInterface("0x80ac58cd")).to.be.true;
+    });
     describe("royalty 2981", () => {
-      it("returns supports royalty interface", async () => {
-        expect(await minterContract.supportsInterface("0x2a55205a")).to.be.true;
-      });
       it("follows royalty payout for owner", async () => {
         await minterContract.mintEdition(signerAddress);
         // allows royalty payout info to be updated

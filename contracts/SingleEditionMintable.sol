@@ -13,6 +13,7 @@ pragma solidity 0.8.6;
 import {ERC721Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
 import {IERC2981Upgradeable, IERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/interfaces/IERC2981Upgradeable.sol";
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import {CountersUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import {SharedNFTLogic} from "./SharedNFTLogic.sol";
 import {IEditionSingleMintable} from "./IEditionSingleMintable.sol";
 
@@ -29,6 +30,7 @@ contract SingleEditionMintable is
     OwnableUpgradeable,
     IERC2981Upgradeable
 {
+    using CountersUpgradeable for CountersUpgradeable.Counter;
     event PriceChanged(uint256 amount);
     event EditionSold(uint256 price, address owner);
 
@@ -48,7 +50,7 @@ contract SingleEditionMintable is
     // Total size of edition that can be minted
     uint256 public editionSize;
     // Current token id minted
-    uint256 private atEditionId;
+    CountersUpgradeable.Counter private atEditionId;
     // Royalty amount in bps
     uint256 royaltyBPS;
     // Addresses allowed to mint edition
@@ -66,15 +68,15 @@ contract SingleEditionMintable is
     }
 
     /**
-      @param _owner Owner of edition
+      @param _owner User that owns and can mint the edition, gets royalty and sales payouts and can update the base url if needed.
       @param _name Name of edition, used in the title as "$NAME NUMBER/TOTAL"
       @param _symbol Symbol of the new token contract
       @param _description Description of edition, used in the description field of the NFT
       @param _imageUrl Image URL of the edition. Strongly encouraged to be used, if necessary, only animation URL can be used. One of animation and image url need to exist in a edition to render the NFT.
-      @param _imageHash SHA256 of the given image in bytes32 format (0xHASH). If no image is included, the hash can be zero (bytes32 type)
+      @param _imageHash SHA256 of the given image in bytes32 format (0xHASH). If no image is included, the hash can be zero.
       @param _animationUrl Animation URL of the edition. Not required, but if omitted image URL needs to be included. This follows the opensea spec for NFTs
-      @param _animationHash The associated hash of the animation in sha-256 bytes32 format. If animation is omitted 
-      @param _editionSize Number of editions that can be minted in total.
+      @param _animationHash The associated hash of the animation in sha-256 bytes32 format. If animation is omitted the hash can be zero.
+      @param _editionSize Number of editions that can be minted in total. If 0, unlimited editions can be minted.
       @param _royaltyBPS BPS of the royalty set on the contract. Can be 0 for no royalty.
       @dev Function to create a new edition. Can only be called by the allowed creator
            Sets the only allowed minter to the address that creates/owns the edition.
@@ -103,12 +105,13 @@ contract SingleEditionMintable is
         imageHash = _imageHash;
         editionSize = _editionSize;
         royaltyBPS = _royaltyBPS;
-        // Set edition id
-        atEditionId = 1;
+        // Set edition id start to be 1 not 0
+        atEditionId.increment();
     }
 
     /**
         Simple eth-based sales function
+        More complex sales functions can be implemented through ISingleEditionMintable interface
      */
 
     /**
@@ -229,14 +232,14 @@ contract SingleEditionMintable is
         internal
         returns (uint256)
     {
-        uint256 startAt = atEditionId;
+        uint256 startAt = atEditionId.current();
         uint256 endAt = startAt + recipients.length - 1;
         require(editionSize == 0 || endAt <= editionSize, "Sold out");
-        while (atEditionId <= endAt) {
-            _mint(recipients[atEditionId - startAt], atEditionId);
-            atEditionId++;
+        while (atEditionId.current() <= endAt) {
+            _mint(recipients[atEditionId.current() - startAt], atEditionId.current());
+            atEditionId.increment();
         }
-        return atEditionId;
+        return atEditionId.current();
     }
 
     /**

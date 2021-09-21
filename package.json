@@ -8,7 +8,8 @@
   "private": false,
   "files": [
     "typechain",
-    "contracts"
+    "contracts",
+    "deployments"
   ],
   "scripts": {
     "typechain": "hardhat typechain",

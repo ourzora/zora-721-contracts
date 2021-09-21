@@ -10,11 +10,18 @@
 
 pragma solidity 0.8.6;
 
-import "@openzeppelin/contracts-upgradeable/proxy/ClonesUpgradeable.sol";
+import {ClonesUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/ClonesUpgradeable.sol";
+import {CountersUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
+
 import "./SingleEditionMintable.sol";
 
 contract SingleEditionMintableCreator {
-    uint256 atContract = 0;
+    using CountersUpgradeable for CountersUpgradeable.Counter;
+
+    /// Counter for current contract id upgraded
+    CountersUpgradeable.Counter private atContract;
+
+    /// Address for implementation of SingleEditionMintable to clone
     address public implementation;
 
     /// Initializes factory with address of implementation logic
@@ -45,9 +52,10 @@ contract SingleEditionMintableCreator {
         uint256 _editionSize,
         uint256 _royaltyBPS
     ) external returns (uint256) {
+        uint256 newId = atContract.current();
         address newContract = ClonesUpgradeable.cloneDeterministic(
             implementation,
-            bytes32(abi.encodePacked(atContract))
+            bytes32(abi.encodePacked(newId))
         );
         SingleEditionMintable(newContract).initialize(
             msg.sender,
@@ -61,10 +69,11 @@ contract SingleEditionMintableCreator {
             _editionSize,
             _royaltyBPS
         );
-        emit CreatedEdition(atContract, msg.sender, _editionSize);
-        // Returns the ID of the recently created minting contract 
+        emit CreatedEdition(newId, msg.sender, _editionSize);
+        // Returns the ID of the recently created minting contract
         // Also increments for the next contract creation call
-        return ++atContract;
+        atContract.increment();
+        return newId;
     }
 
     /// Get edition given the created ID
@@ -87,5 +96,9 @@ contract SingleEditionMintableCreator {
 
     /// Emitted when a edition is created reserving the corresponding token IDs.
     /// @param editionId ID of newly created edition
-    event CreatedEdition(uint256 editionId, address creator, uint256 editionSize);
+    event CreatedEdition(
+        uint256 editionId,
+        address creator,
+        uint256 editionSize
+    );
 }

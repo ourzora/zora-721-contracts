@@ -158,16 +158,31 @@ describe("SingleEditionMintable", () => {
           1
         );
 
+      // Mint second edition
+      await expect(minterContract.mintEdition(signerAddress))
+        .to.emit(minterContract, "Transfer")
+        .withArgs(
+          "0x0000000000000000000000000000000000000000",
+          signerAddress,
+          2
+        );
+
       const tokenURI = await minterContract.tokenURI(1);
-      console.log(tokenURI);
       const parsedTokenURI = parseDataURI(tokenURI);
       if (!parsedTokenURI) {
         throw "No parsed token uri";
       }
 
+      const tokenURI2 = await minterContract.tokenURI(2);
+      const parsedTokenURI2 = parseDataURI(tokenURI2);
+
       // Check metadata from edition
       const uriData = Buffer.from(parsedTokenURI.body).toString("utf-8");
       const metadata = JSON.parse(uriData);
+
+      const uriData2 = Buffer.from(parsedTokenURI2?.body || '').toString("utf-8");
+      const metadata2 = JSON.parse(uriData2);
+      expect(metadata2.name).to.be.equal('Testing Token 2');
 
       expect(parsedTokenURI.mimeType.type).to.equal("application");
       expect(parsedTokenURI.mimeType.subtype).to.equal("json");

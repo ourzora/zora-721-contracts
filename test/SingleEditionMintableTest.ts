@@ -180,9 +180,11 @@ describe("SingleEditionMintable", () => {
       const uriData = Buffer.from(parsedTokenURI.body).toString("utf-8");
       const metadata = JSON.parse(uriData);
 
-      const uriData2 = Buffer.from(parsedTokenURI2?.body || '').toString("utf-8");
+      const uriData2 = Buffer.from(parsedTokenURI2?.body || "").toString(
+        "utf-8"
+      );
       const metadata2 = JSON.parse(uriData2);
-      expect(metadata2.name).to.be.equal('Testing Token 2');
+      expect(metadata2.name).to.be.equal("Testing Token 2");
 
       expect(parsedTokenURI.mimeType.type).to.equal("application");
       expect(parsedTokenURI.mimeType.subtype).to.equal("json");
@@ -197,6 +199,26 @@ describe("SingleEditionMintable", () => {
       );
     });
     it("creates an authenticated edition", async () => {
+      await minterContract.mintEdition(await signer1.getAddress());
+      expect(await minterContract.ownerOf(1)).to.equal(
+        await signer1.getAddress()
+      );
+    });
+    it("does not allow re-initialization", async () => {
+      await expect(
+        minterContract.initialize(
+          signerAddress,
+          "test name",
+          "SYM",
+          "description",
+          "animation",
+          "0x0000000000000000000000000000000000000000000000000000000000000000",
+          "uri",
+          "0x0000000000000000000000000000000000000000000000000000000000000000",
+          12,
+          12
+        )
+      ).to.be.revertedWith("Initializable: contract is already initialized");
       await minterContract.mintEdition(await signer1.getAddress());
       expect(await minterContract.ownerOf(1)).to.equal(
         await signer1.getAddress()
@@ -224,7 +246,7 @@ describe("SingleEditionMintable", () => {
       await expect(minterContract.mintEditions([signerAddress])).to.be.reverted;
       await expect(minterContract.mintEdition(signerAddress)).to.be.reverted;
     });
-    it('mints a large batch', async () => {
+    it("mints a large batch", async () => {
       // no limit for edition size
       await dynamicSketch.createEdition(
         "Testing Token",
@@ -245,7 +267,11 @@ describe("SingleEditionMintable", () => {
       )) as SingleEditionMintable;
 
       const [s1, s2, s3] = await ethers.getSigners();
-      const [s1a, s2a, s3a] = [await s1.getAddress(), await s2.getAddress(), await s3.getAddress()];
+      const [s1a, s2a, s3a] = [
+        await s1.getAddress(),
+        await s2.getAddress(),
+        await s3.getAddress(),
+      ];
       const toAddresses = [];
       for (let i = 0; i < 33; i++) {
         toAddresses.push(s1a);
@@ -253,7 +279,7 @@ describe("SingleEditionMintable", () => {
         toAddresses.push(s3a);
       }
       await minterContract.mintEditions(toAddresses);
-    })
+    });
     it("stops after editions are sold out", async () => {
       const [_, signer1] = await ethers.getSigners();
 
@@ -268,9 +294,9 @@ describe("SingleEditionMintable", () => {
           );
       }
 
-      await expect(minterContract.mintEdition(signerAddress)).to.be.revertedWith(
-        "Sold out"
-      );
+      await expect(
+        minterContract.mintEdition(signerAddress)
+      ).to.be.revertedWith("Sold out");
 
       const tokenURI = await minterContract.tokenURI(10);
       const parsedTokenURI = parseDataURI(tokenURI);

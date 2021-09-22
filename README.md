@@ -17,7 +17,7 @@
 
 ### Where is the factory contract deployed:
 
-**Mainnet ETH**: Soon
+**Mainnet ETH**: [0xEf7a8fF7FC585FA1Fe3062455B628bfC657e2cD5](https://etherscan.io/address/0xEf7a8fF7FC585FA1Fe3062455B628bfC657e2cD5)
 
 **Rinkeby**: [0x7E335506443252196cd5A61bd4a1906D79791Fc6](https://rinkeby.etherscan.io/address/0x7E335506443252196cd5A61bd4a1906D79791Fc6)
 

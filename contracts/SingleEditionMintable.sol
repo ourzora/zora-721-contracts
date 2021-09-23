@@ -1,11 +1,13 @@
 // SPDX-License-Identifier: GPL-3.0
 
 /**
+
 █▄░█ █▀▀ ▀█▀   █▀▀ █▀▄ █ ▀█▀ █ █▀█ █▄░█ █▀
 █░▀█ █▀░ ░█░   ██▄ █▄▀ █ ░█░ █ █▄█ █░▀█ ▄█
 
 ▀█ █▀█ █▀█ ▄▀█
 █▄ █▄█ █▀▄ █▀█
+
  */
 
 pragma solidity 0.8.6;
@@ -25,10 +27,10 @@ import {IEditionSingleMintable} from "./IEditionSingleMintable.sol";
     Repository: https://github.com/ourzora/nft-editions
 */
 contract SingleEditionMintable is
-    IEditionSingleMintable,
     ERC721Upgradeable,
-    OwnableUpgradeable,
-    IERC2981Upgradeable
+    IEditionSingleMintable,
+    IERC2981Upgradeable,
+    OwnableUpgradeable
 {
     using CountersUpgradeable for CountersUpgradeable.Counter;
     event PriceChanged(uint256 amount);
@@ -225,6 +227,15 @@ contract SingleEditionMintable is
     }
 
     /**
+        @param tokenId Token ID to burn
+        User burn function for token id 
+     */
+    function burn(uint256 tokenId) public {
+        require(_isApprovedOrOwner(_msgSender(), tokenId), "Not approved");
+        _burn(tokenId);
+    }
+
+    /**
       @dev Private function to mint als without any access checks.
            Called by the public edition minting functions.
      */
@@ -236,7 +247,10 @@ contract SingleEditionMintable is
         uint256 endAt = startAt + recipients.length - 1;
         require(editionSize == 0 || endAt <= editionSize, "Sold out");
         while (atEditionId.current() <= endAt) {
-            _mint(recipients[atEditionId.current() - startAt], atEditionId.current());
+            _mint(
+                recipients[atEditionId.current() - startAt],
+                atEditionId.current()
+            );
             atEditionId.increment();
         }
         return atEditionId.current();

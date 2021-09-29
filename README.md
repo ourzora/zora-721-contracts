@@ -21,7 +21,7 @@
 
 **Rinkeby**: [0x5d6E1357Acc8BF654979f3b24fdef8C5549A491e](https://rinkeby.etherscan.io/address/0x5d6E1357Acc8BF654979f3b24fdef8C5549A491e)
 
-**Polygon**: Soon
+**Polygon**: [0x9168C5ba5a0a76db8A1BF5b2eE5557f2A0ECA4f4](https://polygonscan.com/address/0x9168C5ba5a0a76db8A1BF5b2eE5557f2A0ECA4f4)
 
 **Mumbai**: [0xb655386104f475c087b7460525a5676CaFc8b13f](https://mumbai.polygonscan.com/address/0xb655386104f475c087b7460525a5676CaFc8b13f)
 

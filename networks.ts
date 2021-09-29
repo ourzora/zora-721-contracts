@@ -22,6 +22,7 @@ if (process.env.DEV_MNEMONIC) {
     accounts: {
       mnemonic: process.env.DEV_MNEMONIC,
     },
+    gasPrice: 8000000000,
   };
   if (process.env.RINKEBY_RPC) {
     networks.rinkeby = {

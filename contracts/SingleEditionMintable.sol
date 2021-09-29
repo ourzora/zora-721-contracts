@@ -111,6 +111,11 @@ contract SingleEditionMintable is
         atEditionId.increment();
     }
 
+
+    /// @dev returns the number of minted tokens within the edition
+    function totalSupply() public view returns (uint256) {
+        return atEditionId.current() - 1;
+    }
     /**
         Simple eth-based sales function
         More complex sales functions can be implemented through ISingleEditionMintable interface

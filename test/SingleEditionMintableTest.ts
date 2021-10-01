@@ -150,6 +150,8 @@ describe("SingleEditionMintable", () => {
         editionResult
       )) as SingleEditionMintable;
 
+      expect(await minterContract.totalSupply()).to.be.equal(0);
+
       // Mint first edition
       await expect(minterContract.mintEdition(signerAddress))
         .to.emit(minterContract, "Transfer")
@@ -159,6 +161,8 @@ describe("SingleEditionMintable", () => {
           1
         );
 
+      expect(await minterContract.totalSupply()).to.be.equal(1);
+
       // Mint second edition
       await expect(minterContract.mintEdition(signerAddress))
         .to.emit(minterContract, "Transfer")
@@ -167,6 +171,8 @@ describe("SingleEditionMintable", () => {
           signerAddress,
           2
         );
+
+      expect(await minterContract.totalSupply()).to.be.equal(2);
 
       const tokenURI = await minterContract.tokenURI(1);
       const parsedTokenURI = parseDataURI(tokenURI);
@@ -204,6 +210,14 @@ describe("SingleEditionMintable", () => {
       expect(await minterContract.ownerOf(1)).to.equal(
         await signer1.getAddress()
       );
+    });
+    it("allows user burn", async () => {
+      await minterContract.mintEdition(await signer1.getAddress());
+      expect(await minterContract.ownerOf(1)).to.equal(
+        await signer1.getAddress()
+      );
+      await minterContract.connect(signer1).burn(1);
+      await expect(minterContract.ownerOf(1)).to.be.reverted;
     });
     it("does not allow re-initialization", async () => {
       await expect(
@@ -248,8 +262,11 @@ describe("SingleEditionMintable", () => {
       await expect(minterContract.mintEdition(signerAddress)).to.be.reverted;
     });
     it("returns interfaces correctly", async () => {
+      // ERC2891 interface
       expect(await minterContract.supportsInterface("0x2a55205a")).to.be.true;
+      // ERC165 interface
       expect(await minterContract.supportsInterface("0x01ffc9a7")).to.be.true;
+      // ERC721 interface
       expect(await minterContract.supportsInterface("0x80ac58cd")).to.be.true;
     });
     describe("royalty 2981", () => {
@@ -317,7 +334,7 @@ describe("SingleEditionMintable", () => {
         await s3.getAddress(),
       ];
       const toAddresses = [];
-      for (let i = 0; i < 33; i++) {
+      for (let i = 0; i < 100; i++) {
         toAddresses.push(s1a);
         toAddresses.push(s2a);
         toAddresses.push(s3a);

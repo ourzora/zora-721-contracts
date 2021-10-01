@@ -1,11 +1,13 @@
 // SPDX-License-Identifier: GPL-3.0
 
 /**
+
 █▄░█ █▀▀ ▀█▀   █▀▀ █▀▄ █ ▀█▀ █ █▀█ █▄░█ █▀
 █░▀█ █▀░ ░█░   ██▄ █▄▀ █ ░█░ █ █▄█ █░▀█ ▄█
 
 ▀█ █▀█ █▀█ ▄▀█
 █▄ █▄█ █▀▄ █▀█
+
  */
 
 pragma solidity 0.8.6;
@@ -69,7 +71,7 @@ contract SingleEditionMintableCreator {
             _editionSize,
             _royaltyBPS
         );
-        emit CreatedEdition(newId, msg.sender, _editionSize);
+        emit CreatedEdition(newId, msg.sender, _editionSize, newContract);
         // Returns the ID of the recently created minting contract
         // Also increments for the next contract creation call
         atContract.increment();
@@ -97,8 +99,9 @@ contract SingleEditionMintableCreator {
     /// Emitted when a edition is created reserving the corresponding token IDs.
     /// @param editionId ID of newly created edition
     event CreatedEdition(
-        uint256 editionId,
-        address creator,
-        uint256 editionSize
+        uint256 indexed editionId,
+        address indexed creator,
+        uint256 editionSize,
+        address editionContractAddress
     );
 }

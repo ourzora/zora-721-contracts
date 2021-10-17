@@ -224,6 +224,16 @@ contract SingleEditionMintable is
         animationUrl = _animationUrl;
     }
 
+    /// Returns the number of editions allowed to mint (max_uint256 when open edition)
+    function numberCanMint() public view override returns (uint256) {
+        // Return max int if open edition
+        if (editionSize == 0) {
+            return type(uint256).max;
+        }
+        // atEditionId is one-indexed hence the need to remove one here
+        return atEditionId.current() - 1 - editionSize;
+    }
+
     /**
       @dev Private function to mint als without any access checks.
            Called by the public edition minting functions.

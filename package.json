@@ -1,6 +1,6 @@
 {
   "name": "@zoralabs/nft-editions-contracts",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "NFT Factory Contracts",
   "main": "index.js",
   "author": "ZORA",

@@ -231,7 +231,7 @@ contract SingleEditionMintable is
             return type(uint256).max;
         }
         // atEditionId is one-indexed hence the need to remove one here
-        return atEditionId.current() - 1 - editionSize;
+        return editionSize + 1 - atEditionId.current();
     }
 
     /**

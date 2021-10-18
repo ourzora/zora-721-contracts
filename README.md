@@ -17,13 +17,13 @@
 
 ### Where is the factory contract deployed:
 
-**Mainnet ETH**: [0xEf7a8fF7FC585FA1Fe3062455B628bfC657e2cD5](https://etherscan.io/address/0xEf7a8fF7FC585FA1Fe3062455B628bfC657e2cD5)
+**Mainnet ETH**: [0x91A8713155758d410DFAc33a63E193AE3E89F909](https://etherscan.io/address/0x91A8713155758d410DFAc33a63E193AE3E89F909)
 
-**Rinkeby**: [0x5d6E1357Acc8BF654979f3b24fdef8C5549A491e](https://rinkeby.etherscan.io/address/0x5d6E1357Acc8BF654979f3b24fdef8C5549A491e)
+**Rinkeby**: [0x85FaDB8Debc0CED38d0647329fC09143d01Af660](https://rinkeby.etherscan.io/address/0x85FaDB8Debc0CED38d0647329fC09143d01Af660)
 
 **Polygon**: [0x9168C5ba5a0a76db8A1BF5b2eE5557f2A0ECA4f4](https://polygonscan.com/address/0x9168C5ba5a0a76db8A1BF5b2eE5557f2A0ECA4f4)
 
-**Mumbai**: [0xb655386104f475c087b7460525a5676CaFc8b13f](https://mumbai.polygonscan.com/address/0xb655386104f475c087b7460525a5676CaFc8b13f)
+**Mumbai**: [0xc95B8a16F31030b303DE1082fd90c4e02795F34e](https://mumbai.polygonscan.com/address/0xc95B8a16F31030b303DE1082fd90c4e02795F34e)
 
 ### How do I create a new edition?
 

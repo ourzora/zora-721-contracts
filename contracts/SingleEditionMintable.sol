@@ -231,6 +231,16 @@ contract SingleEditionMintable is
         animationUrl = _animationUrl;
     }
 
+    /// Returns the number of editions allowed to mint (max_uint256 when open edition)
+    function numberCanMint() public view override returns (uint256) {
+        // Return max int if open edition
+        if (editionSize == 0) {
+            return type(uint256).max;
+        }
+        // atEditionId is one-indexed hence the need to remove one here
+        return editionSize + 1 - atEditionId.current();
+    }
+
     /**
         @param tokenId Token ID to burn
         User burn function for token id 

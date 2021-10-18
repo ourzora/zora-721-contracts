@@ -16,6 +16,8 @@ import {ERC721Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC72
 import {IERC2981Upgradeable, IERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/interfaces/IERC2981Upgradeable.sol";
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import {CountersUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
+import {AddressUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
+
 import {SharedNFTLogic} from "./SharedNFTLogic.sol";
 import {IEditionSingleMintable} from "./IEditionSingleMintable.sol";
 
@@ -150,10 +152,8 @@ contract SingleEditionMintable is
       @dev This withdraws ETH from the contract to the contract owner.
      */
     function withdraw() external onlyOwner {
-        (bool sent, ) = owner().call{value: address(this).balance, gas: 34_000}(
-            ""
-        );
-        require(sent, "Failed to send ETH");
+        // No need for gas limit to trusted address.
+        AddressUpgradeable.sendValue(payable(owner()), address(this).balance);
     }
 
     /**

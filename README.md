@@ -12,8 +12,16 @@
 
 ### How do I create a new contract?
 
+### Directly on the blockchain:
 1. Find/Deploy the `SingleEditionMintableCreator` contract
 2. Call `createEdition` on the `SingleEditionMintableCreator`
+
+### Through a GUI:
+
+Rinkeby: https://nft-minter-rinkeby.vercel.app/
+
+Mainnet: https://nft-minter-mainnet.vercel.app/
+
 
 ### Where is the factory contract deployed:
 

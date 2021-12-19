@@ -14,15 +14,15 @@ if (process.env.DEV_MNEMONIC) {
       mnemonic: process.env.DEV_MNEMONIC,
     },
     // Gas price needed because no estimation
-    gasPrice: 8000000000,
+    gasPrice: 30000000000,
   };
   networks.polygon = {
     chainId: 137,
-    url: "https://rpc-mainnet.maticvigil.com",
+    url: "https://polygon-rpc.com/",
     accounts: {
       mnemonic: process.env.DEV_MNEMONIC,
     },
-    gasPrice: 8000000000,
+    gasPrice: 80000000000,
   };
   if (process.env.RINKEBY_RPC) {
     networks.rinkeby = {

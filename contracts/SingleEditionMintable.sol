@@ -39,7 +39,7 @@ contract SingleEditionMintable is
     event EditionSold(uint256 price, address owner);
 
     // metadata
-    string private description;
+    string public description;
 
     // Media Urls
     // animation_url field in the metadata

@@ -29,9 +29,9 @@ Mainnet: https://nft-minter-mainnet.vercel.app/
 
 **Rinkeby**: [0x85FaDB8Debc0CED38d0647329fC09143d01Af660](https://rinkeby.etherscan.io/address/0x85FaDB8Debc0CED38d0647329fC09143d01Af660)
 
-**Polygon**: [0x9168C5ba5a0a76db8A1BF5b2eE5557f2A0ECA4f4](https://polygonscan.com/address/0x9168C5ba5a0a76db8A1BF5b2eE5557f2A0ECA4f4)
+**Polygon**: [0x4500590AfC7f12575d613457aF01F06b1eEE57a3](https://polygonscan.com/address/0x4500590AfC7f12575d613457aF01F06b1eEE57a3)
 
-**Mumbai**: [0xc95B8a16F31030b303DE1082fd90c4e02795F34e](https://mumbai.polygonscan.com/address/0xc95B8a16F31030b303DE1082fd90c4e02795F34e)
+**Mumbai**: [0x773E5B82179E6CE1CdF8c5C0d736e797b3ceDDDC](https://mumbai.polygonscan.com/address/0x773E5B82179E6CE1CdF8c5C0d736e797b3ceDDDC)
 
 ### How do I create a new edition?
 

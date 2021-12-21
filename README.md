@@ -18,9 +18,13 @@
 
 ### Through a GUI:
 
-Rinkeby: https://nft-minter-rinkeby.vercel.app/
+Rinkeby: https://edition-drop.vercel.app/?network=1
 
-Mainnet: https://nft-minter-mainnet.vercel.app/
+Mainnet: https://edition-drop.vercel.app/?network=4
+
+Polygon: https://edition-drop.vercel.app/?network=137
+
+Mumbai: https://edition-drop.vercel.app/?network=80001
 
 
 ### Where is the factory contract deployed:

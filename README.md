@@ -29,13 +29,26 @@ Mumbai: https://edition-drop.vercel.app/?network=80001
 
 ### Where is the factory contract deployed:
 
+
 **Mainnet ETH**: [0x91A8713155758d410DFAc33a63E193AE3E89F909](https://etherscan.io/address/0x91A8713155758d410DFAc33a63E193AE3E89F909)
+
+note: ~ Deployed with 1.0.1 version of code. Missing public getter for description.
+
 
 **Rinkeby**: [0x85FaDB8Debc0CED38d0647329fC09143d01Af660](https://rinkeby.etherscan.io/address/0x85FaDB8Debc0CED38d0647329fC09143d01Af660)
 
+note: ~ Deployed with 1.0.1 version of code. Missing public getter for description.
+
+
 **Polygon**: [0x4500590AfC7f12575d613457aF01F06b1eEE57a3](https://polygonscan.com/address/0x4500590AfC7f12575d613457aF01F06b1eEE57a3)
 
+note: Deployed with 1.0.2 version of code with public getter for description.
+
+
 **Mumbai**: [0x773E5B82179E6CE1CdF8c5C0d736e797b3ceDDDC](https://mumbai.polygonscan.com/address/0x773E5B82179E6CE1CdF8c5C0d736e797b3ceDDDC)
+
+note: Deployed with 1.0.2 version of code with public getter for description.
+
 
 ### How do I create a new edition?
 

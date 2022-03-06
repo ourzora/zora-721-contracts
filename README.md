@@ -18,9 +18,9 @@
 
 ### Through a GUI:
 
-Rinkeby: https://edition-drop.vercel.app/?network=1
+Rinkeby: https://edition-drop.vercel.app/?network=4
 
-Mainnet: https://edition-drop.vercel.app/?network=4
+Mainnet: https://edition-drop.vercel.app/?network=1
 
 Polygon: https://edition-drop.vercel.app/?network=137
 

@@ -1,37 +1,51 @@
+// SPDX-License-Identifier: GPL-3.0
+pragma solidity ^0.8.10;
+
 import {ERC721Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
+import {IERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/interfaces/IERC20Upgradeable.sol";
 import {IERC2981Upgradeable, IERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/interfaces/IERC2981Upgradeable.sol";
 import {CountersUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import {AddressUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
-import {IEditionSingleMintable} from "./IEditionSingleMintable.sol";
+import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
+
+import {IZoraFeeManager} from "./interfaces/IZoraFeeManager.sol";
+import {IMetadataRenderer} from "./interfaces/IMetadataRenderer.sol";
+import {IEditionSingleMintable} from "./interfaces/IEditionSingleMintable.sol";
 import {OwnableSkeleton} from "./OwnableSkeleton.sol";
 
 contract ZoraMediaBase is
     ERC721Upgradeable,
+    OwnableSkeleton,
     IEditionSingleMintable,
     IERC2981Upgradeable,
-    OwnableSkeleton,
+    ReentrancyGuardUpgradeable,
     AccessControlUpgradeable
 {
     using CountersUpgradeable for CountersUpgradeable.Counter;
-    using AddressUpgradeable for address;
+    using AddressUpgradeable for address payable;
 
-    event PriceChanged(uint256 amount);
-    event Sale(uint256 price, address owner);
+    event PriceChanged(uint256 indexed amount);
+    event FundsRecipientChanged(address indexed newAddress);
+    event Sale(uint256 indexed price, address indexed purchaser);
 
-    bytes32 public immutable MINTER_ROLE = keccak256("MINTER_ROLE");
+    bytes32 public immutable MINTER_ROLE = keccak256("MINTER");
+    bytes32 public immutable FUNDS_RECIPIENT_MANAGER_ROLE =
+        keccak256("FUNDS_RECIPIENT_MANAGER");
 
-    /// @dev Zora fee recipient
-    address public immutable zoraDaoWallet;
+    string public contractURI;
 
     /// @dev Total size of edition that can be minted
     uint256 public editionSize;
 
     /// @dev Funds recipient for sale and royalties
-    address public fundsRecipient;
+    address payable public fundsRecipient;
 
     /// @dev Current token id minted
     CountersUpgradeable.Counter private atEditionId;
+
+    /// @dev Number of burned tokens
+    CountersUpgradeable.Counter private numberBurned;
 
     /// @dev Royalty amount in bps
     uint256 royaltyBPS;
@@ -39,18 +53,60 @@ contract ZoraMediaBase is
     /// @dev Price for sale
     uint256 public salePrice;
 
+    /// @dev Metadata renderer
+    IMetadataRenderer public metadataRenderer;
+
+    /// @dev ZORA V3 transfer helper address for auto-approval
+    address private immutable zoraERC721TransferHelper;
+
+    /// @dev Zora Fee Manager Address
+    IZoraFeeManager public immutable zoraFeeManager;
+
     error OnlyAdminRequired();
+    error OnlyRoleOrAdminRequired(bytes32 role);
 
     modifier onlyAdmin() {
-        require(hasRole(msg.sender, DEFAULT_ADMIN_ROLE), OnlyAdminRequired);
+        if (!hasRole(DEFAULT_ADMIN_ROLE, msg.sender)) {
+            revert OnlyAdminRequired();
+        }
 
         _;
     }
 
-    /// @dev ASDF
-    /// @param _zoraDaoWallet Payout zora DAO wallet
-    constructor(address _zoraDaoWallet) {
-        zoraDaoWallet = _zoraDaoWallet;
+    modifier onlyRoleOrAdmin(bytes32 role) {
+        if (
+            !(hasRole(DEFAULT_ADMIN_ROLE, msg.sender) ||
+                hasRole(role, msg.sender))
+        ) {
+            revert OnlyRoleOrAdminRequired(role);
+        }
+
+        _;
+    }
+
+    constructor(
+        IZoraFeeManager _zoraFeeManager,
+        address _zoraERC721TransferHelper
+    ) {
+        zoraFeeManager = _zoraFeeManager;
+        zoraERC721TransferHelper = _zoraERC721TransferHelper;
+    }
+
+    function updateContractURI(string memory newContractURI)
+        external
+        onlyAdmin
+    {
+        contractURI = newContractURI;
+    }
+
+    /// Returns the number of editions allowed to mint (max_uint256 when open edition)
+    function numberCanMint() public view override returns (uint256) {
+        // Return max int if open edition
+        if (editionSize == 0) {
+            return type(uint256).max;
+        }
+        // atEditionId is one-indexed hence the need to remove one here
+        return editionSize + 1 - atEditionId.current();
     }
 
     /**
@@ -63,12 +119,13 @@ contract ZoraMediaBase is
            This can be re-assigned or updated later
      */
     function initialize(
-        string _name,
-        string _symbol,
+        string memory _name,
+        string memory _symbol,
         address _owner,
-        address _fundsRecipient,
+        address payable _fundsRecipient,
         uint256 _editionSize,
-        uint256 _royaltyBPS
+        uint256 _royaltyBPS,
+        IMetadataRenderer _metadataRenderer
     ) public initializer {
         __ERC721_init(_name, _symbol);
         __AccessControl_init();
@@ -77,11 +134,19 @@ contract ZoraMediaBase is
         // Set edition id start to be 1 not 0
         atEditionId.increment();
 
-        fundsRecipient = _fundsRecipient;
+        _setFundsRecipient(_fundsRecipient);
+        require(royaltyBPS < 50_01, "Royalty BPS cannot be greater than 50%");
+
+        editionSize = _editionSize;
         royaltyBPS = _royaltyBPS;
+        metadataRenderer = _metadataRenderer;
     }
 
-    /// @dev set new owner for royalties / opensea
+    function isAdmin(address user) external view returns (bool) {
+        return hasRole(DEFAULT_ADMIN_ROLE, user);
+    }
+
+    /// @dev Set new owner for royalties / opensea
     /// @param newOwner new owner to set
     function setOwner(address newOwner) public onlyAdmin {
         _setOwner(newOwner);
@@ -89,7 +154,35 @@ contract ZoraMediaBase is
 
     /// @dev returns the number of minted tokens within the edition
     function totalSupply() public view returns (uint256) {
+        return atEditionId.current() - numberBurned.current() - 1;
+    }
+
+    function numberMinted() public view returns (uint256) {
         return atEditionId.current() - 1;
+    }
+
+    /**
+        @param tokenId Token ID to burn
+        User burn function for token id 
+     */
+    function burn(uint256 tokenId) public {
+        require(_isApprovedOrOwner(_msgSender(), tokenId), "Not approved");
+        numberBurned.increment();
+        _burn(tokenId);
+    }
+
+    /// @dev Setup auto-approval for Zora v3 access to sell NFT
+    /// Still requires approval for module
+    function isApprovedForAll(address nftOwner, address operator)
+        public
+        view
+        override(ERC721Upgradeable)
+        returns (bool)
+    {
+        if (operator == zoraERC721TransferHelper) {
+            return true;
+        }
+        return super.isApprovedForAll(nftOwner, operator);
     }
 
     /**
@@ -100,6 +193,7 @@ contract ZoraMediaBase is
     /**
       @dev This allows the user to purchase a edition edition
            at the given price in the contract.
+      @dev no need for re-entrancy guard since no safexxx functions are used
      */
     function purchase() external payable returns (uint256) {
         require(salePrice > 0, "Not for sale");
@@ -160,40 +254,75 @@ contract ZoraMediaBase is
     }
 
     /**
+      @dev Set a different funds recipient 
+     */
+    function setFundsRecipient(address payable newRecipientAddress)
+        external
+        onlyRoleOrAdmin(FUNDS_RECIPIENT_MANAGER_ROLE)
+    {
+        _setFundsRecipient(newRecipientAddress);
+    }
+
+    function _setFundsRecipient(address payable newRecipientAddress) internal {
+        fundsRecipient = newRecipientAddress;
+        emit FundsRecipientChanged(newRecipientAddress);
+    }
+
+    function zoraFeeForAmount(uint256 amount)
+        internal
+        returns (address payable, uint256)
+    {
+        (address payable recipient, uint256 bps) = zoraFeeManager
+            .getZORAWithdrawFeesBPS(address(this));
+        return (recipient, amount * (bps / 10_000));
+    }
+
+    /**
       @dev This withdraws ETH from the contract to the contract owner.
      */
-    function withdraw() external onlyAdmin {
+    function withdraw()
+        external
+        onlyRoleOrAdmin(FUNDS_RECIPIENT_MANAGER_ROLE)
+        nonReentrant
+    {
         uint256 funds = address(this).balance;
-        uint256 zoraFee = funds * 0.05;
-        zoraDaoWallet.sendValue(zoraFee);
+        (address payable feeRecipient, uint256 zoraFee) = zoraFeeForAmount(
+            funds
+        );
+        // No need for gas limit to trusted address.
+        feeRecipient.sendValue(zoraFee);
         funds -= zoraFee;
         // No need for gas limit to trusted address.
         fundsRecipient.sendValue(funds);
     }
 
-    /**
-      @dev This helper function checks if the msg.sender is allowed to mint the
-            given edition id.
-     */
-    function _isAllowedToMint() internal view returns (bool) {
-        if (owner() == msg.sender) {
-            return true;
-        }
-        if (
-            hasRole(msg.sender, MINTER_ROLE) ||
-            hasRole(msg.sender, DEFAULT_ADMIN_ROLE)
-        ) {
-            return true;
-        }
-        return false;
+    /// @dev This is in case royalty or ERC20s are sent to the contract.
+    /// @param tokenAddress address of token
+    function withdrawERC20(address tokenAddress)
+        external
+        onlyRoleOrAdmin(FUNDS_RECIPIENT_MANAGER_ROLE)
+        nonReentrant
+    {
+        IERC20Upgradeable token = IERC20Upgradeable(tokenAddress);
+        uint256 funds = token.balanceOf(address(this));
+        (address payable feeRecipient, uint256 zoraFee) = zoraFeeForAmount(
+            funds
+        );
+        token.transferFrom(address(this), feeRecipient, zoraFee);
+        funds -= zoraFee;
+        token.transferFrom(address(this), fundsRecipient, zoraFee);
     }
 
     /**
       @param to address to send the newly minted edition to
       @dev This mints one edition to the given address by an allowed minter on the edition instance.
      */
-    function mintEdition(address to) external override returns (uint256) {
-        require(_isAllowedToMint(), "Needs to be an allowed minter");
+    function mintEdition(address to)
+        external
+        override
+        onlyRoleOrAdmin(MINTER_ROLE)
+        returns (uint256)
+    {
         address[] memory toMint = new address[](1);
         toMint[0] = to;
         return _mintEditions(toMint);
@@ -203,39 +332,41 @@ contract ZoraMediaBase is
       @param recipients list of addresses to send the newly minted editions to
       @dev This mints multiple editions to the given list of addresses.
      */
-    function mintEditions(address[] memory recipients)
+    function mintEditions(address[] calldata recipients)
         external
         override
+        onlyRoleOrAdmin(MINTER_ROLE)
         returns (uint256)
     {
-        require(_isAllowedToMint(), "Needs to be an allowed minter");
         return _mintEditions(recipients);
     }
 
     /**
         Simple override for owner interface.
+        @return user owner address
      */
     function owner()
         public
         view
-        override(OwnableUpgradeable, IEditionSingleMintable)
+        override(OwnableSkeleton, IEditionSingleMintable)
         returns (address)
     {
-        return super.owner();
+        return owner();
     }
 
-    /**
-      @param minter address to set approved minting status for
-      @param allowed boolean if that address is allowed to mint
-      @dev Sets the approved minting status of the given address.
-           This requires that msg.sender is the owner of the given edition id.
-           If the ZeroAddress (address(0x0)) is set as a minter,
-             anyone will be allowed to mint.
-           This setup is similar to setApprovalForAll in the ERC721 spec.
-     */
-    function setApprovedMinter(address minter, bool allowed) public onlyOwner {
-        allowedMinters[minter] = allowed;
+    function supportsInterface(bytes4 interfaceId)
+        public
+        view
+        override(
+            IERC165Upgradeable,
+            ERC721Upgradeable,
+            AccessControlUpgradeable
+        )
+        returns (bool)
+    {
+        return
+            super.supportsInterface(interfaceId) ||
+            type(OwnableSkeleton).interfaceId == interfaceId ||
+            type(IERC2981Upgradeable).interfaceId == interfaceId;
     }
-
-    // receive fn for royalties
 }

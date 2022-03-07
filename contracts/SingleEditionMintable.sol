@@ -2,15 +2,15 @@
 
 /**
 
-█▄░█ █▀▀ ▀█▀   █▀▀ █▀▄ █ ▀█▀ █ █▀█ █▄░█ █▀
-█░▀█ █▀░ ░█░   ██▄ █▄▀ █ ░█░ █ █▄█ █░▀█ ▄█
+    █▄░█ █▀▀ ▀█▀   █▀▀ █▀▄ █ ▀█▀ █ █▀█ █▄░█ █▀
+    █░▀█ █▀░ ░█░   ██▄ █▄▀ █ ░█░ █ █▄█ █░▀█ ▄█
 
-▀█ █▀█ █▀█ ▄▀█
-█▄ █▄█ █▀▄ █▀█
+    ▀█ █▀█ █▀█ ▄▀█
+    █▄ █▄█ █▀▄ █▀█
 
  */
 
-pragma solidity ^0.8.6;
+pragma solidity ^0.8.10;
 
 
 import {SharedNFTLogic} from "./SharedNFTLogic.sol";
@@ -23,7 +23,8 @@ import {ZoraMediaBase} from "./ZoraMediaBase.sol";
     @author iain nash
     Repository: https://github.com/ourzora/nft-editions
 */
-contract SingleEditionMintable is
+/*
+contract SingleEditionMintable 
 {
 
     // metadata
@@ -48,21 +49,19 @@ contract SingleEditionMintable is
         
     }
 
-    /**
-      @param _owner User that owns and can mint the edition, gets royalty and sales payouts and can update the base url if needed.
-      @param _name Name of edition, used in the title as "$NAME NUMBER/TOTAL"
-      @param _symbol Symbol of the new token contract
-      @param _description Description of edition, used in the description field of the NFT
-      @param _imageUrl Image URL of the edition. Strongly encouraged to be used, if necessary, only animation URL can be used. One of animation and image url need to exist in a edition to render the NFT.
-      @param _imageHash SHA256 of the given image in bytes32 format (0xHASH). If no image is included, the hash can be zero.
-      @param _animationUrl Animation URL of the edition. Not required, but if omitted image URL needs to be included. This follows the opensea spec for NFTs
-      @param _animationHash The associated hash of the animation in sha-256 bytes32 format. If animation is omitted the hash can be zero.
-      @param _editionSize Number of editions that can be minted in total. If 0, unlimited editions can be minted.
-      @param _royaltyBPS BPS of the royalty set on the contract. Can be 0 for no royalty.
-      @dev Function to create a new edition. Can only be called by the allowed creator
-           Sets the only allowed minter to the address that creates/owns the edition.
-           This can be re-assigned or updated later
-     */
+    //   @param _owner User that owns and can mint the edition, gets royalty and sales payouts and can update the base url if needed.
+    //   @param _name Name of edition, used in the title as "$NAME NUMBER/TOTAL"
+    //   @param _symbol Symbol of the new token contract
+    //   @param _description Description of edition, used in the description field of the NFT
+    //   @param _imageUrl Image URL of the edition. Strongly encouraged to be used, if necessary, only animation URL can be used. One of animation and image url need to exist in a edition to render the NFT.
+    //   @param _imageHash SHA256 of the given image in bytes32 format (0xHASH). If no image is included, the hash can be zero.
+    //   @param _animationUrl Animation URL of the edition. Not required, but if omitted image URL needs to be included. This follows the opensea spec for NFTs
+    //   @param _animationHash The associated hash of the animation in sha-256 bytes32 format. If animation is omitted the hash can be zero.
+    //   @param _editionSize Number of editions that can be minted in total. If 0, unlimited editions can be minted.
+    //   @param _royaltyBPS BPS of the royalty set on the contract. Can be 0 for no royalty.
+    //   @dev Function to create a new edition. Can only be called by the allowed creator
+    //        Sets the only allowed minter to the address that creates/owns the edition.
+    //        This can be re-assigned or updated later
     function initialize(
         address _owner,
         string memory _name,
@@ -86,10 +85,8 @@ contract SingleEditionMintable is
     }
 
 
-    /**
-      @dev Allows for updates of edition urls by the owner of the edition.
-           Only URLs can be updated (data-uris are supported), hashes cannot be updated.
-     */
+    //   @dev Allows for updates of edition urls by the owner of the edition.
+    //        Only URLs can be updated (data-uris are supported), hashes cannot be updated.
     function updateEditionURLs(
         string memory _imageUrl,
         string memory _animationUrl
@@ -108,19 +105,15 @@ contract SingleEditionMintable is
         return editionSize + 1 - atEditionId.current();
     }
 
-    /**
-        @param tokenId Token ID to burn
-        User burn function for token id 
-     */
+        // @param tokenId Token ID to burn
+        // User burn function for token id 
     function burn(uint256 tokenId) public {
         require(_isApprovedOrOwner(_msgSender(), tokenId), "Not approved");
         _burn(tokenId);
     }
 
-    /**
-      @dev Get URIs for edition NFT
-      @return imageUrl, imageHash, animationUrl, animationHash
-     */
+    //   @dev Get URIs for edition NFT
+    //   @return imageUrl, imageHash, animationUrl, animationHash
     function getURIs()
         public
         view
@@ -134,10 +127,8 @@ contract SingleEditionMintable is
         return (imageUrl, imageHash, animationUrl, animationHash);
     }
 
-    /**
-        @dev Get royalty information for token
-        @param _salePrice Sale price for the token
-     */
+        // @dev Get royalty information for token
+        // @param _salePrice Sale price for the token
     function royaltyInfo(uint256, uint256 _salePrice)
         external
         view
@@ -150,11 +141,9 @@ contract SingleEditionMintable is
         return (owner(), (_salePrice * royaltyBPS) / 10_000);
     }
 
-    /**
-        @dev Get URI for given token id
-        @param tokenId token id to get uri for
-        @return base64-encoded json metadata object
-    */
+        // @dev Get URI for given token id
+        // @param tokenId token id to get uri for
+        // @return base64-encoded json metadata object
     function tokenURI(uint256 tokenId)
         public
         view
@@ -185,3 +174,5 @@ contract SingleEditionMintable is
             ERC721Upgradeable.supportsInterface(interfaceId);
     }
 }
+
+*/

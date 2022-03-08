@@ -4,3 +4,6 @@
 [submodule "lib/base64"]
 	path = lib/base64
 	url = https://github.com/Brechtpd/base64
+[submodule "lib/ds-test"]
+	path = lib/ds-test
+	url = https://github.com/dapphub/ds-test

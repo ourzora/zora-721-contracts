@@ -269,12 +269,12 @@ contract ZoraNFTBase is
     }
 
     function zoraFeeForAmount(uint256 amount)
-        internal
+        public
         returns (address payable, uint256)
     {
         (address payable recipient, uint256 bps) = zoraFeeManager
             .getZORAWithdrawFeesBPS(address(this));
-        return (recipient, amount * (bps / 10_000));
+        return (recipient, (amount * bps) / 10_000);
     }
 
     /**
@@ -289,6 +289,7 @@ contract ZoraNFTBase is
         (address payable feeRecipient, uint256 zoraFee) = zoraFeeForAmount(
             funds
         );
+
         // No need for gas limit to trusted address.
         feeRecipient.sendValue(zoraFee);
         funds -= zoraFee;

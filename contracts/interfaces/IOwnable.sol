@@ -10,7 +10,7 @@ pragma solidity ^0.8.10;
  * This ownership interface matches OZ's ownable interface.
  *
  */
-interface OwnableUpgradeable {
+interface IOwnable {
     event OwnershipTransferred(
         address indexed previousOwner,
         address indexed newOwner

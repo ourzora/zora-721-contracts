@@ -3,8 +3,8 @@
 pragma solidity ^0.8.10;
 
 import {IMetadataRenderer} from "../interfaces/IMetadataRenderer.sol";
-import {ZoraMediaBase} from "../ZoraMediaBase.sol";
-import {SharedNFTLogic} from "../SharedNFTLogic.sol";
+import {ZoraNFTBase} from "../ZoraNFTBase.sol";
+import {SharedNFTLogic} from "../utils/SharedNFTLogic.sol";
 
 
 contract EditionMetadataRenderer is IMetadataRenderer {
@@ -26,7 +26,7 @@ contract EditionMetadataRenderer is IMetadataRenderer {
         string memory imageUrl,
         string memory animationUrl
     ) external {
-        require(ZoraMediaBase(target).isAdmin(msg.sender), "only admin");
+        require(ZoraNFTBase(target).isAdmin(msg.sender), "only admin");
         tokenInfos[target].imageUrl = imageUrl;
         tokenInfos[target].animationUrl = animationUrl;
     }
@@ -55,7 +55,7 @@ contract EditionMetadataRenderer is IMetadataRenderer {
         returns (string memory)
     {
         TokenEditionInfo memory info = tokenInfos[target];
-        ZoraMediaBase media = ZoraMediaBase(target);
+        ZoraNFTBase media = ZoraNFTBase(target);
 
         return
             sharedNFTLogic.createMetadataEdition({

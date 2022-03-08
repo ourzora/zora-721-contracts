@@ -1,7 +1,7 @@
-# Zora NFT Editions
+# Zora NFT Contracts
 
 ### What are these contracts?
-1. `SingleEditionMintable`
+1. `ZoraNFTBase`
    Each edition is a unique contract.
    This allows for easy royalty collection, clear ownership of the collection, and your own contract 🎉
 2. `SingleEditionMintableCreator`

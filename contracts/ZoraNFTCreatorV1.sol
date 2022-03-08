@@ -1,33 +1,23 @@
 // SPDX-License-Identifier: GPL-3.0
-
-/**
-
-    █▄░█ █▀▀ ▀█▀   █▀▀ █▀▄ █ ▀█▀ █ █▀█ █▄░█ █▀
-    █░▀█ █▀░ ░█░   ██▄ █▄▀ █ ░█░ █ █▄█ █░▀█ ▄█
-
-    ▀█ █▀█ █▀█ ▄▀█
-    █▄ █▄█ █▀▄ █▀█
-
- */
-
 pragma solidity ^0.8.10;
 
 import {ClonesUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/ClonesUpgradeable.sol";
 import {CountersUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
+import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
 import {EditionMetadataRenderer} from "./metadata/EditionMetadataRenderer.sol";
 import {DropMetadataRenderer} from "./metadata/DropMetadataRenderer.sol";
 import {IMetadataRenderer} from "./interfaces/IMetadataRenderer.sol";
-import {ZoraMediaBase} from "./ZoraMediaBase.sol";
+import {ZoraNFTBase} from "./ZoraNFTBase.sol";
 
-// make upgradeable???
-contract SingleEditionMintableCreator {
+contract ZoraNFTCreatorV1 is OwnableUpgradeable, UUPSUpgradeable {
     using CountersUpgradeable for CountersUpgradeable.Counter;
 
     /// Counter for current contract id upgraded
     CountersUpgradeable.Counter private atContract;
 
-    /// Address for implementation of ZoraMediaBase to clone
+    /// Address for implementation of ZoraNFTBase to clone
     address public immutable implementation;
 
     EditionMetadataRenderer public immutable editionMetadataRenderer;
@@ -45,6 +35,16 @@ contract SingleEditionMintableCreator {
         dropMetadataRenderer = _dropMetadataRenderer;
     }
 
+    // Initializes the proxy contract
+    function initialize() public initializer {
+        __Ownable_init();
+        __UUPSUpgradeable_init();   
+    }
+
+    // Only owner can upgrade
+    function _authorizeUpgrade(address) internal override onlyOwner {
+    }
+
     function _setupMediaContract(
         string memory name,
         string memory symbol,
@@ -59,7 +59,7 @@ contract SingleEditionMintableCreator {
             bytes32(abi.encodePacked(newId))
         );
 
-        ZoraMediaBase(newMediaContract).initialize({
+        ZoraNFTBase(newMediaContract).initialize({
             _owner: msg.sender,
             _name: name,
             _symbol: symbol,
@@ -146,10 +146,10 @@ contract SingleEditionMintableCreator {
     function getEditionAtId(uint256 editionId)
         external
         view
-        returns (ZoraMediaBase)
+        returns (ZoraNFTBase)
     {
         return
-            ZoraMediaBase(
+            ZoraNFTBase(
                 ClonesUpgradeable.predictDeterministicAddress(
                     implementation,
                     bytes32(abi.encodePacked(editionId)),

@@ -4,7 +4,7 @@ pragma solidity ^0.8.10;
 
 import {StringsUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/StringsUpgradeable.sol";
 import {IMetadataRenderer} from "../interfaces/IMetadataRenderer.sol";
-import {ZoraMediaBase} from "../ZoraMediaBase.sol";
+import {ZoraNFTBase} from "../ZoraNFTBase.sol";
 
 contract DropMetadataRenderer is IMetadataRenderer {
     struct MetadataURIInfo {
@@ -27,7 +27,7 @@ contract DropMetadataRenderer is IMetadataRenderer {
         string memory metadataExtension,
         uint256 freezeAt
     ) public {
-        require(ZoraMediaBase(target).isAdmin(msg.sender), "Only admin");
+        require(ZoraNFTBase(target).isAdmin(msg.sender), "Only admin");
         require(freezeAt == 0 || freezeAt < block.timestamp, "Metadata frozen");
         metadataBaseByContract[target] = MetadataURIInfo({
             base: metadataBase,

@@ -12,15 +12,16 @@ import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/se
 import {IZoraFeeManager} from "./interfaces/IZoraFeeManager.sol";
 import {IMetadataRenderer} from "./interfaces/IMetadataRenderer.sol";
 import {IEditionSingleMintable} from "./interfaces/IEditionSingleMintable.sol";
-import {OwnableSkeleton} from "./OwnableSkeleton.sol";
+import {IOwnable} from "./interfaces/IOwnable.sol";
+import {OwnableSkeleton} from "./utils/OwnableSkeleton.sol";
 
-contract ZoraMediaBase is
+contract ZoraNFTBase is
     ERC721Upgradeable,
-    OwnableSkeleton,
     IEditionSingleMintable,
     IERC2981Upgradeable,
     ReentrancyGuardUpgradeable,
-    AccessControlUpgradeable
+    AccessControlUpgradeable,
+    OwnableSkeleton
 {
     using CountersUpgradeable for CountersUpgradeable.Counter;
     using AddressUpgradeable for address payable;
@@ -33,6 +34,7 @@ contract ZoraMediaBase is
     bytes32 public immutable FUNDS_RECIPIENT_MANAGER_ROLE =
         keccak256("FUNDS_RECIPIENT_MANAGER");
 
+    /// @dev Optional contract metadata address
     string public contractURI;
 
     /// @dev Total size of edition that can be minted
@@ -62,24 +64,18 @@ contract ZoraMediaBase is
     /// @dev Zora Fee Manager Address
     IZoraFeeManager public immutable zoraFeeManager;
 
-    error OnlyAdminRequired();
-    error OnlyRoleOrAdminRequired(bytes32 role);
-
     modifier onlyAdmin() {
-        if (!hasRole(DEFAULT_ADMIN_ROLE, msg.sender)) {
-            revert OnlyAdminRequired();
-        }
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Only admin allowed");
 
         _;
     }
 
     modifier onlyRoleOrAdmin(bytes32 role) {
-        if (
-            !(hasRole(DEFAULT_ADMIN_ROLE, msg.sender) ||
-                hasRole(role, msg.sender))
-        ) {
-            revert OnlyRoleOrAdminRequired(role);
-        }
+        require(
+            hasRole(DEFAULT_ADMIN_ROLE, msg.sender) ||
+                hasRole(role, msg.sender),
+            "Does not have proper role or admin"
+        );
 
         _;
     }
@@ -92,6 +88,8 @@ contract ZoraMediaBase is
         zoraERC721TransferHelper = _zoraERC721TransferHelper;
     }
 
+    /// @notice Admin function to update contractURI
+    /// @param newContractURI new contract uri
     function updateContractURI(string memory newContractURI)
         external
         onlyAdmin
@@ -129,6 +127,8 @@ contract ZoraMediaBase is
     ) public initializer {
         __ERC721_init(_name, _symbol);
         __AccessControl_init();
+        // Setup the owner role
+        _setupRole(DEFAULT_ADMIN_ROLE, _owner);
         // Set ownership to original sender of contract call
         _setOwner(_owner);
         // Set edition id start to be 1 not 0
@@ -351,7 +351,7 @@ contract ZoraMediaBase is
         override(OwnableSkeleton, IEditionSingleMintable)
         returns (address)
     {
-        return owner();
+        return super.owner();
     }
 
     function supportsInterface(bytes4 interfaceId)
@@ -366,7 +366,7 @@ contract ZoraMediaBase is
     {
         return
             super.supportsInterface(interfaceId) ||
-            type(OwnableSkeleton).interfaceId == interfaceId ||
+            type(IOwnable).interfaceId == interfaceId ||
             type(IERC2981Upgradeable).interfaceId == interfaceId;
     }
 }

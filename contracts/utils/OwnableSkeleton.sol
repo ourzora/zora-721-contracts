@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
-
 pragma solidity ^0.8.10;
+
+import {IOwnable} from "../interfaces/IOwnable.sol";
 
 /**
  * @dev Contract module which provides a basic access control mechanism, where
@@ -8,20 +9,14 @@ pragma solidity ^0.8.10;
  * specific functions.
  *
  * This ownership interface matches OZ's ownable interface.
- *
  */
-abstract contract OwnableSkeleton {
-    event OwnershipTransferred(
-        address indexed previousOwner,
-        address indexed newOwner
-    );
-
+contract OwnableSkeleton is IOwnable {
     address private _owner;
 
     /**
      * @dev Returns the address of the current owner.
      */
-    function owner() external virtual view returns (address) {
+    function owner() public view virtual returns (address) {
         return _owner;
     }
 

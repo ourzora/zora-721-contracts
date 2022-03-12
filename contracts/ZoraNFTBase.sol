@@ -28,7 +28,8 @@ contract ZoraNFTBase is
 
     event PriceChanged(uint256 indexed amount);
     event FundsRecipientChanged(address indexed newAddress);
-    event Sale(uint256 indexed price, address indexed purchaser);
+
+    string private constant SOLD_OUT = "Sold out";
 
     bytes32 public immutable MINTER_ROLE = keccak256("MINTER");
     bytes32 public immutable FUNDS_RECIPIENT_MANAGER_ROLE =
@@ -41,8 +42,6 @@ contract ZoraNFTBase is
         IMetadataRenderer metadataRenderer;
         /// @dev Funds recipient for sale and royalties
         address payable fundsRecipient;
-        /// @dev Total size of edition that can be minted
-        uint64 editionSize;
         /// @dev Current token id minted
         uint64 atEditionId;
         /// @dev Number of burned tokens
@@ -51,6 +50,8 @@ contract ZoraNFTBase is
         uint16 royaltyBPS;
         /// @dev Price for sale
         uint256 salePrice;
+        /// @dev Total size of edition that can be minted
+        uint64 editionSize;
     }
 
     Configuration public config;
@@ -123,14 +124,17 @@ contract ZoraNFTBase is
         // Set ownership to original sender of contract call
         _setOwner(_owner);
 
-        _setFundsRecipient(_fundsRecipient);
-        require(config.royaltyBPS < 50_01, "Royalty BPS cannot be greater than 50%");
+        require(
+            config.royaltyBPS < 50_01,
+            "Royalty BPS cannot be greater than 50%"
+        );
 
         Configuration memory newConfig;
         newConfig.atEditionId = 1;
         newConfig.editionSize = _editionSize;
         newConfig.metadataRenderer = _metadataRenderer;
         newConfig.royaltyBPS = _royaltyBPS;
+        newConfig.fundsRecipient = _fundsRecipient;
         config = newConfig;
     }
 
@@ -151,13 +155,18 @@ contract ZoraNFTBase is
         }
     }
 
-    function saleDetails() external view returns (IEditionSingleMintable.SaleDetails memory) {
-        return IEditionSingleMintable.SaleDetails({
-            active: config.salePrice > 0,
-            price: config.salePrice,
-            totalMinted: config.atEditionId - 1,
-            maxSupply: config.editionSize
-        });
+    function saleDetails()
+        external
+        view
+        returns (IEditionSingleMintable.SaleDetails memory)
+    {
+        return
+            IEditionSingleMintable.SaleDetails({
+                active: config.salePrice > 0,
+                price: config.salePrice,
+                totalMinted: config.atEditionId - 1,
+                maxSupply: config.editionSize
+            });
     }
 
     /**
@@ -194,18 +203,50 @@ contract ZoraNFTBase is
     /**
       @dev This allows the user to purchase a edition edition
            at the given price in the contract.
-      @dev no need for re-entrancy guard since no safexxx functions are used
+      @dev no need for re-entrancy guard since no safe_xxx functions are used
      */
     function purchase(uint256 quantity) external payable returns (uint256) {
-        require(quantity == 1, "only valid quantity is 1");
         uint256 salePrice = config.salePrice;
         require(salePrice > 0, "Not for sale");
-        require(msg.value == salePrice, "Wrong price");
         address mintToAddress = msg.sender;
-        address[] memory toMint = new address[](1);
-        toMint[0] = mintToAddress;
-        emit Sale(salePrice, mintToAddress);
-        return _mintEditions(toMint);
+        require(msg.value == salePrice * quantity, "Wrong price");
+        uint256 endId = _mintMultiple(mintToAddress, quantity);
+        emit IEditionSingleMintable.Sale(mintToAddress, quantity, salePrice);
+        return endId;
+    }
+
+    function mint(address recipient, uint256 quantity)
+        external
+        onlyRoleOrAdmin(MINTER_ROLE)
+        returns (uint256)
+    {
+        return _mintMultiple(recipient, quantity);
+    }
+
+    function _mintMultiple(address recipient, uint256 quantity)
+        internal
+        returns (uint256)
+    {
+        uint256 startAt = config.atEditionId;
+        uint256 atEditionId = config.atEditionId;
+
+        unchecked {
+            uint256 endAt = startAt + quantity;
+            require(
+                // endAt = 1 indexed // config.editionSize = 0 indexed
+                endAt < config.editionSize || config.editionSize == 0,
+                SOLD_OUT
+            );
+            for (; atEditionId < endAt; ) {
+                _mint(recipient, atEditionId);
+                ++atEditionId;
+            }
+        }
+
+        // Store updated at edition
+        _updateEditionId(atEditionId);
+
+        return atEditionId;
     }
 
     /**
@@ -221,7 +262,10 @@ contract ZoraNFTBase is
         if (config.fundsRecipient == address(0x0)) {
             return (config.fundsRecipient, 0);
         }
-        return (config.fundsRecipient, (_salePrice * config.royaltyBPS) / 10_000);
+        return (
+            config.fundsRecipient,
+            (_salePrice * config.royaltyBPS) / 10_000
+        );
     }
 
     /**
@@ -234,21 +278,25 @@ contract ZoraNFTBase is
     {
         uint256 startAt = config.atEditionId;
         uint256 atEditionId = config.atEditionId;
-        uint256 endAt = startAt + recipients.length - 1;
-        require(config.editionSize == 0 || endAt <= config.editionSize, "Sold out");
+        uint256 endAt = startAt + recipients.length;
+        require(
+            endAt < config.editionSize || config.editionSize == 0,
+            SOLD_OUT
+        );
 
-        for (; atEditionId <= endAt;) {
-            _mint(
-                recipients[atEditionId - startAt],
-                atEditionId
-            );
+        for (; atEditionId < endAt; ) {
+            _mint(recipients[atEditionId - startAt], atEditionId);
             unchecked {
                 ++atEditionId;
             }
         }
-        require(atEditionId < type(uint64).max, "overflow");
-        config.atEditionId = uint64(atEditionId);
+        _updateEditionId(atEditionId);
         return atEditionId;
+    }
+
+    function _updateEditionId(uint256 newId) internal {
+        require(newId < type(uint64).max, "overflow");
+        config.atEditionId = uint64(newId);
     }
 
     /**
@@ -270,10 +318,6 @@ contract ZoraNFTBase is
         external
         onlyRoleOrAdmin(FUNDS_RECIPIENT_MANAGER_ROLE)
     {
-        _setFundsRecipient(newRecipientAddress);
-    }
-
-    function _setFundsRecipient(address payable newRecipientAddress) internal {
         config.fundsRecipient = newRecipientAddress;
         emit FundsRecipientChanged(newRecipientAddress);
     }

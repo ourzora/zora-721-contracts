@@ -48,8 +48,8 @@ contract ZoraNFTCreatorV1 is OwnableUpgradeable, UUPSUpgradeable {
     function _setupMediaContract(
         string memory name,
         string memory symbol,
-        uint256 editionSize,
-        uint256 royaltyBPS,
+        uint64 editionSize,
+        uint16 royaltyBPS,
         address payable fundsRecipient,
         IMetadataRenderer metadataRenderer
     ) internal returns (uint256, address) {
@@ -77,8 +77,8 @@ contract ZoraNFTCreatorV1 is OwnableUpgradeable, UUPSUpgradeable {
     function createDrop(
         string memory name,
         string memory symbol,
-        uint256 royaltyBPS,
-        uint256 editionSize,
+        uint16 royaltyBPS,
+        uint64 editionSize,
         address payable fundsRecipient,
         string memory metadataURIBase
     ) external returns (uint256) {
@@ -116,8 +116,8 @@ contract ZoraNFTCreatorV1 is OwnableUpgradeable, UUPSUpgradeable {
         string memory imageUrl,
         // stored as calldata
         bytes32 imageHash,
-        uint256 editionSize,
-        uint256 royaltyBPS,
+        uint64 editionSize,
+        uint16 royaltyBPS,
         address payable fundsRecipient
     ) external returns (uint256) {
         (uint256 newId, address mediaContract) = _setupMediaContract({

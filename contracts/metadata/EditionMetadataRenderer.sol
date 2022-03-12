@@ -64,7 +64,7 @@ contract EditionMetadataRenderer is IMetadataRenderer {
                 imageUrl: info.imageUrl,
                 animationUrl: info.animationUrl,
                 tokenOfEdition: tokenId,
-                editionSize: media.editionSize()
+                editionSize: media.saleDetails().maxSupply
             });
     }
 }

@@ -79,7 +79,7 @@ contract ZoraNFTBaseTest is DSTest {
         );
     }
 
-    function test_Mint() public setupZoraNFTBase {
+    function test_Purchase() public setupZoraNFTBase {
         vm.prank(DEFAULT_OWNER_ADDRESS);
         zoraNFTBase.setSalePrice(0.1 ether);
         vm.deal(address(456), 1 ether);
@@ -89,6 +89,17 @@ contract ZoraNFTBaseTest is DSTest {
         assertEq(zoraNFTBase.saleDetails().totalMinted, 1);
         require(
             zoraNFTBase.ownerOf(1) == address(456),
+            "owner is wrong for new minted token"
+        );
+    }
+
+    function test_Mint() public setupZoraNFTBase {
+        vm.prank(DEFAULT_OWNER_ADDRESS);
+        zoraNFTBase.mintEdition(DEFAULT_OWNER_ADDRESS);
+        assertEq(zoraNFTBase.saleDetails().maxSupply, 10);
+        assertEq(zoraNFTBase.saleDetails().totalMinted, 1);
+        require(
+            zoraNFTBase.ownerOf(1) == DEFAULT_OWNER_ADDRESS,
             "owner is wrong for new minted token"
         );
     }
@@ -137,8 +148,9 @@ contract ZoraNFTBaseTest is DSTest {
 
     function test_Burn() public setupZoraNFTBase() {
       address minter = address(0x32402);
-      vm.prank(DEFAULT_OWNER_ADDRESS);
+      vm.startPrank(DEFAULT_OWNER_ADDRESS);
       zoraNFTBase.grantRole(zoraNFTBase.MINTER_ROLE(), minter);
+      vm.stopPrank();
       vm.startPrank(minter);
       zoraNFTBase.mintEdition(minter);
       

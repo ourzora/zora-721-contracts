@@ -15,6 +15,14 @@ import {IEditionSingleMintable} from "./interfaces/IEditionSingleMintable.sol";
 import {IOwnable} from "./interfaces/IOwnable.sol";
 import {OwnableSkeleton} from "./utils/OwnableSkeleton.sol";
 
+/**
+ * @notice ZORA NFT Base contract for Drops and Editions
+ *
+ * @dev For drops: assumes 1. linear mint order, 2. max number of mints needs to be less than max_uint64
+ *       (if you have more than 18 quintillion linear mints you should probably not be using this contract)
+ * @author iain@zora.co
+ *
+ */
 contract ZoraNFTBase is
     ERC721Upgradeable,
     IEditionSingleMintable,
@@ -30,6 +38,7 @@ contract ZoraNFTBase is
     event FundsRecipientChanged(address indexed newAddress);
 
     string private constant SOLD_OUT = "Sold out";
+    string private constant TOO_MANY = "Too many";
 
     bytes32 public immutable MINTER_ROLE = keccak256("MINTER");
     bytes32 public immutable FUNDS_RECIPIENT_MANAGER_ROLE =
@@ -46,12 +55,14 @@ contract ZoraNFTBase is
         uint64 atEditionId;
         /// @dev Number of burned tokens
         uint64 numberBurned;
-        /// @dev Royalty amount in bps
-        uint16 royaltyBPS;
-        /// @dev Price for sale
-        uint256 salePrice;
         /// @dev Total size of edition that can be minted
         uint64 editionSize;
+        /// @dev Royalty amount in bps
+        uint16 royaltyBPS;
+        /// @dev Maximum # of mint per transaction
+        uint8 maxPurchasePerTransaction;
+        /// @dev Price for sale
+        uint256 salePrice;
     }
 
     Configuration public config;
@@ -206,6 +217,7 @@ contract ZoraNFTBase is
       @dev no need for re-entrancy guard since no safe_xxx functions are used
      */
     function purchase(uint256 quantity) external payable returns (uint256) {
+        require(quantity <= config.maxPurchasePerTransaction, TOO_MANY);
         uint256 salePrice = config.salePrice;
         require(salePrice > 0, "Not for sale");
         address mintToAddress = msg.sender;
@@ -229,6 +241,7 @@ contract ZoraNFTBase is
     {
         uint256 startAt = config.atEditionId;
         uint256 atEditionId = config.atEditionId;
+        require(quantity < config.editionSize, TOO_MANY);
 
         unchecked {
             uint256 endAt = startAt + quantity;
@@ -295,7 +308,7 @@ contract ZoraNFTBase is
     }
 
     function _updateEditionId(uint256 newId) internal {
-        require(newId < type(uint64).max, "overflow");
+        require(newId < type(uint64).max, "Overflow");
         config.atEditionId = uint64(newId);
     }
 
@@ -306,8 +319,9 @@ contract ZoraNFTBase is
            Setting a sales price allows users to mint the edition until it sells out.
            For more granular sales, use an external sales contract.
      */
-    function setSalePrice(uint256 _salePrice) external onlyAdmin {
+    function setSalePrice(uint256 _salePrice, uint8 _maxPurchasePerTransaction) external onlyAdmin {
         config.salePrice = _salePrice;
+        config.maxPurchasePerTransaction = _maxPurchasePerTransaction;
         emit PriceChanged(_salePrice);
     }
 
@@ -351,22 +365,22 @@ contract ZoraNFTBase is
         config.fundsRecipient.sendValue(funds);
     }
 
-    /// @dev This is in case royalty or ERC20s are sent to the contract.
-    /// @param tokenAddress address of token
-    function withdrawERC20(address tokenAddress)
-        external
-        onlyRoleOrAdmin(FUNDS_RECIPIENT_MANAGER_ROLE)
-        nonReentrant
-    {
-        IERC20Upgradeable token = IERC20Upgradeable(tokenAddress);
-        uint256 funds = token.balanceOf(address(this));
-        (address payable feeRecipient, uint256 zoraFee) = zoraFeeForAmount(
-            funds
-        );
-        token.transferFrom(address(this), feeRecipient, zoraFee);
-        funds -= zoraFee;
-        token.transferFrom(address(this), config.fundsRecipient, zoraFee);
-    }
+    // /// @dev This is in case royalty or ERC20s are sent to the contract.
+    // /// @param tokenAddress address of token
+    // function withdrawERC20(address tokenAddress)
+    //     external
+    //     onlyRoleOrAdmin(FUNDS_RECIPIENT_MANAGER_ROLE)
+    //     nonReentrant
+    // {
+    //     IERC20Upgradeable token = IERC20Upgradeable(tokenAddress);
+    //     uint256 funds = token.balanceOf(address(this));
+    //     (address payable feeRecipient, uint256 zoraFee) = zoraFeeForAmount(
+    //         funds
+    //     );
+    //     token.transferFrom(address(this), feeRecipient, zoraFee);
+    //     funds -= zoraFee;
+    //     token.transferFrom(address(this), config.fundsRecipient, zoraFee);
+    // }
 
     /**
       @param to address to send the newly minted edition to

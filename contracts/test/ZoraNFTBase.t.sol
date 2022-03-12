@@ -84,12 +84,25 @@ contract ZoraNFTBaseTest is DSTest {
         zoraNFTBase.setSalePrice(0.1 ether);
         vm.deal(address(456), 1 ether);
         vm.prank(address(456));
-        zoraNFTBase.purchase{value: 0.1 ether}();
-        require(zoraNFTBase.numberCanMint() == 9, "number can mint wrong");
+        zoraNFTBase.purchase{value: 0.1 ether}(1);
+        assertEq(zoraNFTBase.saleDetails().maxSupply, 10);
+        assertEq(zoraNFTBase.saleDetails().totalMinted, 1);
         require(
             zoraNFTBase.ownerOf(1) == address(456),
             "owner is wrong for new minted token"
         );
+    }
+
+    function test_MintWrongValue() public setupZoraNFTBase {
+        vm.deal(address(456), 1 ether);
+        vm.prank(address(456));
+        vm.expectRevert("Not for sale");
+        zoraNFTBase.purchase{value: 0.12 ether}(1);
+        vm.prank(DEFAULT_OWNER_ADDRESS);
+        zoraNFTBase.setSalePrice(0.1 ether);
+        vm.prank(address(456));
+        vm.expectRevert("Wrong price");
+        zoraNFTBase.purchase{value: 0.12 ether}(1);
     }
 
     function test_Withdraw() public setupZoraNFTBase {
@@ -107,5 +120,28 @@ contract ZoraNFTBaseTest is DSTest {
     function test_WithdrawNotAllowed() public setupZoraNFTBase {
         vm.expectRevert("Does not have proper role or admin");
         zoraNFTBase.withdraw();
+    }
+
+    function test_AdminMint() public setupZoraNFTBase() {
+      address minter = address(0x32402);
+      vm.startPrank(DEFAULT_OWNER_ADDRESS);
+      zoraNFTBase.mintEdition(DEFAULT_OWNER_ADDRESS);
+      require(zoraNFTBase.balanceOf(DEFAULT_OWNER_ADDRESS) == 1, "Wrong balance");
+      zoraNFTBase.grantRole(zoraNFTBase.MINTER_ROLE(), minter);
+      vm.stopPrank();
+      vm.prank(minter);
+      zoraNFTBase.mintEdition(minter);
+      require(zoraNFTBase.balanceOf(minter) == 1, "Wrong balance");
+      assertEq(zoraNFTBase.saleDetails().totalMinted, 2);
+    }
+
+    function test_Burn() public setupZoraNFTBase() {
+      address minter = address(0x32402);
+      vm.prank(DEFAULT_OWNER_ADDRESS);
+      zoraNFTBase.grantRole(zoraNFTBase.MINTER_ROLE(), minter);
+      vm.startPrank(minter);
+      zoraNFTBase.mintEdition(minter);
+      
+      vm.stopPrank();
     }
 }

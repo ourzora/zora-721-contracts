@@ -34,29 +34,26 @@ contract ZoraNFTBase is
     bytes32 public immutable FUNDS_RECIPIENT_MANAGER_ROLE =
         keccak256("FUNDS_RECIPIENT_MANAGER");
 
-    /// @dev Optional contract metadata address
-    string public contractURI;
+    struct Configuration {
+        /// @dev Optional contract metadata address
+        string contractURI;
+        /// @dev Metadata renderer
+        IMetadataRenderer metadataRenderer;
+        /// @dev Funds recipient for sale and royalties
+        address payable fundsRecipient;
+        /// @dev Total size of edition that can be minted
+        uint64 editionSize;
+        /// @dev Current token id minted
+        uint64 atEditionId;
+        /// @dev Number of burned tokens
+        uint64 numberBurned;
+        /// @dev Royalty amount in bps
+        uint16 royaltyBPS;
+        /// @dev Price for sale
+        uint256 salePrice;
+    }
 
-    /// @dev Total size of edition that can be minted
-    uint256 public editionSize;
-
-    /// @dev Funds recipient for sale and royalties
-    address payable public fundsRecipient;
-
-    /// @dev Current token id minted
-    CountersUpgradeable.Counter private atEditionId;
-
-    /// @dev Number of burned tokens
-    CountersUpgradeable.Counter private numberBurned;
-
-    /// @dev Royalty amount in bps
-    uint256 royaltyBPS;
-
-    /// @dev Price for sale
-    uint256 public salePrice;
-
-    /// @dev Metadata renderer
-    IMetadataRenderer public metadataRenderer;
+    Configuration public config;
 
     /// @dev ZORA V3 transfer helper address for auto-approval
     address private immutable zoraERC721TransferHelper;
@@ -94,17 +91,11 @@ contract ZoraNFTBase is
         external
         onlyAdmin
     {
-        contractURI = newContractURI;
+        config.contractURI = newContractURI;
     }
 
-    /// Returns the number of editions allowed to mint (max_uint256 when open edition)
-    function numberCanMint() public view override returns (uint256) {
-        // Return max int if open edition
-        if (editionSize == 0) {
-            return type(uint256).max;
-        }
-        // atEditionId is one-indexed hence the need to remove one here
-        return editionSize + 1 - atEditionId.current();
+    function contractURI() external view returns (string memory) {
+        return config.contractURI;
     }
 
     /**
@@ -121,8 +112,8 @@ contract ZoraNFTBase is
         string memory _symbol,
         address _owner,
         address payable _fundsRecipient,
-        uint256 _editionSize,
-        uint256 _royaltyBPS,
+        uint64 _editionSize,
+        uint16 _royaltyBPS,
         IMetadataRenderer _metadataRenderer
     ) public initializer {
         __ERC721_init(_name, _symbol);
@@ -131,15 +122,16 @@ contract ZoraNFTBase is
         _setupRole(DEFAULT_ADMIN_ROLE, _owner);
         // Set ownership to original sender of contract call
         _setOwner(_owner);
-        // Set edition id start to be 1 not 0
-        atEditionId.increment();
 
         _setFundsRecipient(_fundsRecipient);
-        require(royaltyBPS < 50_01, "Royalty BPS cannot be greater than 50%");
+        require(config.royaltyBPS < 50_01, "Royalty BPS cannot be greater than 50%");
 
-        editionSize = _editionSize;
-        royaltyBPS = _royaltyBPS;
-        metadataRenderer = _metadataRenderer;
+        Configuration memory newConfig;
+        newConfig.atEditionId = 1;
+        newConfig.editionSize = _editionSize;
+        newConfig.metadataRenderer = _metadataRenderer;
+        newConfig.royaltyBPS = _royaltyBPS;
+        config = newConfig;
     }
 
     function isAdmin(address user) external view returns (bool) {
@@ -154,11 +146,18 @@ contract ZoraNFTBase is
 
     /// @dev returns the number of minted tokens within the edition
     function totalSupply() public view returns (uint256) {
-        return atEditionId.current() - numberBurned.current() - 1;
+        unchecked {
+            return config.atEditionId - config.numberBurned - 1;
+        }
     }
 
-    function numberMinted() public view returns (uint256) {
-        return atEditionId.current() - 1;
+    function saleDetails() external view returns (IEditionSingleMintable.SaleDetails memory) {
+        return IEditionSingleMintable.SaleDetails({
+            active: config.salePrice > 0,
+            price: config.salePrice,
+            totalMinted: config.atEditionId - 1,
+            maxSupply: config.editionSize
+        });
     }
 
     /**
@@ -167,7 +166,9 @@ contract ZoraNFTBase is
      */
     function burn(uint256 tokenId) public {
         require(_isApprovedOrOwner(_msgSender(), tokenId), "Not approved");
-        numberBurned.increment();
+        unchecked {
+            ++config.numberBurned;
+        }
         _burn(tokenId);
     }
 
@@ -195,12 +196,15 @@ contract ZoraNFTBase is
            at the given price in the contract.
       @dev no need for re-entrancy guard since no safexxx functions are used
      */
-    function purchase() external payable returns (uint256) {
+    function purchase(uint256 quantity) external payable returns (uint256) {
+        require(quantity == 1, "only valid quantity is 1");
+        uint256 salePrice = config.salePrice;
         require(salePrice > 0, "Not for sale");
         require(msg.value == salePrice, "Wrong price");
+        address mintToAddress = msg.sender;
         address[] memory toMint = new address[](1);
-        toMint[0] = msg.sender;
-        emit Sale(salePrice, msg.sender);
+        toMint[0] = mintToAddress;
+        emit Sale(salePrice, mintToAddress);
         return _mintEditions(toMint);
     }
 
@@ -214,10 +218,10 @@ contract ZoraNFTBase is
         override
         returns (address receiver, uint256 royaltyAmount)
     {
-        if (fundsRecipient == address(0x0)) {
-            return (fundsRecipient, 0);
+        if (config.fundsRecipient == address(0x0)) {
+            return (config.fundsRecipient, 0);
         }
-        return (fundsRecipient, (_salePrice * royaltyBPS) / 10_000);
+        return (config.fundsRecipient, (_salePrice * config.royaltyBPS) / 10_000);
     }
 
     /**
@@ -228,17 +232,23 @@ contract ZoraNFTBase is
         internal
         returns (uint256)
     {
-        uint256 startAt = atEditionId.current();
+        uint256 startAt = config.atEditionId;
+        uint256 atEditionId = config.atEditionId;
         uint256 endAt = startAt + recipients.length - 1;
-        require(editionSize == 0 || endAt <= editionSize, "Sold out");
-        while (atEditionId.current() <= endAt) {
+        require(config.editionSize == 0 || endAt <= config.editionSize, "Sold out");
+
+        for (; atEditionId <= endAt;) {
             _mint(
-                recipients[atEditionId.current() - startAt],
-                atEditionId.current()
+                recipients[atEditionId - startAt],
+                atEditionId
             );
-            atEditionId.increment();
+            unchecked {
+                ++atEditionId;
+            }
         }
-        return atEditionId.current();
+        require(atEditionId < type(uint64).max, "overflow");
+        config.atEditionId = uint64(atEditionId);
+        return atEditionId;
     }
 
     /**
@@ -249,8 +259,8 @@ contract ZoraNFTBase is
            For more granular sales, use an external sales contract.
      */
     function setSalePrice(uint256 _salePrice) external onlyAdmin {
-        salePrice = _salePrice;
-        emit PriceChanged(salePrice);
+        config.salePrice = _salePrice;
+        emit PriceChanged(_salePrice);
     }
 
     /**
@@ -264,7 +274,7 @@ contract ZoraNFTBase is
     }
 
     function _setFundsRecipient(address payable newRecipientAddress) internal {
-        fundsRecipient = newRecipientAddress;
+        config.fundsRecipient = newRecipientAddress;
         emit FundsRecipientChanged(newRecipientAddress);
     }
 
@@ -294,7 +304,7 @@ contract ZoraNFTBase is
         feeRecipient.sendValue(zoraFee);
         funds -= zoraFee;
         // No need for gas limit to trusted address.
-        fundsRecipient.sendValue(funds);
+        config.fundsRecipient.sendValue(funds);
     }
 
     /// @dev This is in case royalty or ERC20s are sent to the contract.
@@ -311,7 +321,7 @@ contract ZoraNFTBase is
         );
         token.transferFrom(address(this), feeRecipient, zoraFee);
         funds -= zoraFee;
-        token.transferFrom(address(this), fundsRecipient, zoraFee);
+        token.transferFrom(address(this), config.fundsRecipient, zoraFee);
     }
 
     /**
@@ -320,7 +330,6 @@ contract ZoraNFTBase is
      */
     function mintEdition(address to)
         external
-        override
         onlyRoleOrAdmin(MINTER_ROLE)
         returns (uint256)
     {

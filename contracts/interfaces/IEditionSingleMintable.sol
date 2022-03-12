@@ -2,8 +2,15 @@
 pragma solidity ^0.8.10;
 
 interface IEditionSingleMintable {
-  function mintEdition(address to) external returns (uint256);
+  struct SaleDetails {
+    bool active;
+    uint256 price;
+    uint256 totalMinted;
+    uint256 maxSupply;
+  }
+  function purchase(uint256 quantity) external payable returns (uint256);
+  function saleDetails() external view returns (SaleDetails memory);
+  // function mintEdition(address to, uint256 quantity) external returns (uint256);
   function mintEditions(address[] memory to) external returns (uint256);
-  function numberCanMint() external view returns (uint256);
   function owner() external view returns (address);
 }

@@ -6,4 +6,4 @@ optimizer_runs = 500000
 out = 'dist/artifacts'
 src = 'contracts'
 test = 'test'
-gas_reports = ['ZoraDAOFeeManager', 'ZoraNFTBase', 'ZoraNFTCreatorV1', 'ZoraNFTCreatorProxy']
+gas_reports = ['*']

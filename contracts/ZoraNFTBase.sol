@@ -2,7 +2,6 @@
 pragma solidity ^0.8.10;
 
 import {ERC721Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
-import {IERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/interfaces/IERC20Upgradeable.sol";
 import {IERC2981Upgradeable, IERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/interfaces/IERC2981Upgradeable.sol";
 import {CountersUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import {AddressUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
@@ -140,23 +139,16 @@ contract ZoraNFTBase is
             "Royalty BPS cannot be greater than 50%"
         );
 
-        Configuration memory newConfig;
-        newConfig.atEditionId = 1;
-        newConfig.editionSize = _editionSize;
-        newConfig.metadataRenderer = _metadataRenderer;
-        newConfig.royaltyBPS = _royaltyBPS;
-        newConfig.fundsRecipient = _fundsRecipient;
-        config = newConfig;
+        config.atEditionId = 1;
+        config.editionSize = _editionSize;
+        config.metadataRenderer = _metadataRenderer;
+        config.royaltyBPS = _royaltyBPS;
+        config.fundsRecipient = _fundsRecipient;
     }
 
+    /// @dev Getter for admin role associated with the contract to handle metadata
     function isAdmin(address user) external view returns (bool) {
         return hasRole(DEFAULT_ADMIN_ROLE, user);
-    }
-
-    /// @dev Set new owner for royalties / opensea
-    /// @param newOwner new owner to set
-    function setOwner(address newOwner) public onlyAdmin {
-        _setOwner(newOwner);
     }
 
     /// @dev returns the number of minted tokens within the edition
@@ -164,20 +156,6 @@ contract ZoraNFTBase is
         unchecked {
             return config.atEditionId - config.numberBurned - 1;
         }
-    }
-
-    function saleDetails()
-        external
-        view
-        returns (IEditionSingleMintable.SaleDetails memory)
-    {
-        return
-            IEditionSingleMintable.SaleDetails({
-                active: config.salePrice > 0,
-                price: config.salePrice,
-                totalMinted: config.atEditionId - 1,
-                maxSupply: config.editionSize
-            });
     }
 
     /**
@@ -190,6 +168,40 @@ contract ZoraNFTBase is
             ++config.numberBurned;
         }
         _burn(tokenId);
+    }
+
+    /**
+        @dev Get royalty information for token
+        @param _salePrice Sale price for the token
+     */
+    function royaltyInfo(uint256, uint256 _salePrice)
+        external
+        view
+        override
+        returns (address receiver, uint256 royaltyAmount)
+    {
+        if (config.fundsRecipient == address(0x0)) {
+            return (config.fundsRecipient, 0);
+        }
+        return (
+            config.fundsRecipient,
+            (_salePrice * config.royaltyBPS) / 10_000
+        );
+    }
+
+    function saleDetails()
+        external
+        view
+        returns (IEditionSingleMintable.SaleDetails memory)
+    {
+        return
+            IEditionSingleMintable.SaleDetails({
+                active: config.maxPurchasePerTransaction > 0 &&
+                    config.salePrice > 0,
+                price: config.salePrice,
+                totalMinted: config.atEditionId - 1,
+                maxSupply: config.editionSize
+            });
     }
 
     /// @dev Setup auto-approval for Zora v3 access to sell NFT
@@ -217,9 +229,9 @@ contract ZoraNFTBase is
       @dev no need for re-entrancy guard since no safe_xxx functions are used
      */
     function purchase(uint256 quantity) external payable returns (uint256) {
-        require(quantity <= config.maxPurchasePerTransaction, TOO_MANY);
         uint256 salePrice = config.salePrice;
         require(salePrice > 0, "Not for sale");
+        require(quantity <= config.maxPurchasePerTransaction, TOO_MANY);
         address mintToAddress = msg.sender;
         require(msg.value == salePrice * quantity, "Wrong price");
         uint256 endId = _mintMultiple(mintToAddress, quantity);
@@ -263,25 +275,6 @@ contract ZoraNFTBase is
     }
 
     /**
-        @dev Get royalty information for token
-        @param _salePrice Sale price for the token
-     */
-    function royaltyInfo(uint256, uint256 _salePrice)
-        external
-        view
-        override
-        returns (address receiver, uint256 royaltyAmount)
-    {
-        if (config.fundsRecipient == address(0x0)) {
-            return (config.fundsRecipient, 0);
-        }
-        return (
-            config.fundsRecipient,
-            (_salePrice * config.royaltyBPS) / 10_000
-        );
-    }
-
-    /**
       @dev Private function to mint als without any access checks.
            Called by the public edition minting functions.
      */
@@ -312,6 +305,12 @@ contract ZoraNFTBase is
         config.atEditionId = uint64(newId);
     }
 
+    /// @dev Set new owner for royalties / opensea
+    /// @param newOwner new owner to set
+    function setOwner(address newOwner) public onlyAdmin {
+        _setOwner(newOwner);
+    }
+
     /**
       @param _salePrice if sale price is 0 sale is stopped, otherwise that amount 
                        of ETH is needed to start the sale.
@@ -319,7 +318,10 @@ contract ZoraNFTBase is
            Setting a sales price allows users to mint the edition until it sells out.
            For more granular sales, use an external sales contract.
      */
-    function setSalePrice(uint256 _salePrice, uint8 _maxPurchasePerTransaction) external onlyAdmin {
+    function setSalePrice(uint256 _salePrice, uint8 _maxPurchasePerTransaction)
+        external
+        onlyAdmin
+    {
         config.salePrice = _salePrice;
         config.maxPurchasePerTransaction = _maxPurchasePerTransaction;
         emit PriceChanged(_salePrice);
@@ -365,42 +367,11 @@ contract ZoraNFTBase is
         config.fundsRecipient.sendValue(funds);
     }
 
-    // /// @dev This is in case royalty or ERC20s are sent to the contract.
-    // /// @param tokenAddress address of token
-    // function withdrawERC20(address tokenAddress)
-    //     external
-    //     onlyRoleOrAdmin(FUNDS_RECIPIENT_MANAGER_ROLE)
-    //     nonReentrant
-    // {
-    //     IERC20Upgradeable token = IERC20Upgradeable(tokenAddress);
-    //     uint256 funds = token.balanceOf(address(this));
-    //     (address payable feeRecipient, uint256 zoraFee) = zoraFeeForAmount(
-    //         funds
-    //     );
-    //     token.transferFrom(address(this), feeRecipient, zoraFee);
-    //     funds -= zoraFee;
-    //     token.transferFrom(address(this), config.fundsRecipient, zoraFee);
-    // }
-
-    /**
-      @param to address to send the newly minted edition to
-      @dev This mints one edition to the given address by an allowed minter on the edition instance.
-     */
-    function mintEdition(address to)
-        external
-        onlyRoleOrAdmin(MINTER_ROLE)
-        returns (uint256)
-    {
-        address[] memory toMint = new address[](1);
-        toMint[0] = to;
-        return _mintEditions(toMint);
-    }
-
     /**
       @param recipients list of addresses to send the newly minted editions to
       @dev This mints multiple editions to the given list of addresses.
      */
-    function mintEditions(address[] calldata recipients)
+    function mintAirdrop(address[] calldata recipients)
         external
         override
         onlyRoleOrAdmin(MINTER_ROLE)

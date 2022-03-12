@@ -81,7 +81,7 @@ contract ZoraNFTBaseTest is DSTest {
 
     function test_Purchase() public setupZoraNFTBase {
         vm.prank(DEFAULT_OWNER_ADDRESS);
-        zoraNFTBase.setSalePrice(0.1 ether);
+        zoraNFTBase.setSalePrice(0.1 ether, 1);
         vm.deal(address(456), 1 ether);
         vm.prank(address(456));
         zoraNFTBase.purchase{value: 0.1 ether}(1);
@@ -95,7 +95,7 @@ contract ZoraNFTBaseTest is DSTest {
 
     function test_Mint() public setupZoraNFTBase {
         vm.prank(DEFAULT_OWNER_ADDRESS);
-        zoraNFTBase.mintEdition(DEFAULT_OWNER_ADDRESS);
+        zoraNFTBase.mint(DEFAULT_OWNER_ADDRESS, 1);
         assertEq(zoraNFTBase.saleDetails().maxSupply, 10);
         assertEq(zoraNFTBase.saleDetails().totalMinted, 1);
         require(
@@ -110,7 +110,7 @@ contract ZoraNFTBaseTest is DSTest {
         vm.expectRevert("Not for sale");
         zoraNFTBase.purchase{value: 0.12 ether}(1);
         vm.prank(DEFAULT_OWNER_ADDRESS);
-        zoraNFTBase.setSalePrice(0.1 ether);
+        zoraNFTBase.setSalePrice(0.1 ether, 1);
         vm.prank(address(456));
         vm.expectRevert("Wrong price");
         zoraNFTBase.purchase{value: 0.12 ether}(1);
@@ -136,12 +136,12 @@ contract ZoraNFTBaseTest is DSTest {
     function test_AdminMint() public setupZoraNFTBase() {
       address minter = address(0x32402);
       vm.startPrank(DEFAULT_OWNER_ADDRESS);
-      zoraNFTBase.mintEdition(DEFAULT_OWNER_ADDRESS);
+      zoraNFTBase.mint(DEFAULT_OWNER_ADDRESS, 1);
       require(zoraNFTBase.balanceOf(DEFAULT_OWNER_ADDRESS) == 1, "Wrong balance");
       zoraNFTBase.grantRole(zoraNFTBase.MINTER_ROLE(), minter);
       vm.stopPrank();
       vm.prank(minter);
-      zoraNFTBase.mintEdition(minter);
+      zoraNFTBase.mint(minter, 1);
       require(zoraNFTBase.balanceOf(minter) == 1, "Wrong balance");
       assertEq(zoraNFTBase.saleDetails().totalMinted, 2);
     }
@@ -152,8 +152,18 @@ contract ZoraNFTBaseTest is DSTest {
       zoraNFTBase.grantRole(zoraNFTBase.MINTER_ROLE(), minter);
       vm.stopPrank();
       vm.startPrank(minter);
-      zoraNFTBase.mintEdition(minter);
+      address[] memory airdrop = new address[](1);
+      airdrop[0] = minter;
+      zoraNFTBase.mintAirdrop(airdrop);
       
       vm.stopPrank();
+    }
+
+    function test_eip165() public {
+      require(zoraNFTBase.supportsInterface(0x01ffc9a7), "supports 165");
+      require(zoraNFTBase.supportsInterface(0x80ac58cd), "supports 721");
+      require(zoraNFTBase.supportsInterface(0x5b5e139f), "supports 721-metdata");
+      require(zoraNFTBase.supportsInterface(0x2a55205a), "supports 2981");
+      require(!zoraNFTBase.supportsInterface(0x0000000), "doesnt allow non-interface");
     }
 }

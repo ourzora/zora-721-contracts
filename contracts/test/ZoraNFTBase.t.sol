@@ -42,10 +42,10 @@ contract ZoraNFTBaseTest is DSTest {
     }
 
     function test_Init() public setupZoraNFTBase {
-        // require(
-        //     zoraNFTBase.owner() == DEFAULT_OWNER_ADDRESS,
-        //     "Default owner set wrong"
-        // );
+        require(
+            zoraNFTBase.owner() == DEFAULT_OWNER_ADDRESS,
+            "Default owner set wrong"
+        );
         vm.expectRevert("Initializable: contract is already initialized");
         zoraNFTBase.initialize({
             _name: "Test NFT",

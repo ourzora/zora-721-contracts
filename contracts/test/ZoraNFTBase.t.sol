@@ -133,37 +133,46 @@ contract ZoraNFTBaseTest is DSTest {
         zoraNFTBase.withdraw();
     }
 
-    function test_AdminMint() public setupZoraNFTBase() {
-      address minter = address(0x32402);
-      vm.startPrank(DEFAULT_OWNER_ADDRESS);
-      zoraNFTBase.mint(DEFAULT_OWNER_ADDRESS, 1);
-      require(zoraNFTBase.balanceOf(DEFAULT_OWNER_ADDRESS) == 1, "Wrong balance");
-      zoraNFTBase.grantRole(zoraNFTBase.MINTER_ROLE(), minter);
-      vm.stopPrank();
-      vm.prank(minter);
-      zoraNFTBase.mint(minter, 1);
-      require(zoraNFTBase.balanceOf(minter) == 1, "Wrong balance");
-      assertEq(zoraNFTBase.saleDetails().totalMinted, 2);
+    function test_AdminMint() public setupZoraNFTBase {
+        address minter = address(0x32402);
+        vm.startPrank(DEFAULT_OWNER_ADDRESS);
+        zoraNFTBase.mint(DEFAULT_OWNER_ADDRESS, 1);
+        require(
+            zoraNFTBase.balanceOf(DEFAULT_OWNER_ADDRESS) == 1,
+            "Wrong balance"
+        );
+        zoraNFTBase.grantRole(zoraNFTBase.MINTER_ROLE(), minter);
+        vm.stopPrank();
+        vm.prank(minter);
+        zoraNFTBase.mint(minter, 1);
+        require(zoraNFTBase.balanceOf(minter) == 1, "Wrong balance");
+        assertEq(zoraNFTBase.saleDetails().totalMinted, 2);
     }
 
-    function test_Burn() public setupZoraNFTBase() {
-      address minter = address(0x32402);
-      vm.startPrank(DEFAULT_OWNER_ADDRESS);
-      zoraNFTBase.grantRole(zoraNFTBase.MINTER_ROLE(), minter);
-      vm.stopPrank();
-      vm.startPrank(minter);
-      address[] memory airdrop = new address[](1);
-      airdrop[0] = minter;
-      zoraNFTBase.mintAirdrop(airdrop);
-      
-      vm.stopPrank();
+    function test_Burn() public setupZoraNFTBase {
+        address minter = address(0x32402);
+        vm.startPrank(DEFAULT_OWNER_ADDRESS);
+        zoraNFTBase.grantRole(zoraNFTBase.MINTER_ROLE(), minter);
+        vm.stopPrank();
+        vm.startPrank(minter);
+        address[] memory airdrop = new address[](1);
+        airdrop[0] = minter;
+        zoraNFTBase.mintAirdrop(airdrop);
+
+        vm.stopPrank();
     }
 
     function test_eip165() public {
-      require(zoraNFTBase.supportsInterface(0x01ffc9a7), "supports 165");
-      require(zoraNFTBase.supportsInterface(0x80ac58cd), "supports 721");
-      require(zoraNFTBase.supportsInterface(0x5b5e139f), "supports 721-metdata");
-      require(zoraNFTBase.supportsInterface(0x2a55205a), "supports 2981");
-      require(!zoraNFTBase.supportsInterface(0x0000000), "doesnt allow non-interface");
+        require(zoraNFTBase.supportsInterface(0x01ffc9a7), "supports 165");
+        require(zoraNFTBase.supportsInterface(0x80ac58cd), "supports 721");
+        require(
+            zoraNFTBase.supportsInterface(0x5b5e139f),
+            "supports 721-metdata"
+        );
+        require(zoraNFTBase.supportsInterface(0x2a55205a), "supports 2981");
+        require(
+            !zoraNFTBase.supportsInterface(0x0000000),
+            "doesnt allow non-interface"
+        );
     }
 }

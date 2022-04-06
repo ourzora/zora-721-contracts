@@ -1,11 +1,9 @@
 // SPDX-License-Identifier: MIT
-
 pragma solidity ^0.8.10;
 
 import {IMetadataRenderer} from "../interfaces/IMetadataRenderer.sol";
 import {ZoraNFTBase} from "../ZoraNFTBase.sol";
 import {SharedNFTLogic} from "../utils/SharedNFTLogic.sol";
-
 
 contract EditionMetadataRenderer is IMetadataRenderer {
     struct TokenEditionInfo {
@@ -47,6 +45,29 @@ contract EditionMetadataRenderer is IMetadataRenderer {
         info.animationUrl = animationUrl;
 
         tokenInfos[target] = info;
+    }
+
+    function contractURI(address target) external view returns (string memory) {
+        bytes memory imageSpace;
+        if (bytes(tokenInfos[target].imageUrl).length > 0) {
+            imageSpace = abi.encodePacked(
+                '", "image": "',
+                tokenInfos[target].imageUrl
+            );
+        }
+        return
+            string(
+                sharedNFTLogic.encodeMetadataJSON(
+                    abi.encodePacked(
+                        '{"name": "',
+                        ZoraNFTBase(target).name,
+                        '", "description": "',
+                        tokenInfos[target].description,
+                        imageSpace,
+                        '"}'
+                    )
+                )
+            );
     }
 
     function tokenURI(address target, uint256 tokenId)

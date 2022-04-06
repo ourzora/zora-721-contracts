@@ -14,17 +14,25 @@ import {ZoraNFTBase} from "./ZoraNFTBase.sol";
 contract ZoraNFTCreatorV1 is OwnableUpgradeable, UUPSUpgradeable {
     using CountersUpgradeable for CountersUpgradeable.Counter;
 
-    /// Counter for current contract id upgraded
+    /// TODO: figure out memory implications of using immutable variables here
+    /// They are supposed to be discarded upon upgrade
+
+    /// @notice Counter for current contract id upgraded
     CountersUpgradeable.Counter private atContract;
 
-    /// Address for implementation of ZoraNFTBase to clone
+    /// @notice Address for implementation of ZoraNFTBase to clone
     address public immutable implementation;
 
+    /// @notice Edition metdata renderer
     EditionMetadataRenderer public immutable editionMetadataRenderer;
+
+    /// @notice Drop metdata renderer
     DropMetadataRenderer public immutable dropMetadataRenderer;
 
     /// Initializes factory with address of implementation logic
     /// @param _implementation SingleEditionMintable logic implementation contract to clone
+    /// @param _editionMetadataRenderer Metadata renderer for editions
+    /// @param _dropMetadataRenderer Metadata renderer for drops
     constructor(
         address _implementation,
         EditionMetadataRenderer _editionMetadataRenderer,
@@ -35,16 +43,21 @@ contract ZoraNFTCreatorV1 is OwnableUpgradeable, UUPSUpgradeable {
         dropMetadataRenderer = _dropMetadataRenderer;
     }
 
-    // Initializes the proxy contract
+    /// @dev Initializes the proxy contract
     function initialize() public initializer {
         __Ownable_init();
-        __UUPSUpgradeable_init();   
+        __UUPSUpgradeable_init();
     }
 
-    // Only owner can upgrade
-    function _authorizeUpgrade(address) internal override onlyOwner {
-    }
+    /// @dev Function to determine who is allowed to upgrade this contract.
+    /// @param _newImplementation: unused in access check
+    function _authorizeUpgrade(address _newImplementation)
+        internal
+        override
+        onlyOwner
+    {}
 
+    /// @dev Setup the media contract in general
     function _setupMediaContract(
         string memory name,
         string memory symbol,
@@ -74,13 +87,15 @@ contract ZoraNFTCreatorV1 is OwnableUpgradeable, UUPSUpgradeable {
         return (newId, newMediaContract);
     }
 
+    /// @dev Setup the media contract for a drop
     function createDrop(
         string memory name,
         string memory symbol,
         uint16 royaltyBPS,
         uint64 editionSize,
         address payable fundsRecipient,
-        string memory metadataURIBase
+        string memory metadataURIBase,
+        string memory metadataContractURI
     ) external returns (uint256) {
         (uint256 newId, address mediaContract) = _setupMediaContract({
             name: name,
@@ -90,22 +105,27 @@ contract ZoraNFTCreatorV1 is OwnableUpgradeable, UUPSUpgradeable {
             fundsRecipient: fundsRecipient,
             metadataRenderer: dropMetadataRenderer
         });
-        dropMetadataRenderer.updateMetadataBase(mediaContract, metadataURIBase);
+        dropMetadataRenderer.updateMetadataBase(
+            mediaContract,
+            metadataURIBase,
+            metadataContractURI
+        );
 
         return newId;
     }
 
-    // Creates a new edition contract as a factory with a deterministic address
-    // Important: None of these fields (except the Url fields with the same hash) can be changed after calling
-    // @param _name Name of the edition contract
-    // @param _symbol Symbol of the edition contract
-    // @param _description Metadata: Description of the edition entry
-    // @param _animationUrl Metadata: Animation url (optional) of the edition entry
-    // @param _animationHash Metadata: SHA-256 Hash of the animation (if no animation url, can be 0x0)
-    // @param _imageUrl Metadata: Image url (semi-required) of the edition entry
-    // @param _imageHash Metadata: SHA-256 hash of the Image of the edition entry (if not image, can be 0x0)
-    // @param _editionSize Total size of the edition (number of possible editions)
-    // @param _royaltyBPS BPS amount of royalty
+    /// @notice Creates a new edition contract as a factory with a deterministic address
+    /// @notice Important: None of these fields (except the Url fields with the same hash) can be changed after calling
+    /// @param name Name of the edition contract
+    /// @param symbol Symbol of the edition contract
+    /// @param description Metadata: Description of the edition entry
+    /// @param animationUrl Metadata: Animation url (optional) of the edition entry
+    /// @param animationHash Metadata: SHA-256 Hash of the animation (if no animation url, can be 0x0)
+    /// @param imageUrl Metadata: Image url (semi-required) of the edition entry
+    /// @param imageHash Metadata: SHA-256 hash of the Image of the edition entry (if not image, can be 0x0)
+    /// @param editionSize Total size of the edition (number of possible editions)
+    /// @param royaltyBPS BPS amount of royalty
+    /// @param royaltyBPS Funds recipient for the NFT sale
     function createEdition(
         string memory name,
         string memory symbol,

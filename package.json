@@ -1,7 +1,7 @@
 {
-  "name": "@zoralabs/nft-editions-contracts",
+  "name": "@zoralabs/nft-contracts",
   "version": "1.0.3",
-  "description": "NFT Factory Contracts",
+  "description": "NFT Contracts",
   "main": "index.js",
   "author": "ZORA",
   "license": "GPL-3.0",
@@ -12,37 +12,10 @@
     "deployments"
   ],
   "scripts": {
-    "typechain": "hardhat typechain",
-    "compile": "hardhat compile",
-    "deploy": "hardhat deploy",
-    "test": "hardhat test",
-    "build": "yarn run prepack",
-    "prepack": "hardhat compile"
+    "test": "forge test"
   },
   "devDependencies": {
-    "@nomiclabs/hardhat-waffle": "^2.0.1",
-    "@types/chai": "^4.2.21",
-    "@types/data-urls": "^2.0.1",
-    "@types/mocha": "^8.2.3",
-    "@types/node": "^16.4.0",
-    "chai": "^4.3.4",
-    "data-urls": "^3.0.0",
-    "ethereum-waffle": "^3.4.0",
-    "hardhat": "^2.5.0",
-    "hardhat-gas-reporter": "^1.0.4",
-    "ts-node": "^10.1.0",
-    "typescript": "^4.3.5",
-    "@nomiclabs/hardhat-ethers": "^2.0.2",
-    "@nomiclabs/hardhat-etherscan": "^2.1.4",
-    "@typechain/ethers-v5": "^7.1.0",
-    "@typechain/hardhat": "^2.3.0",
-    "hardhat-deploy": "^0.8.11",
-    "typechain": "^5.1.2",
     "dotenv": "^10.0.0"
   },
-  "dependencies": {
-    "ethers": "^5.4.1",
-    "@openzeppelin/contracts-upgradeable": "^4.3.2",
-    "base64-sol": "^1.0.1"
-  }
+  "dependencies": {}
 }

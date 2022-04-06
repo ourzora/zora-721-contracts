@@ -11,6 +11,7 @@ import {DropMetadataRenderer} from "./metadata/DropMetadataRenderer.sol";
 import {IMetadataRenderer} from "./interfaces/IMetadataRenderer.sol";
 import {ZoraNFTBase} from "./ZoraNFTBase.sol";
 
+/// @dev Zora NFT Creator V1
 contract ZoraNFTCreatorV1 is OwnableUpgradeable, UUPSUpgradeable {
     using CountersUpgradeable for CountersUpgradeable.Counter;
 
@@ -57,7 +58,12 @@ contract ZoraNFTCreatorV1 is OwnableUpgradeable, UUPSUpgradeable {
         onlyOwner
     {}
 
-    /// @dev Setup the media contract in general
+    /// @dev Internal function to setup the media contract across all metadata types
+    /// @param name Name for new contract (cannot be changed)
+    /// @param symbol Symbol for new contract (cannot be changed)
+    /// @param editionSize The max size of the media contract allowed
+    /// @param royaltyBPS BPS for on-chain royalties (cannot be changed)
+    /// @param fundsRecipient recipient for sale funds and, unless overridden, royalties
     function _setupMediaContract(
         string memory name,
         string memory symbol,
@@ -88,11 +94,18 @@ contract ZoraNFTCreatorV1 is OwnableUpgradeable, UUPSUpgradeable {
     }
 
     /// @dev Setup the media contract for a drop
+    /// @param name Name for new contract (cannot be changed)
+    /// @param symbol Symbol for new contract (cannot be changed)
+    /// @param editionSize The max size of the media contract allowed
+    /// @param royaltyBPS BPS for on-chain royalties (cannot be changed)
+    /// @param fundsRecipient recipient for sale funds and, unless overridden, royalties
+    /// @param metadataURIBase URI Base for metadata
+    /// @param metadataContractURI URI for contract metadata
     function createDrop(
         string memory name,
         string memory symbol,
-        uint16 royaltyBPS,
         uint64 editionSize,
+        uint16 royaltyBPS,
         address payable fundsRecipient,
         string memory metadataURIBase,
         string memory metadataContractURI
@@ -118,17 +131,20 @@ contract ZoraNFTCreatorV1 is OwnableUpgradeable, UUPSUpgradeable {
     /// @notice Important: None of these fields (except the Url fields with the same hash) can be changed after calling
     /// @param name Name of the edition contract
     /// @param symbol Symbol of the edition contract
+    /// @param editionSize Total size of the edition (number of possible editions)
+    /// @param royaltyBPS BPS amount of royalty
+    /// @param fundsRecipient Funds recipient for the NFT sale
     /// @param description Metadata: Description of the edition entry
     /// @param animationUrl Metadata: Animation url (optional) of the edition entry
     /// @param animationHash Metadata: SHA-256 Hash of the animation (if no animation url, can be 0x0)
     /// @param imageUrl Metadata: Image url (semi-required) of the edition entry
     /// @param imageHash Metadata: SHA-256 hash of the Image of the edition entry (if not image, can be 0x0)
-    /// @param editionSize Total size of the edition (number of possible editions)
-    /// @param royaltyBPS BPS amount of royalty
-    /// @param royaltyBPS Funds recipient for the NFT sale
     function createEdition(
         string memory name,
         string memory symbol,
+        uint64 editionSize,
+        uint16 royaltyBPS,
+        address payable fundsRecipient,
         string memory description,
         string memory animationUrl,
         // stored as calldata
@@ -136,9 +152,6 @@ contract ZoraNFTCreatorV1 is OwnableUpgradeable, UUPSUpgradeable {
         string memory imageUrl,
         // stored as calldata
         bytes32 imageHash,
-        uint64 editionSize,
-        uint16 royaltyBPS,
-        address payable fundsRecipient
     ) external returns (uint256) {
         (uint256 newId, address mediaContract) = _setupMediaContract({
             name: name,
@@ -160,7 +173,7 @@ contract ZoraNFTCreatorV1 is OwnableUpgradeable, UUPSUpgradeable {
         return newId;
     }
 
-    /// Get edition given the created ID
+    /// @notice Get edition given the created ID
     /// @param editionId id of edition to get contract for
     /// @return SingleEditionMintable Edition NFT contract
     function getEditionAtId(uint256 editionId)
@@ -178,8 +191,7 @@ contract ZoraNFTCreatorV1 is OwnableUpgradeable, UUPSUpgradeable {
             );
     }
 
-    /// Emitted when a edition is created reserving the corresponding token IDs.
-    /// @param editionId ID of newly created edition
+    /// @notice Emitted when a edition is created reserving the corresponding token IDs.
     event CreatedEdition(
         uint256 indexed editionId,
         address indexed creator,

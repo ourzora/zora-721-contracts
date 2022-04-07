@@ -151,7 +151,7 @@ contract ZoraNFTCreatorV1 is OwnableUpgradeable, UUPSUpgradeable {
         bytes32 animationHash,
         string memory imageUrl,
         // stored as calldata
-        bytes32 imageHash,
+        bytes32 imageHash
     ) external returns (uint256) {
         (uint256 newId, address mediaContract) = _setupMediaContract({
             name: name,

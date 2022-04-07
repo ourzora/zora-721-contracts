@@ -65,9 +65,9 @@ contract ZoraNFTBase is
         /// @dev Is the presale active
         bool presaleActive;
         /// @dev Is the public sale active
-        uint64 publicSalePrice;
+        uint104 publicSalePrice;
         /// @dev Private sale price
-        uint64 privateSalePrice;
+        uint104 privateSalePrice;
         /// @dev Max purchase number per txn
         uint32 maxPurchasePerTransaction;
         /// @dev Presale sale price
@@ -368,7 +368,7 @@ contract ZoraNFTBase is
         external
         onlyAdmin
     {
-        salesConfig.publicSalePrice = uint64(_salePrice);
+        salesConfig.publicSalePrice = uint104(_salePrice);
         salesConfig.maxPurchasePerTransaction = _maxPurchasePerTransaction;
         emit PriceChanged(_salePrice);
     }

@@ -16,7 +16,12 @@ contract DropMetadataRenderer is IMetadataRenderer {
     }
 
     modifier requireSenderAdmin(address target) {
-        require(target == msg.sender || ZoraNFTBase(target).isAdmin(msg.sender), "Only admin");
+        require(
+            target == msg.sender || ZoraNFTBase(target).isAdmin(msg.sender),
+            "Only admin"
+        );
+
+        _;
     }
 
     mapping(address => MetadataURIInfo) public metadataBaseByContract;
@@ -25,7 +30,7 @@ contract DropMetadataRenderer is IMetadataRenderer {
         address target,
         string memory baseUri,
         string memory newContractURI
-    ) external requireSenderAdmin {
+    ) external requireSenderAdmin(target) {
         updateMetadataBaseWithDetails(target, baseUri, "", newContractURI, 0);
     }
 
@@ -35,7 +40,7 @@ contract DropMetadataRenderer is IMetadataRenderer {
         string memory metadataExtension,
         string memory newContractURI,
         uint256 freezeAt
-    ) public requireSenderAdmin {
+    ) public requireSenderAdmin(target) {
         require(freezeAt == 0 || freezeAt < block.timestamp, "Metadata frozen");
         metadataBaseByContract[target] = MetadataURIInfo({
             base: metadataBase,
@@ -45,11 +50,16 @@ contract DropMetadataRenderer is IMetadataRenderer {
         });
     }
 
-    function contractURI() external view returns (string memory) {
+    function contractURI() external view override returns (string memory) {
         return metadataBaseByContract[msg.sender].contractURI;
     }
 
-    function tokenURI(uint256 tokenId) external view returns (string memory) {
+    function tokenURI(uint256 tokenId)
+        external
+        view
+        override
+        returns (string memory)
+    {
         MetadataURIInfo memory info = metadataBaseByContract[msg.sender];
 
         return

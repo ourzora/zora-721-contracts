@@ -14,7 +14,12 @@ contract EditionMetadataRenderer is IMetadataRenderer {
     mapping(address => TokenEditionInfo) public tokenInfos;
 
     modifier requireSenderAdmin(address target) {
-        require(target == msg.sender || ZoraNFTBase(target).isAdmin(msg.sender), "Only admin");
+        require(
+            target == msg.sender || ZoraNFTBase(target).isAdmin(msg.sender),
+            "Only admin"
+        );
+
+        _;
     }
 
     SharedNFTLogic private immutable sharedNFTLogic;
@@ -27,7 +32,7 @@ contract EditionMetadataRenderer is IMetadataRenderer {
         address target,
         string memory imageUrl,
         string memory animationUrl
-    ) requireSenderAdmin external {
+    ) external requireSenderAdmin(target) {
         tokenInfos[target].imageUrl = imageUrl;
         tokenInfos[target].animationUrl = animationUrl;
     }
@@ -41,7 +46,7 @@ contract EditionMetadataRenderer is IMetadataRenderer {
         string memory animationUrl,
         // stored as calldata
         bytes32 animationHash
-    ) requireSenderAdmin external {
+    ) external requireSenderAdmin(target) {
         TokenEditionInfo memory info;
         info.description = description;
         info.imageUrl = imageUrl;
@@ -50,7 +55,8 @@ contract EditionMetadataRenderer is IMetadataRenderer {
         tokenInfos[target] = info;
     }
 
-    function contractURI(address target) external view returns (string memory) {
+    function contractURI() external view override returns (string memory) {
+        address target = msg.sender;
         bytes memory imageSpace;
         if (bytes(tokenInfos[target].imageUrl).length > 0) {
             imageSpace = abi.encodePacked(
@@ -73,11 +79,14 @@ contract EditionMetadataRenderer is IMetadataRenderer {
             );
     }
 
-    function tokenURI(address target, uint256 tokenId)
+    function tokenURI(uint256 tokenId)
         external
         view
+        override
         returns (string memory)
     {
+        address target = msg.sender;
+
         TokenEditionInfo memory info = tokenInfos[target];
         ZoraNFTBase media = ZoraNFTBase(target);
 

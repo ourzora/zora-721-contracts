@@ -435,13 +435,14 @@ contract ZoraNFTBase is
     /// @notice Contract URI Getter, proxies to metadataRenderer
     /// @return Contract URI
     function contractURI() external view returns (string memory) {
-        return config.metadataRenderer.contractURI(address(this));
+        return config.metadataRenderer.contractURI();
     }
 
     /// @notice Token URI Getter, proxies to metadataRenderer
+    /// @param tokenId id of token to get URI for
     /// @return Token URI
-    function tokenURI(uint256 tokenURI) external view returns (string memory) {
-        return config.metadataRenderer.contractURI(address(this), tokenURI);
+    function tokenURI(uint256 tokenId) public override view returns (string memory) {
+        return config.metadataRenderer.tokenURI(tokenId);
     }
 
     /// @notice ERC165 supports interface

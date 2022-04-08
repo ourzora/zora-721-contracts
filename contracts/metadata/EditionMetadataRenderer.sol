@@ -13,6 +13,10 @@ contract EditionMetadataRenderer is IMetadataRenderer {
     }
     mapping(address => TokenEditionInfo) public tokenInfos;
 
+    modifier requireSenderAdmin(address target) {
+        require(target == msg.sender || ZoraNFTBase(target).isAdmin(msg.sender), "Only admin");
+    }
+
     SharedNFTLogic private immutable sharedNFTLogic;
 
     constructor(SharedNFTLogic _sharedNFTLogic) {
@@ -23,8 +27,7 @@ contract EditionMetadataRenderer is IMetadataRenderer {
         address target,
         string memory imageUrl,
         string memory animationUrl
-    ) external {
-        require(ZoraNFTBase(target).isAdmin(msg.sender), "only admin");
+    ) requireSenderAdmin external {
         tokenInfos[target].imageUrl = imageUrl;
         tokenInfos[target].animationUrl = animationUrl;
     }
@@ -38,7 +41,7 @@ contract EditionMetadataRenderer is IMetadataRenderer {
         string memory animationUrl,
         // stored as calldata
         bytes32 animationHash
-    ) external {
+    ) requireSenderAdmin external {
         TokenEditionInfo memory info;
         info.description = description;
         info.imageUrl = imageUrl;

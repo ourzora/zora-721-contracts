@@ -35,13 +35,15 @@ contract ZoraNFTBase is
     event PriceChanged(uint256 indexed amount);
     event FundsRecipientChanged(address indexed newAddress);
 
+    /// @notice Error string constants
     string private constant SOLD_OUT = "Sold out";
     string private constant TOO_MANY = "Too many";
 
-
+    /// @notice Access control roles
     bytes32 public immutable MINTER_ROLE = keccak256("MINTER");
     bytes32 public immutable SALES_MANAGER_ROLE = keccak256("SALES_MANAGER");
 
+    /// @notice General configuration for NFT Minting and bookkeeping
     struct Configuration {
         /// @dev Optional contract metadata address
         string contractURI;
@@ -59,6 +61,7 @@ contract ZoraNFTBase is
         address payable fundsRecipient;
     }
 
+    /// @notice Sales states and configuration
     struct SalesConfiguration {
         /// @dev Is the public sale active
         bool publicSaleActive;
@@ -96,20 +99,22 @@ contract ZoraNFTBase is
         _;
     }
 
-    modifier contractMintGuard(
-        uint256 mintedNumber
-    ) {
+    /// @notice Feature for contract mint guard
+    modifier contractMintGuard(uint256 mintedNumber) {
         if (tx.origin != msg.sender) {
             mintedByContract[tx.origin] += mintedNumber;
             require(
-                mintedByContract[tx.origin] <= salesConfig.maxPurchasePerTransaction,
+                mintedByContract[tx.origin] <=
+                    salesConfig.maxPurchasePerTransaction,
                 "Too many mints from contract"
             );
         }
+
         _;
     }
 
     /// @notice Only a given role has access or admin
+    /// @param role role to check for alongside the admin role
     modifier onlyRoleOrAdmin(bytes32 role) {
         require(
             hasRole(DEFAULT_ADMIN_ROLE, msg.sender) ||
@@ -120,6 +125,7 @@ contract ZoraNFTBase is
         _;
     }
 
+    /// @notice Global constructor – these variables will not change with further proxy deploys
     /// @param _zoraFeeManager Zora Fee Manager
     /// @param _zoraERC721TransferHelper Transfer helper
     constructor(
@@ -137,12 +143,6 @@ contract ZoraNFTBase is
         onlyAdmin
     {
         config.contractURI = newContractURI;
-    }
-
-    /// @notice Contract URI Getter
-    /// @return Contract URI
-    function contractURI() external view returns (string memory) {
-        return config.contractURI;
     }
 
     ///  @param _owner User that owns and can mint the edition, gets royalty and sales payouts and can update the base url if needed.
@@ -276,7 +276,7 @@ contract ZoraNFTBase is
     function purchasePresale(uint256 quantity, bytes32[] memory merkleProof)
         external
     {
-        // MerkleProofUpgradeable.verifyProof(merkleProof)    
+        // MerkleProofUpgradeable.verifyProof(merkleProof)
     }
 
     // curator of drops
@@ -285,7 +285,6 @@ contract ZoraNFTBase is
     // add merkle-style allowlist
     // v2
     // add signature based allowlist?
-
 
     /** ADMIN MINTING FUNCTIONS */
 
@@ -433,6 +432,20 @@ contract ZoraNFTBase is
         return super.owner();
     }
 
+    /// @notice Contract URI Getter, proxies to metadataRenderer
+    /// @return Contract URI
+    function contractURI() external view returns (string memory) {
+        return config.metadataRenderer.contractURI(address(this));
+    }
+
+    /// @notice Token URI Getter, proxies to metadataRenderer
+    /// @return Token URI
+    function tokenURI(uint256 tokenURI) external view returns (string memory) {
+        return config.metadataRenderer.contractURI(address(this), tokenURI);
+    }
+
+    /// @notice ERC165 supports interface
+    /// @param interfaceId interface id to check if supported
     function supportsInterface(bytes4 interfaceId)
         public
         view

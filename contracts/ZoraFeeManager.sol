@@ -4,7 +4,7 @@ pragma solidity ^0.8.10;
 import {IZoraFeeManager} from "./interfaces/IZoraFeeManager.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
-contract ZoraDAOFeeManager is Ownable, IZoraFeeManager {
+contract ZoraFeeManager is Ownable, IZoraFeeManager {
     mapping(address => uint256) private feeOverride;
     uint256 private immutable defaultFeeBPS;
 

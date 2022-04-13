@@ -32,7 +32,7 @@ contract ERC721Drop is
 {
     using AddressUpgradeable for address payable;
 
-    event PriceChanged(uint256 indexed amount);
+    event SalesConfigChanged(address indexed changedBy);
     event FundsRecipientChanged(address indexed newAddress);
 
     /// @notice Error string constants
@@ -349,18 +349,13 @@ contract ERC721Drop is
         _setOwner(newOwner);
     }
 
-    /// @param _salePrice if sale price is 0 sale is stopped, otherwise that amount
-    ///                   of ETH is needed to start the sale.
-    ///  @dev This sets a simple ETH sales price
-    ///       Setting a sales price allows users to mint the edition until it sells out.
-    ///       For more granular sales, use an external sales contract.
-    function setSalePrice(uint256 _salePrice, uint8 _maxPurchasePerTransaction)
+    ///  @dev This sets the sales configuration
+    function setSaleConfiguration(SalesConfiguration memory newConfig)
         external
         onlyAdmin
     {
-        salesConfig.publicSalePrice = uint64(_salePrice);
-        salesConfig.maxPurchasePerTransaction = _maxPurchasePerTransaction;
-        emit PriceChanged(_salePrice);
+        salesConfig = newConfig;
+        emit SalesConfigChanged(_msgSender());
     }
 
     /// @dev Set a different funds recipient

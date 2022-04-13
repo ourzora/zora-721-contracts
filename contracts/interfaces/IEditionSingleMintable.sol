@@ -3,8 +3,14 @@ pragma solidity ^0.8.10;
 
 interface IEditionSingleMintable {
   struct SaleDetails {
-    bool active;
-    uint256 price;
+    // built-in eth sales
+    bool publicSaleActive;
+    uint256 publicSalePrice;
+    // built-in eth pre-sales (merkle list authentication)
+    bool presaleActive;
+    uint256 presalePrice;
+
+    // Information about the rest of the supply
     uint256 totalMinted;
     uint256 maxSupply;
   }

@@ -45,8 +45,6 @@ contract ERC721Drop is
 
     /// @notice General configuration for NFT Minting and bookkeeping
     struct Configuration {
-        /// @dev Optional contract metadata address
-        string contractURI;
         /// @dev Metadata renderer
         IMetadataRenderer metadataRenderer;
         /// @dev Total size of edition that can be minted
@@ -65,11 +63,11 @@ contract ERC721Drop is
         bool presaleActive;
         /// @dev Is the public sale active
         uint64 publicSalePrice;
-        /// @dev Private sale price
-        uint64 privateSalePrice;
+        /// @dev Preasale sale price
+        uint64 presalePrice;
         /// @dev Max purchase number per txn
         uint32 maxPurchasePerTransaction;
-        /// @dev Presale sale price
+        /// @dev Presale merkle root
         bytes32 presaleMerkleRoot;
     }
 
@@ -103,6 +101,13 @@ contract ERC721Drop is
 
     function _lastMintedTokenId() internal view returns (uint256) {
         return _currentIndex - 1;
+    }
+
+    /**
+     * To change the starting tokenId, please override this function.
+     */
+    function _startTokenId() internal view override returns (uint256) {
+        return 1;
     }
 
     /// @notice Feature for contract mint guard
@@ -140,15 +145,6 @@ contract ERC721Drop is
     ) {
         zoraFeeManager = _zoraFeeManager;
         zoraERC721TransferHelper = _zoraERC721TransferHelper;
-    }
-
-    /// @notice Admin function to update contractURI
-    /// @param newContractURI new contract uri
-    function updateContractURI(string memory newContractURI)
-        external
-        onlyAdmin
-    {
-        config.contractURI = newContractURI;
     }
 
     ///  @param _owner User that owns and can mint the edition, gets royalty and sales payouts and can update the base url if needed.
@@ -223,9 +219,12 @@ contract ERC721Drop is
     {
         return
             IEditionSingleMintable.SaleDetails({
-                active: salesConfig.maxPurchasePerTransaction > 0 &&
+                publicSaleActive: salesConfig.publicSaleActive &&
                     salesConfig.publicSalePrice > 0,
-                price: salesConfig.publicSalePrice,
+                publicSalePrice: salesConfig.publicSalePrice,
+                presalePrice: salesConfig.presalePrice,
+                presaleActive: salesConfig.presaleActive &&
+                    salesConfig.presalePrice > 0,
                 totalMinted: _totalMinted(),
                 maxSupply: config.editionSize
             });
@@ -233,6 +232,8 @@ contract ERC721Drop is
 
     /// @dev Setup auto-approval for Zora v3 access to sell NFT
     ///      Still requires approval for module
+    /// @param nftOwner owner of the nft
+    /// @param operator operator wishing to transfer/burn/etc the NFTs
     function isApprovedForAll(address nftOwner, address operator)
         public
         view
@@ -269,12 +270,7 @@ contract ERC721Drop is
     }
 
     function _mintNFTs(address to, uint256 quantity) internal {
-        _mint({
-            to: to, 
-            quantity: quantity, 
-            _data: '',
-            safe: false
-        });
+        _mint({to: to, quantity: quantity, _data: "", safe: false});
     }
 
     /**
@@ -296,7 +292,7 @@ contract ERC721Drop is
             "Needs to be approved"
         );
         require(
-            msg.value == salesConfig.privateSalePrice * quantity,
+            msg.value == salesConfig.presalePrice * quantity,
             "Wrong price"
         );
 
@@ -304,7 +300,7 @@ contract ERC721Drop is
         emit IEditionSingleMintable.Sale(
             _msgSender(),
             quantity,
-            salesConfig.privateSalePrice
+            salesConfig.presalePrice
         );
 
         return _lastMintedTokenId();

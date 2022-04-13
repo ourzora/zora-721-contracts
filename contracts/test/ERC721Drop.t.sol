@@ -60,27 +60,6 @@ contract ZoraNFTBaseTest is DSTest {
         });
     }
 
-    function test_UpdateContractURI() public setupZoraNFTBase {
-        require(
-            bytes(zoraNFTBase.contractURI()).length == 0,
-            "Contract URI set by default"
-        );
-        vm.prank(DEFAULT_OWNER_ADDRESS);
-        zoraNFTBase.updateContractURI(
-            "https://data.zora.co/beautiful-contract/data.json"
-        );
-        assertEq(
-            zoraNFTBase.contractURI(),
-            "https://data.zora.co/beautiful-contract/data.json",
-            "Contract URI set by default"
-        );
-        vm.prank(address(39));
-        vm.expectRevert("Only admin allowed");
-        zoraNFTBase.updateContractURI(
-            "https://data.zora.co/beautiful-contract/data.json"
-        );
-    }
-
     function test_Purchase() public setupZoraNFTBase {
         vm.prank(DEFAULT_OWNER_ADDRESS);
         zoraNFTBase.setSalePrice(0.1 ether, 1);
@@ -102,7 +81,7 @@ contract ZoraNFTBaseTest is DSTest {
         assertEq(zoraNFTBase.saleDetails().totalMinted, 1);
         require(
             zoraNFTBase.ownerOf(1) == DEFAULT_OWNER_ADDRESS,
-            "owner is wrong for new minted token"
+            "Owner is wrong for new minted token"
         );
     }
 

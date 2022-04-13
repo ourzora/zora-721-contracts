@@ -2,20 +2,20 @@
 pragma solidity ^0.8.10;
 
 import {IMetadataRenderer} from "../interfaces/IMetadataRenderer.sol";
-import {ZoraNFTBase} from "../ZoraNFTBase.sol";
+import {ERC721Drop} from "../ERC721Drop.sol";
 import {SharedNFTLogic} from "../utils/SharedNFTLogic.sol";
 
 contract EditionMetadataRenderer is IMetadataRenderer {
     struct TokenEditionInfo {
         string description;
-        string imageUrl;
-        string animationUrl;
+        string imageURI;
+        string animationURI;
     }
     mapping(address => TokenEditionInfo) public tokenInfos;
 
     modifier requireSenderAdmin(address target) {
         require(
-            target == msg.sender || ZoraNFTBase(target).isAdmin(msg.sender),
+            target == msg.sender || ERC721Drop(target).isAdmin(msg.sender),
             "Only admin"
         );
 
@@ -30,38 +30,31 @@ contract EditionMetadataRenderer is IMetadataRenderer {
 
     function updateMediaURIs(
         address target,
-        string memory imageUrl,
-        string memory animationUrl
+        string memory imageURI,
+        string memory animationURI
     ) external requireSenderAdmin(target) {
-        tokenInfos[target].imageUrl = imageUrl;
-        tokenInfos[target].animationUrl = animationUrl;
+        tokenInfos[target].imageURI = imageURI;
+        tokenInfos[target].animationURI = animationURI;
     }
 
-    function setEditionDataForContract(
-        address target,
-        string memory description,
-        string memory imageUrl,
-        // stored as calldata
-        bytes32 imageHash,
-        string memory animationUrl,
-        // stored as calldata
-        bytes32 animationHash
-    ) external requireSenderAdmin(target) {
-        TokenEditionInfo memory info;
-        info.description = description;
-        info.imageUrl = imageUrl;
-        info.animationUrl = animationUrl;
+    function initializeWithData(bytes memory data) external {
+        // data format: description, imageURI, animationURI
+        (string memory description, string memory imageURI, string memory animationURI) = abi.decode(data, (string, string, string));
 
-        tokenInfos[target] = info;
+        tokenInfos[msg.sender] = TokenEditionInfo({
+            description: description,
+            imageURI: imageURI,
+            animationURI: animationURI
+        });
     }
 
     function contractURI() external view override returns (string memory) {
         address target = msg.sender;
         bytes memory imageSpace;
-        if (bytes(tokenInfos[target].imageUrl).length > 0) {
+        if (bytes(tokenInfos[target].imageURI).length > 0) {
             imageSpace = abi.encodePacked(
                 '", "image": "',
-                tokenInfos[target].imageUrl
+                tokenInfos[target].imageURI
             );
         }
         return
@@ -69,7 +62,7 @@ contract EditionMetadataRenderer is IMetadataRenderer {
                 sharedNFTLogic.encodeMetadataJSON(
                     abi.encodePacked(
                         '{"name": "',
-                        ZoraNFTBase(target).name,
+                        ERC721Drop(target).name,
                         '", "description": "',
                         tokenInfos[target].description,
                         imageSpace,
@@ -88,14 +81,14 @@ contract EditionMetadataRenderer is IMetadataRenderer {
         address target = msg.sender;
 
         TokenEditionInfo memory info = tokenInfos[target];
-        ZoraNFTBase media = ZoraNFTBase(target);
+        ERC721Drop media = ERC721Drop(target);
 
         return
             sharedNFTLogic.createMetadataEdition({
                 name: media.name(),
                 description: info.description,
-                imageUrl: info.imageUrl,
-                animationUrl: info.animationUrl,
+                imageUrl: info.imageURI,
+                animationUrl: info.animationURI,
                 tokenOfEdition: tokenId,
                 editionSize: media.saleDetails().maxSupply
             });

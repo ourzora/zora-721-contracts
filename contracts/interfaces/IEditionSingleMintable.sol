@@ -11,7 +11,7 @@ interface IEditionSingleMintable {
   event Sale(address indexed to, uint256 indexed quantity, uint256 indexed price);
   function purchase(uint256 quantity) external payable returns (uint256);
   function saleDetails() external view returns (SaleDetails memory);
-  function mint(address to, uint256 quantity) external returns (uint256);
-  function mintAirdrop(address[] memory to) external returns (uint256);
+  function adminMint(address to, uint256 quantity) external returns (uint256);
+  function adminMintAirdrop(address[] memory to) external returns (uint256);
   function owner() external view returns (address);
 }

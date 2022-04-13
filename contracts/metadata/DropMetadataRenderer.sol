@@ -4,7 +4,7 @@ pragma solidity ^0.8.10;
 
 import {StringsUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/StringsUpgradeable.sol";
 import {IMetadataRenderer} from "../interfaces/IMetadataRenderer.sol";
-import {ZoraNFTBase} from "../ZoraNFTBase.sol";
+import {ERC721Drop} from "../ERC721Drop.sol";
 
 /// @notice Add ZORF NFT Style Fee Support
 contract DropMetadataRenderer is IMetadataRenderer {
@@ -17,7 +17,7 @@ contract DropMetadataRenderer is IMetadataRenderer {
 
     modifier requireSenderAdmin(address target) {
         require(
-            target == msg.sender || ZoraNFTBase(target).isAdmin(msg.sender),
+            target == msg.sender || ERC721Drop(target).isAdmin(msg.sender),
             "Only admin"
         );
 
@@ -26,12 +26,20 @@ contract DropMetadataRenderer is IMetadataRenderer {
 
     mapping(address => MetadataURIInfo) public metadataBaseByContract;
 
+    function initializeWithData(bytes memory data) external {
+        // data format: target, baseURI, newContractURI
+        (string memory initialBaseURI, string memory initialContractURI) = abi.decode(data, (string, string));
+        _updateMetadataDetails(msg.sender, initialBaseURI, "", initialContractURI, 0);
+    }
+
+    function onMint(address minter, uint256 tokenId) external {}
+
     function updateMetadataBase(
         address target,
         string memory baseUri,
         string memory newContractURI
     ) external requireSenderAdmin(target) {
-        updateMetadataBaseWithDetails(target, baseUri, "", newContractURI, 0);
+        _updateMetadataDetails(target, baseUri, "", newContractURI, 0);
     }
 
     function updateMetadataBaseWithDetails(
@@ -41,6 +49,22 @@ contract DropMetadataRenderer is IMetadataRenderer {
         string memory newContractURI,
         uint256 freezeAt
     ) public requireSenderAdmin(target) {
+        _updateMetadataDetails(
+            target,
+            metadataBase,
+            metadataExtension,
+            newContractURI,
+            freezeAt
+        );
+    }
+
+    function _updateMetadataDetails(
+        address target,
+        string memory metadataBase,
+        string memory metadataExtension,
+        string memory newContractURI,
+        uint256 freezeAt
+    ) internal {
         require(freezeAt == 0 || freezeAt < block.timestamp, "Metadata frozen");
         metadataBaseByContract[target] = MetadataURIInfo({
             base: metadataBase,

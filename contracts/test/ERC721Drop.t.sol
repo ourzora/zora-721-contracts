@@ -3,17 +3,17 @@ pragma solidity 0.8.10;
 
 import {Vm} from "forge-std/Vm.sol";
 import {DSTest} from "ds-test/test.sol";
-import {ZoraNFTBase} from "../ZoraNFTBase.sol";
-import {ZoraDAOFeeManager} from "../ZoraDAOFeeManager.sol";
+import {ERC721Drop} from "../ERC721Drop.sol";
+import {ZoraFeeManager} from "../ZoraFeeManager.sol";
 import {DummyMetadataRenderer} from "./utils/DummyMetadataRenderer.sol";
 import {MockUser} from "./utils/MockUser.sol";
 
 contract ZoraNFTBaseTest is DSTest {
-    ZoraNFTBase zoraNFTBase;
+    ERC721Drop zoraNFTBase;
     MockUser mockUser;
     Vm public constant vm = Vm(HEVM_ADDRESS);
     DummyMetadataRenderer public dummyRenderer = new DummyMetadataRenderer();
-    ZoraDAOFeeManager public feeManager;
+    ZoraFeeManager public feeManager;
     address public constant DEFAULT_OWNER_ADDRESS = address(0x23499);
     address payable public constant DEFAULT_FUNDS_RECIPIENT_ADDRESS =
         payable(address(0x21303));
@@ -29,16 +29,17 @@ contract ZoraNFTBaseTest is DSTest {
             _fundsRecipient: payable(DEFAULT_FUNDS_RECIPIENT_ADDRESS),
             _editionSize: 10,
             _royaltyBPS: 800,
-            _metadataRenderer: dummyRenderer
+            _metadataRenderer: dummyRenderer,
+            _metadataRendererInit: ''
         });
         _;
     }
 
     function setUp() public {
         vm.prank(DEFAULT_ZORA_DAO_ADDRESS);
-        feeManager = new ZoraDAOFeeManager(250);
+        feeManager = new ZoraFeeManager(250);
         vm.prank(DEFAULT_ZORA_DAO_ADDRESS);
-        zoraNFTBase = new ZoraNFTBase(feeManager, address(1234));
+        zoraNFTBase = new ERC721Drop(feeManager, address(1234));
     }
 
     function test_Init() public setupZoraNFTBase {
@@ -54,7 +55,8 @@ contract ZoraNFTBaseTest is DSTest {
             _fundsRecipient: payable(DEFAULT_FUNDS_RECIPIENT_ADDRESS),
             _editionSize: 10,
             _royaltyBPS: 800,
-            _metadataRenderer: dummyRenderer
+            _metadataRenderer: dummyRenderer,
+            _metadataRendererInit: ''
         });
     }
 
@@ -95,7 +97,7 @@ contract ZoraNFTBaseTest is DSTest {
 
     function test_Mint() public setupZoraNFTBase {
         vm.prank(DEFAULT_OWNER_ADDRESS);
-        zoraNFTBase.mint(DEFAULT_OWNER_ADDRESS, 1);
+        zoraNFTBase.adminMint(DEFAULT_OWNER_ADDRESS, 1);
         assertEq(zoraNFTBase.saleDetails().maxSupply, 10);
         assertEq(zoraNFTBase.saleDetails().totalMinted, 1);
         require(
@@ -136,7 +138,7 @@ contract ZoraNFTBaseTest is DSTest {
     function test_AdminMint() public setupZoraNFTBase {
         address minter = address(0x32402);
         vm.startPrank(DEFAULT_OWNER_ADDRESS);
-        zoraNFTBase.mint(DEFAULT_OWNER_ADDRESS, 1);
+        zoraNFTBase.adminMint(DEFAULT_OWNER_ADDRESS, 1);
         require(
             zoraNFTBase.balanceOf(DEFAULT_OWNER_ADDRESS) == 1,
             "Wrong balance"
@@ -144,7 +146,7 @@ contract ZoraNFTBaseTest is DSTest {
         zoraNFTBase.grantRole(zoraNFTBase.MINTER_ROLE(), minter);
         vm.stopPrank();
         vm.prank(minter);
-        zoraNFTBase.mint(minter, 1);
+        zoraNFTBase.adminMint(minter, 1);
         require(zoraNFTBase.balanceOf(minter) == 1, "Wrong balance");
         assertEq(zoraNFTBase.saleDetails().totalMinted, 2);
     }
@@ -157,7 +159,7 @@ contract ZoraNFTBaseTest is DSTest {
         vm.startPrank(minter);
         address[] memory airdrop = new address[](1);
         airdrop[0] = minter;
-        zoraNFTBase.mintAirdrop(airdrop);
+        zoraNFTBase.adminMintAirdrop(airdrop);
 
         vm.stopPrank();
     }

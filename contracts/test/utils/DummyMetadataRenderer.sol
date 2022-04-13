@@ -10,4 +10,8 @@ contract DummyMetadataRenderer is IMetadataRenderer {
     function contractURI() external pure override returns (string memory) {
         return "DUMMY";
     }
+
+     function initializeWithData(bytes memory data) external {
+         // no-op
+    }
 }

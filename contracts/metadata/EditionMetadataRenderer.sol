@@ -5,12 +5,14 @@ import {IMetadataRenderer} from "../interfaces/IMetadataRenderer.sol";
 import {ERC721Drop} from "../ERC721Drop.sol";
 import {SharedNFTLogic} from "../utils/SharedNFTLogic.sol";
 
+/// @notice EditionMetadataRenderer for editions support
 contract EditionMetadataRenderer is IMetadataRenderer {
     struct TokenEditionInfo {
         string description;
         string imageURI;
         string animationURI;
     }
+
     mapping(address => TokenEditionInfo) public tokenInfos;
 
     modifier requireSenderAdmin(address target) {
@@ -24,8 +26,8 @@ contract EditionMetadataRenderer is IMetadataRenderer {
 
     SharedNFTLogic private immutable sharedNFTLogic;
 
-    constructor(SharedNFTLogic _sharedNFTLogic) {
-        sharedNFTLogic = _sharedNFTLogic;
+    constructor(address _sharedNFTLogic) {
+        sharedNFTLogic = SharedNFTLogic(_sharedNFTLogic);
     }
 
     function updateMediaURIs(

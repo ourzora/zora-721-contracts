@@ -6,7 +6,7 @@ import {StringsUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/Stri
 import {IMetadataRenderer} from "../interfaces/IMetadataRenderer.sol";
 import {ERC721Drop} from "../ERC721Drop.sol";
 
-/// @notice Add ZORF NFT Style Fee Support
+/// @notice Drops metadata system
 contract DropMetadataRenderer is IMetadataRenderer {
     struct MetadataURIInfo {
         string base;
@@ -31,8 +31,6 @@ contract DropMetadataRenderer is IMetadataRenderer {
         (string memory initialBaseURI, string memory initialContractURI) = abi.decode(data, (string, string));
         _updateMetadataDetails(msg.sender, initialBaseURI, "", initialContractURI, 0);
     }
-
-    function onMint(address minter, uint256 tokenId) external {}
 
     function updateMetadataBase(
         address target,

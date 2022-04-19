@@ -6,3 +6,4 @@ cache
 typechain
 .DS_Store
 .env
+.pkey

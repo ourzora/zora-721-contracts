@@ -10,8 +10,9 @@ contract ZoraFeeManager is Ownable, IZoraFeeManager {
 
     event FeeOverrideSet(address indexed, uint256 indexed);
 
-    constructor(uint256 _defaultFeeBPS) {
+    constructor(uint256 _defaultFeeBPS, address feeManagerAdmin) {
         defaultFeeBPS = _defaultFeeBPS;
+        _transferOwnership(feeManagerAdmin);
     }
 
     function setFeeOverride(address mediaContract, uint256 amountBPS)

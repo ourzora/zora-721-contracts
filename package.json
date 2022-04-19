@@ -17,5 +17,7 @@
   "devDependencies": {
     "dotenv": "^10.0.0"
   },
-  "dependencies": {}
+  "dependencies": {
+    "@dotenv/cli": "^2.2.2"
+  }
 }

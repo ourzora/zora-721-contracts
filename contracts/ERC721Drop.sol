@@ -14,6 +14,7 @@ import {IZoraDrop} from "./interfaces/IZoraDrop.sol";
 import {IOwnable} from "./interfaces/IOwnable.sol";
 import {OwnableSkeleton} from "./utils/OwnableSkeleton.sol";
 
+
 /**
  * @notice ZORA NFT Base contract for Drops and Editions
  *
@@ -91,31 +92,33 @@ contract ERC721Drop is
         _;
     }
 
+    /// @notice Allows user to mint tokens at a quantity
     modifier canMintTokens(uint256 quantity) {
         require(quantity + _totalMinted() <= config.editionSize, TOO_MANY);
 
         _;
     }
 
+    /// @notice Presale active
     modifier onlyPresaleActive() {
         require(salesConfig.presaleActive, "Presale inactive");
 
         _;
     }
 
+    /// @notice Public sale active
     modifier onlyPublicSaleActive() {
         require(salesConfig.publicSaleActive, "Sale inactive");
 
         _;
     }
 
+    /// @notice Getter for last minted token ID (gets next token id and subtracts 1)
     function _lastMintedTokenId() internal view returns (uint256) {
         return _currentIndex - 1;
     }
 
-    /**
-     * To change the starting tokenId, please override this function.
-     */
+    /// @notice Start token ID for minting (1-100 vs 0-99)
     function _startTokenId() internal pure override returns (uint256) {
         return 1;
     }
@@ -143,13 +146,13 @@ contract ERC721Drop is
         zoraERC721TransferHelper = _zoraERC721TransferHelper;
     }
 
+    ///  @dev Function to create a new edition. Can only be called by the allowed creator
+    ///       Sets the only allowed minter to the address that creates/owns the edition.
+    ///       This can be re-assigned or updated later
     ///  @param _owner User that owns and can mint the edition, gets royalty and sales payouts and can update the base url if needed.
     ///  @param _fundsRecipient Wallet/user that receives funds from sale
     ///  @param _editionSize Number of editions that can be minted in total. If 0, unlimited editions can be minted.
     ///  @param _royaltyBPS BPS of the royalty set on the contract. Can be 0 for no royalty.
-    ///  @dev Function to create a new edition. Can only be called by the allowed creator
-    ///       Sets the only allowed minter to the address that creates/owns the edition.
-    ///       This can be re-assigned or updated later
     function initialize(
         string memory _name,
         string memory _symbol,
@@ -208,6 +211,8 @@ contract ERC721Drop is
         );
     }
 
+    /// @notice Sale details
+    /// @return IZoraDrop.SaleDetails sale information details 
     function saleDetails()
         external
         view
@@ -261,7 +266,7 @@ contract ERC721Drop is
         returns (uint256)
     {
         uint256 salePrice = salesConfig.publicSalePrice;
-        require(salePrice > 0, "Not for sale");
+
         // TODO(iain): Should Use tx.origin here to allow for minting from proxy contracts to not break limit and require unique accounts
         require(msg.value == salePrice * quantity, "Wrong price");
         require(
@@ -282,13 +287,17 @@ contract ERC721Drop is
         return firstMintedTokenId;
     }
 
+    /// @dev Function to mint NFTs
+    /// @notice (important: Does not enforce max supply limit, enforce that limit earlier)
     function _mintNFTs(address to, uint256 quantity) internal {
         _mint({to: to, quantity: quantity, _data: "", safe: false});
     }
 
-    /**
-        @notice Merkle-tree based presale purchase function
-     */
+    /// @notice Merkle-tree based presale purchase function
+    /// @param quantity quantity to purchase
+    /// @param maxQuantity max quantity that can be purchased via merkle proof #
+    /// @param pricePerToken price that each token is purchased at
+    /// @param merkleProof proof for presale mint
     function purchasePresale(
         uint256 quantity,
         uint256 maxQuantity,
@@ -326,8 +335,6 @@ contract ERC721Drop is
 
         return firstMintedTokenId;
     }
-
-    // TODO(iain): Add signature based mint function
 
     /** ADMIN MINTING FUNCTIONS */
 

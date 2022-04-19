@@ -66,8 +66,7 @@ contract ZoraNFTBaseTest is DSTest {
             publicSaleActive: true,
             presaleActive: false,
             publicSalePrice: 0.1 ether,
-            presalePrice: 0,
-            maxPurchasePerTransaction: 2,
+            maxSalePurchasePerAddress: 2,
             presaleMerkleRoot: bytes32(0)
         }));
         vm.deal(address(456), 1 ether);
@@ -95,15 +94,14 @@ contract ZoraNFTBaseTest is DSTest {
     function test_MintWrongValue() public setupZoraNFTBase {
         vm.deal(address(456), 1 ether);
         vm.prank(address(456));
-        vm.expectRevert("Not for sale");
+        vm.expectRevert("Sale inactive");
         zoraNFTBase.purchase{value: 0.12 ether}(1);
         vm.prank(DEFAULT_OWNER_ADDRESS);
         zoraNFTBase.setSaleConfiguration(ERC721Drop.SalesConfiguration({
             publicSaleActive: true,
             presaleActive: false,
             publicSalePrice: 0.15 ether,
-            presalePrice: 0,
-            maxPurchasePerTransaction: 2,
+            maxSalePurchasePerAddress: 2,
             presaleMerkleRoot: bytes32(0)
         }));
         vm.prank(address(456));

@@ -10,7 +10,7 @@ import {MerkleProofUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/
 
 import {IZoraFeeManager} from "./interfaces/IZoraFeeManager.sol";
 import {IMetadataRenderer} from "./interfaces/IMetadataRenderer.sol";
-import {IEditionSingleMintable} from "./interfaces/IEditionSingleMintable.sol";
+import {IZoraDrop} from "./interfaces/IZoraDrop.sol";
 import {IOwnable} from "./interfaces/IOwnable.sol";
 import {OwnableSkeleton} from "./utils/OwnableSkeleton.sol";
 
@@ -24,10 +24,10 @@ import {OwnableSkeleton} from "./utils/OwnableSkeleton.sol";
  */
 contract ERC721Drop is
     ERC721AUpgradeable,
-    IEditionSingleMintable,
     IERC2981Upgradeable,
     ReentrancyGuardUpgradeable,
     AccessControlUpgradeable,
+    IZoraDrop,
     OwnableSkeleton
 {
     using AddressUpgradeable for address payable;
@@ -63,10 +63,8 @@ contract ERC721Drop is
         bool presaleActive;
         /// @dev Is the public sale active
         uint64 publicSalePrice;
-        /// @dev Preasale sale price
-        uint64 presalePrice;
         /// @dev Max purchase number per txn
-        uint32 maxPurchasePerTransaction;
+        uint32 maxSalePurchasePerAddress;
         /// @dev Presale merkle root
         bytes32 presaleMerkleRoot;
     }
@@ -99,6 +97,18 @@ contract ERC721Drop is
         _;
     }
 
+    modifier onlyPresaleActive() {
+        require(salesConfig.presaleActive, "Presale inactive");
+
+        _;
+    }
+
+    modifier onlyPublicSaleActive() {
+        require(salesConfig.publicSaleActive, "Sale inactive");
+
+        _;
+    }
+
     function _lastMintedTokenId() internal view returns (uint256) {
         return _currentIndex - 1;
     }
@@ -106,22 +116,8 @@ contract ERC721Drop is
     /**
      * To change the starting tokenId, please override this function.
      */
-    function _startTokenId() internal view override returns (uint256) {
+    function _startTokenId() internal pure override returns (uint256) {
         return 1;
-    }
-
-    /// @notice Feature for contract mint guard
-    modifier contractMintGuard(uint256 mintedNumber) {
-        if (tx.origin != msg.sender) {
-            mintedByContract[tx.origin] += mintedNumber;
-            require(
-                mintedByContract[tx.origin] <=
-                    salesConfig.maxPurchasePerTransaction,
-                "Too many mints from contract"
-            );
-        }
-
-        _;
     }
 
     /// @notice Only a given role has access or admin
@@ -215,19 +211,23 @@ contract ERC721Drop is
     function saleDetails()
         external
         view
-        returns (IEditionSingleMintable.SaleDetails memory)
+        returns (IZoraDrop.SaleDetails memory)
     {
         return
-            IEditionSingleMintable.SaleDetails({
-                publicSaleActive: salesConfig.publicSaleActive &&
-                    salesConfig.publicSalePrice > 0,
+            IZoraDrop.SaleDetails({
+                publicSaleActive: salesConfig.publicSaleActive,
                 publicSalePrice: salesConfig.publicSalePrice,
-                presalePrice: salesConfig.presalePrice,
-                presaleActive: salesConfig.presaleActive &&
-                    salesConfig.presalePrice > 0,
+                presaleActive: salesConfig.presaleActive,
                 totalMinted: _totalMinted(),
-                maxSupply: config.editionSize
+                maxSupply: config.editionSize,
+                maxSalePurchasePerAddress: salesConfig.maxSalePurchasePerAddress
             });
+    }
+
+    /// @dev Number of NFTs the user has minted per address
+    /// @param minter to get count for
+    function mintedPerAddress(address minter) external view returns (uint256) {
+        return _numberMinted(minter);
     }
 
     /// @dev Setup auto-approval for Zora v3 access to sell NFT
@@ -257,16 +257,29 @@ contract ERC721Drop is
         external
         payable
         canMintTokens(quantity)
+        onlyPublicSaleActive
         returns (uint256)
     {
         uint256 salePrice = salesConfig.publicSalePrice;
         require(salePrice > 0, "Not for sale");
-        require(quantity <= salesConfig.maxPurchasePerTransaction, TOO_MANY);
+        // TODO(iain): Should Use tx.origin here to allow for minting from proxy contracts to not break limit and require unique accounts
         require(msg.value == salePrice * quantity, "Wrong price");
+        require(
+            _numberMinted(_msgSender()) <=
+                salesConfig.maxSalePurchasePerAddress,
+            TOO_MANY
+        );
 
         _mintNFTs(_msgSender(), quantity);
-        emit IEditionSingleMintable.Sale(_msgSender(), quantity, salePrice);
-        return _lastMintedTokenId();
+        uint256 firstMintedTokenId = _lastMintedTokenId() - quantity;
+
+        emit IZoraDrop.Sale({
+            to: _msgSender(),
+            quantity: quantity,
+            pricePerToken: salePrice,
+            firstPurchasedTokenId: firstMintedTokenId
+        });
+        return firstMintedTokenId;
     }
 
     function _mintNFTs(address to, uint256 quantity) internal {
@@ -276,38 +289,51 @@ contract ERC721Drop is
     /**
         @notice Merkle-tree based presale purchase function
      */
-    function purchasePresale(uint256 quantity, bytes32[] memory merkleProof)
+    function purchasePresale(
+        uint256 quantity,
+        uint256 maxQuantity,
+        uint256 pricePerToken,
+        bytes32[] memory merkleProof
+    )
         external
         payable
         canMintTokens(quantity)
+        onlyPresaleActive
         returns (uint256)
     {
-        require(quantity <= salesConfig.maxPurchasePerTransaction, TOO_MANY);
         require(
             MerkleProofUpgradeable.verify(
                 merkleProof,
                 salesConfig.presaleMerkleRoot,
-                keccak256(abi.encodePacked(msg.sender))
+                keccak256(
+                    abi.encodePacked(msg.sender, maxQuantity, pricePerToken)
+                )
             ),
             "Needs to be approved"
         );
-        require(
-            msg.value == salesConfig.presalePrice * quantity,
-            "Wrong price"
-        );
+        require(msg.value == pricePerToken * quantity, "Wrong price");
+        require(_numberMinted(_msgSender()) <= maxQuantity, TOO_MANY);
 
         _mintNFTs(_msgSender(), quantity);
-        emit IEditionSingleMintable.Sale(
-            _msgSender(),
-            quantity,
-            salesConfig.presalePrice
-        );
+        uint256 firstMintedTokenId = _lastMintedTokenId() - quantity;
 
-        return _lastMintedTokenId();
+        emit IZoraDrop.Sale({
+            to: _msgSender(),
+            quantity: quantity,
+            pricePerToken: pricePerToken,
+            firstPurchasedTokenId: firstMintedTokenId
+        });
+
+        return firstMintedTokenId;
     }
+
+    // TODO(iain): Add signature based mint function
 
     /** ADMIN MINTING FUNCTIONS */
 
+    /// @notice Mint admin
+    /// @param recipient recipient to mint to
+    /// @param quantity quantity to mint
     function adminMint(address recipient, uint256 quantity)
         external
         onlyRoleOrAdmin(MINTER_ROLE)
@@ -319,8 +345,8 @@ contract ERC721Drop is
         return _lastMintedTokenId();
     }
 
-    /// @param recipients list of addresses to send the newly minted editions to
     /// @dev This mints multiple editions to the given list of addresses.
+    /// @param recipients list of addresses to send the newly minted editions to
     function adminMintAirdrop(address[] calldata recipients)
         external
         override
@@ -401,7 +427,7 @@ contract ERC721Drop is
     function owner()
         public
         view
-        override(OwnableSkeleton, IEditionSingleMintable)
+        override(OwnableSkeleton, IZoraDrop)
         returns (address)
     {
         return super.owner();

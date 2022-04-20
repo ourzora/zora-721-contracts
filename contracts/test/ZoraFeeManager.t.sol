@@ -14,8 +14,7 @@ contract ZoraFeeManagerTest is DSTest {
     address public constant mediaContract = address(123456);
 
     function setUp() public {
-        feeManager = new ZoraFeeManager(1234);
-        feeManager.transferOwnership(DEFAULT_ADMIN_ADDRESS);
+        feeManager = new ZoraFeeManager(1234, DEFAULT_ADMIN_ADDRESS);
         mockUser = new MockUser();
     }
 

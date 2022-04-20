@@ -5,6 +5,7 @@ import {DSTest} from "ds-test/test.sol";
 import {Vm} from "forge-std/Vm.sol";
 
 import {ZoraNFTDropDeployer} from "../ZoraNFTDropDeployer.sol";
+import {IMetadataRenderer} from "../interfaces/IMetadataRenderer.sol";
 
 
 contract ZoraFeeManagerTest is DSTest {
@@ -16,8 +17,7 @@ contract ZoraFeeManagerTest is DSTest {
     function test_deploy() public {
         ZoraNFTDropDeployer deployer = new ZoraNFTDropDeployer(
             ADMIN_ADDRESS,
-            ZORA_PROXY_ADDRESS,
-            SHARED_NFT_LOGIC_ADDRESS
+            IMetadataRenderer(ZORA_PROXY_ADDRESS)
         );
     }
 }

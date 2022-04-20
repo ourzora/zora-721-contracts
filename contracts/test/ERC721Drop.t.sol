@@ -32,12 +32,13 @@ contract ZoraNFTBaseTest is DSTest {
             _metadataRenderer: dummyRenderer,
             _metadataRendererInit: ''
         });
+
         _;
     }
 
     function setUp() public {
         vm.prank(DEFAULT_ZORA_DAO_ADDRESS);
-        feeManager = new ZoraFeeManager(250);
+        feeManager = new ZoraFeeManager(250, DEFAULT_ZORA_DAO_ADDRESS);
         vm.prank(DEFAULT_ZORA_DAO_ADDRESS);
         zoraNFTBase = new ERC721Drop(feeManager, address(1234));
     }
@@ -142,6 +143,12 @@ contract ZoraNFTBaseTest is DSTest {
         assertEq(zoraNFTBase.saleDetails().totalMinted, 2);
     }
 
+    // test Admin airdrop
+
+    // test admin mint non-admin permissions
+
+    // test admin airdrop non-admin permissions
+
     function test_Burn() public setupZoraNFTBase {
         address minter = address(0x32402);
         vm.startPrank(DEFAULT_OWNER_ADDRESS);
@@ -154,6 +161,8 @@ contract ZoraNFTBaseTest is DSTest {
 
         vm.stopPrank();
     }
+
+    // Add test burn failure state for users that don't own the token
 
     function test_eip165() public {
         require(zoraNFTBase.supportsInterface(0x01ffc9a7), "supports 165");

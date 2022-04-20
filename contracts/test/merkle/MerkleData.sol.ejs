@@ -1,0 +1,49 @@
+// SPDX-License-Identifier: GPL-3.0
+pragma solidity 0.8.10;
+
+/***
+****    :WARNING:
+**** This file is auto-generated from a template (MerkleData.sol.ejs).
+**** To update, update the template not the resulting test file.
+****
+****
+***/
+
+contract MerkleData {
+  struct MerkleEntry {
+    address user;
+    uint256 maxMint;
+    uint256 mintPrice;
+    bytes32[] proof;
+  }
+
+  struct TestData {
+    MerkleEntry[] entries;
+    bytes32 root;
+  }
+
+  mapping(string => TestData) public testData;
+
+  function getTestSetByName(string memory name) external view returns (TestData memory) {
+    return testData[name];
+  }
+
+  constructor() {
+    bytes32[] memory proof;
+    <% testData.forEach((item) => { %>
+    testData["<%= item.name %>"].root = <%= item.root %>;
+    <% item.entries.forEach((entry, i) => { %>
+    proof = new bytes32[](<%= entry.proof.length %>);
+    <% entry.proof.forEach((proofItem, ii) => { %>
+    proof[<%= ii %>] = bytes32(<%= proofItem %>);
+    <% }) %>
+    testData["<%= item.name %>"].entries.push(MerkleEntry({
+      user: <%= entry.minter %>,
+      maxMint: <%= entry.maxCount %>,
+      mintPrice: <%= entry.price %>,
+      proof: proof 
+    }));
+    <% }) %>
+    <% }) %>
+  }
+}

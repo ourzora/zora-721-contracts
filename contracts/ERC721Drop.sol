@@ -315,7 +315,8 @@ contract ERC721Drop is
                 merkleProof,
                 salesConfig.presaleMerkleRoot,
                 keccak256(
-                    abi.encodePacked(msg.sender, maxQuantity, pricePerToken)
+                    // address, uint256, uint256
+                    abi.encode(msg.sender, maxQuantity, pricePerToken)
                 )
             ),
             "Needs to be approved"

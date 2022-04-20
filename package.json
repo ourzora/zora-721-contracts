@@ -13,13 +13,25 @@
     "deployments"
   ],
   "scripts": {
-    "test": "forge test"
+    "test": "forge test",
+    "generate-merkle-test-file": "node scripts/merkle-test.mjs",
+    "typechain": "typechain --target=ethers-v5 'dist/artifacts/*/*.json' --out-dir dist/typechain"
   },
   "devDependencies": {
     "dotenv": "^10.0.0"
   },
   "dependencies": {
     "@dotenv/cli": "^2.2.2",
-    "@ethersproject/abi": "^5.6.1"
+    "@ethersproject/abi": "^5.6.1",
+    "@ethersproject/bytes": "^5.6.1",
+    "@ethersproject/hash": "^5.6.0",
+    "@ethersproject/units": "5.6.0",
+    "@typechain/ethers-v5": "10.0.0",
+    "ejs": "^3.1.7",
+    "es-main": "^1.0.2",
+    "keccak256": "^1.0.6",
+    "merkletreejs": "0.2.31",
+    "typechain": "8.0.0",
+    "typescript": "4.6.3"
   }
 }

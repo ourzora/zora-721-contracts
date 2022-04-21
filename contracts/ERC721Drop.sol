@@ -33,8 +33,8 @@ contract ERC721Drop is
 {
     using AddressUpgradeable for address payable;
 
-    event SalesConfigChanged(address indexed changedBy);
-    event FundsRecipientChanged(address indexed newAddress);
+    event SalesConfigChanged(address indexed changedBy, SalesConfiguration salesConfig);
+    event FundsRecipientChanged(address indexed newAddress, address indexed changedBy);
 
     /// @notice Error string constants
     string private constant SOLD_OUT = "Sold out";
@@ -58,12 +58,12 @@ contract ERC721Drop is
 
     /// @notice Sales states and configuration
     struct SalesConfiguration {
+        /// @dev Public sale price
+        uint104 publicSalePrice;
         /// @dev Is the public sale active
         bool publicSaleActive;
         /// @dev Is the presale active
         bool presaleActive;
-        /// @dev Is the public sale active
-        uint64 publicSalePrice;
         /// @dev Max purchase number per txn
         uint32 maxSalePurchasePerAddress;
         /// @dev Presale merkle root
@@ -389,7 +389,7 @@ contract ERC721Drop is
         onlyAdmin
     {
         salesConfig = newConfig;
-        emit SalesConfigChanged(_msgSender());
+        emit SalesConfigChanged(_msgSender(), salesConfig);
     }
 
     /// @dev Set a different funds recipient
@@ -398,7 +398,7 @@ contract ERC721Drop is
         onlyRoleOrAdmin(SALES_MANAGER_ROLE)
     {
         config.fundsRecipient = newRecipientAddress;
-        emit FundsRecipientChanged(newRecipientAddress);
+        emit FundsRecipientChanged(newRecipientAddress, _msgSender());
     }
 
     /// @dev Gets the zora fee for amount of withdraw

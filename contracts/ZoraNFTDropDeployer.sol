@@ -31,7 +31,7 @@ contract ZoraNFTDropDeployer {
     );
 
     ERC721Drop(newMediaContract).initialize({
-        _owner: msg.sender,
+        _owner: owner,
         _name: name,
         _symbol: symbol,
         _fundsRecipient: fundsRecipient,
@@ -41,5 +41,7 @@ contract ZoraNFTDropDeployer {
         _metadataRendererInit: metadataInitializer
     });
     emit DeployedNewContract(newMediaContract);
+
+    return newMediaContract;
   }
 }

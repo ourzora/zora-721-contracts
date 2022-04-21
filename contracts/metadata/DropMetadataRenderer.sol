@@ -99,7 +99,7 @@ contract DropMetadataRenderer is IMetadataRenderer {
             target: target,
             metadataBase: metadataBase,
             metadataExtension: metadataExtension,
-            contractURI: contractURI,
+            contractURI: newContractURI,
             freezeAt: freezeAt
         });
     }

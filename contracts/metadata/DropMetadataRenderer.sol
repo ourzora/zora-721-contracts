@@ -8,6 +8,15 @@ import {ERC721Drop} from "../ERC721Drop.sol";
 
 /// @notice Drops metadata system
 contract DropMetadataRenderer is IMetadataRenderer {
+    event MetadataUpdated(
+        address indexed target,
+        string metadataBase,
+        string metadataExtension,
+        string contractURI,
+        uint256 freezeAt
+    );
+    event ProvenanceHashUpdated(address indexed target, bytes32 provenanceHash);
+
     struct MetadataURIInfo {
         string base;
         string extension;
@@ -25,11 +34,27 @@ contract DropMetadataRenderer is IMetadataRenderer {
     }
 
     mapping(address => MetadataURIInfo) public metadataBaseByContract;
+    mapping(address => bytes32) public provenanceHashes;
 
     function initializeWithData(bytes memory data) external {
         // data format: target, baseURI, newContractURI
-        (string memory initialBaseURI, string memory initialContractURI) = abi.decode(data, (string, string));
-        _updateMetadataDetails(msg.sender, initialBaseURI, "", initialContractURI, 0);
+        (string memory initialBaseURI, string memory initialContractURI) = abi
+            .decode(data, (string, string));
+        _updateMetadataDetails(
+            msg.sender,
+            initialBaseURI,
+            "",
+            initialContractURI,
+            0
+        );
+    }
+
+    function updateProvenanceHash(address target, bytes32 provenanceHash)
+        external
+        requireSenderAdmin(target)
+    {
+        provenanceHashes[target] = provenanceHash;
+        emit ProvenanceHashUpdated(target, provenanceHash);
     }
 
     function updateMetadataBase(
@@ -67,6 +92,13 @@ contract DropMetadataRenderer is IMetadataRenderer {
         metadataBaseByContract[target] = MetadataURIInfo({
             base: metadataBase,
             extension: metadataExtension,
+            contractURI: newContractURI,
+            freezeAt: freezeAt
+        });
+        emit MetadataUpdated({
+            target: target,
+            metadataBase: metadataBase,
+            metadataExtension: metadataExtension,
             contractURI: newContractURI,
             freezeAt: freezeAt
         });

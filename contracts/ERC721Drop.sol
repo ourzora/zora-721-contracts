@@ -38,7 +38,10 @@ contract ERC721Drop is
         address indexed changedBy,
         SalesConfiguration salesConfig
     );
+<<<<<<< HEAD
+=======
 
+>>>>>>> origin/main
     event FundsRecipientChanged(
         address indexed newAddress,
         address indexed changedBy
@@ -103,10 +106,10 @@ contract ERC721Drop is
     /// @dev ZORA V3 transfer helper address for auto-approval
     address private immutable zoraERC721TransferHelper;
 
-    /// @dev Mapping for contract mint protection
-    mapping(address => uint256) private mintedByContract;
+    /// @dev Mapping for presale mint counts by address to allow public mint limit
+    mapping(address => uint256) public presaleMintsByAddress;
 
-    /// @dev Zora Fee Manager Address
+    /// @dev Zora Fee Manager address
     IZoraFeeManager public immutable zoraFeeManager;
 
     /// @notice Only allow for users with admin access
@@ -292,7 +295,14 @@ contract ERC721Drop is
         return super.isApprovedForAll(nftOwner, operator);
     }
 
-    /** PUBLIC MINTING FUNCTIONS */
+    /**
+    *** ---------------------------------- ***
+    ***                                    ***
+    ***     PUBLIC MINTING FUNCTIONS       ***
+    ***                                    ***
+    *** ---------------------------------- ***
+    ***
+    ** */
 
     /**
       @dev This allows the user to purchase a edition edition
@@ -311,7 +321,7 @@ contract ERC721Drop is
         // TODO(iain): Should Use tx.origin here to allow for minting from proxy contracts to not break limit and require unique accounts
         require(msg.value == salePrice * quantity, "Wrong price");
         require(
-            _numberMinted(_msgSender()) + quantity <=
+            _numberMinted(_msgSender()) + quantity - presaleMintsByAddress[_msgSender()] <=
                 salesConfig.maxSalePurchasePerAddress,
             TOO_MANY
         );
@@ -330,6 +340,8 @@ contract ERC721Drop is
 
     /// @dev Function to mint NFTs
     /// @notice (important: Does not enforce max supply limit, enforce that limit earlier)
+    /// @param to address to mint NFTs to
+    /// @param quantity number of NFTs to mint
     function _mintNFTs(address to, uint256 quantity) internal {
         _mint({to: to, quantity: quantity, _data: "", safe: false});
     }
@@ -374,6 +386,8 @@ contract ERC721Drop is
             pricePerToken: pricePerToken,
             firstPurchasedTokenId: firstMintedTokenId
         });
+
+        presaleMintsByAddress[_msgSender()] += quantity;
 
         return firstMintedTokenId;
     }
@@ -424,7 +438,8 @@ contract ERC721Drop is
         _setOwner(newOwner);
     }
 
-    ///  @dev This sets the sales configuration
+    /// @dev This sets the sales configuration
+    /// @param newConfig new configuration to set for sales information
     function setSaleConfiguration(SalesConfiguration memory newConfig)
         external
         onlyAdmin
@@ -434,6 +449,7 @@ contract ERC721Drop is
     }
 
     /// @dev Set a different funds recipient
+    /// @param newRecipientAddress new funds recipient address
     function setFundsRecipient(address payable newRecipientAddress)
         external
         onlyRoleOrAdmin(SALES_MANAGER_ROLE)
@@ -471,7 +487,7 @@ contract ERC721Drop is
         config.fundsRecipient.sendValue(funds);
     }
 
-    /// Simple override for owner interface.
+    /// @notice Simple override for owner interface.
     /// @return user owner address
     function owner()
         public

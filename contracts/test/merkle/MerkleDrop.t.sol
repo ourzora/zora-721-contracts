@@ -50,8 +50,10 @@ contract ZoraNFTBaseTest is DSTest {
         vm.startPrank(DEFAULT_OWNER_ADDRESS);
         zoraNFTBase.setSaleConfiguration(
             ERC721Drop.SalesConfiguration({
-                publicSaleActive: true,
-                presaleActive: true,
+                publicSaleStart: 0,
+                publicSaleEnd: 0,
+                presaleStart: 0,
+                presaleEnd: type(uint64).max,
                 publicSalePrice: 0 ether,
                 maxSalePurchasePerAddress: 0,
                 presaleMerkleRoot: merkleData
@@ -105,10 +107,14 @@ contract ZoraNFTBaseTest is DSTest {
     }
     function test_MerklePurchaseInactiveFails() public setupZoraNFTBase {
         vm.startPrank(DEFAULT_OWNER_ADDRESS);
+        // block.timestamp returning zero allows sales to go through.
+        vm.warp(100);
         zoraNFTBase.setSaleConfiguration(
             ERC721Drop.SalesConfiguration({
-                publicSaleActive: true,
-                presaleActive: false,
+                publicSaleStart: 0,
+                publicSaleEnd: 0,
+                presaleStart: 0,
+                presaleEnd: 0,
                 publicSalePrice: 0 ether,
                 maxSalePurchasePerAddress: 0,
                 presaleMerkleRoot: merkleData

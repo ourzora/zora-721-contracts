@@ -22,20 +22,20 @@ contract MerkleData {
         bytes32 root;
     }
 
-    mapping(string => TestData) public testData;
+    mapping(string => TestData) public data;
 
     function getTestSetByName(string memory name)
         external
         view
         returns (TestData memory)
     {
-        return testData[name];
+        return data[name];
     }
 
     constructor() {
         bytes32[] memory proof;
 
-        testData["test-3-addresses"]
+        data["test-3-addresses"]
             .root = 0x17fd3b63857e2260948e1b1c1eb2029cbc98e0c78713197225324a234b319cd1;
 
         proof = new bytes32[](2);
@@ -48,7 +48,7 @@ contract MerkleData {
             0xc97b6b12a9053ef9561f3ba1a26d6f089fa77055a4a254f71094c89168ae2aaf
         );
 
-        testData["test-3-addresses"].entries.push(
+        data["test-3-addresses"].entries.push(
             MerkleEntry({
                 user: 0x0000000000000000000000000000000000000010,
                 maxMint: 1,
@@ -67,7 +67,7 @@ contract MerkleData {
             0xc97b6b12a9053ef9561f3ba1a26d6f089fa77055a4a254f71094c89168ae2aaf
         );
 
-        testData["test-3-addresses"].entries.push(
+        data["test-3-addresses"].entries.push(
             MerkleEntry({
                 user: 0x0000000000000000000000000000000000000011,
                 maxMint: 2,
@@ -82,7 +82,7 @@ contract MerkleData {
             0x0e39a7a99a7f041bb3d20ec2d4724dd9541d631fdaf2c15820def3c077c71e26
         );
 
-        testData["test-3-addresses"].entries.push(
+        data["test-3-addresses"].entries.push(
             MerkleEntry({
                 user: 0x0000000000000000000000000000000000000012,
                 maxMint: 3,
@@ -91,7 +91,7 @@ contract MerkleData {
             })
         );
 
-        testData["test-2-prices"]
+        data["test-2-prices"]
             .root = 0xb7d8ff9be4b222c3049431d7b5982cbd3e64e5902f0ca4a2e3527be999a12d87;
 
         proof = new bytes32[](1);
@@ -100,7 +100,7 @@ contract MerkleData {
             0xcd1f92f2177fa8f6c51829045204caf23439f3e448bb0b94e5134e5b9f11ea4c
         );
 
-        testData["test-2-prices"].entries.push(
+        data["test-2-prices"].entries.push(
             MerkleEntry({
                 user: 0x0000000000000000000000000000000000000010,
                 maxMint: 2,
@@ -115,7 +115,7 @@ contract MerkleData {
             0xbabae39e08c9636595a1a4edd5850334f105c1cedb96c37659d1a9e39cb48615
         );
 
-        testData["test-2-prices"].entries.push(
+        data["test-2-prices"].entries.push(
             MerkleEntry({
                 user: 0x0000000000000000000000000000000000000010,
                 maxMint: 2,
@@ -124,7 +124,7 @@ contract MerkleData {
             })
         );
 
-        testData["test-max-count"]
+        data["test-max-count"]
             .root = 0xb7d8ff9be4b222c3049431d7b5982cbd3e64e5902f0ca4a2e3527be999a12d87;
 
         proof = new bytes32[](1);
@@ -133,7 +133,7 @@ contract MerkleData {
             0xcd1f92f2177fa8f6c51829045204caf23439f3e448bb0b94e5134e5b9f11ea4c
         );
 
-        testData["test-max-count"].entries.push(
+        data["test-max-count"].entries.push(
             MerkleEntry({
                 user: 0x0000000000000000000000000000000000000010,
                 maxMint: 2,
@@ -148,7 +148,7 @@ contract MerkleData {
             0xbabae39e08c9636595a1a4edd5850334f105c1cedb96c37659d1a9e39cb48615
         );
 
-        testData["test-max-count"].entries.push(
+        data["test-max-count"].entries.push(
             MerkleEntry({
                 user: 0x0000000000000000000000000000000000000010,
                 maxMint: 2,

@@ -30,12 +30,18 @@ contract ERC721Drop is
     IZoraDrop,
     OwnableSkeleton
 {
+    uint256 private constant VERSION = 2;
+
     using AddressUpgradeable for address payable;
 
     event SalesConfigChanged(
         address indexed changedBy,
         SalesConfiguration salesConfig
     );
+<<<<<<< HEAD
+=======
+
+>>>>>>> origin/main
     event FundsRecipientChanged(
         address indexed newAddress,
         address indexed changedBy
@@ -48,6 +54,11 @@ contract ERC721Drop is
     /// @notice Access control roles
     bytes32 public immutable MINTER_ROLE = keccak256("MINTER");
     bytes32 public immutable SALES_MANAGER_ROLE = keccak256("SALES_MANAGER");
+
+    /// @dev Returns the version of the contract.
+    function contractVersion() external pure returns (uint8) {
+        return uint8(VERSION);
+    }
 
     /// @notice General configuration for NFT Minting and bookkeeping
     struct Configuration {
@@ -62,15 +73,26 @@ contract ERC721Drop is
     }
 
     /// @notice Sales states and configuration
+    /// @dev Uses 3 storage slots
     struct SalesConfiguration {
         /// @dev Public sale price
         uint104 publicSalePrice;
-        /// @dev Is the public sale active
-        bool publicSaleActive;
-        /// @dev Is the presale active
-        bool presaleActive;
         /// @dev Max purchase number per txn
         uint32 maxSalePurchasePerAddress;
+        /// @dev uint64 type allows for dates into 292 billion years
+
+        // Storage: uses 1 slot
+
+        /// @dev Public sale start timestamp
+        uint64 publicSaleStart;
+        /// @dev Public sale end timestamp
+        uint64 publicSaleEnd;
+        /// @dev Presale start timestamp
+        uint64 presaleStart;
+        /// @dev Presale end timestamp
+        uint64 presaleEnd;
+        // Storage: uses 1 slot
+
         /// @dev Presale merkle root
         bytes32 presaleMerkleRoot;
     }
@@ -104,16 +126,28 @@ contract ERC721Drop is
         _;
     }
 
+    function _presaleActive() internal view returns (bool) {
+        return
+            salesConfig.presaleStart <= block.timestamp &&
+            salesConfig.presaleEnd > block.timestamp;
+    }
+
+    function _publicSaleActive() internal view returns (bool) {
+        return
+            salesConfig.publicSaleStart <= block.timestamp &&
+            salesConfig.publicSaleEnd > block.timestamp;
+    }
+
     /// @notice Presale active
     modifier onlyPresaleActive() {
-        require(salesConfig.presaleActive, "Presale inactive");
+        require(_presaleActive(), "Presale inactive");
 
         _;
     }
 
     /// @notice Public sale active
     modifier onlyPublicSaleActive() {
-        require(salesConfig.publicSaleActive, "Sale inactive");
+        require(_publicSaleActive(), "Sale inactive");
 
         _;
     }
@@ -225,9 +259,14 @@ contract ERC721Drop is
     {
         return
             IZoraDrop.SaleDetails({
-                publicSaleActive: salesConfig.publicSaleActive,
+                publicSaleActive: _publicSaleActive(),
+                presaleActive: _presaleActive(),
+                presaleStart: salesConfig.presaleStart,
+                presaleEnd: salesConfig.presaleEnd,
+                publicSaleStart: salesConfig.publicSaleStart,
+                publicSaleEnd: salesConfig.publicSaleEnd,
+                presaleMerkleRoot: salesConfig.presaleMerkleRoot,
                 publicSalePrice: salesConfig.publicSalePrice,
-                presaleActive: salesConfig.presaleActive,
                 totalMinted: _totalMinted(),
                 maxSupply: config.editionSize,
                 maxSalePurchasePerAddress: salesConfig.maxSalePurchasePerAddress
@@ -282,7 +321,7 @@ contract ERC721Drop is
         // TODO(iain): Should Use tx.origin here to allow for minting from proxy contracts to not break limit and require unique accounts
         require(msg.value == salePrice * quantity, "Wrong price");
         require(
-            _numberMinted(_msgSender()) - presaleMintsByAddress[_msgSender()] <=
+            _numberMinted(_msgSender()) + quantity - presaleMintsByAddress[_msgSender()] <=
                 salesConfig.maxSalePurchasePerAddress,
             TOO_MANY
         );
@@ -316,7 +355,7 @@ contract ERC721Drop is
         uint256 quantity,
         uint256 maxQuantity,
         uint256 pricePerToken,
-        bytes32[] memory merkleProof
+        bytes32[] calldata merkleProof
     )
         external
         payable
@@ -492,6 +531,7 @@ contract ERC721Drop is
         return
             super.supportsInterface(interfaceId) ||
             type(IOwnable).interfaceId == interfaceId ||
-            type(IERC2981Upgradeable).interfaceId == interfaceId;
+            type(IERC2981Upgradeable).interfaceId == interfaceId ||
+            type(IZoraDrop).interfaceId == interfaceId;
     }
 }

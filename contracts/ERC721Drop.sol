@@ -62,16 +62,27 @@ contract ERC721Drop is
     }
 
     /// @notice Sales states and configuration
+    /// @dev Uses 3 storage slots
     struct SalesConfiguration {
         /// @dev Public sale price
         uint104 publicSalePrice;
         /// @dev Max purchase number per txn
         uint32 maxSalePurchasePerAddress;
 
+        /// @dev uint64 type allows for dates into 292 billion years
+
+        // Storage: uses 1 slot
+
+        /// @dev Public sale start timestamp
         uint64 publicSaleStart;
+        /// @dev Public sale end timestamp
         uint64 publicSaleEnd;
+        /// @dev Presale start timestamp
         uint64 presaleStart;
+        /// @dev Presale end timestamp
         uint64 presaleEnd;
+
+        // Storage: uses 1 slot
 
         /// @dev Presale merkle root
         bytes32 presaleMerkleRoot;

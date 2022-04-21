@@ -85,6 +85,53 @@ contract ERC721DropTest is DSTest {
         );
     }
 
+    function test_PurchaseTime() public setupZoraNFTBase {
+        vm.prank(DEFAULT_OWNER_ADDRESS);
+        zoraNFTBase.setSaleConfiguration(ERC721Drop.SalesConfiguration({
+            publicSaleStart: 0,
+            publicSaleEnd: 0,
+            presaleStart: 0,
+            presaleEnd: 0,
+            publicSalePrice: 0.1 ether,
+            maxSalePurchasePerAddress: 2,
+            presaleMerkleRoot: bytes32(0)
+        }));
+
+        assertTrue(!zoraNFTBase.saleDetails().publicSaleActive);
+
+        vm.deal(address(456), 1 ether);
+        vm.prank(address(456));
+        vm.expectRevert("Sale inactive");
+        zoraNFTBase.purchase{value: 0.1 ether}(1);
+
+        assertEq(zoraNFTBase.saleDetails().maxSupply, 10);
+        assertEq(zoraNFTBase.saleDetails().totalMinted, 0);
+
+        vm.prank(DEFAULT_OWNER_ADDRESS);
+        zoraNFTBase.setSaleConfiguration(ERC721Drop.SalesConfiguration({
+            publicSaleStart: 9 * 3600,
+            publicSaleEnd: 11 * 3600,
+            presaleStart: 0,
+            presaleEnd: 0,
+            
+            maxSalePurchasePerAddress: 20,
+            publicSalePrice: 0.1 ether,
+            presaleMerkleRoot: bytes32(0)
+        }));
+
+        assertTrue(!zoraNFTBase.saleDetails().publicSaleActive);
+        // jan 1st 1980
+        vm.warp(10 * 3600);
+        assertTrue(zoraNFTBase.saleDetails().publicSaleActive);
+        assertTrue(!zoraNFTBase.saleDetails().presaleActive);
+
+        vm.prank(address(456));
+        zoraNFTBase.purchase{value: 0.1 ether}(1);
+
+        assertEq(zoraNFTBase.saleDetails().totalMinted, 1);
+        assertEq(zoraNFTBase.ownerOf(1), address(456));
+    }
+
     function test_Mint() public setupZoraNFTBase {
         vm.prank(DEFAULT_OWNER_ADDRESS);
         zoraNFTBase.adminMint(DEFAULT_OWNER_ADDRESS, 1);

@@ -38,10 +38,7 @@ contract ERC721Drop is
         address indexed changedBy,
         SalesConfiguration salesConfig
     );
-<<<<<<< HEAD
-=======
 
->>>>>>> origin/main
     event FundsRecipientChanged(
         address indexed newAddress,
         address indexed changedBy

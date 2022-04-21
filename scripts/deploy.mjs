@@ -1,7 +1,9 @@
 import { deployAndVerify } from "./contract.mjs";
 import { writeFile } from "fs/promises";
+import esMain from "es-main";
 
 // RINKEBY CONSTANTS
+// TODO: Move to env file
 const feeManagerAdmin = "0x9444390c01Dd5b7249E53FAc31290F7dFF53450D";
 const zoraERC721TransferHelperAddress =
   "0x029AA5a949C9C90916729D50537062cb73b5Ac92";
@@ -40,7 +42,7 @@ async function main() {
   writeFile(`./deployments/${date}.json`, JSON.stringify(output));
 }
 
-if (require.main === module) {
+if (esMain(import.meta)) {
   // Run main
   await main();
 }

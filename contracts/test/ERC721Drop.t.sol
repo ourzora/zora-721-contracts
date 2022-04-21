@@ -3,17 +3,17 @@ pragma solidity 0.8.10;
 
 import {Vm} from "forge-std/Vm.sol";
 import {DSTest} from "ds-test/test.sol";
-import {ZoraNFTBase} from "../ZoraNFTBase.sol";
-import {ZoraDAOFeeManager} from "../ZoraDAOFeeManager.sol";
+import {ERC721Drop} from "../ERC721Drop.sol";
+import {ZoraFeeManager} from "../ZoraFeeManager.sol";
 import {DummyMetadataRenderer} from "./utils/DummyMetadataRenderer.sol";
 import {MockUser} from "./utils/MockUser.sol";
 
 contract ZoraNFTBaseTest is DSTest {
-    ZoraNFTBase zoraNFTBase;
+    ERC721Drop zoraNFTBase;
     MockUser mockUser;
     Vm public constant vm = Vm(HEVM_ADDRESS);
     DummyMetadataRenderer public dummyRenderer = new DummyMetadataRenderer();
-    ZoraDAOFeeManager public feeManager;
+    ZoraFeeManager public feeManager;
     address public constant DEFAULT_OWNER_ADDRESS = address(0x23499);
     address payable public constant DEFAULT_FUNDS_RECIPIENT_ADDRESS =
         payable(address(0x21303));
@@ -29,16 +29,18 @@ contract ZoraNFTBaseTest is DSTest {
             _fundsRecipient: payable(DEFAULT_FUNDS_RECIPIENT_ADDRESS),
             _editionSize: 10,
             _royaltyBPS: 800,
-            _metadataRenderer: dummyRenderer
+            _metadataRenderer: dummyRenderer,
+            _metadataRendererInit: ''
         });
+
         _;
     }
 
     function setUp() public {
         vm.prank(DEFAULT_ZORA_DAO_ADDRESS);
-        feeManager = new ZoraDAOFeeManager(250);
+        feeManager = new ZoraFeeManager(250, DEFAULT_ZORA_DAO_ADDRESS);
         vm.prank(DEFAULT_ZORA_DAO_ADDRESS);
-        zoraNFTBase = new ZoraNFTBase(feeManager, address(1234));
+        zoraNFTBase = new ERC721Drop(feeManager, address(1234));
     }
 
     function test_Init() public setupZoraNFTBase {
@@ -54,34 +56,20 @@ contract ZoraNFTBaseTest is DSTest {
             _fundsRecipient: payable(DEFAULT_FUNDS_RECIPIENT_ADDRESS),
             _editionSize: 10,
             _royaltyBPS: 800,
-            _metadataRenderer: dummyRenderer
+            _metadataRenderer: dummyRenderer,
+            _metadataRendererInit: ''
         });
-    }
-
-    function test_UpdateContractURI() public setupZoraNFTBase {
-        require(
-            bytes(zoraNFTBase.contractURI()).length == 0,
-            "Contract URI set by default"
-        );
-        vm.prank(DEFAULT_OWNER_ADDRESS);
-        zoraNFTBase.updateContractURI(
-            "https://data.zora.co/beautiful-contract/data.json"
-        );
-        assertEq(
-            zoraNFTBase.contractURI(),
-            "https://data.zora.co/beautiful-contract/data.json",
-            "Contract URI set by default"
-        );
-        vm.prank(address(39));
-        vm.expectRevert("Only admin allowed");
-        zoraNFTBase.updateContractURI(
-            "https://data.zora.co/beautiful-contract/data.json"
-        );
     }
 
     function test_Purchase() public setupZoraNFTBase {
         vm.prank(DEFAULT_OWNER_ADDRESS);
-        zoraNFTBase.setSalePrice(0.1 ether, 1);
+        zoraNFTBase.setSaleConfiguration(ERC721Drop.SalesConfiguration({
+            publicSaleActive: true,
+            presaleActive: false,
+            publicSalePrice: 0.1 ether,
+            maxSalePurchasePerAddress: 2,
+            presaleMerkleRoot: bytes32(0)
+        }));
         vm.deal(address(456), 1 ether);
         vm.prank(address(456));
         zoraNFTBase.purchase{value: 0.1 ether}(1);
@@ -95,22 +83,28 @@ contract ZoraNFTBaseTest is DSTest {
 
     function test_Mint() public setupZoraNFTBase {
         vm.prank(DEFAULT_OWNER_ADDRESS);
-        zoraNFTBase.mint(DEFAULT_OWNER_ADDRESS, 1);
+        zoraNFTBase.adminMint(DEFAULT_OWNER_ADDRESS, 1);
         assertEq(zoraNFTBase.saleDetails().maxSupply, 10);
         assertEq(zoraNFTBase.saleDetails().totalMinted, 1);
         require(
             zoraNFTBase.ownerOf(1) == DEFAULT_OWNER_ADDRESS,
-            "owner is wrong for new minted token"
+            "Owner is wrong for new minted token"
         );
     }
 
     function test_MintWrongValue() public setupZoraNFTBase {
         vm.deal(address(456), 1 ether);
         vm.prank(address(456));
-        vm.expectRevert("Not for sale");
+        vm.expectRevert("Sale inactive");
         zoraNFTBase.purchase{value: 0.12 ether}(1);
         vm.prank(DEFAULT_OWNER_ADDRESS);
-        zoraNFTBase.setSalePrice(0.1 ether, 1);
+        zoraNFTBase.setSaleConfiguration(ERC721Drop.SalesConfiguration({
+            publicSaleActive: true,
+            presaleActive: false,
+            publicSalePrice: 0.15 ether,
+            maxSalePurchasePerAddress: 2,
+            presaleMerkleRoot: bytes32(0)
+        }));
         vm.prank(address(456));
         vm.expectRevert("Wrong price");
         zoraNFTBase.purchase{value: 0.12 ether}(1);
@@ -136,7 +130,7 @@ contract ZoraNFTBaseTest is DSTest {
     function test_AdminMint() public setupZoraNFTBase {
         address minter = address(0x32402);
         vm.startPrank(DEFAULT_OWNER_ADDRESS);
-        zoraNFTBase.mint(DEFAULT_OWNER_ADDRESS, 1);
+        zoraNFTBase.adminMint(DEFAULT_OWNER_ADDRESS, 1);
         require(
             zoraNFTBase.balanceOf(DEFAULT_OWNER_ADDRESS) == 1,
             "Wrong balance"
@@ -144,10 +138,16 @@ contract ZoraNFTBaseTest is DSTest {
         zoraNFTBase.grantRole(zoraNFTBase.MINTER_ROLE(), minter);
         vm.stopPrank();
         vm.prank(minter);
-        zoraNFTBase.mint(minter, 1);
+        zoraNFTBase.adminMint(minter, 1);
         require(zoraNFTBase.balanceOf(minter) == 1, "Wrong balance");
         assertEq(zoraNFTBase.saleDetails().totalMinted, 2);
     }
+
+    // test Admin airdrop
+
+    // test admin mint non-admin permissions
+
+    // test admin airdrop non-admin permissions
 
     function test_Burn() public setupZoraNFTBase {
         address minter = address(0x32402);
@@ -157,10 +157,12 @@ contract ZoraNFTBaseTest is DSTest {
         vm.startPrank(minter);
         address[] memory airdrop = new address[](1);
         airdrop[0] = minter;
-        zoraNFTBase.mintAirdrop(airdrop);
+        zoraNFTBase.adminMintAirdrop(airdrop);
 
         vm.stopPrank();
     }
+
+    // Add test burn failure state for users that don't own the token
 
     function test_eip165() public {
         require(zoraNFTBase.supportsInterface(0x01ffc9a7), "supports 165");

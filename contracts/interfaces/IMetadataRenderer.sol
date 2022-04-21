@@ -3,6 +3,7 @@
 pragma solidity ^0.8.10;
 
 interface IMetadataRenderer {
-    function tokenURI(address, uint256) external returns (string memory);
-    function contractURI(address) external returns (string memory);
+    function tokenURI(uint256) external view returns (string memory);
+    function contractURI() external view returns (string memory);
+    function initializeWithData(bytes memory initData) external;
 }

@@ -1,5 +1,6 @@
 @openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/
 @openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/
+erc721a-upgradeable=lib/ERC721A-Upgradeable/contracts/
 base64/=lib/base64/
 ds-test/=lib/ds-test/src/
 forge-std/=lib/forge-std/src/

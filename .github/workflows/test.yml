@@ -1,0 +1,19 @@
+name: Run Tests
+on: [push]
+jobs:
+  build:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: recursive
+      - uses: actions/setup-node@v2
+        with:
+          node-version: "16"
+      - run: npm install
+      - uses: onbjerg/foundry-toolchain@v1
+        with:
+          version: nightly
+      - run: forge test
+

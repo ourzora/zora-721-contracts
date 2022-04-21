@@ -2,20 +2,19 @@
 pragma solidity 0.8.10;
 
 import {DSTest} from "ds-test/test.sol";
-import {ZoraDAOFeeManager} from "../ZoraDAOFeeManager.sol";
+import {ZoraFeeManager} from "../ZoraFeeManager.sol";
 import {MockUser} from "./utils/MockUser.sol";
 import {Vm} from "forge-std/Vm.sol";
 
-contract ZoraDAOFeeManagerTest is DSTest {
-    ZoraDAOFeeManager feeManager;
+contract ZoraFeeManagerTest is DSTest {
+    ZoraFeeManager feeManager;
     MockUser mockUser;
     Vm public constant vm = Vm(HEVM_ADDRESS);
     address public constant DEFAULT_ADMIN_ADDRESS = address(23499);
     address public constant mediaContract = address(123456);
 
     function setUp() public {
-        feeManager = new ZoraDAOFeeManager(1234);
-        feeManager.transferOwnership(DEFAULT_ADMIN_ADDRESS);
+        feeManager = new ZoraFeeManager(1234, DEFAULT_ADMIN_ADDRESS);
         mockUser = new MockUser();
     }
 

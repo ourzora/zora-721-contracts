@@ -9,7 +9,8 @@ import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/U
 import {EditionMetadataRenderer} from "./metadata/EditionMetadataRenderer.sol";
 import {DropMetadataRenderer} from "./metadata/DropMetadataRenderer.sol";
 import {IMetadataRenderer} from "./interfaces/IMetadataRenderer.sol";
-import {ZoraNFTBase} from "./ZoraNFTBase.sol";
+import {ERC721Drop} from "./ERC721Drop.sol";
+
 
 /// @dev Zora NFT Creator V1
 contract ZoraNFTCreatorV1 is OwnableUpgradeable, UUPSUpgradeable {
@@ -70,7 +71,8 @@ contract ZoraNFTCreatorV1 is OwnableUpgradeable, UUPSUpgradeable {
         uint64 editionSize,
         uint16 royaltyBPS,
         address payable fundsRecipient,
-        IMetadataRenderer metadataRenderer
+        IMetadataRenderer metadataRenderer,
+        bytes memory metadataInitializer
     ) internal returns (uint256, address) {
         uint256 newId = atContract.current();
         address newMediaContract = ClonesUpgradeable.cloneDeterministic(
@@ -78,14 +80,15 @@ contract ZoraNFTCreatorV1 is OwnableUpgradeable, UUPSUpgradeable {
             bytes32(abi.encodePacked(newId))
         );
 
-        ZoraNFTBase(newMediaContract).initialize({
+        ERC721Drop(newMediaContract).initialize({
             _owner: msg.sender,
             _name: name,
             _symbol: symbol,
             _fundsRecipient: fundsRecipient,
             _editionSize: editionSize,
             _royaltyBPS: royaltyBPS,
-            _metadataRenderer: metadataRenderer
+            _metadataRenderer: metadataRenderer,
+            _metadataRendererInit: metadataInitializer
         });
         atContract.increment();
         emit CreatedEdition(newId, msg.sender, editionSize, newMediaContract);
@@ -110,19 +113,16 @@ contract ZoraNFTCreatorV1 is OwnableUpgradeable, UUPSUpgradeable {
         string memory metadataURIBase,
         string memory metadataContractURI
     ) external returns (uint256) {
+        bytes memory metadataInitializer = abi.encode(metadataURIBase, metadataContractURI);
         (uint256 newId, address mediaContract) = _setupMediaContract({
             name: name,
             symbol: symbol,
             royaltyBPS: royaltyBPS,
             editionSize: editionSize,
             fundsRecipient: fundsRecipient,
-            metadataRenderer: dropMetadataRenderer
+            metadataRenderer: dropMetadataRenderer,
+            metadataInitializer: metadataInitializer
         });
-        dropMetadataRenderer.updateMetadataBase(
-            mediaContract,
-            metadataURIBase,
-            metadataContractURI
-        );
 
         return newId;
     }
@@ -135,9 +135,9 @@ contract ZoraNFTCreatorV1 is OwnableUpgradeable, UUPSUpgradeable {
     /// @param royaltyBPS BPS amount of royalty
     /// @param fundsRecipient Funds recipient for the NFT sale
     /// @param description Metadata: Description of the edition entry
-    /// @param animationUrl Metadata: Animation url (optional) of the edition entry
+    /// @param animationURI Metadata: Animation url (optional) of the edition entry
     /// @param animationHash Metadata: SHA-256 Hash of the animation (if no animation url, can be 0x0)
-    /// @param imageUrl Metadata: Image url (semi-required) of the edition entry
+    /// @param imageURI Metadata: Image url (semi-required) of the edition entry
     /// @param imageHash Metadata: SHA-256 hash of the Image of the edition entry (if not image, can be 0x0)
     function createEdition(
         string memory name,
@@ -146,28 +146,22 @@ contract ZoraNFTCreatorV1 is OwnableUpgradeable, UUPSUpgradeable {
         uint16 royaltyBPS,
         address payable fundsRecipient,
         string memory description,
-        string memory animationUrl,
+        string memory animationURI,
         // stored as calldata
         bytes32 animationHash,
-        string memory imageUrl,
+        string memory imageURI,
         // stored as calldata
         bytes32 imageHash
     ) external returns (uint256) {
+        bytes memory metadataInitializer = abi.encode(description, imageURI, animationURI);
         (uint256 newId, address mediaContract) = _setupMediaContract({
             name: name,
             symbol: symbol,
             royaltyBPS: royaltyBPS,
             editionSize: editionSize,
             fundsRecipient: fundsRecipient,
-            metadataRenderer: editionMetadataRenderer
-        });
-        editionMetadataRenderer.setEditionDataForContract({
-            target: mediaContract,
-            description: description,
-            imageUrl: imageUrl,
-            imageHash: imageHash,
-            animationUrl: animationUrl,
-            animationHash: animationHash
+            metadataRenderer: editionMetadataRenderer,
+            metadataInitializer: metadataInitializer
         });
 
         return newId;
@@ -179,10 +173,10 @@ contract ZoraNFTCreatorV1 is OwnableUpgradeable, UUPSUpgradeable {
     function getEditionAtId(uint256 editionId)
         external
         view
-        returns (ZoraNFTBase)
+        returns (ERC721Drop)
     {
         return
-            ZoraNFTBase(
+            ERC721Drop(
                 ClonesUpgradeable.predictDeterministicAddress(
                     implementation,
                     bytes32(abi.encodePacked(editionId)),

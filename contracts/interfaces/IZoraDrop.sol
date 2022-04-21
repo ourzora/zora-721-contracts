@@ -4,9 +4,16 @@ pragma solidity ^0.8.10;
 interface IZoraDrop {
   struct SaleDetails {
     // built-in eth sales
-    bool publicSaleActive;
-    uint256 publicSalePrice;
     bool presaleActive;
+    bool publicSaleActive;
+
+    uint64 publicSaleStart;
+    uint64 publicSaleEnd;
+    uint256 publicSalePrice;
+
+    uint64 presaleStart;
+    uint64 presaleEnd;
+    bytes32 presaleMerkleRoot;
 
     uint256 maxSalePurchasePerAddress;
 

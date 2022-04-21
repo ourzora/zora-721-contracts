@@ -105,6 +105,67 @@ contract ZoraNFTBaseTest is DSTest {
         );
         vm.stopPrank();
     }
+
+    function test_MerklePurchaseAndPublicSalePurchaseLimits() public setupZoraNFTBase {
+        vm.startPrank(DEFAULT_OWNER_ADDRESS);
+        zoraNFTBase.setSaleConfiguration(
+            ERC721Drop.SalesConfiguration({
+                publicSaleStart: 0,
+                publicSaleEnd: type(uint64).max,
+                presaleStart: 0,
+                presaleEnd: type(uint64).max,
+                publicSalePrice: 0.1 ether,
+                maxSalePurchasePerAddress: 1,
+                presaleMerkleRoot: merkleData
+                    .getTestSetByName("test-2-prices")
+                    .root
+            })
+        );
+        vm.stopPrank();
+
+        MerkleData.MerkleEntry memory item;
+
+        item = merkleData
+            .getTestSetByName("test-2-prices")
+            .entries[0];
+        vm.deal(address(item.user), 1 ether);
+        vm.startPrank(address(item.user));
+    
+        vm.expectRevert("Too many");
+        zoraNFTBase.purchasePresale{value: item.mintPrice * 3}(
+            3,
+            item.maxMint,
+            item.mintPrice,
+            item.proof
+        );
+
+        zoraNFTBase.purchasePresale{value: item.mintPrice * 1}(
+            1, item.maxMint, item.mintPrice, item.proof
+        );
+        zoraNFTBase.purchasePresale{value: item.mintPrice * 1}(
+            1, item.maxMint, item.mintPrice, item.proof
+        );
+        assertEq(zoraNFTBase.saleDetails().totalMinted, 2);
+        require(
+            zoraNFTBase.ownerOf(1) == address(item.user),
+            "owner is wrong for new minted token"
+        );
+
+        vm.expectRevert("Too many");
+        zoraNFTBase.purchasePresale{value: item.mintPrice * 1}(
+            1, item.maxMint, item.mintPrice, item.proof
+        );
+
+        zoraNFTBase.purchase{value: 0.1 ether}(1);
+        require(
+            zoraNFTBase.ownerOf(3) == address(item.user),
+            "owner is wrong for new minted token"
+        );
+        vm.expectRevert("Too many");
+        zoraNFTBase.purchase{value: 0.1 ether}(1);
+        vm.stopPrank();
+    }
+
     function test_MerklePurchaseInactiveFails() public setupZoraNFTBase {
         vm.startPrank(DEFAULT_OWNER_ADDRESS);
         // block.timestamp returning zero allows sales to go through.

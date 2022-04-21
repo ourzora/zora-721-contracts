@@ -63,15 +63,17 @@ contract ERC721DropTest is DSTest {
 
     function test_Purchase(uint64 amount) public setupZoraNFTBase(10) {
         vm.prank(DEFAULT_OWNER_ADDRESS);
-        zoraNFTBase.setSaleConfiguration(ERC721Drop.SalesConfiguration({
-            publicSaleStart: 0,
-            publicSaleEnd: type(uint64).max,
-            presaleStart: 0,
-            presaleEnd: 0,
-            publicSalePrice: amount,
-            maxSalePurchasePerAddress: 2,
-            presaleMerkleRoot: bytes32(0)
-        }));
+        zoraNFTBase.setSaleConfiguration(
+            ERC721Drop.SalesConfiguration({
+                publicSaleStart: 0,
+                publicSaleEnd: type(uint64).max,
+                presaleStart: 0,
+                presaleEnd: 0,
+                publicSalePrice: amount,
+                maxSalePurchasePerAddress: 2,
+                presaleMerkleRoot: bytes32(0)
+            })
+        );
 
         vm.deal(address(456), uint256(amount) * 2);
         vm.prank(address(456));
@@ -86,17 +88,19 @@ contract ERC721DropTest is DSTest {
         assertEq(address(zoraNFTBase).balance, amount);
     }
 
-    function test_PurchaseTime() public setupZoraNFTBase(100) {
+    function test_PurchaseTime() public setupZoraNFTBase(10) {
         vm.prank(DEFAULT_OWNER_ADDRESS);
-        zoraNFTBase.setSaleConfiguration(ERC721Drop.SalesConfiguration({
-            publicSaleStart: 0,
-            publicSaleEnd: 0,
-            presaleStart: 0,
-            presaleEnd: 0,
-            publicSalePrice: 0.1 ether,
-            maxSalePurchasePerAddress: 2,
-            presaleMerkleRoot: bytes32(0)
-        }));
+        zoraNFTBase.setSaleConfiguration(
+            ERC721Drop.SalesConfiguration({
+                publicSaleStart: 0,
+                publicSaleEnd: 0,
+                presaleStart: 0,
+                presaleEnd: 0,
+                publicSalePrice: 0.1 ether,
+                maxSalePurchasePerAddress: 2,
+                presaleMerkleRoot: bytes32(0)
+            })
+        );
 
         assertTrue(!zoraNFTBase.saleDetails().publicSaleActive);
 
@@ -109,16 +113,17 @@ contract ERC721DropTest is DSTest {
         assertEq(zoraNFTBase.saleDetails().totalMinted, 0);
 
         vm.prank(DEFAULT_OWNER_ADDRESS);
-        zoraNFTBase.setSaleConfiguration(ERC721Drop.SalesConfiguration({
-            publicSaleStart: 9 * 3600,
-            publicSaleEnd: 11 * 3600,
-            presaleStart: 0,
-            presaleEnd: 0,
-            
-            maxSalePurchasePerAddress: 20,
-            publicSalePrice: 0.1 ether,
-            presaleMerkleRoot: bytes32(0)
-        }));
+        zoraNFTBase.setSaleConfiguration(
+            ERC721Drop.SalesConfiguration({
+                publicSaleStart: 9 * 3600,
+                publicSaleEnd: 11 * 3600,
+                presaleStart: 0,
+                presaleEnd: 0,
+                maxSalePurchasePerAddress: 20,
+                publicSalePrice: 0.1 ether,
+                presaleMerkleRoot: bytes32(0)
+            })
+        );
 
         assertTrue(!zoraNFTBase.saleDetails().publicSaleActive);
         // jan 1st 1980
@@ -150,15 +155,17 @@ contract ERC721DropTest is DSTest {
         vm.expectRevert("Sale inactive");
         zoraNFTBase.purchase{value: 0.12 ether}(1);
         vm.prank(DEFAULT_OWNER_ADDRESS);
-        zoraNFTBase.setSaleConfiguration(ERC721Drop.SalesConfiguration({
-            publicSaleStart: 0,
-            publicSaleEnd: type(uint64).max,
-            presaleStart: 0,
-            presaleEnd: 0,
-            publicSalePrice: 0.15 ether,
-            maxSalePurchasePerAddress: 2,
-            presaleMerkleRoot: bytes32(0)
-        }));
+        zoraNFTBase.setSaleConfiguration(
+            ERC721Drop.SalesConfiguration({
+                publicSaleStart: 0,
+                publicSaleEnd: type(uint64).max,
+                presaleStart: 0,
+                presaleEnd: 0,
+                publicSalePrice: 0.15 ether,
+                maxSalePurchasePerAddress: 2,
+                presaleMerkleRoot: bytes32(0)
+            })
+        );
         vm.prank(address(456));
         vm.expectRevert("Wrong price");
         zoraNFTBase.purchase{value: 0.12 ether}(1);
@@ -174,13 +181,17 @@ contract ERC721DropTest is DSTest {
         );
         assertEq(feeBps, 500);
 
-        assertEq(
-            DEFAULT_ZORA_DAO_ADDRESS.balance / 100,
-            ((uint256(amount) * 1_000 * 5) / 100000) / 100
+        assertTrue(
+            DEFAULT_ZORA_DAO_ADDRESS.balance <
+                ((uint256(amount) * 1_000 * 5) / 100000) + 2 ||
+                DEFAULT_ZORA_DAO_ADDRESS.balance >
+                ((uint256(amount) * 1_000 * 5) / 100000) + 2
         );
-        assertEq(
-            DEFAULT_FUNDS_RECIPIENT_ADDRESS.balance / 100,
-            ((uint256(amount) * 1_000 * 95) / 100000) / 100
+        assertTrue(
+            DEFAULT_FUNDS_RECIPIENT_ADDRESS.balance >
+                ((uint256(amount) * 1_000 * 95) / 100000) - 2 ||
+                DEFAULT_FUNDS_RECIPIENT_ADDRESS.balance <
+                ((uint256(amount) * 1_000 * 95) / 100000) + 2
         );
     }
 

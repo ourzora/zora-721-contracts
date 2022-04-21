@@ -372,7 +372,7 @@ contract ERC721Drop is
             "Needs to be approved"
         );
         require(msg.value == pricePerToken * quantity, "Wrong price");
-        require(_numberMinted(_msgSender()) <= maxQuantity, TOO_MANY);
+        require(presaleMintsByAddress[_msgSender()] + quantity <= maxQuantity, TOO_MANY);
 
         _mintNFTs(_msgSender(), quantity);
         uint256 firstMintedTokenId = _lastMintedTokenId() - quantity;

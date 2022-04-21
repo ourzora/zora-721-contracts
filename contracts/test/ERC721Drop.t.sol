@@ -22,8 +22,6 @@ contract ERC721DropTest is DSTest {
     address public constant mediaContract = address(0x123456);
 
     modifier setupZoraNFTBase() {
-        // Update time for time-based drops
-        vm.warp(1000);
         zoraNFTBase.initialize({
             _name: "Test NFT",
             _symbol: "TNFT",

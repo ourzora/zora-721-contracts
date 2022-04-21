@@ -119,12 +119,12 @@ contract ERC721Drop is
 
     function _presaleActive() internal view returns (bool) {
         return salesConfig.presaleStart <= block.timestamp &&
-                salesConfig.presaleEnd >= block.timestamp;
+                salesConfig.presaleEnd > block.timestamp;
     }
 
     function _publicSaleActive() internal view returns (bool) {
         return salesConfig.publicSaleStart <= block.timestamp &&
-                salesConfig.publicSaleEnd >= block.timestamp;
+                salesConfig.publicSaleEnd > block.timestamp;
     }
 
     /// @notice Presale active

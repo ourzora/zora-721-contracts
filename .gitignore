@@ -7,3 +7,4 @@ typechain
 .DS_Store
 .env
 .pkey
+scripts/gen.json

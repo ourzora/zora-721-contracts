@@ -21,13 +21,13 @@ contract ZoraNFTBaseTest is DSTest {
         payable(address(0x999));
     address public constant mediaContract = address(0x123456);
 
-    modifier setupZoraNFTBase() {
+    modifier setupZoraNFTBase(uint64 editionSize) {
         zoraNFTBase.initialize({
             _name: "Test NFT",
             _symbol: "TNFT",
             _owner: DEFAULT_OWNER_ADDRESS,
             _fundsRecipient: payable(DEFAULT_FUNDS_RECIPIENT_ADDRESS),
-            _editionSize: 10,
+            _editionSize: editionSize,
             _royaltyBPS: 800,
             _metadataRenderer: dummyRenderer,
             _metadataRendererInit: ''
@@ -38,12 +38,12 @@ contract ZoraNFTBaseTest is DSTest {
 
     function setUp() public {
         vm.prank(DEFAULT_ZORA_DAO_ADDRESS);
-        feeManager = new ZoraFeeManager(250, DEFAULT_ZORA_DAO_ADDRESS);
+        feeManager = new ZoraFeeManager(500, DEFAULT_ZORA_DAO_ADDRESS);
         vm.prank(DEFAULT_ZORA_DAO_ADDRESS);
         zoraNFTBase = new ERC721Drop(feeManager, address(1234));
     }
 
-    function test_Init() public setupZoraNFTBase {
+    function test_Init() public setupZoraNFTBase(10) {
         require(
             zoraNFTBase.owner() == DEFAULT_OWNER_ADDRESS,
             "Default owner set wrong"
@@ -61,27 +61,30 @@ contract ZoraNFTBaseTest is DSTest {
         });
     }
 
-    function test_Purchase() public setupZoraNFTBase {
+    function test_Purchase(uint64 amount) public setupZoraNFTBase(10) {
         vm.prank(DEFAULT_OWNER_ADDRESS);
         zoraNFTBase.setSaleConfiguration(ERC721Drop.SalesConfiguration({
             publicSaleActive: true,
             presaleActive: false,
-            publicSalePrice: 0.1 ether,
+            publicSalePrice: amount,
             maxSalePurchasePerAddress: 2,
             presaleMerkleRoot: bytes32(0)
         }));
-        vm.deal(address(456), 1 ether);
+
+        vm.deal(address(456), uint256(amount) * 2);
         vm.prank(address(456));
-        zoraNFTBase.purchase{value: 0.1 ether}(1);
+        zoraNFTBase.purchase{value: amount}(1);
+
         assertEq(zoraNFTBase.saleDetails().maxSupply, 10);
         assertEq(zoraNFTBase.saleDetails().totalMinted, 1);
         require(
             zoraNFTBase.ownerOf(1) == address(456),
             "owner is wrong for new minted token"
         );
+        assertEq(address(zoraNFTBase).balance, amount);
     }
 
-    function test_Mint() public setupZoraNFTBase {
+    function test_Mint() public setupZoraNFTBase(10) {
         vm.prank(DEFAULT_OWNER_ADDRESS);
         zoraNFTBase.adminMint(DEFAULT_OWNER_ADDRESS, 1);
         assertEq(zoraNFTBase.saleDetails().maxSupply, 10);
@@ -92,7 +95,7 @@ contract ZoraNFTBaseTest is DSTest {
         );
     }
 
-    function test_MintWrongValue() public setupZoraNFTBase {
+    function test_MintWrongValue() public setupZoraNFTBase(10) {
         vm.deal(address(456), 1 ether);
         vm.prank(address(456));
         vm.expectRevert("Sale inactive");
@@ -110,24 +113,60 @@ contract ZoraNFTBaseTest is DSTest {
         zoraNFTBase.purchase{value: 0.12 ether}(1);
     }
 
-    function test_Withdraw() public setupZoraNFTBase {
-        vm.deal(address(zoraNFTBase), 1 ether);
+    function test_Withdraw(uint256 amount) public setupZoraNFTBase(10) {
+        vm.assume(amount > 0.01 ether);
+        vm.deal(address(zoraNFTBase), amount);
         vm.prank(DEFAULT_OWNER_ADDRESS);
         zoraNFTBase.withdraw();
         (, uint256 feeBps) = feeManager.getZORAWithdrawFeesBPS(
             address(zoraNFTBase)
         );
-        assertEq(feeBps, 250);
-        assertEq(DEFAULT_ZORA_DAO_ADDRESS.balance, 0.025 ether);
-        assertEq(DEFAULT_FUNDS_RECIPIENT_ADDRESS.balance, 0.975 ether);
+        assertEq(feeBps, 500);
+
+        // fuzzy eq within 10 units for division
+        assertEq(DEFAULT_ZORA_DAO_ADDRESS.balance, amount / 20);
+        assertEq(DEFAULT_FUNDS_RECIPIENT_ADDRESS.balance, (19 * amount) / 20);
     }
 
-    function test_WithdrawNotAllowed() public setupZoraNFTBase {
+    function test_MintLimit(uint32 limit) public setupZoraNFTBase(5000) {
+        vm.assume(limit > 0 && limit < 1000);
+
+        vm.prank(DEFAULT_OWNER_ADDRESS);
+        zoraNFTBase.setSaleConfiguration(ERC721Drop.SalesConfiguration({
+            publicSaleActive: true,
+            presaleActive: false,
+            publicSalePrice: 0.1 ether,
+            maxSalePurchasePerAddress: limit,
+            presaleMerkleRoot: bytes32(0)
+        }));
+        vm.deal(address(456), 1_000_000 ether);
+        vm.prank(address(456));
+        zoraNFTBase.purchase{value: 0.1 ether * uint256(limit)}(limit);
+
+        assertEq(zoraNFTBase.saleDetails().totalMinted, limit);
+
+        vm.deal(address(444), 1_000_000 ether);
+        vm.prank(address(444));
+        vm.expectRevert("Too many");
+        zoraNFTBase.purchase{value: 0.1 ether * (uint256(limit) + 1)}(uint256(limit) + 1);
+
+        assertEq(zoraNFTBase.saleDetails().totalMinted, limit);
+    }
+
+    function test_GlobalLimit(uint32 limit) public setupZoraNFTBase(uint64(limit)) {
+        vm.assume(limit > 0);
+        vm.startPrank(DEFAULT_OWNER_ADDRESS);
+        zoraNFTBase.adminMint(DEFAULT_OWNER_ADDRESS, limit);
+        vm.expectRevert("Too many");
+        zoraNFTBase.adminMint(DEFAULT_OWNER_ADDRESS, 1);
+    }
+
+    function test_WithdrawNotAllowed() public setupZoraNFTBase(10) {
         vm.expectRevert("Does not have proper role or admin");
         zoraNFTBase.withdraw();
     }
 
-    function test_AdminMint() public setupZoraNFTBase {
+    function test_AdminMint() public setupZoraNFTBase(10) {
         address minter = address(0x32402);
         vm.startPrank(DEFAULT_OWNER_ADDRESS);
         zoraNFTBase.adminMint(DEFAULT_OWNER_ADDRESS, 1);
@@ -149,7 +188,7 @@ contract ZoraNFTBaseTest is DSTest {
 
     // test admin airdrop non-admin permissions
 
-    function test_Burn() public setupZoraNFTBase {
+    function test_Burn() public setupZoraNFTBase(10) {
         address minter = address(0x32402);
         vm.startPrank(DEFAULT_OWNER_ADDRESS);
         zoraNFTBase.grantRole(zoraNFTBase.MINTER_ROLE(), minter);
@@ -164,7 +203,7 @@ contract ZoraNFTBaseTest is DSTest {
 
     // Add test burn failure state for users that don't own the token
 
-    function test_eip165() public {
+    function test_EIP165() public view {
         require(zoraNFTBase.supportsInterface(0x01ffc9a7), "supports 165");
         require(zoraNFTBase.supportsInterface(0x80ac58cd), "supports 721");
         require(

@@ -207,7 +207,7 @@ contract ERC721Drop is
         }
         return (
             config.fundsRecipient,
-            _salePrice * (config.royaltyBPS / 10_000)
+            (_salePrice * config.royaltyBPS) / 10_000
         );
     }
 

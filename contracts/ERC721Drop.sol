@@ -14,7 +14,6 @@ import {IZoraDrop} from "./interfaces/IZoraDrop.sol";
 import {IOwnable} from "./interfaces/IOwnable.sol";
 import {OwnableSkeleton} from "./utils/OwnableSkeleton.sol";
 
-
 /**
  * @notice ZORA NFT Base contract for Drops and Editions
  *
@@ -33,8 +32,14 @@ contract ERC721Drop is
 {
     using AddressUpgradeable for address payable;
 
-    event SalesConfigChanged(address indexed changedBy, SalesConfiguration salesConfig);
-    event FundsRecipientChanged(address indexed newAddress, address indexed changedBy);
+    event SalesConfigChanged(
+        address indexed changedBy,
+        SalesConfiguration salesConfig
+    );
+    event FundsRecipientChanged(
+        address indexed newAddress,
+        address indexed changedBy
+    );
 
     /// @notice Error string constants
     string private constant SOLD_OUT = "Sold out";
@@ -60,12 +65,14 @@ contract ERC721Drop is
     struct SalesConfiguration {
         /// @dev Public sale price
         uint104 publicSalePrice;
-        /// @dev Is the public sale active
-        bool publicSaleActive;
-        /// @dev Is the presale active
-        bool presaleActive;
         /// @dev Max purchase number per txn
         uint32 maxSalePurchasePerAddress;
+
+        uint64 publicSaleStart;
+        uint64 publicSaleEnd;
+        uint64 presaleStart;
+        uint64 presaleEnd;
+
         /// @dev Presale merkle root
         bytes32 presaleMerkleRoot;
     }
@@ -99,16 +106,32 @@ contract ERC721Drop is
         _;
     }
 
+    function _presaleActive() internal view returns (bool) {
+        return salesConfig.presaleStart <= block.timestamp &&
+                salesConfig.presaleEnd >= block.timestamp;
+    }
+
+    function _publicSaleActive() internal view returns (bool) {
+        return salesConfig.publicSaleStart <= block.timestamp &&
+                salesConfig.publicSaleEnd >= block.timestamp;
+    }
+
     /// @notice Presale active
     modifier onlyPresaleActive() {
-        require(salesConfig.presaleActive, "Presale inactive");
+        require(
+            _presaleActive(),
+            "Presale inactive"
+        );
 
         _;
     }
 
     /// @notice Public sale active
     modifier onlyPublicSaleActive() {
-        require(salesConfig.publicSaleActive, "Sale inactive");
+        require(
+            _publicSaleActive(),
+            "Sale inactive"
+        );
 
         _;
     }
@@ -212,7 +235,7 @@ contract ERC721Drop is
     }
 
     /// @notice Sale details
-    /// @return IZoraDrop.SaleDetails sale information details 
+    /// @return IZoraDrop.SaleDetails sale information details
     function saleDetails()
         external
         view
@@ -220,9 +243,17 @@ contract ERC721Drop is
     {
         return
             IZoraDrop.SaleDetails({
-                publicSaleActive: salesConfig.publicSaleActive,
+                publicSaleActive: _publicSaleActive(),
+                presaleActive: _presaleActive(),
+
+                presaleStart: salesConfig.presaleStart,
+                presaleEnd: salesConfig.presaleEnd,
+                publicSaleStart: salesConfig.publicSaleStart,
+                publicSaleEnd: salesConfig.publicSaleEnd,
+
+                presaleMerkleRoot: salesConfig.presaleMerkleRoot,
+
                 publicSalePrice: salesConfig.publicSalePrice,
-                presaleActive: salesConfig.presaleActive,
                 totalMinted: _totalMinted(),
                 maxSupply: config.editionSize,
                 maxSalePurchasePerAddress: salesConfig.maxSalePurchasePerAddress

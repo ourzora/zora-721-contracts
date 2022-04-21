@@ -8,7 +8,7 @@ import {ZoraFeeManager} from "../ZoraFeeManager.sol";
 import {DummyMetadataRenderer} from "./utils/DummyMetadataRenderer.sol";
 import {MockUser} from "./utils/MockUser.sol";
 
-contract ZoraNFTBaseTest is DSTest {
+contract ERC721DropTest is DSTest {
     ERC721Drop zoraNFTBase;
     MockUser mockUser;
     Vm public constant vm = Vm(HEVM_ADDRESS);
@@ -22,6 +22,8 @@ contract ZoraNFTBaseTest is DSTest {
     address public constant mediaContract = address(0x123456);
 
     modifier setupZoraNFTBase() {
+        // Update time for time-based drops
+        vm.warp(1000);
         zoraNFTBase.initialize({
             _name: "Test NFT",
             _symbol: "TNFT",
@@ -64,8 +66,10 @@ contract ZoraNFTBaseTest is DSTest {
     function test_Purchase() public setupZoraNFTBase {
         vm.prank(DEFAULT_OWNER_ADDRESS);
         zoraNFTBase.setSaleConfiguration(ERC721Drop.SalesConfiguration({
-            publicSaleActive: true,
-            presaleActive: false,
+            publicSaleStart: 0,
+            publicSaleEnd: type(uint64).max,
+            presaleStart: 0,
+            presaleEnd: 0,
             publicSalePrice: 0.1 ether,
             maxSalePurchasePerAddress: 2,
             presaleMerkleRoot: bytes32(0)
@@ -99,8 +103,10 @@ contract ZoraNFTBaseTest is DSTest {
         zoraNFTBase.purchase{value: 0.12 ether}(1);
         vm.prank(DEFAULT_OWNER_ADDRESS);
         zoraNFTBase.setSaleConfiguration(ERC721Drop.SalesConfiguration({
-            publicSaleActive: true,
-            presaleActive: false,
+            publicSaleStart: 0,
+            publicSaleEnd: type(uint64).max,
+            presaleStart: 0,
+            presaleEnd: 0,
             publicSalePrice: 0.15 ether,
             maxSalePurchasePerAddress: 2,
             presaleMerkleRoot: bytes32(0)

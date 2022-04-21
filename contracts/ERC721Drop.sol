@@ -270,7 +270,7 @@ contract ERC721Drop is
         // TODO(iain): Should Use tx.origin here to allow for minting from proxy contracts to not break limit and require unique accounts
         require(msg.value == salePrice * quantity, "Wrong price");
         require(
-            _numberMinted(_msgSender()) <=
+            _numberMinted(_msgSender()) + quantity <=
                 salesConfig.maxSalePurchasePerAddress,
             TOO_MANY
         );

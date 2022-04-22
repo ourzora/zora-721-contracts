@@ -1,18 +1,19 @@
 import { deployAndVerify } from "./contract.mjs";
 import { writeFile } from "fs/promises";
+import dotenv from "dotenv";
 import esMain from "es-main";
 
-// RINKEBY CONSTANTS
-// TODO: Move to env file
-const feeManagerAdmin = "0x9444390c01Dd5b7249E53FAc31290F7dFF53450D";
-const zoraERC721TransferHelperAddress =
-  "0x029AA5a949C9C90916729D50537062cb73b5Ac92";
-const feeDefaultBPS = "500";
+dotenv.config();
 
 export async function setupContracts() {
+  const feeManagerAdminAddress = process.env.FEE_MANAGER_ADMIN_ADDRESS;
+  const zoraERC721TransferHelperAddress =
+    process.env.ZORA_ERC_721_TRANSFER_HELPER_ADDRESS;
+  const feeDefaultBPS = process.env.FEE_DEFAULT_BPS;
+
   const feeManager = await deployAndVerify(
     "contracts/ZoraFeeManager.sol:ZoraFeeManager",
-    [feeDefaultBPS, feeManagerAdmin]
+    [feeDefaultBPS, feeManagerAdminAddress]
   );
   const feeManagerAddress = feeManager.deployed.deploy.deployedTo;
   const dropContract = await deployAndVerify(

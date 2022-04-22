@@ -529,9 +529,8 @@ contract ERC721Drop is
         external
         onlyRoleOrAdmin(SALES_MANAGER_ROLE)
     {
-        if (config.editionSize == type(uint64).max) {
-            config.editionSize = uint64(_totalMinted());
-        }
+        require(config.editionSize == type(uint64).max, "Not open edition");
+        config.editionSize = uint64(_totalMinted());
         emit OpenMintFinalized(_msgSender(), config.editionSize);
     }
 

@@ -44,10 +44,7 @@ contract ERC721Drop is
         address indexed changedBy
     );
 
-    event OpenMintFinalized(
-        address indexed sender,
-        uint256 numberOfMints
-    );
+    event OpenMintFinalized(address indexed sender, uint256 numberOfMints);
 
     /// @notice Error string constants
     string private constant SOLD_OUT = "Sold out";
@@ -276,9 +273,20 @@ contract ERC721Drop is
     }
 
     /// @dev Number of NFTs the user has minted per address
-    /// @param minter to get count for
-    function mintedPerAddress(address minter) external view returns (uint256) {
-        return _numberMinted(minter);
+    /// @param minter to get counts for
+    function mintedPerAddress(address minter)
+        external
+        view
+        override
+        returns (IZoraDrop.AddressMintDetails memory)
+    {
+        return
+            IZoraDrop.AddressMintDetails({
+                presaleMints: presaleMintsByAddress[minter],
+                publicMints: _numberMinted(minter) -
+                    presaleMintsByAddress[minter],
+                totalMints: _numberMinted(minter)
+            });
     }
 
     /// @dev Setup auto-approval for Zora v3 access to sell NFT
@@ -411,13 +419,13 @@ contract ERC721Drop is
     }
 
     /**
-    *** ---------------------------------- ***
-    ***                                    ***
-    ***     ADMIN MINTING FUNCTIONS        ***
-    ***                                    ***
-    *** ---------------------------------- ***
-    ***
-    ***/
+     *** ---------------------------------- ***
+     ***                                    ***
+     ***     ADMIN MINTING FUNCTIONS        ***
+     ***                                    ***
+     *** ---------------------------------- ***
+     ***
+     ***/
 
     /// @notice Mint admin
     /// @param recipient recipient to mint to
@@ -458,13 +466,13 @@ contract ERC721Drop is
     }
 
     /**
-    *** ---------------------------------- ***
-    ***                                    ***
-    ***  ADMIN CONFIGURATION FUNCTIONS     ***
-    ***                                    ***
-    *** ---------------------------------- ***
-    ***
-    ***/
+     *** ---------------------------------- ***
+     ***                                    ***
+     ***  ADMIN CONFIGURATION FUNCTIONS     ***
+     ***                                    ***
+     *** ---------------------------------- ***
+     ***
+     ***/
 
     /// @dev Set new owner for royalties / opensea
     /// @param newOwner new owner to set
@@ -493,10 +501,7 @@ contract ERC721Drop is
     }
 
     /// @dev This withdraws ETH from the contract to the contract owner.
-    function withdraw()
-        external
-        nonReentrant
-    {
+    function withdraw() external nonReentrant {
         address sender = _msgSender();
 
         uint256 funds = address(this).balance;
@@ -506,9 +511,9 @@ contract ERC721Drop is
 
         require(
             hasRole(DEFAULT_ADMIN_ROLE, sender) ||
-            hasRole(SALES_MANAGER_ROLE, sender) ||
-            sender == feeRecipient ||
-            sender == config.fundsRecipient,
+                hasRole(SALES_MANAGER_ROLE, sender) ||
+                sender == feeRecipient ||
+                sender == config.fundsRecipient,
             "Does not have proper role to withdraw"
         );
 
@@ -531,13 +536,13 @@ contract ERC721Drop is
     }
 
     /**
-    *** ---------------------------------- ***
-    ***                                    ***
-    ***      GENERAL GETTER FUNCTIONS      ***
-    ***                                    ***
-    *** ---------------------------------- ***
-    ***
-    ***/
+     *** ---------------------------------- ***
+     ***                                    ***
+     ***      GENERAL GETTER FUNCTIONS      ***
+     ***                                    ***
+     *** ---------------------------------- ***
+     ***
+     ***/
 
     /// @notice Simple override for owner interface.
     /// @return user owner address

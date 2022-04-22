@@ -498,17 +498,18 @@ contract ERC721Drop is
         nonReentrant
     {
         address sender = _msgSender();
-        require(
-            hasRole(DEFAULT_ADMIN_ROLE, sender) ||
-                hasRole(SALES_MANAGER_Role, sender) ||
-                sender == feeRecipient ||
-                sender == fundsRecipient,
-            "Does not have proper role to withdraw"
-        );
 
         uint256 funds = address(this).balance;
         (address payable feeRecipient, uint256 zoraFee) = zoraFeeForAmount(
             funds
+        );
+
+        require(
+            hasRole(DEFAULT_ADMIN_ROLE, sender) ||
+            hasRole(SALES_MANAGER_ROLE, sender) ||
+            sender == feeRecipient ||
+            sender == config.fundsRecipient,
+            "Does not have proper role to withdraw"
         );
 
         // No need for gas limit to trusted address.
@@ -523,10 +524,10 @@ contract ERC721Drop is
         external
         onlyRoleOrAdmin(SALES_MANAGER_ROLE)
     {
-        if (config.editionSize === type(uint64).max) {
-            config.editionSize = _totalMinted();
+        if (config.editionSize == type(uint64).max) {
+            config.editionSize = uint64(_totalMinted());
         }
-        emit OpenMintFinalized(_msgSender, config.editionSize);
+        emit OpenMintFinalized(_msgSender(), config.editionSize);
     }
 
     /**
@@ -556,8 +557,8 @@ contract ERC721Drop is
     }
 
     /// @notice Getter for metadataRenderer contract
-    function metadataRenderer() external view returns (address) {
-        return config.metadataRenderer;
+    function metadataRenderer() external view returns (IMetadataRenderer) {
+        return IMetadataRenderer(config.metadataRenderer);
     }
 
     /// @notice Token URI Getter, proxies to metadataRenderer

@@ -63,7 +63,7 @@ contract ERC721DropTest is DSTest {
 
     function test_Purchase(uint64 amount) public setupZoraNFTBase(10) {
         vm.prank(DEFAULT_OWNER_ADDRESS);
-        zoraNFTBase.setSaleConfiguration(
+        zoraNFTBase.setDropSaleConfiguration(
             ERC721Drop.SalesConfiguration({
                 publicSaleStart: 0,
                 publicSaleEnd: type(uint64).max,
@@ -90,7 +90,7 @@ contract ERC721DropTest is DSTest {
 
     function test_PurchaseTime() public setupZoraNFTBase(10) {
         vm.prank(DEFAULT_OWNER_ADDRESS);
-        zoraNFTBase.setSaleConfiguration(
+        zoraNFTBase.setDropSaleConfiguration(
             ERC721Drop.SalesConfiguration({
                 publicSaleStart: 0,
                 publicSaleEnd: 0,
@@ -113,7 +113,7 @@ contract ERC721DropTest is DSTest {
         assertEq(zoraNFTBase.saleDetails().totalMinted, 0);
 
         vm.prank(DEFAULT_OWNER_ADDRESS);
-        zoraNFTBase.setSaleConfiguration(
+        zoraNFTBase.setDropSaleConfiguration(
             ERC721Drop.SalesConfiguration({
                 publicSaleStart: 9 * 3600,
                 publicSaleEnd: 11 * 3600,
@@ -155,7 +155,7 @@ contract ERC721DropTest is DSTest {
         vm.expectRevert("Sale inactive");
         zoraNFTBase.purchase{value: 0.12 ether}(1);
         vm.prank(DEFAULT_OWNER_ADDRESS);
-        zoraNFTBase.setSaleConfiguration(
+        zoraNFTBase.setDropSaleConfiguration(
             ERC721Drop.SalesConfiguration({
                 publicSaleStart: 0,
                 publicSaleEnd: type(uint64).max,
@@ -199,7 +199,7 @@ contract ERC721DropTest is DSTest {
         // set limit to speed up tests
         vm.assume(limit > 0 && limit < 50);
         vm.prank(DEFAULT_OWNER_ADDRESS);
-        zoraNFTBase.setSaleConfiguration(
+        zoraNFTBase.setDropSaleConfiguration(
             ERC721Drop.SalesConfiguration({
                 publicSaleStart: 0,
                 publicSaleEnd: type(uint64).max,
@@ -244,7 +244,7 @@ contract ERC721DropTest is DSTest {
 
     function test_InvalidFinalizeOpenEdition() public setupZoraNFTBase(5) {
         vm.prank(DEFAULT_OWNER_ADDRESS);
-        zoraNFTBase.setSaleConfiguration(ERC721Drop.SalesConfiguration({
+        zoraNFTBase.setDropSaleConfiguration(ERC721Drop.SalesConfiguration({
             publicSaleStart: 0,
             publicSaleEnd: type(uint64).max,
             presaleStart: 0,
@@ -263,7 +263,7 @@ contract ERC721DropTest is DSTest {
 
     function test_ValidFinalizeOpenEdition() public setupZoraNFTBase(type(uint64).max) {
         vm.prank(DEFAULT_OWNER_ADDRESS);
-        zoraNFTBase.setSaleConfiguration(ERC721Drop.SalesConfiguration({
+        zoraNFTBase.setDropSaleConfiguration(ERC721Drop.SalesConfiguration({
             publicSaleStart: 0,
             publicSaleEnd: type(uint64).max,
             presaleStart: 0,

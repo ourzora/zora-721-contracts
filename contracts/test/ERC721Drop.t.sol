@@ -398,8 +398,24 @@ contract ERC721DropTest is DSTest {
         address[] memory airdrop = new address[](1);
         airdrop[0] = minter;
         zoraNFTBase.adminMintAirdrop(airdrop);
-
+        zoraNFTBase.burn(1);
         vm.stopPrank();
+    }
+
+    function test_BurnNonOwner() public setupZoraNFTBase(10) {
+        address minter = address(0x32402);
+        vm.startPrank(DEFAULT_OWNER_ADDRESS);
+        zoraNFTBase.grantRole(zoraNFTBase.MINTER_ROLE(), minter);
+        vm.stopPrank();
+        vm.startPrank(minter);
+        address[] memory airdrop = new address[](1);
+        airdrop[0] = minter;
+        zoraNFTBase.adminMintAirdrop(airdrop);
+        vm.stopPrank();
+
+        // vm.prank(address(1));
+        // vm.expectRevert();
+        // zoraNFTBase.burn(1);
     }
 
     // Add test burn failure state for users that don't own the token

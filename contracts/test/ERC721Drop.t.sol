@@ -63,7 +63,7 @@ contract ERC721DropTest is DSTest {
 
     function test_Purchase(uint64 amount) public setupZoraNFTBase(10) {
         vm.prank(DEFAULT_OWNER_ADDRESS);
-        zoraNFTBase.setSaleConfiguration(
+        zoraNFTBase.setDropSaleConfiguration(
             ERC721Drop.SalesConfiguration({
                 publicSaleStart: 0,
                 publicSaleEnd: type(uint64).max,
@@ -90,7 +90,7 @@ contract ERC721DropTest is DSTest {
 
     function test_PurchaseTime() public setupZoraNFTBase(10) {
         vm.prank(DEFAULT_OWNER_ADDRESS);
-        zoraNFTBase.setSaleConfiguration(
+        zoraNFTBase.setDropSaleConfiguration(
             ERC721Drop.SalesConfiguration({
                 publicSaleStart: 0,
                 publicSaleEnd: 0,
@@ -113,7 +113,7 @@ contract ERC721DropTest is DSTest {
         assertEq(zoraNFTBase.saleDetails().totalMinted, 0);
 
         vm.prank(DEFAULT_OWNER_ADDRESS);
-        zoraNFTBase.setSaleConfiguration(
+        zoraNFTBase.setDropSaleConfiguration(
             ERC721Drop.SalesConfiguration({
                 publicSaleStart: 9 * 3600,
                 publicSaleEnd: 11 * 3600,
@@ -155,7 +155,7 @@ contract ERC721DropTest is DSTest {
         vm.expectRevert("Sale inactive");
         zoraNFTBase.purchase{value: 0.12 ether}(1);
         vm.prank(DEFAULT_OWNER_ADDRESS);
-        zoraNFTBase.setSaleConfiguration(
+        zoraNFTBase.setDropSaleConfiguration(
             ERC721Drop.SalesConfiguration({
                 publicSaleStart: 0,
                 publicSaleEnd: type(uint64).max,
@@ -199,7 +199,7 @@ contract ERC721DropTest is DSTest {
         // set limit to speed up tests
         vm.assume(limit > 0 && limit < 50);
         vm.prank(DEFAULT_OWNER_ADDRESS);
-        zoraNFTBase.setSaleConfiguration(
+        zoraNFTBase.setDropSaleConfiguration(
             ERC721Drop.SalesConfiguration({
                 publicSaleStart: 0,
                 publicSaleEnd: type(uint64).max,
@@ -238,8 +238,50 @@ contract ERC721DropTest is DSTest {
     }
 
     function test_WithdrawNotAllowed() public setupZoraNFTBase(10) {
-        vm.expectRevert("Does not have proper role or admin");
+        vm.expectRevert("Does not have proper role to withdraw");
         zoraNFTBase.withdraw();
+    }
+
+    function test_InvalidFinalizeOpenEdition() public setupZoraNFTBase(5) {
+        vm.prank(DEFAULT_OWNER_ADDRESS);
+        zoraNFTBase.setDropSaleConfiguration(ERC721Drop.SalesConfiguration({
+            publicSaleStart: 0,
+            publicSaleEnd: type(uint64).max,
+            presaleStart: 0,
+            presaleEnd: 0,
+            publicSalePrice: 0.2 ether,
+            presaleMerkleRoot: bytes32(0),
+            maxSalePurchasePerAddress: 5
+        }));
+        zoraNFTBase.purchase{value: 0.6 ether}(3);
+        vm.prank(DEFAULT_OWNER_ADDRESS);
+        zoraNFTBase.adminMint(address(0x1234), 2);
+        vm.prank(DEFAULT_OWNER_ADDRESS);
+        vm.expectRevert("Not open edition");
+        zoraNFTBase.finalizeOpenEdition();
+    }
+
+    function test_ValidFinalizeOpenEdition() public setupZoraNFTBase(type(uint64).max) {
+        vm.prank(DEFAULT_OWNER_ADDRESS);
+        zoraNFTBase.setDropSaleConfiguration(ERC721Drop.SalesConfiguration({
+            publicSaleStart: 0,
+            publicSaleEnd: type(uint64).max,
+            presaleStart: 0,
+            presaleEnd: 0,
+            publicSalePrice: 0.2 ether,
+            presaleMerkleRoot: bytes32(0),
+            maxSalePurchasePerAddress: 10 
+        }));
+        zoraNFTBase.purchase{value: 0.6 ether}(3);
+        vm.prank(DEFAULT_OWNER_ADDRESS);
+        zoraNFTBase.adminMint(address(0x1234), 2);
+        vm.prank(DEFAULT_OWNER_ADDRESS);
+        zoraNFTBase.finalizeOpenEdition();
+        vm.expectRevert("Too many");
+        vm.prank(DEFAULT_OWNER_ADDRESS);
+        zoraNFTBase.adminMint(address(0x1234), 2);
+        vm.expectRevert("Too many");
+        zoraNFTBase.purchase{value: 0.6 ether}(3);
     }
 
     function test_AdminMint() public setupZoraNFTBase(10) {

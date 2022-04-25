@@ -1,6 +1,20 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.10;
 
+/**
+
+ ________   _____   ____    ______      ____
+/\_____  \ /\  __`\/\  _`\ /\  _  \    /\  _`\
+\/____//'/'\ \ \/\ \ \ \L\ \ \ \L\ \   \ \ \/\ \  _ __   ___   _____     ____
+     //'/'  \ \ \ \ \ \ ,  /\ \  __ \   \ \ \ \ \/\`'__\/ __`\/\ '__`\  /',__\
+    //'/'___ \ \ \_\ \ \ \\ \\ \ \/\ \   \ \ \_\ \ \ \//\ \L\ \ \ \L\ \/\__, `\
+    /\_______\\ \_____\ \_\ \_\ \_\ \_\   \ \____/\ \_\\ \____/\ \ ,__/\/\____/
+    \/_______/ \/_____/\/_/\/ /\/_/\/_/    \/___/  \/_/ \/___/  \ \ \/  \/___/
+                                                                 \ \_\
+                                                                  \/_/
+
+ */
+
 import {ERC721AUpgradeable} from "erc721a-upgradeable/ERC721AUpgradeable.sol";
 import {IERC2981Upgradeable, IERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/interfaces/IERC2981Upgradeable.sol";
 import {AddressUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
@@ -47,6 +61,8 @@ contract ERC721Drop is
         address indexed changedBy
     );
 
+    event OpenMintFinalized(address indexed sender, uint256 numberOfMints);
+
     /// @notice Error string constants
     string private constant SOLD_OUT = "Sold out";
     string private constant TOO_MANY = "Too many";
@@ -56,8 +72,8 @@ contract ERC721Drop is
     bytes32 public immutable SALES_MANAGER_ROLE = keccak256("SALES_MANAGER");
 
     /// @dev Returns the version of the contract.
-    function contractVersion() external pure returns (uint8) {
-        return uint8(VERSION);
+    function contractVersion() external pure returns (uint256) {
+        return VERSION;
     }
 
     /// @notice General configuration for NFT Minting and bookkeeping
@@ -278,9 +294,20 @@ contract ERC721Drop is
     }
 
     /// @dev Number of NFTs the user has minted per address
-    /// @param minter to get count for
-    function mintedPerAddress(address minter) external view returns (uint256) {
-        return _numberMinted(minter);
+    /// @param minter to get counts for
+    function mintedPerAddress(address minter)
+        external
+        view
+        override
+        returns (IZoraDrop.AddressMintDetails memory)
+    {
+        return
+            IZoraDrop.AddressMintDetails({
+                presaleMints: presaleMintsByAddress[minter],
+                publicMints: _numberMinted(minter) -
+                    presaleMintsByAddress[minter],
+                totalMints: _numberMinted(minter)
+            });
     }
 
     /// @dev Setup auto-approval for Zora v3 access to sell NFT
@@ -299,14 +326,25 @@ contract ERC721Drop is
         return super.isApprovedForAll(nftOwner, operator);
     }
 
+    /// @dev Gets the zora fee for amount of withdraw
+    /// @param amount amount of funds to get fee for
+    function zoraFeeForAmount(uint256 amount)
+        public
+        returns (address payable, uint256)
+    {
+        (address payable recipient, uint256 bps) = zoraFeeManager
+            .getZORAWithdrawFeesBPS(address(this));
+        return (recipient, (amount * bps) / 10_000);
+    }
+
     /**
-    *** ---------------------------------- ***
-    ***                                    ***
-    ***     PUBLIC MINTING FUNCTIONS       ***
-    ***                                    ***
-    *** ---------------------------------- ***
-    ***
-    ***/
+     *** ---------------------------------- ***
+     ***                                    ***
+     ***     PUBLIC MINTING FUNCTIONS       ***
+     ***                                    ***
+     *** ---------------------------------- ***
+     ***
+     ***/
 
     /**
       @dev This allows the user to purchase a edition edition
@@ -322,10 +360,11 @@ contract ERC721Drop is
     {
         uint256 salePrice = salesConfig.publicSalePrice;
 
-        // TODO(iain): Should Use tx.origin here to allow for minting from proxy contracts to not break limit and require unique accounts
         require(msg.value == salePrice * quantity, "Wrong price");
         require(
-            _numberMinted(_msgSender()) + quantity - presaleMintsByAddress[_msgSender()] <=
+            _numberMinted(_msgSender()) +
+                quantity -
+                presaleMintsByAddress[_msgSender()] <=
                 salesConfig.maxSalePurchasePerAddress,
             TOO_MANY
         );
@@ -349,7 +388,9 @@ contract ERC721Drop is
     /// @param quantity number of NFTs to mint
     function _mintNFTs(address to, uint256 quantity) internal {
         do {
-            uint256 toMint = quantity > MAX_MINT_BATCH_SIZE ? MAX_MINT_BATCH_SIZE : quantity;
+            uint256 toMint = quantity > MAX_MINT_BATCH_SIZE
+                ? MAX_MINT_BATCH_SIZE
+                : quantity;
             _mint({to: to, quantity: toMint, _data: "", safe: false});
             quantity -= toMint;
         } while (quantity > 0);
@@ -402,7 +443,14 @@ contract ERC721Drop is
         return firstMintedTokenId;
     }
 
-    /** ADMIN MINTING FUNCTIONS */
+    /**
+     *** ---------------------------------- ***
+     ***                                    ***
+     ***     ADMIN MINTING FUNCTIONS        ***
+     ***                                    ***
+     *** ---------------------------------- ***
+     ***
+     ***/
 
     /// @notice Mint admin
     /// @param recipient recipient to mint to
@@ -442,6 +490,15 @@ contract ERC721Drop is
         return _lastMintedTokenId();
     }
 
+    /**
+     *** ---------------------------------- ***
+     ***                                    ***
+     ***  ADMIN CONFIGURATION FUNCTIONS     ***
+     ***                                    ***
+     *** ---------------------------------- ***
+     ***
+     ***/
+
     /// @dev Set new owner for royalties / opensea
     /// @param newOwner new owner to set
     function setOwner(address newOwner) public onlyAdmin {
@@ -450,7 +507,7 @@ contract ERC721Drop is
 
     /// @dev This sets the sales configuration
     /// @param newConfig new configuration to set for sales information
-    function setSaleConfiguration(SalesConfiguration memory newConfig)
+    function setDropSaleConfiguration(SalesConfiguration memory newConfig)
         external
         onlyAdmin
     {
@@ -468,26 +525,21 @@ contract ERC721Drop is
         emit FundsRecipientChanged(newRecipientAddress, _msgSender());
     }
 
-    /// @dev Gets the zora fee for amount of withdraw
-    /// @param amount amount of funds to get fee for
-    function zoraFeeForAmount(uint256 amount)
-        public
-        returns (address payable, uint256)
-    {
-        (address payable recipient, uint256 bps) = zoraFeeManager
-            .getZORAWithdrawFeesBPS(address(this));
-        return (recipient, (amount * bps) / 10_000);
-    }
-
     /// @dev This withdraws ETH from the contract to the contract owner.
-    function withdraw()
-        external
-        onlyRoleOrAdmin(SALES_MANAGER_ROLE)
-        nonReentrant
-    {
+    function withdraw() external nonReentrant {
+        address sender = _msgSender();
+
         uint256 funds = address(this).balance;
         (address payable feeRecipient, uint256 zoraFee) = zoraFeeForAmount(
             funds
+        );
+
+        require(
+            hasRole(DEFAULT_ADMIN_ROLE, sender) ||
+                hasRole(SALES_MANAGER_ROLE, sender) ||
+                sender == feeRecipient ||
+                sender == config.fundsRecipient,
+            "Does not have proper role to withdraw"
         );
 
         // No need for gas limit to trusted address.
@@ -498,6 +550,25 @@ contract ERC721Drop is
         // No need for gas limit to trusted address.
         config.fundsRecipient.sendValue(funds);
     }
+
+    /// @notice Admin function to finalize and open edition sale
+    function finalizeOpenEdition()
+        external
+        onlyRoleOrAdmin(SALES_MANAGER_ROLE)
+    {
+        require(config.editionSize == type(uint64).max, "Not open edition");
+        config.editionSize = uint64(_totalMinted());
+        emit OpenMintFinalized(_msgSender(), config.editionSize);
+    }
+
+    /**
+     *** ---------------------------------- ***
+     ***                                    ***
+     ***      GENERAL GETTER FUNCTIONS      ***
+     ***                                    ***
+     *** ---------------------------------- ***
+     ***
+     ***/
 
     /// @notice Simple override for owner interface.
     /// @return user owner address
@@ -514,6 +585,11 @@ contract ERC721Drop is
     /// @return Contract URI
     function contractURI() external view returns (string memory) {
         return config.metadataRenderer.contractURI();
+    }
+
+    /// @notice Getter for metadataRenderer contract
+    function metadataRenderer() external view returns (IMetadataRenderer) {
+        return IMetadataRenderer(config.metadataRenderer);
     }
 
     /// @notice Token URI Getter, proxies to metadataRenderer

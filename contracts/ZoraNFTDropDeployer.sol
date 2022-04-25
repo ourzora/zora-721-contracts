@@ -7,7 +7,7 @@ import {DropMetadataRenderer} from "./metadata/DropMetadataRenderer.sol";
 import {IMetadataRenderer} from "./interfaces/IMetadataRenderer.sol";
 
 contract ZoraNFTDropDeployer {
-  event DeployedNewContract(address indexed);
+  event DeployedNewContract(address indexed from, address indexed newContract);
   address private immutable implementation;
   IMetadataRenderer private immutable metadataDropRendererAddress;
   constructor(address mediaContractBase, IMetadataRenderer _metadataDropRendererAddress) {
@@ -40,7 +40,7 @@ contract ZoraNFTDropDeployer {
         _metadataRenderer: metadataDropRendererAddress,
         _metadataRendererInit: metadataInitializer
     });
-    emit DeployedNewContract(newMediaContract);
+    emit DeployedNewContract(msg.sender, newMediaContract);
 
     return newMediaContract;
   }

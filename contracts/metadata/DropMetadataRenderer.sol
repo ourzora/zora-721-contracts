@@ -37,7 +37,7 @@ contract DropMetadataRenderer is IMetadataRenderer {
     mapping(address => bytes32) public provenanceHashes;
 
     function initializeWithData(bytes memory data) external {
-        // data format: target, baseURI, newContractURI
+        // data format: string baseURI, string newContractURI
         (string memory initialBaseURI, string memory initialContractURI) = abi
             .decode(data, (string, string));
         _updateMetadataDetails(

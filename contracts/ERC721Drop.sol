@@ -308,11 +308,11 @@ contract ERC721Drop is
     /**
       @dev This allows the user to purchase a edition edition
            at the given price in the contract.
-      @dev no need for re-entrancy guard since no safe_xxx functions are used
      */
     function purchase(uint256 quantity)
         external
         payable
+        nonReentrant
         canMintTokens(quantity)
         onlyPublicSaleActive
         returns (uint256)
@@ -364,6 +364,7 @@ contract ERC721Drop is
     )
         external
         payable
+        nonReentrant
         canMintTokens(quantity)
         onlyPresaleActive
         returns (uint256)

@@ -30,7 +30,10 @@ contract ERC721Drop is
     IZoraDrop,
     OwnableSkeleton
 {
-    uint256 private constant VERSION = 2;
+    /// @dev This is the underlying contract version that is implemented by the interface
+    uint256 private constant VERSION = 3;
+    /// @dev This is the max mint batch size for the optimized ERC721A mint contract
+    uint256 private constant MAX_MINT_BATCH_SIZE = 8;
 
     using AddressUpgradeable for address payable;
 
@@ -303,7 +306,7 @@ contract ERC721Drop is
     ***                                    ***
     *** ---------------------------------- ***
     ***
-    ** */
+    ***/
 
     /**
       @dev This allows the user to purchase a edition edition
@@ -339,13 +342,14 @@ contract ERC721Drop is
         return firstMintedTokenId;
     }
 
-    /// @dev Function to mint NFTs
-    /// @notice (important: Does not enforce max supply limit, enforce that limit earlier)
+    /// @notice Function to mint NFTs
+    /// @dev (important: Does not enforce max supply limit, enforce that limit earlier)
+    /// @dev This batches in size of 8 as per recommended by ERC721A creators
     /// @param to address to mint NFTs to
     /// @param quantity number of NFTs to mint
     function _mintNFTs(address to, uint256 quantity) internal {
         do {
-            uint256 toMint = quantity > 8 ? 8 : quantity;
+            uint256 toMint = quantity > MAX_MINT_BATCH_SIZE ? MAX_MINT_BATCH_SIZE : quantity;
             _mint({to: to, quantity: toMint, _data: "", safe: false});
             quantity -= toMint;
         } while (quantity > 0);
@@ -381,7 +385,9 @@ contract ERC721Drop is
             "Needs to be approved"
         );
         require(msg.value == pricePerToken * quantity, "Wrong price");
-        require(presaleMintsByAddress[_msgSender()] + quantity <= maxQuantity, TOO_MANY);
+
+        presaleMintsByAddress[_msgSender()] += quantity;
+        require(presaleMintsByAddress[_msgSender()] <= maxQuantity, TOO_MANY);
 
         _mintNFTs(_msgSender(), quantity);
         uint256 firstMintedTokenId = _lastMintedTokenId() - quantity;
@@ -392,8 +398,6 @@ contract ERC721Drop is
             pricePerToken: pricePerToken,
             firstPurchasedTokenId: firstMintedTokenId
         });
-
-        presaleMintsByAddress[_msgSender()] += quantity;
 
         return firstMintedTokenId;
     }
@@ -487,8 +491,10 @@ contract ERC721Drop is
         );
 
         // No need for gas limit to trusted address.
-        feeRecipient.sendValue(zoraFee);
-        funds -= zoraFee;
+        if (zoraFee > 0) {
+            feeRecipient.sendValue(zoraFee);
+            funds -= zoraFee;
+        }
         // No need for gas limit to trusted address.
         config.fundsRecipient.sendValue(funds);
     }

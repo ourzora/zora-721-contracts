@@ -7,6 +7,7 @@ import {ERC721Drop} from "../ERC721Drop.sol";
 import {ZoraFeeManager} from "../ZoraFeeManager.sol";
 import {DummyMetadataRenderer} from "./utils/DummyMetadataRenderer.sol";
 import {MockUser} from "./utils/MockUser.sol";
+import {IMetadataRenderer} from "../interfaces/IMetadataRenderer.sol";
 
 contract ERC721DropTest is DSTest {
     ERC721Drop zoraNFTBase;
@@ -20,6 +21,13 @@ contract ERC721DropTest is DSTest {
     address payable public constant DEFAULT_ZORA_DAO_ADDRESS =
         payable(address(0x999));
     address public constant mediaContract = address(0x123456);
+
+    struct Configuration {
+        IMetadataRenderer metadataRenderer;
+        uint64 editionSize;
+        uint16 royaltyBPS;
+        address payable fundsRecipient;
+    }
 
     modifier setupZoraNFTBase(uint64 editionSize) {
         zoraNFTBase.initialize({
@@ -48,6 +56,16 @@ contract ERC721DropTest is DSTest {
             zoraNFTBase.owner() == DEFAULT_OWNER_ADDRESS,
             "Default owner set wrong"
         );
+        (IMetadataRenderer renderer, uint64 editionSize, uint16 royaltyBPS, address payable fundsRecipient) = zoraNFTBase.config();
+        require(address(renderer) == address(dummyRenderer));
+        require(editionSize == 10);
+        require(royaltyBPS == 800);
+        require(fundsRecipient == payable(DEFAULT_FUNDS_RECIPIENT_ADDRESS));
+        string memory name = zoraNFTBase.name();
+        string memory symbol = zoraNFTBase.symbol();
+        require(keccak256(bytes(name)) == keccak256(bytes("Test NFT")));
+        require(keccak256(bytes(symbol)) == keccak256(bytes("TNFT")));
+
         vm.expectRevert("Initializable: contract is already initialized");
         zoraNFTBase.initialize({
             _name: "Test NFT",
@@ -298,6 +316,36 @@ contract ERC721DropTest is DSTest {
         zoraNFTBase.adminMint(minter, 1);
         require(zoraNFTBase.balanceOf(minter) == 1, "Wrong balance");
         assertEq(zoraNFTBase.saleDetails().totalMinted, 2);
+    }
+
+    function test_EditionSizeZero() public setupZoraNFTBase(0) {
+        address minter = address(0x32402);
+        vm.startPrank(DEFAULT_OWNER_ADDRESS);
+        vm.expectRevert("Too many");
+        zoraNFTBase.adminMint(DEFAULT_OWNER_ADDRESS, 1);
+        zoraNFTBase.grantRole(zoraNFTBase.MINTER_ROLE(), minter);
+        vm.stopPrank();
+        vm.prank(minter);
+        vm.expectRevert("Too many");
+        zoraNFTBase.adminMint(minter, 1);
+
+        vm.prank(DEFAULT_OWNER_ADDRESS);
+        zoraNFTBase.setDropSaleConfiguration(
+            ERC721Drop.SalesConfiguration({
+                publicSaleStart: 0,
+                publicSaleEnd: type(uint64).max,
+                presaleStart: 0,
+                presaleEnd: 0,
+                publicSalePrice: 1,
+                maxSalePurchasePerAddress: 2,
+                presaleMerkleRoot: bytes32(0)
+            })
+        );
+
+        vm.deal(address(456), uint256(1) * 2);
+        vm.prank(address(456));
+        vm.expectRevert("Too many");
+        zoraNFTBase.purchase{value: 1}(1);
     }
 
     // test Admin airdrop

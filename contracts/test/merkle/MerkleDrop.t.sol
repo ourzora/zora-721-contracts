@@ -166,6 +166,52 @@ contract ZoraNFTBaseTest is DSTest {
         vm.stopPrank();
     }
 
+    function test_MerklePurchaseAndPublicSaleEditionSizeZero() public {
+        zoraNFTBase.initialize({
+            _name: "Test NFT",
+            _symbol: "TNFT",
+            _owner: DEFAULT_OWNER_ADDRESS,
+            _fundsRecipient: payable(DEFAULT_FUNDS_RECIPIENT_ADDRESS),
+            _editionSize: 0,
+            _royaltyBPS: 800,
+            _metadataRenderer: dummyRenderer,
+            _metadataRendererInit: ""
+        });
+
+        vm.startPrank(DEFAULT_OWNER_ADDRESS);
+        zoraNFTBase.setDropSaleConfiguration(
+            ERC721Drop.SalesConfiguration({
+                publicSaleStart: 0,
+                publicSaleEnd: type(uint64).max,
+                presaleStart: 0,
+                presaleEnd: type(uint64).max,
+                publicSalePrice: 0.1 ether,
+                maxSalePurchasePerAddress: 1,
+                presaleMerkleRoot: merkleData
+                    .getTestSetByName("test-2-prices")
+                    .root
+            })
+        );
+        vm.stopPrank();
+
+        MerkleData.MerkleEntry memory item;
+
+        item = merkleData
+            .getTestSetByName("test-2-prices")
+            .entries[0];
+        vm.deal(address(item.user), 1 ether);
+        vm.startPrank(address(item.user));
+
+        vm.expectRevert("Too many");
+        zoraNFTBase.purchasePresale{value: item.mintPrice}(
+            1,
+            item.maxMint,
+            item.mintPrice,
+            item.proof
+        );
+        vm.stopPrank();
+    }
+
     function test_MerklePurchaseInactiveFails() public setupZoraNFTBase {
         vm.startPrank(DEFAULT_OWNER_ADDRESS);
         // block.timestamp returning zero allows sales to go through.

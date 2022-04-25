@@ -49,6 +49,7 @@ contract DropMetadataRenderer is IMetadataRenderer {
         );
     }
 
+    /// @notice Update the 
     function updateProvenanceHash(address target, bytes32 provenanceHash)
         external
         requireSenderAdmin(target)
@@ -57,14 +58,22 @@ contract DropMetadataRenderer is IMetadataRenderer {
         emit ProvenanceHashUpdated(target, provenanceHash);
     }
 
+    /// @notice Update metadata base URI and contract URI
+    /// @param baseUri new base URI
+    /// @param newContractUri new contract URI (can be an empty string)
     function updateMetadataBase(
         address target,
         string memory baseUri,
-        string memory newContractURI
+        string memory newContractUri
     ) external requireSenderAdmin(target) {
-        _updateMetadataDetails(target, baseUri, "", newContractURI, 0);
+        _updateMetadataDetails(target, baseUri, "", newContractUri, 0);
     }
 
+    /// @notice Update metadata base URI, extension, contract URI and freezing detailsUpdate metadata base URI, extension, contract URI and freezing detailsUpdate metadata base URI, extension, contract URI and freezing detailsUpdate metadata base URI, extension, contract URI and freezing detailsUpdate metadata base URI, extension, contract URI and freezing detailsUpdate metadata base URI, extension, contract URI and freezing detailsUpdate metadata base URI, extension, contract URI and freezing detailsUpdate metadata base URI, extension, contract URI and freezing details
+    /// @param target target contract to update metadata for
+    /// @param metadataBase new base URI to update metadata with
+    /// @param metadataExtension new extension to append to base metadata URI
+    /// @param freezeAt time to freeze the contract metadata at (set to 0 to disable)
     function updateMetadataBaseWithDetails(
         address target,
         string memory metadataBase,
@@ -81,6 +90,10 @@ contract DropMetadataRenderer is IMetadataRenderer {
         );
     }
 
+    /// @notice Internal metadata update function
+    /// @param metadataBase Base URI to update metadata for
+    /// @param metadataExtension Extension URI to update metadata for
+    /// @param freezeAt timestamp to freeze metadata (set to 0 to disable freezing)
     function _updateMetadataDetails(
         address target,
         string memory metadataBase,
@@ -104,10 +117,18 @@ contract DropMetadataRenderer is IMetadataRenderer {
         });
     }
 
+    /// @notice A contract URI for the given drop contract
+    /// @dev reverts if a contract uri is not provided
+    /// @return contract uri for the contract metadata
     function contractURI() external view override returns (string memory) {
-        return metadataBaseByContract[msg.sender].contractURI;
+        string memory uri = metadataBaseByContract[msg.sender].contractURI;
+        if (bytes(uri).length == 0) revert();
+        return uri;
     }
 
+    /// @notice A token URI for the given drops contract
+    /// @dev reverts if a contract uri is not set
+    /// @return token URI for the given token ID and contract (set by msg.sender)
     function tokenURI(uint256 tokenId)
         external
         view
@@ -115,6 +136,8 @@ contract DropMetadataRenderer is IMetadataRenderer {
         returns (string memory)
     {
         MetadataURIInfo memory info = metadataBaseByContract[msg.sender];
+
+        if (bytes(info.base).length == 0) revert();
 
         return
             string(

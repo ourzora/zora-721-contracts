@@ -215,8 +215,12 @@ contract ERC721Drop is
         IMetadataRenderer _metadataRenderer,
         bytes memory _metadataRendererInit
     ) public initializer {
+        // Setup ERC721A
         __ERC721A_init(_name, _symbol);
+        // Setup access control
         __AccessControl_init();
+        // Setup re-entracy guard
+        __ReentrancyGuard_init();
         // Setup the owner role
         _setupRole(DEFAULT_ADMIN_ROLE, _owner);
         // Set ownership to original sender of contract call
@@ -342,11 +346,11 @@ contract ERC721Drop is
     /**
       @dev This allows the user to purchase a edition edition
            at the given price in the contract.
-      @dev no need for re-entrancy guard since no safe_xxx functions are used
      */
     function purchase(uint256 quantity)
         external
         payable
+        nonReentrant
         canMintTokens(quantity)
         onlyPublicSaleActive
         returns (uint256)
@@ -379,7 +383,11 @@ contract ERC721Drop is
     /// @param to address to mint NFTs to
     /// @param quantity number of NFTs to mint
     function _mintNFTs(address to, uint256 quantity) internal {
-        _mint({to: to, quantity: quantity, _data: "", safe: false});
+        do {
+            uint256 toMint = quantity > 8 ? 8 : quantity;
+            _mint({to: to, quantity: toMint, _data: "", safe: false});
+            quantity -= toMint;
+        } while (quantity > 0);
     }
 
     /// @notice Merkle-tree based presale purchase function
@@ -395,6 +403,7 @@ contract ERC721Drop is
     )
         external
         payable
+        nonReentrant
         canMintTokens(quantity)
         onlyPresaleActive
         returns (uint256)

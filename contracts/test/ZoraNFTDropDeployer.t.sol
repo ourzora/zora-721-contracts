@@ -14,7 +14,7 @@ contract ZoraFeeManagerTest is DSTest {
     address public constant ZORA_PROXY_ADDRESS = address(123456);
     address public constant SHARED_NFT_LOGIC_ADDRESS = address(33);
 
-    function test_deploy() public {
+    function test_Deploy() public {
         ZoraNFTDropDeployer deployer = new ZoraNFTDropDeployer(
             ADMIN_ADDRESS,
             IMetadataRenderer(ZORA_PROXY_ADDRESS)

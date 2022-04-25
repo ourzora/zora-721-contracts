@@ -301,10 +301,45 @@ contract ERC721DropTest is DSTest {
     }
 
     // test Admin airdrop
+    function test_AdminMintAirdrop() public setupZoraNFTBase(1000) {
+        vm.startPrank(DEFAULT_OWNER_ADDRESS);
+        address[] memory toMint = new address[](4);
+        toMint[0] = address(0x10);
+        toMint[1] = address(0x11);
+        toMint[2] = address(0x12);
+        toMint[3] = address(0x13);
+        zoraNFTBase.adminMintAirdrop(toMint);
+        assertEq(zoraNFTBase.saleDetails().totalMinted, 4);
+        assertEq(zoraNFTBase.balanceOf(address(0x10)), 1);
+        assertEq(zoraNFTBase.balanceOf(address(0x11)), 1);
+        assertEq(zoraNFTBase.balanceOf(address(0x12)), 1);
+        assertEq(zoraNFTBase.balanceOf(address(0x13)), 1);
+    }
+
+    function test_AdminMintAirdropFails() public setupZoraNFTBase(1000) {
+        vm.startPrank(address(0x10));
+        address[] memory toMint = new address[](4);
+        toMint[0] = address(0x10);
+        toMint[1] = address(0x11);
+        toMint[2] = address(0x12);
+        toMint[3] = address(0x13);
+        vm.expectRevert("Does not have proper role or admin");
+        zoraNFTBase.adminMintAirdrop(toMint);
+    }
 
     // test admin mint non-admin permissions
+    function test_AdminMintBatch() public setupZoraNFTBase(1000) {
+        vm.startPrank(DEFAULT_OWNER_ADDRESS);
+        zoraNFTBase.adminMint(DEFAULT_OWNER_ADDRESS, 100);
+        assertEq(zoraNFTBase.saleDetails().totalMinted, 100);
+        assertEq(zoraNFTBase.balanceOf(DEFAULT_OWNER_ADDRESS), 100);
+    }
 
-    // test admin airdrop non-admin permissions
+    function test_AdminMintBatchFails() public setupZoraNFTBase(1000) {
+        vm.startPrank(address(0x10));
+        vm.expectRevert("Does not have proper role or admin");
+        zoraNFTBase.adminMint(address(0x10), 100);
+    }
 
     function test_Burn() public setupZoraNFTBase(10) {
         address minter = address(0x32402);

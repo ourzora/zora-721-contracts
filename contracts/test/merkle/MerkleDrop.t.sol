@@ -48,7 +48,7 @@ contract ZoraNFTBaseTest is DSTest {
 
     function test_MerklePurchaseActiveSuccess() public setupZoraNFTBase {
         vm.startPrank(DEFAULT_OWNER_ADDRESS);
-        zoraNFTBase.setSaleConfiguration(
+        zoraNFTBase.setDropSaleConfiguration(
             ERC721Drop.SalesConfiguration({
                 publicSaleStart: 0,
                 publicSaleEnd: 0,
@@ -108,7 +108,7 @@ contract ZoraNFTBaseTest is DSTest {
 
     function test_MerklePurchaseAndPublicSalePurchaseLimits() public setupZoraNFTBase {
         vm.startPrank(DEFAULT_OWNER_ADDRESS);
-        zoraNFTBase.setSaleConfiguration(
+        zoraNFTBase.setDropSaleConfiguration(
             ERC721Drop.SalesConfiguration({
                 publicSaleStart: 0,
                 publicSaleEnd: type(uint64).max,
@@ -170,7 +170,7 @@ contract ZoraNFTBaseTest is DSTest {
         vm.startPrank(DEFAULT_OWNER_ADDRESS);
         // block.timestamp returning zero allows sales to go through.
         vm.warp(100);
-        zoraNFTBase.setSaleConfiguration(
+        zoraNFTBase.setDropSaleConfiguration(
             ERC721Drop.SalesConfiguration({
                 publicSaleStart: 0,
                 publicSaleEnd: 0,

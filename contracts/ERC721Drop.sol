@@ -1,6 +1,20 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.10;
 
+/**
+
+ ________   _____   ____    ______      ____
+/\_____  \ /\  __`\/\  _`\ /\  _  \    /\  _`\
+\/____//'/'\ \ \/\ \ \ \L\ \ \ \L\ \   \ \ \/\ \  _ __   ___   _____     ____
+     //'/'  \ \ \ \ \ \ ,  /\ \  __ \   \ \ \ \ \/\`'__\/ __`\/\ '__`\  /',__\
+    //'/'___ \ \ \_\ \ \ \\ \\ \ \/\ \   \ \ \_\ \ \ \//\ \L\ \ \ \L\ \/\__, `\
+    /\_______\\ \_____\ \_\ \_\ \_\ \_\   \ \____/\ \_\\ \____/\ \ ,__/\/\____/
+    \/_______/ \/_____/\/_/\/ /\/_/\/_/    \/___/  \/_/ \/___/  \ \ \/  \/___/
+                                                                 \ \_\
+                                                                  \/_/
+
+ */
+
 import {ERC721AUpgradeable} from "erc721a-upgradeable/ERC721AUpgradeable.sol";
 import {IERC2981Upgradeable, IERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/interfaces/IERC2981Upgradeable.sol";
 import {AddressUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
@@ -55,8 +69,8 @@ contract ERC721Drop is
     bytes32 public immutable SALES_MANAGER_ROLE = keccak256("SALES_MANAGER");
 
     /// @dev Returns the version of the contract.
-    function contractVersion() external pure returns (uint8) {
-        return uint8(VERSION);
+    function contractVersion() external pure returns (uint256) {
+        return VERSION;
     }
 
     /// @notice General configuration for NFT Minting and bookkeeping
@@ -339,7 +353,6 @@ contract ERC721Drop is
     {
         uint256 salePrice = salesConfig.publicSalePrice;
 
-        // TODO(iain): Should Use tx.origin here to allow for minting from proxy contracts to not break limit and require unique accounts
         require(msg.value == salePrice * quantity, "Wrong price");
         require(
             _numberMinted(_msgSender()) +
@@ -482,7 +495,7 @@ contract ERC721Drop is
 
     /// @dev This sets the sales configuration
     /// @param newConfig new configuration to set for sales information
-    function setSaleConfiguration(SalesConfiguration memory newConfig)
+    function setDropSaleConfiguration(SalesConfiguration memory newConfig)
         external
         onlyAdmin
     {

@@ -238,7 +238,7 @@ contract ERC721DropTest is DSTest {
     }
 
     function test_WithdrawNotAllowed() public setupZoraNFTBase(10) {
-        vm.expectRevert("Does not have proper role or admin");
+        vm.expectRevert("Does not have proper role to withdraw");
         zoraNFTBase.withdraw();
     }
 

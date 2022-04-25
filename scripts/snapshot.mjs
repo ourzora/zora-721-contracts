@@ -1,12 +1,48 @@
-import 'isomorphic-fetch'
+import "isomorphic-fetch";
+import { writeFile } from "fs/promises";
+import esMain from "es-main";
 
-const indexer_result = await fetch("https://indexer-prod-mainnet.zora.co/v1/graphql", {
-  headers: {
-    Accept: "*/*",
-    "Content-Type": "application/json",
-  },
-  body: '{"query":"query Token {\\n  Token(where:{\\n    tokenContract:{address:{_eq:\\"0xC9677Cd8e9652F1b1aaDd3429769b0Ef8D7A0425\\"}}\\n  }\\n  limit: 100\\n\\toffset: 0\\n) {\\n    tokenId\\n    owner\\n    metadata {\\n      json\\n    }\\n  }\\n}","variables":null,"operationName":"Token"}',
-  method: "POST",
-});
+async function fetchIndexer(contract, offset) {
+  const query = `{"query":"query Token {\\n  Token(where:{\\n    tokenContract:{address:{_eq:\\"${contract}\\"}}\\n  }\\n  limit: 100\\n\\toffset: ${offset}\\n) {\\n    tokenId\\n    owner\\n    metadata {\\n      json\\n    }\\n  }\\n}","variables":null,"operationName":"Token"}`;
+  console.log(query);
+  const result = await fetch(
+    "https://indexer-prod-mainnet.zora.co/v1/graphql",
+    {
+      headers: {
+        Accept: "*/*",
+        "Content-Type": "application/json",
+      },
+      body: query,
+      method: "POST",
+    }
+  );
+  const jsonResult = await result.json();
+  const tokenData = jsonResult.data.Token;
+  return tokenData;
+}
 
-console.log(indexer_result)
+async function fetchLoop(contract) {
+  let resultPart = [];
+  let results = [];
+  let offset = 0;
+  do {
+    resultPart = await fetchIndexer(contract, offset);
+    results = results.concat(resultPart);
+    console.log({ offset });
+    offset += 100;
+  } while (resultPart.length > 0);
+  return results;
+}
+
+async function fetchAllAddresses(contract) {
+  const results = await fetchLoop(contract);
+  console.log(`[results] has ${results.length} nfts`);
+  writeFile("./results.json", JSON.stringify(results, null, 2));
+}
+
+if (esMain(import.meta)) {
+  const contract = process.argv[2];
+  console.log(`[result] fetching for contract: ${contract}`);
+  await fetchAllAddresses(contract);
+  console.log(`[result] done`);
+}

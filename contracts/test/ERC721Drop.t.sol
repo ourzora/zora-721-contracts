@@ -242,6 +242,48 @@ contract ERC721DropTest is DSTest {
         zoraNFTBase.withdraw();
     }
 
+    function test_InvalidFinalizeOpenEdition() public setupZoraNFTBase(5) {
+        vm.prank(DEFAULT_OWNER_ADDRESS);
+        zoraNFTBase.setSaleConfiguration(ERC721Drop.SalesConfiguration({
+            publicSaleStart: 0,
+            publicSaleEnd: type(uint64).max,
+            presaleStart: 0,
+            presaleEnd: 0,
+            publicSalePrice: 0.2 ether,
+            presaleMerkleRoot: bytes32(0),
+            maxSalePurchasePerAddress: 5
+        }));
+        zoraNFTBase.purchase{value: 0.6 ether}(3);
+        vm.prank(DEFAULT_OWNER_ADDRESS);
+        zoraNFTBase.adminMint(address(0x1234), 2);
+        vm.prank(DEFAULT_OWNER_ADDRESS);
+        vm.expectRevert("Not open edition");
+        zoraNFTBase.finalizeOpenEdition();
+    }
+
+    function test_ValidFinalizeOpenEdition() public setupZoraNFTBase(type(uint64).max) {
+        vm.prank(DEFAULT_OWNER_ADDRESS);
+        zoraNFTBase.setSaleConfiguration(ERC721Drop.SalesConfiguration({
+            publicSaleStart: 0,
+            publicSaleEnd: type(uint64).max,
+            presaleStart: 0,
+            presaleEnd: 0,
+            publicSalePrice: 0.2 ether,
+            presaleMerkleRoot: bytes32(0),
+            maxSalePurchasePerAddress: 10 
+        }));
+        zoraNFTBase.purchase{value: 0.6 ether}(3);
+        vm.prank(DEFAULT_OWNER_ADDRESS);
+        zoraNFTBase.adminMint(address(0x1234), 2);
+        vm.prank(DEFAULT_OWNER_ADDRESS);
+        zoraNFTBase.finalizeOpenEdition();
+        vm.expectRevert("Too many");
+        vm.prank(DEFAULT_OWNER_ADDRESS);
+        zoraNFTBase.adminMint(address(0x1234), 2);
+        vm.expectRevert("Too many");
+        zoraNFTBase.purchase{value: 0.6 ether}(3);
+    }
+
     function test_AdminMint() public setupZoraNFTBase(10) {
         address minter = address(0x32402);
         vm.startPrank(DEFAULT_OWNER_ADDRESS);

@@ -3,7 +3,14 @@ import { writeFile } from "fs/promises";
 import dotenv from "dotenv";
 import esMain from "es-main";
 
-dotenv.config();
+if (!process.env.DEPLOY_ENV) {
+  console.error('DEPLOY_ENV=rinkeby or DEPLOY_ENV=mainnet needs to be set')
+  process.exit();
+}
+
+dotenv.config({
+  path: `.env.${process.env.DEPLOY_ENV}`
+});
 
 export async function setupContracts() {
   const feeManagerAdminAddress = process.env.FEE_MANAGER_ADMIN_ADDRESS;

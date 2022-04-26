@@ -1,4 +1,5 @@
 artifacts
+dist/
 node_modules
 cache
 *.private.json
@@ -6,5 +7,6 @@ cache
 typechain
 .DS_Store
 .env
+.env*
 .pkey
 scripts/gen.json

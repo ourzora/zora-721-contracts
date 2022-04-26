@@ -16,7 +16,7 @@ export function hashForEntry(entry) {
 export function makeTree(entries) {
   entries = entries.map((entry) => {
     entry.hash = hashForEntry(entry);
-    console.log(entry.hash);
+    console.log(Buffer.from(entry.hash).toString('base64'));
     return entry;
   });
   const tree = new MerkleTree(
@@ -24,9 +24,9 @@ export function makeTree(entries) {
     keccak256,
     { sortPairs: true }
   );
-  entries = entries.map((entry) => {
+  entries = entries.map((entry, indx) => {
     entry.hash = hexValue(entry.hash);
-    entry.proof = tree.getHexProof(entry.hash);
+    entry.proof = tree.getHexProof(entry.hash, indx);
     return entry;
   });
 

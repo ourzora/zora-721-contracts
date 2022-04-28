@@ -8,3 +8,5 @@ typechain
 .env
 .pkey
 scripts/gen.json
+.env.*
+dist/

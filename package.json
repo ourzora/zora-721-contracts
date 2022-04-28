@@ -15,8 +15,9 @@
   "scripts": {
     "test": "forge test",
     "generate-merkle-test-file": "node scripts/merkle-test.mjs",
-    "typechain": "typechain --target=ethers-v5 'dist/artifacts/*/*.json' --out-dir dist/typechain",
-    "deploy": "node scripts/deploy.mjs"
+    "typechain": "yarn run build && typechain --target=ethers-v5 'dist/artifacts/*/*[!.metadata].json' --out-dir dist/typechain",
+    "deploy": "node scripts/deploy.mjs",
+    "build": "forge build"
   },
   "devDependencies": {
     "dotenv": "^10.0.0"

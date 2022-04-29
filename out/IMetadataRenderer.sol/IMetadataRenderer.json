@@ -1,0 +1,310 @@
+{
+  "abi": [
+    {
+      "inputs": [],
+      "name": "contractURI",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes",
+          "name": "initData",
+          "type": "bytes"
+        }
+      ],
+      "name": "initializeWithData",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "tokenURI",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "bytecode": {
+    "object": "0x",
+    "sourceMap": "",
+    "linkReferences": {}
+  },
+  "deployedBytecode": {
+    "object": "0x",
+    "sourceMap": "",
+    "linkReferences": {}
+  },
+  "methodIdentifiers": {
+    "contractURI()": "e8a3d485",
+    "initializeWithData(bytes)": "856a7ffa",
+    "tokenURI(uint256)": "c87b56dd"
+  },
+  "userdoc": {
+    "version": 1,
+    "kind": "user"
+  },
+  "devdoc": {
+    "version": 1,
+    "kind": "dev"
+  },
+  "ast": {
+    "absolutePath": "/Users/iain/zora/zora-nft-contracts/src/interfaces/IMetadataRenderer.sol",
+    "exportedSymbols": {
+      "IMetadataRenderer": [
+        6264
+      ]
+    },
+    "id": 6265,
+    "license": "MIT",
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 6246,
+        "literals": [
+          "solidity",
+          "^",
+          "0.8",
+          ".10"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "32:24:38"
+      },
+      {
+        "abstract": false,
+        "baseContracts": [],
+        "canonicalName": "IMetadataRenderer",
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "fullyImplemented": false,
+        "id": 6264,
+        "linearizedBaseContracts": [
+          6264
+        ],
+        "name": "IMetadataRenderer",
+        "nameLocation": "68:17:38",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "functionSelector": "c87b56dd",
+            "id": 6253,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "tokenURI",
+            "nameLocation": "101:8:38",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 6249,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6248,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6253,
+                  "src": "110:7:38",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 6247,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "110:7:38",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "109:9:38"
+            },
+            "returnParameters": {
+              "id": 6252,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6251,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6253,
+                  "src": "142:13:38",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_memory_ptr",
+                    "typeString": "string"
+                  },
+                  "typeName": {
+                    "id": 6250,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "142:6:38",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "141:15:38"
+            },
+            "scope": 6264,
+            "src": "92:65:38",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "functionSelector": "e8a3d485",
+            "id": 6258,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "contractURI",
+            "nameLocation": "171:11:38",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 6254,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "182:2:38"
+            },
+            "returnParameters": {
+              "id": 6257,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6256,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6258,
+                  "src": "208:13:38",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_memory_ptr",
+                    "typeString": "string"
+                  },
+                  "typeName": {
+                    "id": 6255,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "208:6:38",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "207:15:38"
+            },
+            "scope": 6264,
+            "src": "162:61:38",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "functionSelector": "856a7ffa",
+            "id": 6263,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "initializeWithData",
+            "nameLocation": "237:18:38",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 6261,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6260,
+                  "mutability": "mutable",
+                  "name": "initData",
+                  "nameLocation": "269:8:38",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6263,
+                  "src": "256:21:38",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes_memory_ptr",
+                    "typeString": "bytes"
+                  },
+                  "typeName": {
+                    "id": 6259,
+                    "name": "bytes",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "256:5:38",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes_storage_ptr",
+                      "typeString": "bytes"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "255:23:38"
+            },
+            "returnParameters": {
+              "id": 6262,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "287:0:38"
+            },
+            "scope": 6264,
+            "src": "228:60:38",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "scope": 6265,
+        "src": "58:232:38",
+        "usedErrors": []
+      }
+    ],
+    "src": "32:259:38"
+  }
+}

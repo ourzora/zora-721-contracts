@@ -1,0 +1,428 @@
+{
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "bytes",
+          "name": "unencoded",
+          "type": "bytes"
+        }
+      ],
+      "name": "base64Encode",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes",
+          "name": "json",
+          "type": "bytes"
+        }
+      ],
+      "name": "encodeMetadataJSON",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "value",
+          "type": "uint256"
+        }
+      ],
+      "name": "numberToString",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    }
+  ],
+  "bytecode": {
+    "object": "0x",
+    "sourceMap": "",
+    "linkReferences": {}
+  },
+  "deployedBytecode": {
+    "object": "0x",
+    "sourceMap": "",
+    "linkReferences": {}
+  },
+  "methodIdentifiers": {
+    "base64Encode(bytes)": "d5fb1b19",
+    "encodeMetadataJSON(bytes)": "d01fde8c",
+    "numberToString(uint256)": "170dc660"
+  },
+  "userdoc": {
+    "version": 1,
+    "kind": "user",
+    "methods": {
+      "encodeMetadataJSON(bytes)": {
+        "notice": "Encodes the argument json bytes into base64-data uri format"
+      },
+      "numberToString(uint256)": {
+        "notice": "Proxy to openzeppelin's toString function"
+      }
+    },
+    "notice": "Shared public library for on-chain NFT functions"
+  },
+  "devdoc": {
+    "version": 1,
+    "kind": "dev",
+    "methods": {
+      "base64Encode(bytes)": {
+        "params": {
+          "unencoded": "bytes to base64-encode"
+        }
+      },
+      "encodeMetadataJSON(bytes)": {
+        "params": {
+          "json": "Raw json to base64 and turn into a data-uri"
+        }
+      },
+      "numberToString(uint256)": {
+        "params": {
+          "value": "number to return as a string"
+        }
+      }
+    }
+  },
+  "ast": {
+    "absolutePath": "/Users/iain/zora/zora-nft-contracts/src/interfaces/IPublicSharedMetadata.sol",
+    "exportedSymbols": {
+      "IPublicSharedMetadata": [
+        6308
+      ]
+    },
+    "id": 6309,
+    "license": "GPL-3.0",
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 6282,
+        "literals": [
+          "solidity",
+          "^",
+          "0.8",
+          ".10"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "36:24:40"
+      },
+      {
+        "abstract": false,
+        "baseContracts": [],
+        "canonicalName": "IPublicSharedMetadata",
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "documentation": {
+          "id": 6283,
+          "nodeType": "StructuredDocumentation",
+          "src": "62:53:40",
+          "text": "Shared public library for on-chain NFT functions"
+        },
+        "fullyImplemented": false,
+        "id": 6308,
+        "linearizedBaseContracts": [
+          6308
+        ],
+        "name": "IPublicSharedMetadata",
+        "nameLocation": "125:21:40",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "documentation": {
+              "id": 6284,
+              "nodeType": "StructuredDocumentation",
+              "src": "153:43:40",
+              "text": "@param unencoded bytes to base64-encode"
+            },
+            "functionSelector": "d5fb1b19",
+            "id": 6291,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "base64Encode",
+            "nameLocation": "210:12:40",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 6287,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6286,
+                  "mutability": "mutable",
+                  "name": "unencoded",
+                  "nameLocation": "236:9:40",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6291,
+                  "src": "223:22:40",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes_memory_ptr",
+                    "typeString": "bytes"
+                  },
+                  "typeName": {
+                    "id": 6285,
+                    "name": "bytes",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "223:5:40",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes_storage_ptr",
+                      "typeString": "bytes"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "222:24:40"
+            },
+            "returnParameters": {
+              "id": 6290,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6289,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6291,
+                  "src": "294:13:40",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_memory_ptr",
+                    "typeString": "string"
+                  },
+                  "typeName": {
+                    "id": 6288,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "294:6:40",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "293:15:40"
+            },
+            "scope": 6308,
+            "src": "201:108:40",
+            "stateMutability": "pure",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 6292,
+              "nodeType": "StructuredDocumentation",
+              "src": "315:127:40",
+              "text": "Encodes the argument json bytes into base64-data uri format\n @param json Raw json to base64 and turn into a data-uri"
+            },
+            "functionSelector": "d01fde8c",
+            "id": 6299,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "encodeMetadataJSON",
+            "nameLocation": "456:18:40",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 6295,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6294,
+                  "mutability": "mutable",
+                  "name": "json",
+                  "nameLocation": "488:4:40",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6299,
+                  "src": "475:17:40",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes_memory_ptr",
+                    "typeString": "bytes"
+                  },
+                  "typeName": {
+                    "id": 6293,
+                    "name": "bytes",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "475:5:40",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes_storage_ptr",
+                      "typeString": "bytes"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "474:19:40"
+            },
+            "returnParameters": {
+              "id": 6298,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6297,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6299,
+                  "src": "541:13:40",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_memory_ptr",
+                    "typeString": "string"
+                  },
+                  "typeName": {
+                    "id": 6296,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "541:6:40",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "540:15:40"
+            },
+            "scope": 6308,
+            "src": "447:109:40",
+            "stateMutability": "pure",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 6300,
+              "nodeType": "StructuredDocumentation",
+              "src": "562:95:40",
+              "text": "Proxy to openzeppelin's toString function\n @param value number to return as a string"
+            },
+            "functionSelector": "170dc660",
+            "id": 6307,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "numberToString",
+            "nameLocation": "671:14:40",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 6303,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6302,
+                  "mutability": "mutable",
+                  "name": "value",
+                  "nameLocation": "694:5:40",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6307,
+                  "src": "686:13:40",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 6301,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "686:7:40",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "685:15:40"
+            },
+            "returnParameters": {
+              "id": 6306,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6305,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6307,
+                  "src": "748:13:40",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_memory_ptr",
+                    "typeString": "string"
+                  },
+                  "typeName": {
+                    "id": 6304,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "748:6:40",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "747:15:40"
+            },
+            "scope": 6308,
+            "src": "662:101:40",
+            "stateMutability": "pure",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "scope": 6309,
+        "src": "115:650:40",
+        "usedErrors": []
+      }
+    ],
+    "src": "36:730:40"
+  }
+}

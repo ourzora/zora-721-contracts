@@ -25,9 +25,9 @@ contract ZoraNFTBaseTest is DSTest {
 
     modifier setupZoraNFTBase() {
         zoraNFTBase.initialize({
-            _name: "Test NFT",
-            _symbol: "TNFT",
-            _owner: DEFAULT_OWNER_ADDRESS,
+            _contractName: "Test NFT",
+            _contractSymbol: "TNFT",
+            _initialOwner: DEFAULT_OWNER_ADDRESS,
             _fundsRecipient: payable(DEFAULT_FUNDS_RECIPIENT_ADDRESS),
             _editionSize: 10,
             _royaltyBPS: 800,
@@ -168,9 +168,9 @@ contract ZoraNFTBaseTest is DSTest {
 
     function test_MerklePurchaseAndPublicSaleEditionSizeZero() public {
         zoraNFTBase.initialize({
-            _name: "Test NFT",
-            _symbol: "TNFT",
-            _owner: DEFAULT_OWNER_ADDRESS,
+            _contractName: "Test NFT",
+            _contractSymbol: "TNFT",
+            _initialOwner: DEFAULT_OWNER_ADDRESS,
             _fundsRecipient: payable(DEFAULT_FUNDS_RECIPIENT_ADDRESS),
             _editionSize: 0,
             _royaltyBPS: 800,

@@ -1,0 +1,157 @@
+{
+  "abi": [
+    {
+      "inputs": [],
+      "name": "implementation",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "bytecode": {
+    "object": "0x",
+    "sourceMap": "",
+    "linkReferences": {}
+  },
+  "deployedBytecode": {
+    "object": "0x",
+    "sourceMap": "",
+    "linkReferences": {}
+  },
+  "methodIdentifiers": {
+    "implementation()": "5c60da1b"
+  },
+  "userdoc": {
+    "version": 1,
+    "kind": "user"
+  },
+  "devdoc": {
+    "version": 1,
+    "kind": "dev",
+    "details": "This is the interface that {BeaconProxy} expects of its beacon.",
+    "methods": {
+      "implementation()": {
+        "details": "Must return an address that can be used as a delegate call target. {BeaconProxy} will check that this address is a contract."
+      }
+    }
+  },
+  "ast": {
+    "absolutePath": "/Users/iain/zora/zora-nft-contracts/lib/openzeppelin-contracts/contracts/proxy/beacon/IBeacon.sol",
+    "exportedSymbols": {
+      "IBeacon": [
+        4234
+      ]
+    },
+    "id": 4235,
+    "license": "MIT",
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 4226,
+        "literals": [
+          "solidity",
+          "^",
+          "0.8",
+          ".0"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "93:23:29"
+      },
+      {
+        "abstract": false,
+        "baseContracts": [],
+        "canonicalName": "IBeacon",
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "documentation": {
+          "id": 4227,
+          "nodeType": "StructuredDocumentation",
+          "src": "118:79:29",
+          "text": " @dev This is the interface that {BeaconProxy} expects of its beacon."
+        },
+        "fullyImplemented": false,
+        "id": 4234,
+        "linearizedBaseContracts": [
+          4234
+        ],
+        "name": "IBeacon",
+        "nameLocation": "208:7:29",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "documentation": {
+              "id": 4228,
+              "nodeType": "StructuredDocumentation",
+              "src": "222:162:29",
+              "text": " @dev Must return an address that can be used as a delegate call target.\n {BeaconProxy} will check that this address is a contract."
+            },
+            "functionSelector": "5c60da1b",
+            "id": 4233,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "implementation",
+            "nameLocation": "398:14:29",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 4229,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "412:2:29"
+            },
+            "returnParameters": {
+              "id": 4232,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 4231,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 4233,
+                  "src": "438:7:29",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 4230,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "438:7:29",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "437:9:29"
+            },
+            "scope": 4234,
+            "src": "389:58:29",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "scope": 4235,
+        "src": "198:251:29",
+        "usedErrors": []
+      }
+    ],
+    "src": "93:357:29"
+  }
+}

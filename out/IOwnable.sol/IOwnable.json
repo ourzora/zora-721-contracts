@@ -1,0 +1,250 @@
+{
+  "abi": [
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "previousOwner",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "newOwner",
+          "type": "address"
+        }
+      ],
+      "name": "OwnershipTransferred",
+      "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "owner",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "bytecode": {
+    "object": "0x",
+    "sourceMap": "",
+    "linkReferences": {}
+  },
+  "deployedBytecode": {
+    "object": "0x",
+    "sourceMap": "",
+    "linkReferences": {}
+  },
+  "methodIdentifiers": {
+    "owner()": "8da5cb5b"
+  },
+  "userdoc": {
+    "version": 1,
+    "kind": "user"
+  },
+  "devdoc": {
+    "version": 1,
+    "kind": "dev",
+    "details": "Contract module which provides a basic access control mechanism, where there is an account (an owner) that can be granted exclusive access to specific functions. This ownership interface matches OZ's ownable interface.",
+    "methods": {
+      "owner()": {
+        "details": "Returns the address of the current owner."
+      }
+    }
+  },
+  "ast": {
+    "absolutePath": "/Users/iain/zora/zora-nft-contracts/src/interfaces/IOwnable.sol",
+    "exportedSymbols": {
+      "IOwnable": [
+        6280
+      ]
+    },
+    "id": 6281,
+    "license": "MIT",
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 6266,
+        "literals": [
+          "solidity",
+          "^",
+          "0.8",
+          ".10"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "32:24:39"
+      },
+      {
+        "abstract": false,
+        "baseContracts": [],
+        "canonicalName": "IOwnable",
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "documentation": {
+          "id": 6267,
+          "nodeType": "StructuredDocumentation",
+          "src": "58:249:39",
+          "text": " @dev Contract module which provides a basic access control mechanism, where\n there is an account (an owner) that can be granted exclusive access to\n specific functions.\n This ownership interface matches OZ's ownable interface."
+        },
+        "fullyImplemented": false,
+        "id": 6280,
+        "linearizedBaseContracts": [
+          6280
+        ],
+        "name": "IOwnable",
+        "nameLocation": "318:8:39",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "anonymous": false,
+            "eventSelector": "8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0",
+            "id": 6273,
+            "name": "OwnershipTransferred",
+            "nameLocation": "339:20:39",
+            "nodeType": "EventDefinition",
+            "parameters": {
+              "id": 6272,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6269,
+                  "indexed": true,
+                  "mutability": "mutable",
+                  "name": "previousOwner",
+                  "nameLocation": "385:13:39",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6273,
+                  "src": "369:29:39",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 6268,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "369:7:39",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 6271,
+                  "indexed": true,
+                  "mutability": "mutable",
+                  "name": "newOwner",
+                  "nameLocation": "424:8:39",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6273,
+                  "src": "408:24:39",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 6270,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "408:7:39",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "359:79:39"
+            },
+            "src": "333:106:39"
+          },
+          {
+            "documentation": {
+              "id": 6274,
+              "nodeType": "StructuredDocumentation",
+              "src": "445:65:39",
+              "text": " @dev Returns the address of the current owner."
+            },
+            "functionSelector": "8da5cb5b",
+            "id": 6279,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "owner",
+            "nameLocation": "524:5:39",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 6275,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "529:2:39"
+            },
+            "returnParameters": {
+              "id": 6278,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6277,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6279,
+                  "src": "555:7:39",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 6276,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "555:7:39",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "554:9:39"
+            },
+            "scope": 6280,
+            "src": "515:49:39",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "scope": 6281,
+        "src": "308:258:39",
+        "usedErrors": []
+      }
+    ],
+    "src": "32:535:39"
+  }
+}

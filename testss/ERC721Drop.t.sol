@@ -31,9 +31,9 @@ contract ERC721DropTest is DSTest {
 
     modifier setupZoraNFTBase(uint64 editionSize) {
         zoraNFTBase.initialize({
-            _name: "Test NFT",
-            _symbol: "TNFT",
-            _owner: DEFAULT_OWNER_ADDRESS,
+            _contractName: "Test NFT",
+            _contractSymbol: "TNFT",
+            _initialOwner: DEFAULT_OWNER_ADDRESS,
             _fundsRecipient: payable(DEFAULT_FUNDS_RECIPIENT_ADDRESS),
             _editionSize: editionSize,
             _royaltyBPS: 800,
@@ -68,9 +68,9 @@ contract ERC721DropTest is DSTest {
 
         vm.expectRevert("Initializable: contract is already initialized");
         zoraNFTBase.initialize({
-            _name: "Test NFT",
-            _symbol: "TNFT",
-            _owner: DEFAULT_OWNER_ADDRESS,
+            _contractName: "Test NFT",
+            _contractSymbol: "TNFT",
+            _initialOwner: DEFAULT_OWNER_ADDRESS,
             _fundsRecipient: payable(DEFAULT_FUNDS_RECIPIENT_ADDRESS),
             _editionSize: 10,
             _royaltyBPS: 800,

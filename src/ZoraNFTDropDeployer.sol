@@ -31,9 +31,9 @@ contract ZoraNFTDropDeployer {
     );
 
     ERC721Drop(newMediaContract).initialize({
-        _owner: owner,
-        _name: name,
-        _symbol: symbol,
+        _initialOwner: owner,
+        _contractName: name,
+        _contractSymbol: symbol,
         _fundsRecipient: fundsRecipient,
         _editionSize: editionSize,
         _royaltyBPS: royaltyBPS,

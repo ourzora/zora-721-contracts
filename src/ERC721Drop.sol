@@ -201,17 +201,17 @@ contract ERC721Drop is
         zoraERC721TransferHelper = _zoraERC721TransferHelper;
     }
 
-    ///  @dev Function to create a new edition. Can only be called by the allowed creator
-    ///       Sets the only allowed minter to the address that creates/owns the edition.
-    ///       This can be re-assigned or updated later
-    ///  @param _owner User that owns and can mint the edition, gets royalty and sales payouts and can update the base url if needed.
+    ///  @dev Create a new drop
+    ///  @param _contractName Contract name
+    ///  @param _contractSymbol Contract symbol
+    ///  @param _initialOwner User that owns and can mint the edition, gets royalty and sales payouts and can update the base url if needed.
     ///  @param _fundsRecipient Wallet/user that receives funds from sale
     ///  @param _editionSize Number of editions that can be minted in total. If 0, unlimited editions can be minted.
     ///  @param _royaltyBPS BPS of the royalty set on the contract. Can be 0 for no royalty.
     function initialize(
-        string memory _name,
-        string memory _symbol,
-        address _owner,
+        string memory _contractName,
+        string memory _contractSymbol,
+        address _initialOwner,
         address payable _fundsRecipient,
         uint64 _editionSize,
         uint16 _royaltyBPS,
@@ -219,15 +219,15 @@ contract ERC721Drop is
         bytes memory _metadataRendererInit
     ) public initializer {
         // Setup ERC721A
-        __ERC721A_init(_name, _symbol);
+        __ERC721A_init(_contractName, _contractSymbol);
         // Setup access control
         __AccessControl_init();
         // Setup re-entracy guard
         __ReentrancyGuard_init();
         // Setup the owner role
-        _setupRole(DEFAULT_ADMIN_ROLE, _owner);
+        _setupRole(DEFAULT_ADMIN_ROLE, _initialOwner);
         // Set ownership to original sender of contract call
-        _setOwner(_owner);
+        _setOwner(_initialOwner);
 
         require(
             config.royaltyBPS < 50_01,

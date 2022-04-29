@@ -45,7 +45,8 @@ contract ERC721Drop is
     OwnableSkeleton
 {
     /// @dev This is the underlying contract version that is implemented by the interface
-    uint256 private constant VERSION = 3;
+    uint256 private constant VERSION = 4;
+
     /// @dev This is the max mint batch size for the optimized ERC721A mint contract
     uint256 private constant MAX_MINT_BATCH_SIZE = 8;
 
@@ -66,6 +67,7 @@ contract ERC721Drop is
     /// @notice Error string constants
     string private constant SOLD_OUT = "Sold out";
     string private constant TOO_MANY = "Too many";
+    string private constant ADDRESS_ZERO_ERROR = "Cannot set address to 0x0";
 
     /// @notice Access control roles
     bytes32 public immutable MINTER_ROLE = keccak256("MINTER");
@@ -78,38 +80,36 @@ contract ERC721Drop is
 
     /// @notice General configuration for NFT Minting and bookkeeping
     struct Configuration {
-        /// @dev Metadata renderer
+        /// @dev Metadata renderer (uint160)
         IMetadataRenderer metadataRenderer;
-        /// @dev Total size of edition that can be minted
+        /// @dev Total size of edition that can be minted (uint160+64 = 224)
         uint64 editionSize;
-        /// @dev Royalty amount in bps
+        /// @dev Royalty amount in bps (uint224+16 = 240)
         uint16 royaltyBPS;
-        /// @dev Funds recipient for sale
+        /// @dev Flag to disable royalties (uint240+8 = 248)
+        bool disableRoyalties;
+        /// @dev Funds recipient for sale (new slot, uint160)
         address payable fundsRecipient;
     }
 
     /// @notice Sales states and configuration
     /// @dev Uses 3 storage slots
     struct SalesConfiguration {
-        /// @dev Public sale price
+        /// @dev Public sale price (max ether value > 1000 ether with this value)
         uint104 publicSalePrice;
-        /// @dev Max purchase number per txn
+        /// @dev Max purchase number per txn (90+32 = 122)
         uint32 maxSalePurchasePerAddress;
         /// @dev uint64 type allows for dates into 292 billion years
-
-        // Storage: uses 1 slot
-
-        /// @dev Public sale start timestamp
+        /// @notice Public sale start timestamp (136+64 = 186)
         uint64 publicSaleStart;
-        /// @dev Public sale end timestamp
+        /// @notice Public sale end timestamp (186+64 = 250)
         uint64 publicSaleEnd;
-        /// @dev Presale start timestamp
+        /// @notice Presale start timestamp
+        /// @dev new storage slot
         uint64 presaleStart;
-        /// @dev Presale end timestamp
+        /// @notice Presale end timestamp
         uint64 presaleEnd;
-        // Storage: uses 1 slot
-
-        /// @dev Presale merkle root
+        /// @notice Presale merkle root
         bytes32 presaleMerkleRoot;
     }
 
@@ -135,9 +135,21 @@ contract ERC721Drop is
         _;
     }
 
+    /// @notice Only a given role has access or admin
+    /// @param role role to check for alongside the admin role
+    modifier onlyRoleOrAdmin(bytes32 role) {
+        require(
+            hasRole(DEFAULT_ADMIN_ROLE, msg.sender) ||
+                hasRole(role, msg.sender),
+            "Does not have proper role or admin"
+        );
+
+        _;
+    }
+
     /// @notice Allows user to mint tokens at a quantity
     modifier canMintTokens(uint256 quantity) {
-        require(quantity + _totalMinted() <= config.editionSize, TOO_MANY);
+        require(quantity + _totalMinted() <= config.editionSize, SOLD_OUT);
 
         _;
     }
@@ -178,18 +190,6 @@ contract ERC721Drop is
         return 1;
     }
 
-    /// @notice Only a given role has access or admin
-    /// @param role role to check for alongside the admin role
-    modifier onlyRoleOrAdmin(bytes32 role) {
-        require(
-            hasRole(DEFAULT_ADMIN_ROLE, msg.sender) ||
-                hasRole(role, msg.sender),
-            "Does not have proper role or admin"
-        );
-
-        _;
-    }
-
     /// @notice Global constructor – these variables will not change with further proxy deploys
     /// @param _zoraFeeManager Zora Fee Manager
     /// @param _zoraERC721TransferHelper Transfer helper
@@ -218,6 +218,13 @@ contract ERC721Drop is
         IMetadataRenderer _metadataRenderer,
         bytes memory _metadataRendererInit
     ) public initializer {
+        // Metadata renderer cannot be zero address
+        require(address(_metadataRenderer) != address(0x0), ADDRESS_ZERO_ERROR);
+        // Funds recipient cannot be zero address
+        require(address(_fundsRecipient) != address(0x0), ADDRESS_ZERO_ERROR);
+        // Owner cannot be zero address
+        require(address(_initialOwner) != address(0x0), ADDRESS_ZERO_ERROR);
+
         // Setup ERC721A
         __ERC721A_init(_contractName, _contractSymbol);
         // Setup access control
@@ -234,6 +241,7 @@ contract ERC721Drop is
             "Royalty BPS cannot be greater than 50%"
         );
 
+        // Setup config variables
         config.editionSize = _editionSize;
         config.metadataRenderer = _metadataRenderer;
         config.royaltyBPS = _royaltyBPS;
@@ -261,7 +269,7 @@ contract ERC721Drop is
         override
         returns (address receiver, uint256 royaltyAmount)
     {
-        if (config.fundsRecipient == address(0x0)) {
+        if (config.disableRoyalties) {
             return (config.fundsRecipient, 0);
         }
         return (
@@ -391,7 +399,7 @@ contract ERC721Drop is
             uint256 toMint = quantity > MAX_MINT_BATCH_SIZE
                 ? MAX_MINT_BATCH_SIZE
                 : quantity;
-            _mint({to: to, quantity: toMint, _data: "", safe: false});
+            _mint({to: to, quantity: toMint});
             quantity -= toMint;
         } while (quantity > 0);
     }
@@ -496,7 +504,6 @@ contract ERC721Drop is
      ***  ADMIN CONFIGURATION FUNCTIONS     ***
      ***                                    ***
      *** ---------------------------------- ***
-     ***
      ***/
 
     /// @dev Set new owner for royalties / opensea
@@ -506,26 +513,80 @@ contract ERC721Drop is
     }
 
     /// @dev This sets the sales configuration
-    /// @param newConfig new configuration to set for sales information
-    function setDropSaleConfiguration(SalesConfiguration memory newConfig)
-        external
-        onlyAdmin
-    {
-        salesConfig = newConfig;
-        emit SalesConfigChanged(_msgSender(), salesConfig);
+    // / @param publicSalePrice New public sale price
+    function setSaleConfiguration(
+        uint104 publicSalePrice,
+        uint32 maxSalePurchasePerAddress,
+        uint64 publicSaleStart,
+        uint64 publicSaleEnd,
+        uint64 presaleStart,
+        uint64 presaleEnd,
+        bytes32 presaleMerkleRoot
+    ) external onlyAdmin {
+        SalesConfiguration memory localSalesConfig = salesConfig;
+
+        if (localSalesConfig.publicSalePrice != publicSalePrice) {
+            salesConfig.publicSalePrice = publicSalePrice;
+            localSalesConfig.publicSalePrice = publicSalePrice;
+        }
+
+        if (
+            localSalesConfig.maxSalePurchasePerAddress !=
+            maxSalePurchasePerAddress
+        ) {
+            salesConfig.maxSalePurchasePerAddress = maxSalePurchasePerAddress;
+            localSalesConfig
+                .maxSalePurchasePerAddress = maxSalePurchasePerAddress;
+        }
+
+        if (localSalesConfig.publicSaleStart != publicSaleStart) {
+            salesConfig.publicSaleStart = publicSaleStart;
+            localSalesConfig.publicSaleStart = publicSaleStart;
+        }
+        if (localSalesConfig.publicSaleEnd != publicSaleEnd) {
+            salesConfig.publicSaleEnd = publicSaleEnd;
+            localSalesConfig.publicSaleEnd = publicSaleEnd;
+        }
+
+        if (localSalesConfig.presaleStart != presaleStart) {
+            salesConfig.presaleStart = presaleStart;
+            localSalesConfig.presaleStart = presaleStart;
+        }
+        if (localSalesConfig.presaleEnd != presaleEnd) {
+            salesConfig.presaleEnd = presaleEnd;
+            localSalesConfig.presaleEnd = presaleEnd;
+        }
+
+        if (localSalesConfig.presaleMerkleRoot != presaleMerkleRoot) {
+            salesConfig.presaleMerkleRoot = presaleMerkleRoot;
+            localSalesConfig.presaleMerkleRoot = presaleMerkleRoot;
+        }
+
+        emit SalesConfigChanged(_msgSender(), localSalesConfig);
     }
 
-    /// @dev Set a different funds recipient
+    /// @notice Set a different funds recipient
     /// @param newRecipientAddress new funds recipient address
     function setFundsRecipient(address payable newRecipientAddress)
         external
         onlyRoleOrAdmin(SALES_MANAGER_ROLE)
     {
+        require(newRecipientAddress != address(0x0), "Cannot set to 0x0");
+
         config.fundsRecipient = newRecipientAddress;
         emit FundsRecipientChanged(newRecipientAddress, _msgSender());
     }
 
-    /// @dev This withdraws ETH from the contract to the contract owner.
+    /// @notice Disables on-chain royalties (allows a user to turn off royalties if needed)
+    /// @param disableRoyalties setting to disable royalties: true and royalties will be turned off, false enabled, default false.
+    function setDisableRoyalties(bool disableRoyalties)
+        external
+        onlyRoleOrAdmin(SALES_MANAGER_ROLE)
+    {
+        config.disableRoyalties = disableRoyalties;
+    }
+
+    /// @notice This withdraws ETH from the contract to the contract owner.
     function withdraw() external nonReentrant {
         address sender = _msgSender();
 
@@ -557,6 +618,7 @@ contract ERC721Drop is
         onlyRoleOrAdmin(SALES_MANAGER_ROLE)
     {
         require(config.editionSize == type(uint64).max, "Not open edition");
+
         config.editionSize = uint64(_totalMinted());
         emit OpenMintFinalized(_msgSender(), config.editionSize);
     }

@@ -29,6 +29,7 @@ contract ZoraNFTDropDeployer {
     address newMediaContract = ClonesUpgradeable.clone(
         implementation
     );
+    emit DeployedNewContract(msg.sender, newMediaContract);
 
     ERC721Drop(newMediaContract).initialize({
         _initialOwner: owner,
@@ -40,7 +41,6 @@ contract ZoraNFTDropDeployer {
         _metadataRenderer: metadataDropRendererAddress,
         _metadataRendererInit: metadataInitializer
     });
-    emit DeployedNewContract(msg.sender, newMediaContract);
 
     return newMediaContract;
   }

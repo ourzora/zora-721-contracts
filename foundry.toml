@@ -2,7 +2,7 @@
 auto_detect_solc = true
 optimizer = true
 optimizer_runs = 1000
-out = 'out'#dist/artifacts'
+out = 'dist/artifacts'
 src = 'src'
 libs = ['lib']
 gas_reports = ['*']

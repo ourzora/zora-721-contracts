@@ -79,7 +79,7 @@ contract DropMetadataRenderer is IMetadataRenderer {
         string memory metadataExtension,
         string memory newContractURI,
         uint256 freezeAt
-    ) public requireSenderAdmin(target) {
+    ) external requireSenderAdmin(target) {
         _updateMetadataDetails(
             target,
             metadataBase,

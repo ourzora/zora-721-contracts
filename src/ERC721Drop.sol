@@ -523,46 +523,19 @@ contract ERC721Drop is
         uint64 presaleEnd,
         bytes32 presaleMerkleRoot
     ) external onlyAdmin {
-        SalesConfiguration memory localSalesConfig = salesConfig;
+        SalesConfiguration memory newConfig = SalesConfiguration({
+            publicSaleStart: publicSaleStart,
+            publicSaleEnd: publicSaleEnd,
+            presaleStart: presaleStart,
+            presaleEnd: presaleEnd,
+            publicSalePrice: publicSalePrice,
+            maxSalePurchasePerAddress: maxSalePurchasePerAddress,
+            presaleMerkleRoot: presaleMerkleRoot
+        });
 
-        if (localSalesConfig.publicSalePrice != publicSalePrice) {
-            salesConfig.publicSalePrice = publicSalePrice;
-            localSalesConfig.publicSalePrice = publicSalePrice;
-        }
+        emit SalesConfigChanged(_msgSender(), newConfig);
 
-        if (
-            localSalesConfig.maxSalePurchasePerAddress !=
-            maxSalePurchasePerAddress
-        ) {
-            salesConfig.maxSalePurchasePerAddress = maxSalePurchasePerAddress;
-            localSalesConfig
-                .maxSalePurchasePerAddress = maxSalePurchasePerAddress;
-        }
-
-        if (localSalesConfig.publicSaleStart != publicSaleStart) {
-            salesConfig.publicSaleStart = publicSaleStart;
-            localSalesConfig.publicSaleStart = publicSaleStart;
-        }
-        if (localSalesConfig.publicSaleEnd != publicSaleEnd) {
-            salesConfig.publicSaleEnd = publicSaleEnd;
-            localSalesConfig.publicSaleEnd = publicSaleEnd;
-        }
-
-        if (localSalesConfig.presaleStart != presaleStart) {
-            salesConfig.presaleStart = presaleStart;
-            localSalesConfig.presaleStart = presaleStart;
-        }
-        if (localSalesConfig.presaleEnd != presaleEnd) {
-            salesConfig.presaleEnd = presaleEnd;
-            localSalesConfig.presaleEnd = presaleEnd;
-        }
-
-        if (localSalesConfig.presaleMerkleRoot != presaleMerkleRoot) {
-            salesConfig.presaleMerkleRoot = presaleMerkleRoot;
-            localSalesConfig.presaleMerkleRoot = presaleMerkleRoot;
-        }
-
-        emit SalesConfigChanged(_msgSender(), localSalesConfig);
+        salesConfig = newConfig;
     }
 
     /// @notice Set a different funds recipient

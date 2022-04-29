@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity 0.8.10;
 
-import {IMetadataRenderer} from "../../interfaces/IMetadataRenderer.sol";
+import {IMetadataRenderer} from "../../src/interfaces/IMetadataRenderer.sol";
 
 contract DummyMetadataRenderer is IMetadataRenderer {
     function tokenURI(uint256) external pure override returns (string memory) {

@@ -3,11 +3,11 @@ pragma solidity 0.8.10;
 
 import {Vm} from "forge-std/Vm.sol";
 import {DSTest} from "ds-test/test.sol";
-import {ERC721Drop} from "../ERC721Drop.sol";
-import {ZoraFeeManager} from "../ZoraFeeManager.sol";
+import {ERC721Drop} from "../src/ERC721Drop.sol";
+import {ZoraFeeManager} from "../src/ZoraFeeManager.sol";
 import {DummyMetadataRenderer} from "./utils/DummyMetadataRenderer.sol";
 import {MockUser} from "./utils/MockUser.sol";
-import {IMetadataRenderer} from "../interfaces/IMetadataRenderer.sol";
+import {IMetadataRenderer} from "../src/interfaces/IMetadataRenderer.sol";
 
 contract ERC721DropTest is DSTest {
     ERC721Drop zoraNFTBase;

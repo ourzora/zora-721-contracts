@@ -4,8 +4,8 @@ pragma solidity 0.8.10;
 import {Vm} from "forge-std/Vm.sol";
 import {DSTest} from "ds-test/test.sol";
 
-import {ERC721Drop} from "../../ERC721Drop.sol";
-import {ZoraFeeManager} from "../../ZoraFeeManager.sol";
+import {ERC721Drop} from "../../src/ERC721Drop.sol";
+import {ZoraFeeManager} from "../../src/ZoraFeeManager.sol";
 import {DummyMetadataRenderer} from "../utils/DummyMetadataRenderer.sol";
 
 import {MerkleData} from "./MerkleData.sol";

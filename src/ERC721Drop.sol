@@ -209,9 +209,9 @@ contract ERC721Drop is
     ///  @param _editionSize Number of editions that can be minted in total. If 0, unlimited editions can be minted.
     ///  @param _royaltyBPS BPS of the royalty set on the contract. Can be 0 for no royalty.
     function initialize(
-        string memory _contractName,
-        string memory _contractSymbol,
-        address _iniitalOwner,
+        string memory _name,
+        string memory _symbol,
+        address _owner,
         address payable _fundsRecipient,
         uint64 _editionSize,
         uint16 _royaltyBPS,
@@ -219,15 +219,15 @@ contract ERC721Drop is
         bytes memory _metadataRendererInit
     ) public initializer {
         // Setup ERC721A
-        __ERC721A_init(_contractName, _contractSymbol);
+        __ERC721A_init(_name, _symbol);
         // Setup access control
         __AccessControl_init();
         // Setup re-entracy guard
         __ReentrancyGuard_init();
         // Setup the owner role
-        _setupRole(DEFAULT_ADMIN_ROLE, _initialOwner);
+        _setupRole(DEFAULT_ADMIN_ROLE, _owner);
         // Set ownership to original sender of contract call
-        _setOwner(_initialOwner);
+        _setOwner(_owner);
 
         require(
             config.royaltyBPS < 50_01,

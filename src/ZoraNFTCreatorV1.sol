@@ -14,6 +14,8 @@ import {ERC721Drop} from "./ERC721Drop.sol";
 
 /// @dev Zora NFT Creator V1
 contract ZoraNFTCreatorV1 is OwnableUpgradeable, UUPSUpgradeable {
+    string private constant CANNOT_BE_ZERO = "Cannot be 0 address";
+
     using CountersUpgradeable for CountersUpgradeable.Counter;
 
     /// TODO: figure out memory implications of using immutable variables here
@@ -40,13 +42,17 @@ contract ZoraNFTCreatorV1 is OwnableUpgradeable, UUPSUpgradeable {
         EditionMetadataRenderer _editionMetadataRenderer,
         DropMetadataRenderer _dropMetadataRenderer
     ) {
+        require(_implementation != address(0), CANNOT_BE_ZERO);
+        require(address(_editionMetadataRenderer) != address(0), CANNOT_BE_ZERO);
+        require(address(_dropMetadataRenderer) != address(0), CANNOT_BE_ZERO);
+
         implementation = _implementation;
         editionMetadataRenderer = _editionMetadataRenderer;
         dropMetadataRenderer = _dropMetadataRenderer;
     }
 
     /// @dev Initializes the proxy contract
-    function initialize() public initializer {
+    function initialize() external initializer {
         __Ownable_init();
         __UUPSUpgradeable_init();
     }
@@ -79,19 +85,19 @@ contract ZoraNFTCreatorV1 is OwnableUpgradeable, UUPSUpgradeable {
             implementation,
             bytes32(abi.encodePacked(newId))
         );
+        emit CreatedEdition(newId, msg.sender, editionSize, newMediaContract);
+        atContract.increment();
 
         ERC721Drop(newMediaContract).initialize({
-            _owner: msg.sender,
-            _name: name,
-            _symbol: symbol,
+            _initialOwner: msg.sender,
+            _contractName: name,
+            _contractSymbol: symbol,
             _fundsRecipient: fundsRecipient,
             _editionSize: editionSize,
             _royaltyBPS: royaltyBPS,
             _metadataRenderer: metadataRenderer,
             _metadataRendererInit: metadataInitializer
         });
-        atContract.increment();
-        emit CreatedEdition(newId, msg.sender, editionSize, newMediaContract);
 
         return (newId, newMediaContract);
     }
@@ -112,9 +118,9 @@ contract ZoraNFTCreatorV1 is OwnableUpgradeable, UUPSUpgradeable {
         address payable fundsRecipient,
         string memory metadataURIBase,
         string memory metadataContractURI
-    ) external returns (uint256) {
+    ) external returns (uint256, address) {
         bytes memory metadataInitializer = abi.encode(metadataURIBase, metadataContractURI);
-        (uint256 newId, address mediaContract) = _setupMediaContract({
+        return _setupMediaContract({
             name: name,
             symbol: symbol,
             royaltyBPS: royaltyBPS,
@@ -123,8 +129,6 @@ contract ZoraNFTCreatorV1 is OwnableUpgradeable, UUPSUpgradeable {
             metadataRenderer: dropMetadataRenderer,
             metadataInitializer: metadataInitializer
         });
-
-        return newId;
     }
 
     /// @notice Creates a new edition contract as a factory with a deterministic address
@@ -152,9 +156,9 @@ contract ZoraNFTCreatorV1 is OwnableUpgradeable, UUPSUpgradeable {
         string memory imageURI,
         // stored as calldata
         bytes32 imageHash
-    ) external returns (uint256) {
+    ) external returns (uint256, address) {
         bytes memory metadataInitializer = abi.encode(description, imageURI, animationURI);
-        (uint256 newId, address mediaContract) = _setupMediaContract({
+        return _setupMediaContract({
             name: name,
             symbol: symbol,
             royaltyBPS: royaltyBPS,
@@ -163,8 +167,6 @@ contract ZoraNFTCreatorV1 is OwnableUpgradeable, UUPSUpgradeable {
             metadataRenderer: editionMetadataRenderer,
             metadataInitializer: metadataInitializer
         });
-
-        return newId;
     }
 
     /// @notice Get edition given the created ID

@@ -10,3 +10,4 @@ typechain
 scripts/gen.json
 .env.*
 dist/
+.idea

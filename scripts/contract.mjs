@@ -72,6 +72,7 @@ export async function verify(address, contract, args = undefined)  {
 async function retryVerify(maxTries, ...args) {
   if (maxTries == 0) {
     console.log('failed to verify');
+    return
   }
   try {
     return await verify(...args);
@@ -84,8 +85,23 @@ async function retryVerify(maxTries, ...args) {
   }
 }
 
+async function retryDeploy(maxTries, ...args) {
+  if(maxTries === 0) {
+    console.log('failed to deploy.')
+    process.exit(1);
+  }
+  try {
+    return await deploy(...args)
+  } catch (e) {
+    console.error(e);
+    console.log('retrying');
+    await timeout(2000)
+    return retryDeploy(maxTries - 1, ...args)
+  }
+}
+
 export async function deployAndVerify(contract, args) {
-  const deployed = await deploy(contract, args);
+  const deployed = await retryDeploy(2, contract, args);
   console.log(`[deployed] ${contract}`);
   console.log('wait 10 sec for etherscan to catch up');
   await timeout(10000);

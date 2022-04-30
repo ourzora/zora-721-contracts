@@ -2,7 +2,7 @@
 pragma solidity 0.8.10;
 
 import {DSTest} from "ds-test/test.sol";
-import {ZoraFeeManager} from "../src/ZoraFeeManager.sol";
+import {ZoraFeeManager} from "../ZoraFeeManager.sol";
 import {MockUser} from "./utils/MockUser.sol";
 import {Vm} from "forge-std/Vm.sol";
 

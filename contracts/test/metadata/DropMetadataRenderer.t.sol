@@ -5,7 +5,7 @@ import {DSTest} from "ds-test/test.sol";
 import {Vm} from "forge-std/Vm.sol";
 
 import {DropMockBase} from "./DropMockBase.sol";
-import {DropMetadataRenderer} from "../../src/metadata/DropMetadataRenderer.sol";
+import {DropMetadataRenderer} from "../../metadata/DropMetadataRenderer.sol";
 
 contract DropMetadataRendererTest is DSTest {
     Vm public constant vm = Vm(HEVM_ADDRESS);

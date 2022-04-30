@@ -4,8 +4,8 @@ pragma solidity 0.8.10;
 import {DSTest} from "ds-test/test.sol";
 import {Vm} from "forge-std/Vm.sol";
 
-import {ZoraNFTDropDeployer} from "../src/ZoraNFTDropDeployer.sol";
-import {IMetadataRenderer} from "../src/interfaces/IMetadataRenderer.sol";
+import {ZoraNFTDropDeployer} from "../ZoraNFTDropDeployer.sol";
+import {IMetadataRenderer} from "../interfaces/IMetadataRenderer.sol";
 
 
 contract ZoraFeeManagerTest is DSTest {

@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: MIT
+
 pragma solidity ^0.8.10;
 
 import {StringsUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/StringsUpgradeable.sol";
@@ -79,7 +80,7 @@ contract DropMetadataRenderer is IMetadataRenderer {
         string memory metadataExtension,
         string memory newContractURI,
         uint256 freezeAt
-    ) external requireSenderAdmin(target) {
+    ) public requireSenderAdmin(target) {
         _updateMetadataDetails(
             target,
             metadataBase,

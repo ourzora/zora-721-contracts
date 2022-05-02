@@ -7,7 +7,7 @@ const execPromise = util.promisify(exec);
 
 dotenv.config();
 
-function timeout(ms) {
+export function timeout(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
@@ -69,7 +69,7 @@ export async function verify(address, contract, args = undefined)  {
   };
 }
 
-async function retryVerify(maxTries, ...args) {
+export async function retryVerify(maxTries, ...args) {
   if (maxTries == 0) {
     console.log('failed to verify');
     return
@@ -85,7 +85,7 @@ async function retryVerify(maxTries, ...args) {
   }
 }
 
-async function retryDeploy(maxTries, ...args) {
+export async function retryDeploy(maxTries, ...args) {
   if(maxTries === 0) {
     console.log('failed to deploy.')
     process.exit(1);
@@ -107,7 +107,7 @@ export async function deployAndVerify(contract, args) {
   await timeout(10000);
   const verified = await retryVerify(3, deployed.deploy.deployedTo, contract, deployed.args);
   console.log(`[verified] ${contract}`)
-  console.log(verified)
+  // console.log(verified)
   return {
     deployed, verify: verified
   }

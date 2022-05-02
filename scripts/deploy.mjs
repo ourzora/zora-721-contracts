@@ -1,4 +1,4 @@
-import { deployAndVerify } from "./contract.mjs";
+import {deployAndVerify, retryDeploy, retryVerify, timeout} from "./contract.mjs";
 import { writeFile } from "fs/promises";
 import dotenv from "dotenv";
 import esMain from "es-main";
@@ -46,16 +46,28 @@ export async function setupContracts() {
   const editionsMetadataAddress = editionsMetadataContract.deployed.deploy.deployedTo;
   console.log("deployed drops metadata to", editionsMetadataAddress)
 
-  // const creator = await deployAndVerify(
-  //   "contracts/ZoraNFTDropDeployer.sol:ZoraNFTDropDeployer",
-  //   [dropContractAddress, dropMetadataAddress]
-  // );
+  console.log('deploying creator implementation')
+  const creatorImpl = await deployAndVerify(
+    "contracts/ZoraNFTCreatorV1.sol:ZoraNFTCreatorV1",
+    [dropContractAddress, editionsMetadataAddress, dropMetadataAddress]
+  );
+  console.log('deployed creator implementation to', creatorImpl.deployed.deploy.deployedTo)
+
+  console.log('deploying creator proxy')
+  const creatorProxy = await retryDeploy(2,
+    "contracts/ZoraNFTCreatorProxy.sol:ZoraNFTCreatorProxy",
+    // [creatorImpl.deployed.deploy.deployedTo, []]
+    ['0x97d0deaf7fbbea140218989dff3ca34eaeab4034', '""']
+  )
+  await timeout(10000)
+  await retryVerify(3, creatorProxy.deploy.deployedTo,"contracts/ZoraNFTCreatorProxy.sol:ZoraNFTCreatorProxy", ['0x97d0deaf7fbbea140218989dff3ca34eaeab4034', []])
+  console.log('deployed creator proxy to ', creatorProxy.deploy.deployedTo);
   return {
     feeManager,
     dropContract,
     dropMetadataContract,
-    editionsMetadataContract
-    // creator,
+    editionsMetadataContract,
+    creatorProxy,
   };
 }
 

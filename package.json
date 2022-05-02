@@ -8,9 +8,8 @@
   "private": false,
   "type": "module",
   "files": [
-    "typechain",
-    "contracts",
-    "deployments"
+    "dist/typechain",
+    "src",
   ],
   "scripts": {
     "test": "forge test",

@@ -351,7 +351,6 @@ contract ERC721Drop is
      ***     PUBLIC MINTING FUNCTIONS       ***
      ***                                    ***
      *** ---------------------------------- ***
-     ***
      ***/
 
     /**

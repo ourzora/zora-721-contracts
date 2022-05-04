@@ -33,7 +33,7 @@ contract ZoraNFTCreatorV1 is OwnableUpgradeable, UUPSUpgradeable {
     /// @notice Drop metdata renderer
     DropMetadataRenderer public immutable dropMetadataRenderer;
 
-    /// Initializes factory with address of implementation logic
+    /// @notice Initializes factory with address of implementation logic
     /// @param _implementation SingleEditionMintable logic implementation contract to clone
     /// @param _editionMetadataRenderer Metadata renderer for editions
     /// @param _dropMetadataRenderer Metadata renderer for drops

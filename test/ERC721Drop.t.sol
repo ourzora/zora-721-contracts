@@ -8,6 +8,7 @@ import {ZoraFeeManager} from "../src/ZoraFeeManager.sol";
 import {DummyMetadataRenderer} from "./utils/DummyMetadataRenderer.sol";
 import {MockUser} from "./utils/MockUser.sol";
 import {IMetadataRenderer} from "../src/interfaces/IMetadataRenderer.sol";
+import {FactoryUpgradeGate} from "../src/interfaces/FactoryUpgradeGate.sol";
 
 contract ERC721DropTest is DSTest {
     ERC721Drop zoraNFTBase;
@@ -48,7 +49,7 @@ contract ERC721DropTest is DSTest {
         vm.prank(DEFAULT_ZORA_DAO_ADDRESS);
         feeManager = new ZoraFeeManager(500, DEFAULT_ZORA_DAO_ADDRESS);
         vm.prank(DEFAULT_ZORA_DAO_ADDRESS);
-        zoraNFTBase = new ERC721Drop(feeManager, address(1234));
+        zoraNFTBase = new ERC721Drop(feeManager, address(1234), FactoryUpgradeGate(address(0x0)));
     }
 
     function test_Init() public setupZoraNFTBase(10) {

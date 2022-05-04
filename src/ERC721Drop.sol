@@ -21,12 +21,16 @@ import {AddressUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/Addr
 import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import {MerkleProofUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/cryptography/MerkleProofUpgradeable.sol";
+import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
 import {IZoraFeeManager} from "./interfaces/IZoraFeeManager.sol";
 import {IMetadataRenderer} from "./interfaces/IMetadataRenderer.sol";
 import {IZoraDrop} from "./interfaces/IZoraDrop.sol";
 import {IOwnable} from "./interfaces/IOwnable.sol";
+import {FactoryUpgradeGate} from "./interfaces/FactoryUpgradeGate.sol";
+
 import {OwnableSkeleton} from "./utils/OwnableSkeleton.sol";
+import {Version} from "./utils/Version.sol";
 
 /**
  * @notice ZORA NFT Base contract for Drops and Editions
@@ -38,15 +42,14 @@ import {OwnableSkeleton} from "./utils/OwnableSkeleton.sol";
  */
 contract ERC721Drop is
     ERC721AUpgradeable,
+    UUPSUpgradeable,
     IERC2981Upgradeable,
     ReentrancyGuardUpgradeable,
     AccessControlUpgradeable,
     IZoraDrop,
-    OwnableSkeleton
+    OwnableSkeleton,
+    Version(5)
 {
-    /// @dev This is the underlying contract version that is implemented by the interface
-    uint256 private constant VERSION = 4;
-
     /// @dev This is the max mint batch size for the optimized ERC721A mint contract
     uint256 private constant MAX_MINT_BATCH_SIZE = 8;
 
@@ -72,11 +75,6 @@ contract ERC721Drop is
     /// @notice Access control roles
     bytes32 public immutable MINTER_ROLE = keccak256("MINTER");
     bytes32 public immutable SALES_MANAGER_ROLE = keccak256("SALES_MANAGER");
-
-    /// @dev Returns the version of the contract.
-    function contractVersion() external pure returns (uint256) {
-        return VERSION;
-    }
 
     /// @notice General configuration for NFT Minting and bookkeeping
     struct Configuration {
@@ -121,6 +119,9 @@ contract ERC721Drop is
 
     /// @dev ZORA V3 transfer helper address for auto-approval
     address private immutable zoraERC721TransferHelper;
+
+    /// @dev Factory upgrade gate
+    FactoryUpgradeGate private immutable factoryUpgradeGate;
 
     /// @dev Mapping for presale mint counts by address to allow public mint limit
     mapping(address => uint256) public presaleMintsByAddress;
@@ -195,10 +196,12 @@ contract ERC721Drop is
     /// @param _zoraERC721TransferHelper Transfer helper
     constructor(
         IZoraFeeManager _zoraFeeManager,
-        address _zoraERC721TransferHelper
+        address _zoraERC721TransferHelper,
+        FactoryUpgradeGate _factoryUpgradeGate
     ) {
         zoraFeeManager = _zoraFeeManager;
         zoraERC721TransferHelper = _zoraERC721TransferHelper;
+        factoryUpgradeGate = _factoryUpgradeGate;
     }
 
     ///  @dev Create a new drop
@@ -253,6 +256,13 @@ contract ERC721Drop is
     /// @return boolean if address is admin
     function isAdmin(address user) external view returns (bool) {
         return hasRole(DEFAULT_ADMIN_ROLE, user);
+    }
+
+    function _authorizeUpgrade(address newImplementation) internal override onlyAdmin {
+        require(
+            factoryUpgradeGate.isValidUpgrade(newImplementation),
+            "Invalid upgrade"
+        );
     }
 
     /// @param tokenId Token ID to burn

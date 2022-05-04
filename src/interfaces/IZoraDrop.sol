@@ -101,8 +101,4 @@ interface IZoraDrop {
     /// @param to list of addresses to mint an NFT each to
     /// @return the id of the first minted NFT
     function adminMintAirdrop(address[] memory to) external returns (uint256);
-
-    /// @notice The version of the contract
-    /// @return The version ID of this contract implementation
-    function contractVersion() external pure returns (uint256);
 }

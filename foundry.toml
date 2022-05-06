@@ -1,9 +1,9 @@
 [default]
 auto_detect_solc = true
-gas_reports = ['*']
-libs = ['lib']
 optimizer = true
 optimizer_runs = 500000
 out = 'dist/artifacts'
-src = 'contracts'
 test = 'test'
+src = 'src'
+libs = ['lib']
+gas_reports = ['*']

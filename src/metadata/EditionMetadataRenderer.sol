@@ -74,7 +74,7 @@ contract EditionMetadataRenderer is IMetadataRenderer {
 
     function contractURI() external view override returns (string memory) {
         address target = msg.sender;
-        bytes memory imageSpace;
+        bytes memory imageSpace = bytes("");
         if (bytes(tokenInfos[target].imageURI).length > 0) {
             imageSpace = abi.encodePacked(
                 '", "image": "',
@@ -106,6 +106,14 @@ contract EditionMetadataRenderer is IMetadataRenderer {
 
         TokenEditionInfo memory info = tokenInfos[target];
         ERC721Drop media = ERC721Drop(target);
+
+        uint256 maxSupply = media.saleDetails().maxSupply;
+
+        // For open editions, set max supply to 0 for renderer to remove the edition max number
+        // This will be added back on once the open edition is "finalized"
+        if (maxSupply == type(uint64).max) {
+            maxSupply = 0;
+        }
 
         return
             sharedNFTLogic.createMetadataEdition({

@@ -1,28 +1,32 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.10;
 
-import {ClonesUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/ClonesUpgradeable.sol";
-import {CountersUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
+import {ERC721DropProxy} from "./ERC721DropProxy.sol";
+import {Version} from "./utils/Version.sol";
 import {EditionMetadataRenderer} from "./metadata/EditionMetadataRenderer.sol";
 import {DropMetadataRenderer} from "./metadata/DropMetadataRenderer.sol";
 import {IMetadataRenderer} from "./interfaces/IMetadataRenderer.sol";
 import {ERC721Drop} from "./ERC721Drop.sol";
+import {FactoryUpgradeGate} from "./interfaces/FactoryUpgradeGate.sol";
 
-
-/// @dev Zora NFT Creator V1
-contract ZoraNFTCreatorV1 is OwnableUpgradeable, UUPSUpgradeable {
+/// @notice Zora NFT Creator V1
+contract ZoraNFTCreatorV1 is
+    OwnableUpgradeable,
+    UUPSUpgradeable,
+    FactoryUpgradeGate,
+    Version(1)
+{
     string private constant CANNOT_BE_ZERO = "Cannot be 0 address";
 
-    using CountersUpgradeable for CountersUpgradeable.Counter;
-
-    /// TODO: figure out memory implications of using immutable variables here
-    /// They are supposed to be discarded upon upgrade
-
-    /// @notice Counter for current contract id upgraded
-    CountersUpgradeable.Counter private atContract;
+    /// @notice Emitted when a edition is created reserving the corresponding token IDs.
+    event CreatedDrop(
+        address indexed creator,
+        address indexed editionContractAddress,
+        uint256 editionSize
+    );
 
     /// @notice Address for implementation of ZoraNFTBase to clone
     address public immutable implementation;
@@ -33,7 +37,7 @@ contract ZoraNFTCreatorV1 is OwnableUpgradeable, UUPSUpgradeable {
     /// @notice Drop metdata renderer
     DropMetadataRenderer public immutable dropMetadataRenderer;
 
-    /// Initializes factory with address of implementation logic
+    /// @notice Initializes factory with address of implementation logic
     /// @param _implementation SingleEditionMintable logic implementation contract to clone
     /// @param _editionMetadataRenderer Metadata renderer for editions
     /// @param _dropMetadataRenderer Metadata renderer for drops
@@ -43,12 +47,22 @@ contract ZoraNFTCreatorV1 is OwnableUpgradeable, UUPSUpgradeable {
         DropMetadataRenderer _dropMetadataRenderer
     ) {
         require(_implementation != address(0), CANNOT_BE_ZERO);
-        require(address(_editionMetadataRenderer) != address(0), CANNOT_BE_ZERO);
+        require(
+            address(_editionMetadataRenderer) != address(0),
+            CANNOT_BE_ZERO
+        );
         require(address(_dropMetadataRenderer) != address(0), CANNOT_BE_ZERO);
 
         implementation = _implementation;
         editionMetadataRenderer = _editionMetadataRenderer;
         dropMetadataRenderer = _dropMetadataRenderer;
+    }
+
+    /// @notice Call to validate upgrade for child drop contract.
+    /// @dev Can be upgraded to include a static list of allowable upgrades for child media contracts.
+    /// @param newImplementation proposed new implementation address
+    function isValidUpgrade(address newImplementation) external returns (bool) {
+        return false;
     }
 
     /// @dev Initializes the proxy contract
@@ -68,43 +82,45 @@ contract ZoraNFTCreatorV1 is OwnableUpgradeable, UUPSUpgradeable {
     /// @dev Internal function to setup the media contract across all metadata types
     /// @param name Name for new contract (cannot be changed)
     /// @param symbol Symbol for new contract (cannot be changed)
+    /// @param defaultAdmin Default admin address
     /// @param editionSize The max size of the media contract allowed
     /// @param royaltyBPS BPS for on-chain royalties (cannot be changed)
     /// @param fundsRecipient recipient for sale funds and, unless overridden, royalties
     function _setupMediaContract(
         string memory name,
         string memory symbol,
+        address defaultAdmin,
         uint64 editionSize,
         uint16 royaltyBPS,
         address payable fundsRecipient,
         IMetadataRenderer metadataRenderer,
         bytes memory metadataInitializer
-    ) internal returns (uint256, address) {
-        uint256 newId = atContract.current();
-        address newMediaContract = ClonesUpgradeable.cloneDeterministic(
+    ) internal returns (address) {
+        ERC721DropProxy newDrop = new ERC721DropProxy(
             implementation,
-            bytes32(abi.encodePacked(newId))
+            abi.encode(
+                name,
+                symbol,
+                defaultAdmin,
+                fundsRecipient,
+                editionSize,
+                royaltyBPS,
+                metadataRenderer,
+                metadataInitializer
+            )
         );
-        emit CreatedEdition(newId, msg.sender, editionSize, newMediaContract);
-        atContract.increment();
 
-        ERC721Drop(newMediaContract).initialize({
-            _initialOwner: msg.sender,
-            _contractName: name,
-            _contractSymbol: symbol,
-            _fundsRecipient: fundsRecipient,
-            _editionSize: editionSize,
-            _royaltyBPS: royaltyBPS,
-            _metadataRenderer: metadataRenderer,
-            _metadataRendererInit: metadataInitializer
-        });
+        address newDropAddress = address(newDrop);
 
-        return (newId, newMediaContract);
+        emit CreatedDrop({creator: msg.sender, editionSize: editionSize, editionContractAddress: newDropAddress});
+
+        return newDropAddress;
     }
 
     /// @dev Setup the media contract for a drop
     /// @param name Name for new contract (cannot be changed)
     /// @param symbol Symbol for new contract (cannot be changed)
+    /// @param defaultAdmin Default admin address
     /// @param editionSize The max size of the media contract allowed
     /// @param royaltyBPS BPS for on-chain royalties (cannot be changed)
     /// @param fundsRecipient recipient for sale funds and, unless overridden, royalties
@@ -113,28 +129,35 @@ contract ZoraNFTCreatorV1 is OwnableUpgradeable, UUPSUpgradeable {
     function createDrop(
         string memory name,
         string memory symbol,
+        address defaultAdmin,
         uint64 editionSize,
         uint16 royaltyBPS,
         address payable fundsRecipient,
         string memory metadataURIBase,
         string memory metadataContractURI
-    ) external returns (uint256, address) {
-        bytes memory metadataInitializer = abi.encode(metadataURIBase, metadataContractURI);
-        return _setupMediaContract({
-            name: name,
-            symbol: symbol,
-            royaltyBPS: royaltyBPS,
-            editionSize: editionSize,
-            fundsRecipient: fundsRecipient,
-            metadataRenderer: dropMetadataRenderer,
-            metadataInitializer: metadataInitializer
-        });
+    ) external returns (address) {
+        bytes memory metadataInitializer = abi.encode(
+            metadataURIBase,
+            metadataContractURI
+        );
+        return
+            _setupMediaContract({
+                defaultAdmin: defaultAdmin,
+                name: name,
+                symbol: symbol,
+                royaltyBPS: royaltyBPS,
+                editionSize: editionSize,
+                fundsRecipient: fundsRecipient,
+                metadataRenderer: dropMetadataRenderer,
+                metadataInitializer: metadataInitializer
+            });
     }
 
     /// @notice Creates a new edition contract as a factory with a deterministic address
     /// @notice Important: None of these fields (except the Url fields with the same hash) can be changed after calling
     /// @param name Name of the edition contract
     /// @param symbol Symbol of the edition contract
+    /// @param defaultAdmin Default admin address
     /// @param editionSize Total size of the edition (number of possible editions)
     /// @param royaltyBPS BPS amount of royalty
     /// @param fundsRecipient Funds recipient for the NFT sale
@@ -149,6 +172,7 @@ contract ZoraNFTCreatorV1 is OwnableUpgradeable, UUPSUpgradeable {
         uint64 editionSize,
         uint16 royaltyBPS,
         address payable fundsRecipient,
+        address defaultAdmin,
         string memory description,
         string memory animationURI,
         // stored as calldata
@@ -156,42 +180,22 @@ contract ZoraNFTCreatorV1 is OwnableUpgradeable, UUPSUpgradeable {
         string memory imageURI,
         // stored as calldata
         bytes32 imageHash
-    ) external returns (uint256, address) {
-        bytes memory metadataInitializer = abi.encode(description, imageURI, animationURI);
-        return _setupMediaContract({
-            name: name,
-            symbol: symbol,
-            royaltyBPS: royaltyBPS,
-            editionSize: editionSize,
-            fundsRecipient: fundsRecipient,
-            metadataRenderer: editionMetadataRenderer,
-            metadataInitializer: metadataInitializer
-        });
-    }
-
-    /// @notice Get edition given the created ID
-    /// @param editionId id of edition to get contract for
-    /// @return SingleEditionMintable Edition NFT contract
-    function getEditionAtId(uint256 editionId)
-        external
-        view
-        returns (ERC721Drop)
-    {
+    ) external returns (address) {
+        bytes memory metadataInitializer = abi.encode(
+            description,
+            imageURI,
+            animationURI
+        );
         return
-            ERC721Drop(
-                ClonesUpgradeable.predictDeterministicAddress(
-                    implementation,
-                    bytes32(abi.encodePacked(editionId)),
-                    address(this)
-                )
-            );
+            _setupMediaContract({
+                name: name,
+                symbol: symbol,
+                defaultAdmin: defaultAdmin,
+                royaltyBPS: royaltyBPS,
+                editionSize: editionSize,
+                fundsRecipient: fundsRecipient,
+                metadataRenderer: editionMetadataRenderer,
+                metadataInitializer: metadataInitializer
+            });
     }
-
-    /// @notice Emitted when a edition is created reserving the corresponding token IDs.
-    event CreatedEdition(
-        uint256 indexed editionId,
-        address indexed creator,
-        uint256 editionSize,
-        address editionContractAddress
-    );
 }

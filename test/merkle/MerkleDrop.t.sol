@@ -4,9 +4,10 @@ pragma solidity 0.8.10;
 import {Vm} from "forge-std/Vm.sol";
 import {DSTest} from "ds-test/test.sol";
 
-import {ERC721Drop} from "../../ERC721Drop.sol";
-import {ZoraFeeManager} from "../../ZoraFeeManager.sol";
+import {ERC721Drop} from "../../src/ERC721Drop.sol";
+import {ZoraFeeManager} from "../../src/ZoraFeeManager.sol";
 import {DummyMetadataRenderer} from "../utils/DummyMetadataRenderer.sol";
+import {FactoryUpgradeGate} from "../../src/interfaces/FactoryUpgradeGate.sol";
 
 import {MerkleData} from "./MerkleData.sol";
 
@@ -25,9 +26,9 @@ contract ZoraNFTBaseTest is DSTest {
 
     modifier setupZoraNFTBase() {
         zoraNFTBase.initialize({
-            _name: "Test NFT",
-            _symbol: "TNFT",
-            _owner: DEFAULT_OWNER_ADDRESS,
+            _contractName: "Test NFT",
+            _contractSymbol: "TNFT",
+            _initialOwner: DEFAULT_OWNER_ADDRESS,
             _fundsRecipient: payable(DEFAULT_FUNDS_RECIPIENT_ADDRESS),
             _editionSize: 10,
             _royaltyBPS: 800,
@@ -42,32 +43,32 @@ contract ZoraNFTBaseTest is DSTest {
         vm.prank(DEFAULT_ZORA_DAO_ADDRESS);
         feeManager = new ZoraFeeManager(250, DEFAULT_ZORA_DAO_ADDRESS);
         vm.prank(DEFAULT_ZORA_DAO_ADDRESS);
-        zoraNFTBase = new ERC721Drop(feeManager, address(1234));
+        zoraNFTBase = new ERC721Drop(
+            feeManager,
+            address(1234),
+            FactoryUpgradeGate(address(0x0))
+        );
         merkleData = new MerkleData();
     }
 
     function test_MerklePurchaseActiveSuccess() public setupZoraNFTBase {
         vm.startPrank(DEFAULT_OWNER_ADDRESS);
-        zoraNFTBase.setDropSaleConfiguration(
-            ERC721Drop.SalesConfiguration({
-                publicSaleStart: 0,
-                publicSaleEnd: 0,
-                presaleStart: 0,
-                presaleEnd: type(uint64).max,
-                publicSalePrice: 0 ether,
-                maxSalePurchasePerAddress: 0,
-                presaleMerkleRoot: merkleData
-                    .getTestSetByName("test-3-addresses")
-                    .root
-            })
-        );
+        zoraNFTBase.setSaleConfiguration({
+            publicSaleStart: 0,
+            publicSaleEnd: 0,
+            presaleStart: 0,
+            presaleEnd: type(uint64).max,
+            publicSalePrice: 0 ether,
+            maxSalePurchasePerAddress: 0,
+            presaleMerkleRoot: merkleData
+                .getTestSetByName("test-3-addresses")
+                .root
+        });
         vm.stopPrank();
 
         MerkleData.MerkleEntry memory item;
 
-        item = merkleData
-            .getTestSetByName("test-3-addresses")
-            .entries[0];
+        item = merkleData.getTestSetByName("test-3-addresses").entries[0];
         vm.deal(address(item.user), 1 ether);
         vm.startPrank(address(item.user));
 
@@ -85,10 +86,7 @@ contract ZoraNFTBaseTest is DSTest {
         );
         vm.stopPrank();
 
-
-        item = merkleData
-            .getTestSetByName("test-3-addresses")
-            .entries[1];
+        item = merkleData.getTestSetByName("test-3-addresses").entries[1];
         vm.deal(address(item.user), 1 ether);
         vm.startPrank(address(item.user));
         zoraNFTBase.purchasePresale{value: item.mintPrice * 2}(
@@ -106,31 +104,28 @@ contract ZoraNFTBaseTest is DSTest {
         vm.stopPrank();
     }
 
-    function test_MerklePurchaseAndPublicSalePurchaseLimits() public setupZoraNFTBase {
+    function test_MerklePurchaseAndPublicSalePurchaseLimits()
+        public
+        setupZoraNFTBase
+    {
         vm.startPrank(DEFAULT_OWNER_ADDRESS);
-        zoraNFTBase.setDropSaleConfiguration(
-            ERC721Drop.SalesConfiguration({
-                publicSaleStart: 0,
-                publicSaleEnd: type(uint64).max,
-                presaleStart: 0,
-                presaleEnd: type(uint64).max,
-                publicSalePrice: 0.1 ether,
-                maxSalePurchasePerAddress: 1,
-                presaleMerkleRoot: merkleData
-                    .getTestSetByName("test-2-prices")
-                    .root
-            })
-        );
+        zoraNFTBase.setSaleConfiguration({
+            publicSaleStart: 0,
+            publicSaleEnd: type(uint64).max,
+            presaleStart: 0,
+            presaleEnd: type(uint64).max,
+            publicSalePrice: 0.1 ether,
+            maxSalePurchasePerAddress: 1,
+            presaleMerkleRoot: merkleData.getTestSetByName("test-2-prices").root
+        });
         vm.stopPrank();
 
         MerkleData.MerkleEntry memory item;
 
-        item = merkleData
-            .getTestSetByName("test-2-prices")
-            .entries[0];
+        item = merkleData.getTestSetByName("test-2-prices").entries[0];
         vm.deal(address(item.user), 1 ether);
         vm.startPrank(address(item.user));
-    
+
         vm.expectRevert("Too many");
         zoraNFTBase.purchasePresale{value: item.mintPrice * 3}(
             3,
@@ -140,10 +135,16 @@ contract ZoraNFTBaseTest is DSTest {
         );
 
         zoraNFTBase.purchasePresale{value: item.mintPrice * 1}(
-            1, item.maxMint, item.mintPrice, item.proof
+            1,
+            item.maxMint,
+            item.mintPrice,
+            item.proof
         );
         zoraNFTBase.purchasePresale{value: item.mintPrice * 1}(
-            1, item.maxMint, item.mintPrice, item.proof
+            1,
+            item.maxMint,
+            item.mintPrice,
+            item.proof
         );
         assertEq(zoraNFTBase.saleDetails().totalMinted, 2);
         require(
@@ -153,7 +154,10 @@ contract ZoraNFTBaseTest is DSTest {
 
         vm.expectRevert("Too many");
         zoraNFTBase.purchasePresale{value: item.mintPrice * 1}(
-            1, item.maxMint, item.mintPrice, item.proof
+            1,
+            item.maxMint,
+            item.mintPrice,
+            item.proof
         );
 
         zoraNFTBase.purchase{value: 0.1 ether}(1);
@@ -168,9 +172,9 @@ contract ZoraNFTBaseTest is DSTest {
 
     function test_MerklePurchaseAndPublicSaleEditionSizeZero() public {
         zoraNFTBase.initialize({
-            _name: "Test NFT",
-            _symbol: "TNFT",
-            _owner: DEFAULT_OWNER_ADDRESS,
+            _contractName: "Test NFT",
+            _contractSymbol: "TNFT",
+            _initialOwner: DEFAULT_OWNER_ADDRESS,
             _fundsRecipient: payable(DEFAULT_FUNDS_RECIPIENT_ADDRESS),
             _editionSize: 0,
             _royaltyBPS: 800,
@@ -179,30 +183,24 @@ contract ZoraNFTBaseTest is DSTest {
         });
 
         vm.startPrank(DEFAULT_OWNER_ADDRESS);
-        zoraNFTBase.setDropSaleConfiguration(
-            ERC721Drop.SalesConfiguration({
-                publicSaleStart: 0,
-                publicSaleEnd: type(uint64).max,
-                presaleStart: 0,
-                presaleEnd: type(uint64).max,
-                publicSalePrice: 0.1 ether,
-                maxSalePurchasePerAddress: 1,
-                presaleMerkleRoot: merkleData
-                    .getTestSetByName("test-2-prices")
-                    .root
-            })
-        );
+        zoraNFTBase.setSaleConfiguration({
+            publicSaleStart: 0,
+            publicSaleEnd: type(uint64).max,
+            presaleStart: 0,
+            presaleEnd: type(uint64).max,
+            publicSalePrice: 0.1 ether,
+            maxSalePurchasePerAddress: 1,
+            presaleMerkleRoot: merkleData.getTestSetByName("test-2-prices").root
+        });
         vm.stopPrank();
 
         MerkleData.MerkleEntry memory item;
 
-        item = merkleData
-            .getTestSetByName("test-2-prices")
-            .entries[0];
+        item = merkleData.getTestSetByName("test-2-prices").entries[0];
         vm.deal(address(item.user), 1 ether);
         vm.startPrank(address(item.user));
 
-        vm.expectRevert("Too many");
+        vm.expectRevert("Sold out");
         zoraNFTBase.purchasePresale{value: item.mintPrice}(
             1,
             item.maxMint,
@@ -216,19 +214,17 @@ contract ZoraNFTBaseTest is DSTest {
         vm.startPrank(DEFAULT_OWNER_ADDRESS);
         // block.timestamp returning zero allows sales to go through.
         vm.warp(100);
-        zoraNFTBase.setDropSaleConfiguration(
-            ERC721Drop.SalesConfiguration({
-                publicSaleStart: 0,
-                publicSaleEnd: 0,
-                presaleStart: 0,
-                presaleEnd: 0,
-                publicSalePrice: 0 ether,
-                maxSalePurchasePerAddress: 0,
-                presaleMerkleRoot: merkleData
-                    .getTestSetByName("test-3-addresses")
-                    .root
-            })
-        );
+        zoraNFTBase.setSaleConfiguration({
+            publicSaleStart: 0,
+            publicSaleEnd: 0,
+            presaleStart: 0,
+            presaleEnd: 0,
+            publicSalePrice: 0 ether,
+            maxSalePurchasePerAddress: 0,
+            presaleMerkleRoot: merkleData
+                .getTestSetByName("test-3-addresses")
+                .root
+        });
         vm.stopPrank();
         vm.deal(address(0x10), 1 ether);
 

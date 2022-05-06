@@ -16,6 +16,7 @@ pragma solidity ^0.8.10;
  */
 
 import {ERC721AUpgradeable} from "erc721a-upgradeable/ERC721AUpgradeable.sol";
+import {IERC721AUpgradeable} from "erc721a-upgradeable/IERC721AUpgradeable.sol";
 import {IERC2981Upgradeable, IERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/interfaces/IERC2981Upgradeable.sol";
 import {AddressUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
@@ -601,6 +602,10 @@ contract ERC721Drop is
         override
         returns (string memory)
     {
+        if (!_exists(tokenId)) {
+            revert IERC721AUpgradeable.URIQueryForNonexistentToken();
+        }
+
         return config.metadataRenderer.tokenURI(tokenId);
     }
 

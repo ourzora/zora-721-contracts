@@ -13,6 +13,15 @@ contract EditionMetadataRenderer is IMetadataRenderer {
         string animationURI;
     }
 
+    event MediaURIsUpdated(
+        address indexed target,
+        address sender,
+        string imageURI,
+        string animationURI
+    );
+
+    event EditionInitialized(address indexed target);
+
     mapping(address => TokenEditionInfo) public tokenInfos;
 
     modifier requireSenderAdmin(address target) {
@@ -37,16 +46,29 @@ contract EditionMetadataRenderer is IMetadataRenderer {
     ) external requireSenderAdmin(target) {
         tokenInfos[target].imageURI = imageURI;
         tokenInfos[target].animationURI = animationURI;
+        emit MediaURIsUpdated({
+            target: target,
+            sender: msg.sender,
+            imageURI: imageURI,
+            animationURI: animationURI
+        });
     }
 
     function initializeWithData(bytes memory data) external {
         // data format: description, imageURI, animationURI
-        (string memory description, string memory imageURI, string memory animationURI) = abi.decode(data, (string, string, string));
+        (
+            string memory description,
+            string memory imageURI,
+            string memory animationURI
+        ) = abi.decode(data, (string, string, string));
 
         tokenInfos[msg.sender] = TokenEditionInfo({
             description: description,
             imageURI: imageURI,
             animationURI: animationURI
+        });
+        emit EditionInitialized({
+            target: msg.sender,
         });
     }
 

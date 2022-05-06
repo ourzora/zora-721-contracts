@@ -409,7 +409,7 @@ contract ERC721Drop is
             uint256 toMint = quantity > MAX_MINT_BATCH_SIZE
                 ? MAX_MINT_BATCH_SIZE
                 : quantity;
-            _mint({to: to, quantity: toMint});
+            _mint({to: to, quantity: toMint, _data: "", safe: false});
             quantity -= toMint;
         } while (quantity > 0);
     }

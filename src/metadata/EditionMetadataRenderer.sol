@@ -20,7 +20,7 @@ contract EditionMetadataRenderer is IMetadataRenderer {
         string animationURI
     );
 
-    event EditionInitialized(address indexed target);
+    event EditionInitialized(address indexed target, string description, string imageURI, string animationURI);
 
     mapping(address => TokenEditionInfo) public tokenInfos;
 
@@ -69,6 +69,9 @@ contract EditionMetadataRenderer is IMetadataRenderer {
         });
         emit EditionInitialized({
             target: msg.sender,
+            description: description,
+            imageURI: imageURI,
+            animationURI: animationURI
         });
     }
 

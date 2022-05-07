@@ -27,10 +27,10 @@ import {IZoraFeeManager} from "./interfaces/IZoraFeeManager.sol";
 import {IMetadataRenderer} from "./interfaces/IMetadataRenderer.sol";
 import {IZoraDrop} from "./interfaces/IZoraDrop.sol";
 import {IOwnable} from "./interfaces/IOwnable.sol";
-import {FactoryUpgradeGate} from "./interfaces/FactoryUpgradeGate.sol";
 
 import {OwnableSkeleton} from "./utils/OwnableSkeleton.sol";
 import {Version} from "./utils/Version.sol";
+import {FactoryUpgradeGate} from "./FactoryUpgradeGate.sol";
 
 /**
  * @notice ZORA NFT Base contract for Drops and Editions
@@ -121,7 +121,7 @@ contract ERC721Drop is
     address private immutable zoraERC721TransferHelper;
 
     /// @dev Factory upgrade gate
-    FactoryUpgradeGate private factoryUpgradeGate;
+    FactoryUpgradeGate private immutable factoryUpgradeGate;
 
     /// @dev Mapping for presale mint counts by address to allow public mint limit
     mapping(address => uint256) public presaleMintsByAddress;
@@ -196,10 +196,12 @@ contract ERC721Drop is
     /// @param _zoraERC721TransferHelper Transfer helper
     constructor(
         IZoraFeeManager _zoraFeeManager,
-        address _zoraERC721TransferHelper
+        address _zoraERC721TransferHelper,
+        FactoryUpgradeGate _factoryUpgradeGate
     ) {
         zoraFeeManager = _zoraFeeManager;
         zoraERC721TransferHelper = _zoraERC721TransferHelper;
+        factoryUpgradeGate = _factoryUpgradeGate;
     }
 
     ///  @dev Create a new drop
@@ -260,7 +262,7 @@ contract ERC721Drop is
 
     function _authorizeUpgrade(address newImplementation) internal override onlyAdmin {
         require(
-            factoryUpgradeGate.isValidUpgrade(newImplementation),
+            factoryUpgradeGate.isValidUpgradePath(newImplementation),
             "Invalid upgrade"
         );
     }

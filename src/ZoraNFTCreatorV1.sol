@@ -10,13 +10,11 @@ import {EditionMetadataRenderer} from "./metadata/EditionMetadataRenderer.sol";
 import {DropMetadataRenderer} from "./metadata/DropMetadataRenderer.sol";
 import {IMetadataRenderer} from "./interfaces/IMetadataRenderer.sol";
 import {ERC721Drop} from "./ERC721Drop.sol";
-import {FactoryUpgradeGate} from "./interfaces/FactoryUpgradeGate.sol";
 
 /// @notice Zora NFT Creator V1
 contract ZoraNFTCreatorV1 is
     OwnableUpgradeable,
     UUPSUpgradeable,
-    FactoryUpgradeGate,
     Version(1)
 {
     string private constant CANNOT_BE_ZERO = "Cannot be 0 address";

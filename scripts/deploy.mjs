@@ -11,6 +11,11 @@ export async function setupContracts() {
     process.env.ZORA_ERC_721_TRANSFER_HELPER_ADDRESS;
   const feeDefaultBPS = process.env.FEE_DEFAULT_BPS;
 
+  console.log('deploying upgrade gate')
+  const upgradeGate = await deployAndVerify("src/FactoryUpgradeGate.sol:FactoryUpgradeGate", [feeManagerAdminAddress])
+  const upgradeGateAddress = upgradeGate.deployed.deploy.deployedTo
+  console.log('Deployed upgrade gate to', upgradeGateAddress)
+
   console.log("deploying fee manager")
   const feeManager = await deployAndVerify(
     "src/ZoraFeeManager.sol:ZoraFeeManager",
@@ -21,7 +26,7 @@ export async function setupContracts() {
   console.log("deploying Erc721Drop")
   const dropContract = await deployAndVerify(
     "src/ERC721Drop.sol:ERC721Drop",
-    [feeManagerAddress, zoraERC721TransferHelperAddress]
+    [feeManagerAddress, zoraERC721TransferHelperAddress, upgradeGateAddress]
   );
   const dropContractAddress = dropContract.deployed.deploy.deployedTo;
   console.log("deployed drop contract to ", dropContractAddress)
@@ -56,11 +61,10 @@ export async function setupContracts() {
   console.log('deploying creator proxy')
   const creatorProxy = await retryDeploy(2,
     "src/ZoraNFTCreatorProxy.sol:ZoraNFTCreatorProxy",
-    // [creatorImpl.deployed.deploy.deployedTo, []]
-    ['0x97d0deaf7fbbea140218989dff3ca34eaeab4034', '""']
+    [creatorImpl.deployed.deploy.deployedTo, '""']
   )
   await timeout(10000)
-  await retryVerify(3, creatorProxy.deploy.deployedTo,"src/ZoraNFTCreatorProxy.sol:ZoraNFTCreatorProxy", ['0x97d0deaf7fbbea140218989dff3ca34eaeab4034', []])
+  await retryVerify(3, creatorProxy.deploy.deployedTo,"src/ZoraNFTCreatorProxy.sol:ZoraNFTCreatorProxy", [creatorImpl.deployed.deploy.deployedTo, []])
   console.log('deployed creator proxy to ', creatorProxy.deploy.deployedTo);
   return {
     feeManager,
@@ -74,7 +78,7 @@ export async function setupContracts() {
 async function main() {
   const output = await setupContracts();
   const date = new Date().toISOString().slice(0, 10);
-  writeFile(`./deployments/${date}.${process.env.CHAIN}.json`, JSON.stringify(output));
+  writeFile(`./deployments/${date}.${process.env.CHAIN}.run.json`, JSON.stringify(output));
 }
 
 if (esMain(import.meta)) {

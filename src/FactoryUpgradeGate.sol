@@ -2,23 +2,22 @@
 pragma solidity ^0.8.10;
 
 import {IFactoryUpgradeGate} from "./interfaces/IFactoryUpgradeGate.sol";
+import "./utils/OwnableSkeleton.sol";
 
-contract FactoryUpgradeGate is IFactoryUpgradeGate {
+contract FactoryUpgradeGate is IFactoryUpgradeGate, OwnableSkeleton {
     mapping(address => mapping(address => bool)) private _validUpgradePaths;
-    address public owner;
 
-    event OwnerUpdated(address indexed newOwner);
     event UpgradePathRegistered(address newImpl, address oldImpl);
     event UpgradePathRemoved(address newImpl, address oldImpl);
 
     modifier onlyOwner() {
-        require(msg.sender == owner, "only owner");
+        require(msg.sender == owner(), "only owner");
 
         _;
     }
 
     constructor(address _owner) {
-        owner = _owner;
+        _setOwner(_owner);
     }
 
     /// @notice Ensures the given upgrade path is valid and does not overwrite existing storage slots
@@ -44,13 +43,5 @@ contract FactoryUpgradeGate is IFactoryUpgradeGate {
     function unregisterUpgradePath(address _newImpl, address _prevImpl) external onlyOwner {
         _validUpgradePaths[_newImpl][_prevImpl] = false;
         emit UpgradePathRemoved(_newImpl, _prevImpl);
-    }
-
-    /// @notice Sets the owner for the contract
-    /// @param _owner The new owner
-    function setOwner(address _owner) external onlyOwner {
-        owner = _owner;
-
-        emit OwnerUpdated(owner);
     }
 }

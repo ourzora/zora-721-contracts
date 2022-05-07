@@ -70,7 +70,6 @@ contract ERC721Drop is
     /// @notice Error string constants
     string private constant SOLD_OUT = "Sold out";
     string private constant TOO_MANY = "Too many";
-    string private constant ADDRESS_ZERO_ERROR = "Cannot set address to 0x0";
 
     /// @notice Access control roles
     bytes32 public immutable MINTER_ROLE = keccak256("MINTER");
@@ -129,7 +128,7 @@ contract ERC721Drop is
 
     /// @notice Only allow for users with admin access
     modifier onlyAdmin() {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Only admin allowed");
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Only admin");
 
         _;
     }
@@ -140,7 +139,7 @@ contract ERC721Drop is
         require(
             hasRole(DEFAULT_ADMIN_ROLE, msg.sender) ||
                 hasRole(role, msg.sender),
-            "Does not have proper role or admin"
+            "only role or admin"
         );
 
         _;
@@ -232,7 +231,7 @@ contract ERC721Drop is
 
         require(
             config.royaltyBPS < 50_01,
-            "Royalty BPS cannot be greater than 50%"
+            "Royalty cannot be greater than 50%"
         );
 
         // Setup config variables
@@ -432,7 +431,7 @@ contract ERC721Drop is
                     abi.encode(msg.sender, maxQuantity, pricePerToken)
                 )
             ),
-            "Needs to be approved"
+            "not approved"
         );
         require(msg.value == pricePerToken * quantity, "Wrong price");
 
@@ -545,8 +544,6 @@ contract ERC721Drop is
         external
         onlyRoleOrAdmin(SALES_MANAGER_ROLE)
     {
-        require(newRecipientAddress != address(0x0), "Cannot set to 0x0");
-
         config.fundsRecipient = newRecipientAddress;
         emit FundsRecipientChanged(newRecipientAddress, _msgSender());
     }
@@ -565,7 +562,7 @@ contract ERC721Drop is
                 hasRole(SALES_MANAGER_ROLE, sender) ||
                 sender == feeRecipient ||
                 sender == config.fundsRecipient,
-            "Does not have proper role to withdraw"
+            "not allowed"
         );
 
         // No need for gas limit to trusted address.

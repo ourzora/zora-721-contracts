@@ -62,17 +62,12 @@ contract ERC721DropTest is DSTest {
             IMetadataRenderer renderer,
             uint64 editionSize,
             uint16 royaltyBPS,
-            bool royaltiesDisabled,
             address payable fundsRecipient
         ) = zoraNFTBase.config();
 
         require(address(renderer) == address(dummyRenderer));
         require(editionSize == 10, "EditionSize is wrong");
         require(royaltyBPS == 800, "RoyaltyBPS is wrong");
-        require(
-            !royaltiesDisabled,
-            "Royalties are disabled when they should be enabled by default"
-        );
         require(
             fundsRecipient == payable(DEFAULT_FUNDS_RECIPIENT_ADDRESS),
             "FundsRecipient is wrong"

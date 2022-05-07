@@ -84,8 +84,6 @@ contract ERC721Drop is
         uint64 editionSize;
         /// @dev Royalty amount in bps (uint224+16 = 240)
         uint16 royaltyBPS;
-        /// @dev Flag to disable royalties (uint240+8 = 248)
-        bool disableRoyalties;
         /// @dev Funds recipient for sale (new slot, uint160)
         address payable fundsRecipient;
     }
@@ -221,13 +219,6 @@ contract ERC721Drop is
         IMetadataRenderer _metadataRenderer,
         bytes memory _metadataRendererInit
     ) public initializer {
-        // Metadata renderer cannot be zero address
-        require(address(_metadataRenderer) != address(0x0), ADDRESS_ZERO_ERROR);
-        // Funds recipient cannot be zero address
-        require(address(_fundsRecipient) != address(0x0), ADDRESS_ZERO_ERROR);
-        // Owner cannot be zero address
-        require(address(_initialOwner) != address(0x0), ADDRESS_ZERO_ERROR);
-
         // Setup ERC721A
         __ERC721A_init(_contractName, _contractSymbol);
         // Setup access control
@@ -279,7 +270,7 @@ contract ERC721Drop is
         override
         returns (address receiver, uint256 royaltyAmount)
     {
-        if (config.disableRoyalties) {
+        if (config.fundsRecipient == address(0)) {
             return (config.fundsRecipient, 0);
         }
         return (
@@ -558,15 +549,6 @@ contract ERC721Drop is
 
         config.fundsRecipient = newRecipientAddress;
         emit FundsRecipientChanged(newRecipientAddress, _msgSender());
-    }
-
-    /// @notice Disables on-chain royalties (allows a user to turn off royalties if needed)
-    /// @param disableRoyalties setting to disable royalties: true and royalties will be turned off, false enabled, default false.
-    function setDisableRoyalties(bool disableRoyalties)
-        external
-        onlyRoleOrAdmin(SALES_MANAGER_ROLE)
-    {
-        config.disableRoyalties = disableRoyalties;
     }
 
     /// @notice This withdraws ETH from the contract to the contract owner.

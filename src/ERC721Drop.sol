@@ -238,8 +238,6 @@ contract ERC721Drop is
         _setupRole(DEFAULT_ADMIN_ROLE, _initialOwner);
         // Set ownership to original sender of contract call
         _setOwner(_initialOwner);
-        // Set factory upgrade gate
-        factoryUpgradeGate = FactoryUpgradeGate(msg.sender);
 
         require(
             config.royaltyBPS < 50_01,
@@ -262,7 +260,7 @@ contract ERC721Drop is
 
     function _authorizeUpgrade(address newImplementation) internal override onlyAdmin {
         require(
-            factoryUpgradeGate.isValidUpgradePath(newImplementation),
+            factoryUpgradeGate.isValidUpgradePath(newImplementation, address(this)),
             "Invalid upgrade"
         );
     }

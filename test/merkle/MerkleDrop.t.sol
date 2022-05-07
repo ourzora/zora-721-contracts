@@ -45,8 +45,7 @@ contract ZoraNFTBaseTest is DSTest {
         vm.prank(DEFAULT_ZORA_DAO_ADDRESS);
         zoraNFTBase = new ERC721Drop(
             feeManager,
-            address(1234),
-            FactoryUpgradeGate(address(0x0))
+            address(1234)
         );
         merkleData = new MerkleData();
     }

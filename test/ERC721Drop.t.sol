@@ -49,7 +49,7 @@ contract ERC721DropTest is DSTest {
         vm.prank(DEFAULT_ZORA_DAO_ADDRESS);
         feeManager = new ZoraFeeManager(500, DEFAULT_ZORA_DAO_ADDRESS);
         vm.prank(DEFAULT_ZORA_DAO_ADDRESS);
-        zoraNFTBase = new ERC721Drop(feeManager, address(1234), FactoryUpgradeGate(address(0x0)));
+        zoraNFTBase = new ERC721Drop(feeManager, address(1234));
     }
 
     function test_Init() public setupZoraNFTBase(10) {

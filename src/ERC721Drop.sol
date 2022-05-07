@@ -121,7 +121,7 @@ contract ERC721Drop is
     address private immutable zoraERC721TransferHelper;
 
     /// @dev Factory upgrade gate
-    FactoryUpgradeGate private immutable factoryUpgradeGate;
+    FactoryUpgradeGate private factoryUpgradeGate;
 
     /// @dev Mapping for presale mint counts by address to allow public mint limit
     mapping(address => uint256) public presaleMintsByAddress;
@@ -196,12 +196,10 @@ contract ERC721Drop is
     /// @param _zoraERC721TransferHelper Transfer helper
     constructor(
         IZoraFeeManager _zoraFeeManager,
-        address _zoraERC721TransferHelper,
-        FactoryUpgradeGate _factoryUpgradeGate
+        address _zoraERC721TransferHelper
     ) {
         zoraFeeManager = _zoraFeeManager;
         zoraERC721TransferHelper = _zoraERC721TransferHelper;
-        factoryUpgradeGate = _factoryUpgradeGate;
     }
 
     ///  @dev Create a new drop
@@ -238,6 +236,8 @@ contract ERC721Drop is
         _setupRole(DEFAULT_ADMIN_ROLE, _initialOwner);
         // Set ownership to original sender of contract call
         _setOwner(_initialOwner);
+        // Set factory upgrade gate
+        factoryUpgradeGate = FactoryUpgradeGate(msg.sender);
 
         require(
             config.royaltyBPS < 50_01,

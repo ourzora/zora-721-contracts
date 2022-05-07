@@ -73,6 +73,8 @@ export async function setupContracts() {
     editionsMetadataContract,
     creatorProxy,
   };
+
+
 }
 
 async function main() {

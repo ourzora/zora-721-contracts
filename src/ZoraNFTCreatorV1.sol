@@ -95,20 +95,21 @@ contract ZoraNFTCreatorV1 is
         bytes memory metadataInitializer
     ) internal returns (address) {
         ERC721DropProxy newDrop = new ERC721DropProxy(
-            implementation,
-            abi.encode(
-                name,
-                symbol,
-                defaultAdmin,
-                fundsRecipient,
-                editionSize,
-                royaltyBPS,
-                metadataRenderer,
-                metadataInitializer
-            )
+            implementation, ""
         );
 
         address newDropAddress = address(newDrop);
+
+        ERC721Drop(newDropAddress).initialize(
+            name,
+            symbol,
+            defaultAdmin,
+            fundsRecipient,
+            editionSize,
+            royaltyBPS,
+            metadataRenderer,
+            metadataInitializer
+        );
 
         emit CreatedDrop({creator: msg.sender, editionSize: editionSize, editionContractAddress: newDropAddress});
 

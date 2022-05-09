@@ -3,7 +3,9 @@ import { writeFile } from "fs/promises";
 import dotenv from "dotenv";
 import esMain from "es-main";
 
-dotenv.config();
+dotenv.config({
+  path: `.env.${process.env.CHAIN}` 
+});
 
 export async function setupContracts() {
   const feeManagerAdminAddress = process.env.FEE_MANAGER_ADMIN_ADDRESS;
@@ -80,7 +82,7 @@ export async function setupContracts() {
 async function main() {
   const output = await setupContracts();
   const date = new Date().toISOString().slice(0, 10);
-  writeFile(`./deployments/${date}.${process.env.CHAIN}.json`, JSON.stringify(output));
+  writeFile(`./deployments/${date}.${process.env.CHAIN}.json`, JSON.stringify(output, null, 2));
 }
 
 if (esMain(import.meta)) {

@@ -17,6 +17,30 @@ pragma solidity ^0.8.10;
 
 /// @notice Interface for ZORA Drops contract
 interface IZoraDrop {
+
+    // Access errors
+    error Access_OnlyAdmin();
+    error Access_MissingRoleOrAdmin(bytes32 role);
+    error Access_WithdrawNotAllowed();
+
+    // Sale/Purchase errors
+    error Sale_Inactive();
+    error Presale_Inactive();
+    error Presale_MerkleNotApproved();
+    error Purchase_WrongPrice(uint256 correctPrice);
+    error Mint_SoldOut();
+    error Purchase_TooManyForAddress();
+    error Presale_TooManyForAddress();
+
+    // Admin errors
+    error Setup_RoyaltyPercentageTooHigh(uint16 maxRoyaltyBPS);
+    error Admin_InvalidUpgradeAddress(address proposedAddress);
+
+    // Quantity Errors
+    error Admin_UnableToFinalizeNotOpenEdition();
+
+
+
     /// @notice Event emitted for each sale
     event Sale(
         address indexed to,

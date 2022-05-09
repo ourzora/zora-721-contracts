@@ -431,7 +431,7 @@ contract ERC721DropTest is DSTest {
         vm.stopPrank();
 
         vm.prank(address(1));
-        vm.expectRevert(abi.encodeWithSignature("TransferCallerNotOwnerNorApproved()"));
+        vm.expectRevert(IERC721Drop.TransferCallerNotOwnerNorApproved.selector);
         zoraNFTBase.burn(1);
     }
 

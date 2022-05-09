@@ -17,29 +17,40 @@ pragma solidity ^0.8.10;
 
 /// @notice Interface for ZORA Drops contract
 interface IZoraDrop {
-
     // Access errors
+
+    /// @notice Only admin can access this function
     error Access_OnlyAdmin();
+    /// @notice Missing the given role or admin access
     error Access_MissingRoleOrAdmin(bytes32 role);
+    /// @notice Withdraw is not allowed by this user
     error Access_WithdrawNotAllowed();
 
     // Sale/Purchase errors
+    /// @notice Sale is inactive
     error Sale_Inactive();
+    /// @notice Presale is inactive
     error Presale_Inactive();
+    /// @notice Presale merkle root is invalid
     error Presale_MerkleNotApproved();
+    /// @notice Wrong price for purchase
     error Purchase_WrongPrice(uint256 correctPrice);
+    /// @notice NFT sold out
     error Mint_SoldOut();
+    /// @notice Too many purchase for address
     error Purchase_TooManyForAddress();
+    /// @notice Too many presale for address
     error Presale_TooManyForAddress();
 
     // Admin errors
+    /// @notice Royalty percentage too high
     error Setup_RoyaltyPercentageTooHigh(uint16 maxRoyaltyBPS);
+    /// @notice Invalid admin upgrade address
     error Admin_InvalidUpgradeAddress(address proposedAddress);
 
     // Quantity Errors
+    /// @notice Unable to finalize an edition not marked as open (size set to uint64_max_value)
     error Admin_UnableToFinalizeNotOpenEdition();
-
-
 
     /// @notice Event emitted for each sale
     event Sale(
@@ -54,7 +65,6 @@ interface IZoraDrop {
         // Synthesized status variables for sale and presale
         bool presaleActive;
         bool publicSaleActive;
-
         // Timed sale actions for public sale
         uint64 publicSaleStart;
         uint64 publicSaleEnd;

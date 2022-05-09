@@ -20,7 +20,7 @@ contract EditionMetadataRenderer is IMetadataRenderer {
         string animationURI
     );
 
-    event EditionInitialized(address indexed target, string description, string imageURI, string animationURI);
+    event EditionInitialized(address indexed target);
 
     mapping(address => TokenEditionInfo) public tokenInfos;
 

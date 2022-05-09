@@ -16,7 +16,7 @@ pragma solidity ^0.8.10;
 */
 
 /// @notice Interface for ZORA Drops contract
-interface IZoraDrop {
+interface IERC721Drop {
     // Access errors
 
     /// @notice Only admin can access this function
@@ -135,4 +135,8 @@ interface IZoraDrop {
     /// @param to list of addresses to mint an NFT each to
     /// @return the id of the first minted NFT
     function adminMintAirdrop(address[] memory to) external returns (uint256);
+
+    /// @dev Getter for admin role associated with the contract to handle metadata
+    /// @return boolean if address is admin
+    function isAdmin(address user) external view returns (bool);
 }

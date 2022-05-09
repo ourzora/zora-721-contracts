@@ -2,7 +2,8 @@
 pragma solidity ^0.8.10;
 
 import {IMetadataRenderer} from "../interfaces/IMetadataRenderer.sol";
-import {ERC721Drop} from "../ERC721Drop.sol";
+import {IERC721Drop} from "../interfaces/IERC721Drop.sol";
+import {IERC721MetadataUpgradeable} from "@openzeppelin/contracts-upgradeable/interfaces/IERC721MetadataUpgradeable.sol";
 import {SharedNFTLogic} from "../utils/SharedNFTLogic.sol";
 
 /// @notice EditionMetadataRenderer for editions support
@@ -13,11 +14,25 @@ contract EditionMetadataRenderer is IMetadataRenderer {
         string animationURI;
     }
 
+    event MediaURIsUpdated(
+        address indexed target,
+        address sender,
+        string imageURI,
+        string animationURI
+    );
+
+    event EditionInitialized(
+        address indexed target,
+        string description,
+        string imageURI,
+        string animationURI
+    );
+
     mapping(address => TokenEditionInfo) public tokenInfos;
 
     modifier requireSenderAdmin(address target) {
         require(
-            target == msg.sender || ERC721Drop(target).isAdmin(msg.sender),
+            target == msg.sender || IERC721Drop(target).isAdmin(msg.sender),
             "Only admin"
         );
 
@@ -26,8 +41,8 @@ contract EditionMetadataRenderer is IMetadataRenderer {
 
     SharedNFTLogic private immutable sharedNFTLogic;
 
-    constructor(address _sharedNFTLogic) {
-        sharedNFTLogic = SharedNFTLogic(_sharedNFTLogic);
+    constructor(SharedNFTLogic _sharedNFTLogic) {
+        sharedNFTLogic = _sharedNFTLogic;
     }
 
     function updateMediaURIs(
@@ -37,6 +52,12 @@ contract EditionMetadataRenderer is IMetadataRenderer {
     ) external requireSenderAdmin(target) {
         tokenInfos[target].imageURI = imageURI;
         tokenInfos[target].animationURI = animationURI;
+        emit MediaURIsUpdated({
+            target: target,
+            sender: msg.sender,
+            imageURI: imageURI,
+            animationURI: animationURI
+        });
     }
 
     function initializeWithData(bytes memory data) external {
@@ -48,6 +69,12 @@ contract EditionMetadataRenderer is IMetadataRenderer {
         ) = abi.decode(data, (string, string, string));
 
         tokenInfos[msg.sender] = TokenEditionInfo({
+            description: description,
+            imageURI: imageURI,
+            animationURI: animationURI
+        });
+        emit EditionInitialized({
+            target: msg.sender,
             description: description,
             imageURI: imageURI,
             animationURI: animationURI
@@ -68,7 +95,7 @@ contract EditionMetadataRenderer is IMetadataRenderer {
                 sharedNFTLogic.encodeMetadataJSON(
                     abi.encodePacked(
                         '{"name": "',
-                        ERC721Drop(target).name,
+                        IERC721MetadataUpgradeable(target).name(),
                         '", "description": "',
                         tokenInfos[target].description,
                         imageSpace,
@@ -87,7 +114,7 @@ contract EditionMetadataRenderer is IMetadataRenderer {
         address target = msg.sender;
 
         TokenEditionInfo memory info = tokenInfos[target];
-        ERC721Drop media = ERC721Drop(target);
+        IERC721Drop media = IERC721Drop(target);
 
         uint256 maxSupply = media.saleDetails().maxSupply;
 
@@ -99,7 +126,7 @@ contract EditionMetadataRenderer is IMetadataRenderer {
 
         return
             sharedNFTLogic.createMetadataEdition({
-                name: media.name(),
+                name: IERC721MetadataUpgradeable(target).name(),
                 description: info.description,
                 imageUrl: info.imageURI,
                 animationUrl: info.animationURI,

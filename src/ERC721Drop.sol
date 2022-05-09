@@ -55,6 +55,27 @@ contract ERC721Drop is
 {
     using AddressUpgradeable for address payable;
 
+    /// @dev This is the max mint batch size for the optimized ERC721A mint contract
+    uint256 internal constant MAX_MINT_BATCH_SIZE = 8;
+
+    /// @notice Error string constants
+    string internal constant SOLD_OUT = "Sold out";
+    string internal constant TOO_MANY = "Too many";
+
+    /// @notice Access control roles
+    bytes32 public immutable MINTER_ROLE = keccak256("MINTER");
+    bytes32 public immutable SALES_MANAGER_ROLE = keccak256("SALES_MANAGER");
+
+    /// @dev ZORA V3 transfer helper address for auto-approval
+    address internal immutable zoraERC721TransferHelper;
+
+    /// @dev Factory upgrade gate
+    FactoryUpgradeGate internal immutable factoryUpgradeGate;
+
+    /// @dev Zora Fee Manager address
+    IZoraFeeManager public immutable zoraFeeManager;
+
+    /// @notice Max royalty BPS
     uint16 constant MAX_ROYALTY_BPS = 50_00;
 
     event SalesConfigChanged(
@@ -147,13 +168,11 @@ contract ERC721Drop is
         IZoraFeeManager _zoraFeeManager,
         address _zoraERC721TransferHelper,
         FactoryUpgradeGate _factoryUpgradeGate
-    )
-        ERC721DropStorageV1(
-            _zoraFeeManager,
-            _zoraERC721TransferHelper,
-            _factoryUpgradeGate
-        )
-    {}
+    ) initializer {
+        zoraFeeManager = _zoraFeeManager;
+        zoraERC721TransferHelper = _zoraERC721TransferHelper;
+        factoryUpgradeGate = _factoryUpgradeGate;
+    }
 
     ///  @dev Create a new drop
     ///  @param _contractName Contract name
@@ -515,6 +534,7 @@ contract ERC721Drop is
         external
         onlyRoleOrAdmin(SALES_MANAGER_ROLE)
     {
+        // TODO(iain): funds recipient cannot be 0?
         config.fundsRecipient = newRecipientAddress;
         emit FundsRecipientChanged(newRecipientAddress, _msgSender());
     }

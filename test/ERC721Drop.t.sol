@@ -3,12 +3,14 @@ pragma solidity 0.8.10;
 
 import {Vm} from "forge-std/Vm.sol";
 import {DSTest} from "ds-test/test.sol";
+import {IERC721Drop} from "../src/interfaces/IERC721Drop.sol";
 import {ERC721Drop} from "../src/ERC721Drop.sol";
 import {ZoraFeeManager} from "../src/ZoraFeeManager.sol";
 import {DummyMetadataRenderer} from "./utils/DummyMetadataRenderer.sol";
 import {MockUser} from "./utils/MockUser.sol";
 import {IMetadataRenderer} from "../src/interfaces/IMetadataRenderer.sol";
 import {FactoryUpgradeGate} from "../src/FactoryUpgradeGate.sol";
+import {ERC721DropProxy} from "../src/ERC721DropProxy.sol";
 
 contract ERC721DropTest is DSTest {
     ERC721Drop zoraNFTBase;
@@ -49,7 +51,15 @@ contract ERC721DropTest is DSTest {
         vm.prank(DEFAULT_ZORA_DAO_ADDRESS);
         feeManager = new ZoraFeeManager(500, DEFAULT_ZORA_DAO_ADDRESS);
         vm.prank(DEFAULT_ZORA_DAO_ADDRESS);
-        zoraNFTBase = new ERC721Drop(feeManager, address(1234), FactoryUpgradeGate(address(0)));
+        address impl = address(
+            new ERC721Drop(
+                feeManager,
+                address(1234),
+                FactoryUpgradeGate(address(0))
+            )
+        );
+        address newDrop = address(new ERC721DropProxy(impl, ""));
+        zoraNFTBase = ERC721Drop(newDrop);
     }
 
     function test_Init() public setupZoraNFTBase(10) {
@@ -132,7 +142,7 @@ contract ERC721DropTest is DSTest {
 
         vm.deal(address(456), 1 ether);
         vm.prank(address(456));
-        vm.expectRevert("Sale inactive");
+        vm.expectRevert(IERC721Drop.Sale_Inactive.selector);
         zoraNFTBase.purchase{value: 0.1 ether}(1);
 
         assertEq(zoraNFTBase.saleDetails().maxSupply, 10);
@@ -176,7 +186,7 @@ contract ERC721DropTest is DSTest {
     function test_MintWrongValue() public setupZoraNFTBase(10) {
         vm.deal(address(456), 1 ether);
         vm.prank(address(456));
-        vm.expectRevert("Sale inactive");
+        vm.expectRevert(IERC721Drop.Sale_Inactive.selector);
         zoraNFTBase.purchase{value: 0.12 ether}(1);
         vm.prank(DEFAULT_OWNER_ADDRESS);
         zoraNFTBase.setSaleConfiguration({
@@ -189,7 +199,7 @@ contract ERC721DropTest is DSTest {
             presaleMerkleRoot: bytes32(0)
         });
         vm.prank(address(456));
-        vm.expectRevert("Wrong price");
+        vm.expectRevert(abi.encodeWithSelector(IERC721Drop.Purchase_WrongPrice.selector, 0.15 ether));
         zoraNFTBase.purchase{value: 0.12 ether}(1);
     }
 
@@ -238,7 +248,7 @@ contract ERC721DropTest is DSTest {
 
         vm.deal(address(444), 1_000_000 ether);
         vm.prank(address(444));
-        vm.expectRevert("Too many");
+        vm.expectRevert(IERC721Drop.Purchase_TooManyForAddress.selector);
         zoraNFTBase.purchase{value: 0.1 ether * (uint256(limit) + 1)}(
             uint256(limit) + 1
         );
@@ -253,12 +263,12 @@ contract ERC721DropTest is DSTest {
         vm.assume(limit > 0);
         vm.startPrank(DEFAULT_OWNER_ADDRESS);
         zoraNFTBase.adminMint(DEFAULT_OWNER_ADDRESS, limit);
-        vm.expectRevert("Sold out");
+        vm.expectRevert(IERC721Drop.Mint_SoldOut.selector);
         zoraNFTBase.adminMint(DEFAULT_OWNER_ADDRESS, 1);
     }
 
     function test_WithdrawNotAllowed() public setupZoraNFTBase(10) {
-        vm.expectRevert("Does not have proper role to withdraw");
+        vm.expectRevert(IERC721Drop.Access_WithdrawNotAllowed.selector);
         zoraNFTBase.withdraw();
     }
 
@@ -277,7 +287,7 @@ contract ERC721DropTest is DSTest {
         vm.prank(DEFAULT_OWNER_ADDRESS);
         zoraNFTBase.adminMint(address(0x1234), 2);
         vm.prank(DEFAULT_OWNER_ADDRESS);
-        vm.expectRevert("Not open edition");
+        vm.expectRevert(IERC721Drop.Admin_UnableToFinalizeNotOpenEdition.selector);
         zoraNFTBase.finalizeOpenEdition();
     }
 
@@ -300,10 +310,10 @@ contract ERC721DropTest is DSTest {
         zoraNFTBase.adminMint(address(0x1234), 2);
         vm.prank(DEFAULT_OWNER_ADDRESS);
         zoraNFTBase.finalizeOpenEdition();
-        vm.expectRevert("Sold out");
+        vm.expectRevert(IERC721Drop.Mint_SoldOut.selector);
         vm.prank(DEFAULT_OWNER_ADDRESS);
         zoraNFTBase.adminMint(address(0x1234), 2);
-        vm.expectRevert("Sold out");
+        vm.expectRevert(IERC721Drop.Mint_SoldOut.selector);
         zoraNFTBase.purchase{value: 0.6 ether}(3);
     }
 
@@ -326,12 +336,12 @@ contract ERC721DropTest is DSTest {
     function test_EditionSizeZero() public setupZoraNFTBase(0) {
         address minter = address(0x32402);
         vm.startPrank(DEFAULT_OWNER_ADDRESS);
-        vm.expectRevert("Sold out");
+        vm.expectRevert(IERC721Drop.Mint_SoldOut.selector);
         zoraNFTBase.adminMint(DEFAULT_OWNER_ADDRESS, 1);
         zoraNFTBase.grantRole(zoraNFTBase.MINTER_ROLE(), minter);
         vm.stopPrank();
         vm.prank(minter);
-        vm.expectRevert("Sold out");
+        vm.expectRevert(IERC721Drop.Mint_SoldOut.selector);
         zoraNFTBase.adminMint(minter, 1);
 
         vm.prank(DEFAULT_OWNER_ADDRESS);
@@ -347,7 +357,7 @@ contract ERC721DropTest is DSTest {
 
         vm.deal(address(456), uint256(1) * 2);
         vm.prank(address(456));
-        vm.expectRevert("Sold out");
+        vm.expectRevert(IERC721Drop.Mint_SoldOut.selector);
         zoraNFTBase.purchase{value: 1}(1);
     }
 
@@ -374,7 +384,8 @@ contract ERC721DropTest is DSTest {
         toMint[1] = address(0x11);
         toMint[2] = address(0x12);
         toMint[3] = address(0x13);
-        vm.expectRevert("Does not have proper role or admin");
+        bytes32 minterRole = zoraNFTBase.MINTER_ROLE();
+        vm.expectRevert(abi.encodeWithSignature("Access_MissingRoleOrAdmin(bytes32)", minterRole));
         zoraNFTBase.adminMintAirdrop(toMint);
     }
 
@@ -388,7 +399,10 @@ contract ERC721DropTest is DSTest {
 
     function test_AdminMintBatchFails() public setupZoraNFTBase(1000) {
         vm.startPrank(address(0x10));
-        vm.expectRevert("Does not have proper role or admin");
+        bytes32 role = zoraNFTBase.MINTER_ROLE();
+        vm.expectRevert(
+            abi.encodeWithSignature("Access_MissingRoleOrAdmin(bytes32)", role)
+        );
         zoraNFTBase.adminMint(address(0x10), 100);
     }
 
@@ -416,9 +430,9 @@ contract ERC721DropTest is DSTest {
         zoraNFTBase.adminMintAirdrop(airdrop);
         vm.stopPrank();
 
-        // vm.prank(address(1));
-        // vm.expectRevert();
-        // zoraNFTBase.burn(1);
+        vm.prank(address(1));
+        vm.expectRevert(abi.encodeWithSignature("TransferCallerNotOwnerNorApproved()"));
+        zoraNFTBase.burn(1);
     }
 
     // Add test burn failure state for users that don't own the token

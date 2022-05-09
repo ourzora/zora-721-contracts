@@ -16,6 +16,7 @@ pragma solidity ^0.8.10;
  */
 
 import {ERC721AUpgradeable} from "erc721a-upgradeable/ERC721AUpgradeable.sol";
+import {IERC721AUpgradeable} from "erc721a-upgradeable/IERC721AUpgradeable.sol";
 import {IERC2981Upgradeable, IERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/interfaces/IERC2981Upgradeable.sol";
 import {AddressUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
@@ -25,7 +26,7 @@ import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/U
 
 import {IZoraFeeManager} from "./interfaces/IZoraFeeManager.sol";
 import {IMetadataRenderer} from "./interfaces/IMetadataRenderer.sol";
-import {IZoraDrop} from "./interfaces/IZoraDrop.sol";
+import {IERC721Drop} from "./interfaces/IERC721Drop.sol";
 import {IOwnable} from "./interfaces/IOwnable.sol";
 
 import {OwnableSkeleton} from "./utils/OwnableSkeleton.sol";
@@ -47,7 +48,7 @@ contract ERC721Drop is
     IERC2981Upgradeable,
     ReentrancyGuardUpgradeable,
     AccessControlUpgradeable,
-    IZoraDrop,
+    IERC721Drop,
     OwnableSkeleton,
     Version(5),
     ERC721DropStorageV1
@@ -184,7 +185,11 @@ contract ERC721Drop is
         return hasRole(DEFAULT_ADMIN_ROLE, user);
     }
 
-    function _authorizeUpgrade(address newImplementation) internal override onlyAdmin {
+    function _authorizeUpgrade(address newImplementation)
+        internal
+        override
+        onlyAdmin
+    {
         require(
             factoryUpgradeGate.isValidUpgradePath(newImplementation, address(this)),
             "Invalid upgrade"
@@ -215,14 +220,14 @@ contract ERC721Drop is
     }
 
     /// @notice Sale details
-    /// @return IZoraDrop.SaleDetails sale information details
+    /// @return IERC721Drop.SaleDetails sale information details
     function saleDetails()
         external
         view
-        returns (IZoraDrop.SaleDetails memory)
+        returns (IERC721Drop.SaleDetails memory)
     {
         return
-            IZoraDrop.SaleDetails({
+            IERC721Drop.SaleDetails({
                 publicSaleActive: _publicSaleActive(),
                 presaleActive: _presaleActive(),
                 presaleStart: salesConfig.presaleStart,
@@ -243,10 +248,10 @@ contract ERC721Drop is
         external
         view
         override
-        returns (IZoraDrop.AddressMintDetails memory)
+        returns (IERC721Drop.AddressMintDetails memory)
     {
         return
-            IZoraDrop.AddressMintDetails({
+            IERC721Drop.AddressMintDetails({
                 presaleMints: presaleMintsByAddress[minter],
                 publicMints: _numberMinted(minter) -
                     presaleMintsByAddress[minter],
@@ -316,7 +321,7 @@ contract ERC721Drop is
         _mintNFTs(_msgSender(), quantity);
         uint256 firstMintedTokenId = _lastMintedTokenId() - quantity;
 
-        emit IZoraDrop.Sale({
+        emit IERC721Drop.Sale({
             to: _msgSender(),
             quantity: quantity,
             pricePerToken: salePrice,
@@ -335,7 +340,7 @@ contract ERC721Drop is
             uint256 toMint = quantity > MAX_MINT_BATCH_SIZE
                 ? MAX_MINT_BATCH_SIZE
                 : quantity;
-            _mint({to: to, quantity: toMint, _data: "", safe: false});
+            _mint({to: to, quantity: toMint});
             quantity -= toMint;
         } while (quantity > 0);
     }
@@ -377,7 +382,7 @@ contract ERC721Drop is
         _mintNFTs(_msgSender(), quantity);
         uint256 firstMintedTokenId = _lastMintedTokenId() - quantity;
 
-        emit IZoraDrop.Sale({
+        emit IERC721Drop.Sale({
             to: _msgSender(),
             quantity: quantity,
             pricePerToken: pricePerToken,
@@ -535,7 +540,7 @@ contract ERC721Drop is
     function owner()
         public
         view
-        override(OwnableSkeleton, IZoraDrop)
+        override(OwnableSkeleton, IERC721Drop)
         returns (address)
     {
         return super.owner();
@@ -561,6 +566,10 @@ contract ERC721Drop is
         override
         returns (string memory)
     {
+        if (!_exists(tokenId)) {
+            revert IERC721AUpgradeable.URIQueryForNonexistentToken();
+        }
+
         return config.metadataRenderer.tokenURI(tokenId);
     }
 
@@ -580,6 +589,6 @@ contract ERC721Drop is
             super.supportsInterface(interfaceId) ||
             type(IOwnable).interfaceId == interfaceId ||
             type(IERC2981Upgradeable).interfaceId == interfaceId ||
-            type(IZoraDrop).interfaceId == interfaceId;
+            type(IERC721Drop).interfaceId == interfaceId;
     }
 }

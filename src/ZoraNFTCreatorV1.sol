@@ -10,13 +10,11 @@ import {EditionMetadataRenderer} from "./metadata/EditionMetadataRenderer.sol";
 import {DropMetadataRenderer} from "./metadata/DropMetadataRenderer.sol";
 import {IMetadataRenderer} from "./interfaces/IMetadataRenderer.sol";
 import {ERC721Drop} from "./ERC721Drop.sol";
-import {FactoryUpgradeGate} from "./interfaces/FactoryUpgradeGate.sol";
 
 /// @notice Zora NFT Creator V1
 contract ZoraNFTCreatorV1 is
     OwnableUpgradeable,
     UUPSUpgradeable,
-    FactoryUpgradeGate,
     Version(1)
 {
     string private constant CANNOT_BE_ZERO = "Cannot be 0 address";
@@ -97,20 +95,21 @@ contract ZoraNFTCreatorV1 is
         bytes memory metadataInitializer
     ) internal returns (address) {
         ERC721DropProxy newDrop = new ERC721DropProxy(
-            implementation,
-            abi.encode(
-                name,
-                symbol,
-                defaultAdmin,
-                fundsRecipient,
-                editionSize,
-                royaltyBPS,
-                metadataRenderer,
-                metadataInitializer
-            )
+            implementation, ""
         );
 
         address newDropAddress = address(newDrop);
+
+        ERC721Drop(newDropAddress).initialize(
+            name,
+            symbol,
+            defaultAdmin,
+            fundsRecipient,
+            editionSize,
+            royaltyBPS,
+            metadataRenderer,
+            metadataInitializer
+        );
 
         emit CreatedDrop({creator: msg.sender, editionSize: editionSize, editionContractAddress: newDropAddress});
 

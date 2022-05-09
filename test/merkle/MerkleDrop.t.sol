@@ -7,7 +7,7 @@ import {DSTest} from "ds-test/test.sol";
 import {ERC721Drop} from "../../src/ERC721Drop.sol";
 import {ZoraFeeManager} from "../../src/ZoraFeeManager.sol";
 import {DummyMetadataRenderer} from "../utils/DummyMetadataRenderer.sol";
-import {FactoryUpgradeGate} from "../../src/interfaces/FactoryUpgradeGate.sol";
+import {FactoryUpgradeGate} from "../../src/FactoryUpgradeGate.sol";
 
 import {MerkleData} from "./MerkleData.sol";
 
@@ -46,7 +46,7 @@ contract ZoraNFTBaseTest is DSTest {
         zoraNFTBase = new ERC721Drop(
             feeManager,
             address(1234),
-            FactoryUpgradeGate(address(0x0))
+            FactoryUpgradeGate(address(0))
         );
         merkleData = new MerkleData();
     }

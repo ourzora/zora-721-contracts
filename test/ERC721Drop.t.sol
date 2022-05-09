@@ -8,7 +8,7 @@ import {ZoraFeeManager} from "../src/ZoraFeeManager.sol";
 import {DummyMetadataRenderer} from "./utils/DummyMetadataRenderer.sol";
 import {MockUser} from "./utils/MockUser.sol";
 import {IMetadataRenderer} from "../src/interfaces/IMetadataRenderer.sol";
-import {FactoryUpgradeGate} from "../src/interfaces/FactoryUpgradeGate.sol";
+import {FactoryUpgradeGate} from "../src/FactoryUpgradeGate.sol";
 
 contract ERC721DropTest is DSTest {
     ERC721Drop zoraNFTBase;
@@ -49,7 +49,7 @@ contract ERC721DropTest is DSTest {
         vm.prank(DEFAULT_ZORA_DAO_ADDRESS);
         feeManager = new ZoraFeeManager(500, DEFAULT_ZORA_DAO_ADDRESS);
         vm.prank(DEFAULT_ZORA_DAO_ADDRESS);
-        zoraNFTBase = new ERC721Drop(feeManager, address(1234), FactoryUpgradeGate(address(0x0)));
+        zoraNFTBase = new ERC721Drop(feeManager, address(1234), FactoryUpgradeGate(address(0)));
     }
 
     function test_Init() public setupZoraNFTBase(10) {
@@ -62,17 +62,12 @@ contract ERC721DropTest is DSTest {
             IMetadataRenderer renderer,
             uint64 editionSize,
             uint16 royaltyBPS,
-            bool royaltiesDisabled,
             address payable fundsRecipient
         ) = zoraNFTBase.config();
 
         require(address(renderer) == address(dummyRenderer));
         require(editionSize == 10, "EditionSize is wrong");
         require(royaltyBPS == 800, "RoyaltyBPS is wrong");
-        require(
-            !royaltiesDisabled,
-            "Royalties are disabled when they should be enabled by default"
-        );
         require(
             fundsRecipient == payable(DEFAULT_FUNDS_RECIPIENT_ADDRESS),
             "FundsRecipient is wrong"

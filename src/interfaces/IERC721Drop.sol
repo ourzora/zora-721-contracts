@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.10;
 
+import {IMetadataRenderer} from "../interfaces/IMetadataRenderer.sol";
+
 /**
 
  ________   _____   ____    ______      ____
@@ -25,6 +27,8 @@ interface IERC721Drop {
     error Access_MissingRoleOrAdmin(bytes32 role);
     /// @notice Withdraw is not allowed by this user
     error Access_WithdrawNotAllowed();
+    /// @notice Cannot withdraw funds due to ETH send failure.
+    error Withdraw_FundsSendFailure();
 
     // Sale/Purchase errors
     /// @notice Sale is inactive
@@ -47,18 +51,53 @@ interface IERC721Drop {
     error Setup_RoyaltyPercentageTooHigh(uint16 maxRoyaltyBPS);
     /// @notice Invalid admin upgrade address
     error Admin_InvalidUpgradeAddress(address proposedAddress);
-
-    // Quantity Errors
     /// @notice Unable to finalize an edition not marked as open (size set to uint64_max_value)
     error Admin_UnableToFinalizeNotOpenEdition();
 
     /// @notice Event emitted for each sale
+    /// @param to address sale was made to
+    /// @param quantity quantity of the minted nfts
+    /// @param pricePerToken price for each token
+    /// @param firstPurchasedTokenId first purchased token ID (to get range add to quantity for max)
     event Sale(
         address indexed to,
         uint256 indexed quantity,
         uint256 indexed pricePerToken,
         uint256 firstPurchasedTokenId
     );
+
+    /// @notice General configuration for NFT Minting and bookkeeping
+    struct Configuration {
+        /// @dev Metadata renderer (uint160)
+        IMetadataRenderer metadataRenderer;
+        /// @dev Total size of edition that can be minted (uint160+64 = 224)
+        uint64 editionSize;
+        /// @dev Royalty amount in bps (uint224+16 = 240)
+        uint16 royaltyBPS;
+        /// @dev Funds recipient for sale (new slot, uint160)
+        address payable fundsRecipient;
+    }
+
+    /// @notice Sales states and configuration
+    /// @dev Uses 3 storage slots
+    struct SalesConfiguration {
+        /// @dev Public sale price (max ether value > 1000 ether with this value)
+        uint104 publicSalePrice;
+        /// @dev Max purchase number per txn (90+32 = 122)
+        uint32 maxSalePurchasePerAddress;
+        /// @dev uint64 type allows for dates into 292 billion years
+        /// @notice Public sale start timestamp (136+64 = 186)
+        uint64 publicSaleStart;
+        /// @notice Public sale end timestamp (186+64 = 250)
+        uint64 publicSaleEnd;
+        /// @notice Presale start timestamp
+        /// @dev new storage slot
+        uint64 presaleStart;
+        /// @notice Presale end timestamp
+        uint64 presaleEnd;
+        /// @notice Presale merkle root
+        bytes32 presaleMerkleRoot;
+    }
 
     /// @notice Return value for sales details to use with front-ends
     struct SaleDetails {

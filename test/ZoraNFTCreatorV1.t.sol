@@ -4,7 +4,6 @@ pragma solidity 0.8.10;
 import {DSTest} from "ds-test/test.sol";
 import {Vm} from "forge-std/Vm.sol";
 
-import {ZoraNFTDropDeployer} from "../src/ZoraNFTDropDeployer.sol";
 import {IMetadataRenderer} from "../src/interfaces/IMetadataRenderer.sol";
 import "../src/ZoraNFTCreatorV1.sol";
 import "../src/ZoraFeeManager.sol";
@@ -29,7 +28,7 @@ contract ZoraFeeManagerTest is DSTest {
         vm.prank(DEFAULT_ZORA_DAO_ADDRESS);
         SharedNFTLogic sharedLogic = new SharedNFTLogic();
         dropImpl = new ERC721Drop(feeManager, address(1234), FactoryUpgradeGate(address(0)));
-        editionMetadataRenderer = new EditionMetadataRenderer(address(sharedLogic));
+        editionMetadataRenderer = new EditionMetadataRenderer(sharedLogic);
         dropMetadataRenderer = new DropMetadataRenderer();
         ZoraNFTCreatorV1 impl = new ZoraNFTCreatorV1(address(dropImpl), editionMetadataRenderer, dropMetadataRenderer);
         creator = ZoraNFTCreatorV1(address(new ZoraNFTCreatorProxy(address(impl), "")));

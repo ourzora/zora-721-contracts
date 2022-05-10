@@ -18,7 +18,6 @@ pragma solidity ^0.8.10;
 import {ERC721AUpgradeable} from "erc721a-upgradeable/ERC721AUpgradeable.sol";
 import {IERC721AUpgradeable} from "erc721a-upgradeable/IERC721AUpgradeable.sol";
 import {IERC2981Upgradeable, IERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/interfaces/IERC2981Upgradeable.sol";
-import {AddressUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import {MerkleProofUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/cryptography/MerkleProofUpgradeable.sol";
@@ -50,11 +49,33 @@ contract ERC721Drop is
     AccessControlUpgradeable,
     IERC721Drop,
     OwnableSkeleton,
-    Version(5),
+    Version(6),
     ERC721DropStorageV1
 {
-    using AddressUpgradeable for address payable;
+    /// @dev This is the max mint batch size for the optimized ERC721A mint contract
+    uint256 internal constant MAX_MINT_BATCH_SIZE = 8;
 
+    /// @dev Gas limit to send funds
+    uint256 internal constant FUNDS_SEND_GAS_LIMIT = 200_000;
+
+    /// @notice Error string constants
+    string internal constant SOLD_OUT = "Sold out";
+    string internal constant TOO_MANY = "Too many";
+
+    /// @notice Access control roles
+    bytes32 public immutable MINTER_ROLE = keccak256("MINTER");
+    bytes32 public immutable SALES_MANAGER_ROLE = keccak256("SALES_MANAGER");
+
+    /// @dev ZORA V3 transfer helper address for auto-approval
+    address internal immutable zoraERC721TransferHelper;
+
+    /// @dev Factory upgrade gate
+    FactoryUpgradeGate internal immutable factoryUpgradeGate;
+
+    /// @dev Zora Fee Manager address
+    IZoraFeeManager public immutable zoraFeeManager;
+
+    /// @notice Max royalty BPS
     uint16 constant MAX_ROYALTY_BPS = 50_00;
 
     event SalesConfigChanged(
@@ -147,13 +168,11 @@ contract ERC721Drop is
         IZoraFeeManager _zoraFeeManager,
         address _zoraERC721TransferHelper,
         FactoryUpgradeGate _factoryUpgradeGate
-    )
-        ERC721DropStorageV1(
-            _zoraFeeManager,
-            _zoraERC721TransferHelper,
-            _factoryUpgradeGate
-        )
-    {}
+    ) initializer {
+        zoraFeeManager = _zoraFeeManager;
+        zoraERC721TransferHelper = _zoraERC721TransferHelper;
+        factoryUpgradeGate = _factoryUpgradeGate;
+    }
 
     ///  @dev Create a new drop
     ///  @param _contractName Contract name
@@ -186,6 +205,13 @@ contract ERC721Drop is
         if (config.royaltyBPS > MAX_ROYALTY_BPS) {
             revert Setup_RoyaltyPercentageTooHigh(MAX_ROYALTY_BPS);
         }
+        
+        // TODO(iain):
+        // if (_defaultSalesPrice > 0) {
+        //     salesConfig.publicSalePrice = _defaultSalesPrice;
+        //     salesConfig.publicSaleEnd = type(uint64).max;
+        //     salesConfig.maxSalePurchasePerAddress = 10;
+        // }
 
         // Setup config variables
         config.editionSize = _editionSize;
@@ -312,7 +338,6 @@ contract ERC721Drop is
      ***     PUBLIC MINTING FUNCTIONS       ***
      ***                                    ***
      *** ---------------------------------- ***
-     ***
      ***/
 
     /**
@@ -428,7 +453,6 @@ contract ERC721Drop is
      ***     ADMIN MINTING FUNCTIONS        ***
      ***                                    ***
      *** ---------------------------------- ***
-     ***
      ***/
 
     /// @notice Mint admin
@@ -515,6 +539,7 @@ contract ERC721Drop is
         external
         onlyRoleOrAdmin(SALES_MANAGER_ROLE)
     {
+        // TODO(iain): funds recipient cannot be 0?
         config.fundsRecipient = newRecipientAddress;
         emit FundsRecipientChanged(newRecipientAddress, _msgSender());
     }
@@ -523,6 +548,7 @@ contract ERC721Drop is
     function withdraw() external nonReentrant {
         address sender = _msgSender();
 
+        // Get fee amount
         uint256 funds = address(this).balance;
         (address payable feeRecipient, uint256 zoraFee) = zoraFeeForAmount(
             funds
@@ -537,13 +563,26 @@ contract ERC721Drop is
             revert Access_WithdrawNotAllowed();
         }
 
-        // No need for gas limit to trusted address.
+        // Payout ZORA fee
         if (zoraFee > 0) {
-            feeRecipient.sendValue(zoraFee);
+            (bool successFee, ) = feeRecipient.call{
+                value: zoraFee,
+                gas: FUNDS_SEND_GAS_LIMIT
+            }("");
+            if (!successFee) {
+                revert Withdraw_FundsSendFailure();
+            }
             funds -= zoraFee;
         }
-        // No need for gas limit to trusted address.
-        config.fundsRecipient.sendValue(funds);
+
+        // Payout recipient
+        (bool successFunds, ) = config.fundsRecipient.call{
+            value: funds,
+            gas: FUNDS_SEND_GAS_LIMIT
+        }("");
+        if (!successFunds) {
+            revert Withdraw_FundsSendFailure();
+        }
     }
 
     /// @notice Admin function to finalize and open edition sale
@@ -565,7 +604,6 @@ contract ERC721Drop is
      ***      GENERAL GETTER FUNCTIONS      ***
      ***                                    ***
      *** ---------------------------------- ***
-     ***
      ***/
 
     /// @notice Simple override for owner interface.

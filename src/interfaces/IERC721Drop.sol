@@ -27,6 +27,8 @@ interface IERC721Drop {
     error Access_MissingRoleOrAdmin(bytes32 role);
     /// @notice Withdraw is not allowed by this user
     error Access_WithdrawNotAllowed();
+    /// @notice Cannot withdraw funds due to ETH send failure.
+    error Withdraw_FundsSendFailure();
 
     // Sale/Purchase errors
     /// @notice Sale is inactive
@@ -49,12 +51,14 @@ interface IERC721Drop {
     error Setup_RoyaltyPercentageTooHigh(uint16 maxRoyaltyBPS);
     /// @notice Invalid admin upgrade address
     error Admin_InvalidUpgradeAddress(address proposedAddress);
-
-    // Quantity Errors
     /// @notice Unable to finalize an edition not marked as open (size set to uint64_max_value)
     error Admin_UnableToFinalizeNotOpenEdition();
 
     /// @notice Event emitted for each sale
+    /// @param to address sale was made to
+    /// @param quantity quantity of the minted nfts
+    /// @param pricePerToken price for each token
+    /// @param firstPurchasedTokenId first purchased token ID (to get range add to quantity for max)
     event Sale(
         address indexed to,
         uint256 indexed quantity,

@@ -3,6 +3,8 @@ pragma solidity 0.8.10;
 
 import {Vm} from "forge-std/Vm.sol";
 import {DSTest} from "ds-test/test.sol";
+import {IERC721AUpgradeable} from "erc721a-upgradeable/IERC721AUpgradeable.sol";
+
 import {IERC721Drop} from "../src/interfaces/IERC721Drop.sol";
 import {ERC721Drop} from "../src/ERC721Drop.sol";
 import {ZoraFeeManager} from "../src/ZoraFeeManager.sol";
@@ -11,6 +13,7 @@ import {MockUser} from "./utils/MockUser.sol";
 import {IMetadataRenderer} from "../src/interfaces/IMetadataRenderer.sol";
 import {FactoryUpgradeGate} from "../src/FactoryUpgradeGate.sol";
 import {ERC721DropProxy} from "../src/ERC721DropProxy.sol";
+
 
 contract ERC721DropTest is DSTest {
     ERC721Drop zoraNFTBase;
@@ -431,7 +434,7 @@ contract ERC721DropTest is DSTest {
         vm.stopPrank();
 
         vm.prank(address(1));
-        vm.expectRevert(IERC721Drop.TransferCallerNotOwnerNorApproved.selector);
+        vm.expectRevert(IERC721AUpgradeable.TransferCallerNotOwnerNorApproved.selector);
         zoraNFTBase.burn(1);
     }
 

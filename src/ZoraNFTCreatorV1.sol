@@ -7,6 +7,7 @@ import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/U
 import {ERC721DropProxy} from "./ERC721DropProxy.sol";
 import {Version} from "./utils/Version.sol";
 import {EditionMetadataRenderer} from "./metadata/EditionMetadataRenderer.sol";
+import {IERC721Drop} from "./interfaces/IERC721Drop.sol";
 import {DropMetadataRenderer} from "./metadata/DropMetadataRenderer.sol";
 import {IMetadataRenderer} from "./interfaces/IMetadataRenderer.sol";
 import {ERC721Drop} from "./ERC721Drop.sol";
@@ -91,6 +92,7 @@ contract ZoraNFTCreatorV1 is
         uint64 editionSize,
         uint16 royaltyBPS,
         address payable fundsRecipient,
+        IERC721Drop.SalesConfiguration memory saleConfig,
         IMetadataRenderer metadataRenderer,
         bytes memory metadataInitializer
     ) internal returns (address) {
@@ -107,6 +109,7 @@ contract ZoraNFTCreatorV1 is
             fundsRecipient,
             editionSize,
             royaltyBPS,
+            saleConfig,
             metadataRenderer,
             metadataInitializer
         );
@@ -132,6 +135,7 @@ contract ZoraNFTCreatorV1 is
         uint64 editionSize,
         uint16 royaltyBPS,
         address payable fundsRecipient,
+        IERC721Drop.SalesConfiguration memory saleConfig,
         string memory metadataURIBase,
         string memory metadataContractURI
     ) external returns (address) {
@@ -147,6 +151,7 @@ contract ZoraNFTCreatorV1 is
                 royaltyBPS: royaltyBPS,
                 editionSize: editionSize,
                 fundsRecipient: fundsRecipient,
+                saleConfig: saleConfig,
                 metadataRenderer: dropMetadataRenderer,
                 metadataInitializer: metadataInitializer
             });
@@ -162,9 +167,7 @@ contract ZoraNFTCreatorV1 is
     /// @param fundsRecipient Funds recipient for the NFT sale
     /// @param description Metadata: Description of the edition entry
     /// @param animationURI Metadata: Animation url (optional) of the edition entry
-    /// @param animationHash Metadata: SHA-256 Hash of the animation (if no animation url, can be 0x0)
     /// @param imageURI Metadata: Image url (semi-required) of the edition entry
-    /// @param imageHash Metadata: SHA-256 hash of the Image of the edition entry (if not image, can be 0x0)
     function createEdition(
         string memory name,
         string memory symbol,
@@ -172,26 +175,25 @@ contract ZoraNFTCreatorV1 is
         uint16 royaltyBPS,
         address payable fundsRecipient,
         address defaultAdmin,
+        IERC721Drop.SalesConfiguration memory saleConfig,
         string memory description,
         string memory animationURI,
-        // stored as calldata
-        bytes32 animationHash,
-        string memory imageURI,
-        // stored as calldata
-        bytes32 imageHash
+        string memory imageURI
     ) external returns (address) {
         bytes memory metadataInitializer = abi.encode(
             description,
             imageURI,
             animationURI
         );
+
         return
             _setupMediaContract({
                 name: name,
                 symbol: symbol,
                 defaultAdmin: defaultAdmin,
-                royaltyBPS: royaltyBPS,
                 editionSize: editionSize,
+                royaltyBPS: royaltyBPS,
+                saleConfig: saleConfig,
                 fundsRecipient: fundsRecipient,
                 metadataRenderer: editionMetadataRenderer,
                 metadataInitializer: metadataInitializer

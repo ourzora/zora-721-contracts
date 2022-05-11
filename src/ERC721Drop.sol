@@ -426,7 +426,10 @@ contract ERC721Drop is
             revert Purchase_WrongPrice(salePrice * quantity);
         }
 
+        // If max purchase per address == 0 there is no limit.
+        // Any other number, the per address mint limit is that.
         if (
+            salesConfig.maxSalePurchasePerAddress != 0 &&
             _numberMinted(_msgSender()) +
                 quantity -
                 presaleMintsByAddress[_msgSender()] >

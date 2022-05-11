@@ -1,0 +1,38 @@
+@startuml
+actor Caller
+actor FeeRecipient
+actor FundsRecipient
+participant ERC721Drop
+
+Caller -> ERC721Drop : withdraw()
+
+alt caller is not admin or manager?
+
+    ERC721Drop -> Caller : revert Access_WithdrawNotAllowed()
+
+else noop
+
+end
+
+ERC721Drop -> FeeRecipient : send fee amount
+
+alt send unsuccesful?
+
+    ERC721Drop -> ERC721Drop : revert Withdraw_FundsSendFailure()
+
+else noop
+
+end
+
+ERC721Drop -> FundsRecipient : send remaining funds amount
+
+alt send unsuccesful?
+
+    ERC721Drop -> ERC721Drop : revert Withdraw_FundsSendFailure()
+
+else noop
+
+end
+
+@enduml
+

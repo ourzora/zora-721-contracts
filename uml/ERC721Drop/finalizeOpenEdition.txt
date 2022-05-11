@@ -1,0 +1,28 @@
+@startuml
+actor Caller
+participant ERC721Drop
+
+Caller -> ERC721Drop : finalizeOpenEdition()
+
+alt caller is not admin or SALES_MANAGER_ROLE?
+
+    ERC721Drop -> Caller : revert Access_MissingRoleOrAdmin()
+
+else noop
+
+end
+
+alt drop is not an open edition?
+
+    ERC721Drop -> ERC721Drop : revert Admin_UnableToFinalizeNotOpenEdition()
+
+else noop
+
+end
+
+ERC721Drop -> ERC721Drop : set config edition size
+
+ERC721Drop -> ERC721Drop : emit OpenMintFinalized()
+
+@enduml
+

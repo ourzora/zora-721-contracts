@@ -1,0 +1,20 @@
+@startuml
+actor Caller
+participant ERC721Drop
+
+Caller -> ERC721Drop : setSalesConfiguration()
+
+alt caller is not admin?
+
+    ERC721Drop -> Caller : revert Access_MissingRoleOrAdmin()
+
+else noop
+
+end
+
+ERC721Drop -> ERC721Drop : set funds recipient
+
+ERC721Drop -> ERC721Drop : emit FundsRecipientChanged()
+
+@enduml
+

@@ -1,0 +1,9 @@
+@startuml
+actor Caller
+participant ERC721Drop
+
+Caller -> ERC721Drop : burn()
+ERC721Drop -> ERC721Drop : burn token
+
+@enduml
+

@@ -119,6 +119,37 @@ contract ZoraNFTCreatorV1 is
         return newDropAddress;
     }
 
+    //        ,-.
+    //        `-'
+    //        /|\
+    //         |                    ,----------------.              ,----------.
+    //        / \                   |ZoraNFTCreatorV1|              |ERC721Drop|
+    //      Caller                  `-------+--------'              `----+-----'
+    //        |                       createDrop()                       |
+    //        | --------------------------------------------------------->
+    //        |                             |                            |
+    //        |                             |----.
+    //        |                             |    | initialize NFT metadata
+    //        |                             |<---'
+    //        |                             |                            |
+    //        |                             |           deploy           |
+    //        |                             | --------------------------->
+    //        |                             |                            |
+    //        |                             |       initialize drop      |
+    //        |                             | --------------------------->
+    //        |                             |                            |
+    //        |                             |----.                       |
+    //        |                             |    | emit CreatedDrop      |
+    //        |                             |<---'                       |
+    //        |                             |                            |
+    //        | return drop contract address|                            |
+    //        | <----------------------------                            |
+    //      Caller                  ,-------+--------.              ,----+-----.
+    //        ,-.                   |ZoraNFTCreatorV1|              |ERC721Drop|
+    //        `-'                   `----------------'              `----------'
+    //        /|\
+    //         |
+    //        / \
     /// @dev Setup the media contract for a drop
     /// @param name Name for new contract (cannot be changed)
     /// @param symbol Symbol for new contract (cannot be changed)
@@ -157,6 +188,37 @@ contract ZoraNFTCreatorV1 is
             });
     }
 
+    //        ,-.
+    //        `-'
+    //        /|\
+    //         |                    ,----------------.              ,----------.
+    //        / \                   |ZoraNFTCreatorV1|              |ERC721Drop|
+    //      Caller                  `-------+--------'              `----+-----'
+    //        |                      createEdition()                     |
+    //        | --------------------------------------------------------->
+    //        |                             |                            |
+    //        |                             |----.
+    //        |                             |    | initialize NFT metadata
+    //        |                             |<---'
+    //        |                             |                            |
+    //        |                             |           deploy           |
+    //        |                             | --------------------------->
+    //        |                             |                            |
+    //        |                             |     initialize edition     |
+    //        |                             | --------------------------->
+    //        |                             |                            |
+    //        |                             |----.                       |
+    //        |                             |    | emit CreatedDrop      |
+    //        |                             |<---'                       |
+    //        |                             |                            |
+    //        | return drop contract address|                            |
+    //        | <----------------------------                            |
+    //      Caller                  ,-------+--------.              ,----+-----.
+    //        ,-.                   |ZoraNFTCreatorV1|              |ERC721Drop|
+    //        `-'                   `----------------'              `----------'
+    //        /|\
+    //         |
+    //        / \                                                               
     /// @notice Creates a new edition contract as a factory with a deterministic address
     /// @notice Important: None of these fields (except the Url fields with the same hash) can be changed after calling
     /// @param name Name of the edition contract

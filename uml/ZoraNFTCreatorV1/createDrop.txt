@@ -1,0 +1,19 @@
+@startuml
+actor Caller
+participant ZoraNFTCreatorV1
+participant ERC721Drop
+
+Caller -> ERC721Drop : createDrop()
+
+ZoraNFTCreatorV1 -> ZoraNFTCreatorV1 : initialize NFT metadata
+
+ZoraNFTCreatorV1 -> ERC721Drop : deploy
+
+ZoraNFTCreatorV1 -> ERC721Drop : initialize drop
+
+ZoraNFTCreatorV1 -> ZoraNFTCreatorV1 : emit CreatedDrop
+
+ZoraNFTCreatorV1 -> Caller : return drop contract address
+
+@enduml
+

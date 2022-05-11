@@ -1,0 +1,47 @@
+@startuml
+actor Caller
+participant ERC721Drop
+
+Caller -> ERC721Drop : purchasePresale()
+
+alt drop has no tokens left for caller to mint?
+
+    ERC721Drop -> Caller : revert Mint_SoldOut()
+
+else noop
+
+end
+
+alt presale sale isn't active?
+
+    ERC721Drop -> Caller : revert Presale_Inactive()
+
+else noop
+
+end
+
+alt merkle proof unapproved for caller?
+
+    ERC721Drop -> Caller : revert Presale_MerkleNotApproved()
+
+else noop
+
+end
+
+alt inadequate funds sent?
+
+    ERC721Drop -> Caller : revert Purchase_WrongPrice()
+
+else noop
+
+end
+
+
+ERC721Drop -> ERC721Drop : mint tokens
+
+ERC721Drop -> ERC721Drop : emit IERC721Drop.Sale()
+
+ERC721Drop -> Caller : return first minted token ID
+
+@enduml
+

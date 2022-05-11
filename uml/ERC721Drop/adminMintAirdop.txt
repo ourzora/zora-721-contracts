@@ -1,0 +1,30 @@
+@startuml
+actor Caller
+participant ERC721Drop
+
+Caller -> ERC721Drop : adminMintAirdrop()
+
+alt caller is not admin or minter role?
+
+    ERC721Drop -> Caller : revert Access_MissingRoleOrAdmin()
+
+else noop
+
+end
+
+alt drop has no tokens left for recipients to mint?
+
+    ERC721Drop -> Caller : revert Mint_SoldOut()
+
+else noop
+
+end
+
+loop for all recipients
+    ERC721Drop -> ERC721Drop : mint tokens
+end
+
+ERC721Drop -> Caller : return last minted token ID
+
+@enduml
+

@@ -1,0 +1,20 @@
+@startuml
+actor Caller
+participant ERC721Drop
+
+Caller -> ERC721Drop : setOwner()
+
+alt caller is not admin or SALES_MANAGER_ROLE?
+
+    ERC721Drop -> Caller : revert Access_OnlyAdmin()
+
+else noop
+
+end
+
+ERC721Drop -> ERC721Drop : set sales configuration
+
+ERC721Drop -> ERC721Drop : emit SalesConfigChanged()
+
+@enduml
+

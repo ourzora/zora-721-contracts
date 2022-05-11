@@ -83,6 +83,7 @@ interface IERC721Drop {
     struct SalesConfiguration {
         /// @dev Public sale price (max ether value > 1000 ether with this value)
         uint104 publicSalePrice;
+        /// @notice Purchase mint limit per address (if set to 0 === unlimited mints)
         /// @dev Max purchase number per txn (90+32 = 122)
         uint32 maxSalePurchasePerAddress;
         /// @dev uint64 type allows for dates into 292 billion years

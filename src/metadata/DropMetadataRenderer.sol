@@ -3,7 +3,7 @@ pragma solidity ^0.8.10;
 
 import {StringsUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/StringsUpgradeable.sol";
 import {IMetadataRenderer} from "../interfaces/IMetadataRenderer.sol";
-import {ERC721Drop} from "../ERC721Drop.sol";
+import {IERC721Drop} from "../interfaces/IERC721Drop.sol";
 
 /// @notice Drops metadata system
 contract DropMetadataRenderer is IMetadataRenderer {
@@ -25,7 +25,7 @@ contract DropMetadataRenderer is IMetadataRenderer {
 
     modifier requireSenderAdmin(address target) {
         require(
-            target == msg.sender || ERC721Drop(target).isAdmin(msg.sender),
+            target == msg.sender || IERC721Drop(target).isAdmin(msg.sender),
             "Only admin"
         );
 

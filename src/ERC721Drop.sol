@@ -16,8 +16,8 @@ pragma solidity ^0.8.10;
  */
 
 import {ERC721AUpgradeable} from "erc721a-upgradeable/ERC721AUpgradeable.sol";
+import {IERC721AUpgradeable} from "erc721a-upgradeable/IERC721AUpgradeable.sol";
 import {IERC2981Upgradeable, IERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/interfaces/IERC2981Upgradeable.sol";
-import {AddressUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import {MerkleProofUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/cryptography/MerkleProofUpgradeable.sol";
@@ -25,12 +25,13 @@ import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/U
 
 import {IZoraFeeManager} from "./interfaces/IZoraFeeManager.sol";
 import {IMetadataRenderer} from "./interfaces/IMetadataRenderer.sol";
-import {IZoraDrop} from "./interfaces/IZoraDrop.sol";
+import {IERC721Drop} from "./interfaces/IERC721Drop.sol";
 import {IOwnable} from "./interfaces/IOwnable.sol";
-import {FactoryUpgradeGate} from "./interfaces/FactoryUpgradeGate.sol";
 
 import {OwnableSkeleton} from "./utils/OwnableSkeleton.sol";
 import {Version} from "./utils/Version.sol";
+import {FactoryUpgradeGate} from "./FactoryUpgradeGate.sol";
+import {ERC721DropStorageV1} from "./storage/ERC721DropStorageV1.sol";
 
 /**
  * @notice ZORA NFT Base contract for Drops and Editions
@@ -46,18 +47,39 @@ contract ERC721Drop is
     IERC2981Upgradeable,
     ReentrancyGuardUpgradeable,
     AccessControlUpgradeable,
-    IZoraDrop,
+    IERC721Drop,
     OwnableSkeleton,
-    Version(5)
+    Version(6),
+    ERC721DropStorageV1
 {
     /// @dev This is the max mint batch size for the optimized ERC721A mint contract
-    uint256 private constant MAX_MINT_BATCH_SIZE = 8;
+    uint256 internal constant MAX_MINT_BATCH_SIZE = 8;
 
-    using AddressUpgradeable for address payable;
+    /// @dev Gas limit to send funds
+    uint256 internal constant FUNDS_SEND_GAS_LIMIT = 210_000;
+
+    /// @notice Error string constants
+    string internal constant SOLD_OUT = "Sold out";
+    string internal constant TOO_MANY = "Too many";
+
+    /// @notice Access control roles
+    bytes32 public immutable MINTER_ROLE = keccak256("MINTER");
+    bytes32 public immutable SALES_MANAGER_ROLE = keccak256("SALES_MANAGER");
+
+    /// @dev ZORA V3 transfer helper address for auto-approval
+    address internal immutable zoraERC721TransferHelper;
+
+    /// @dev Factory upgrade gate
+    FactoryUpgradeGate internal immutable factoryUpgradeGate;
+
+    /// @dev Zora Fee Manager address
+    IZoraFeeManager public immutable zoraFeeManager;
+
+    /// @notice Max royalty BPS
+    uint16 constant MAX_ROYALTY_BPS = 50_00;
 
     event SalesConfigChanged(
-        address indexed changedBy,
-        SalesConfiguration salesConfig
+        address indexed changedBy
     );
 
     event FundsRecipientChanged(
@@ -67,71 +89,11 @@ contract ERC721Drop is
 
     event OpenMintFinalized(address indexed sender, uint256 numberOfMints);
 
-    /// @notice Error string constants
-    string private constant SOLD_OUT = "Sold out";
-    string private constant TOO_MANY = "Too many";
-    string private constant ADDRESS_ZERO_ERROR = "Cannot set address to 0x0";
-
-    /// @notice Access control roles
-    bytes32 public immutable MINTER_ROLE = keccak256("MINTER");
-    bytes32 public immutable SALES_MANAGER_ROLE = keccak256("SALES_MANAGER");
-
-    /// @notice General configuration for NFT Minting and bookkeeping
-    struct Configuration {
-        /// @dev Metadata renderer (uint160)
-        IMetadataRenderer metadataRenderer;
-        /// @dev Total size of edition that can be minted (uint160+64 = 224)
-        uint64 editionSize;
-        /// @dev Royalty amount in bps (uint224+16 = 240)
-        uint16 royaltyBPS;
-        /// @dev Flag to disable royalties (uint240+8 = 248)
-        bool disableRoyalties;
-        /// @dev Funds recipient for sale (new slot, uint160)
-        address payable fundsRecipient;
-    }
-
-    /// @notice Sales states and configuration
-    /// @dev Uses 3 storage slots
-    struct SalesConfiguration {
-        /// @dev Public sale price (max ether value > 1000 ether with this value)
-        uint104 publicSalePrice;
-        /// @dev Max purchase number per txn (90+32 = 122)
-        uint32 maxSalePurchasePerAddress;
-        /// @dev uint64 type allows for dates into 292 billion years
-        /// @notice Public sale start timestamp (136+64 = 186)
-        uint64 publicSaleStart;
-        /// @notice Public sale end timestamp (186+64 = 250)
-        uint64 publicSaleEnd;
-        /// @notice Presale start timestamp
-        /// @dev new storage slot
-        uint64 presaleStart;
-        /// @notice Presale end timestamp
-        uint64 presaleEnd;
-        /// @notice Presale merkle root
-        bytes32 presaleMerkleRoot;
-    }
-
-    /// @notice Configuration for NFT minting contract storage
-    Configuration public config;
-
-    /// @notice Sales configuration
-    SalesConfiguration public salesConfig;
-
-    /// @dev ZORA V3 transfer helper address for auto-approval
-    address private immutable zoraERC721TransferHelper;
-
-    /// @dev Factory upgrade gate
-    FactoryUpgradeGate private immutable factoryUpgradeGate;
-
-    /// @dev Mapping for presale mint counts by address to allow public mint limit
-    mapping(address => uint256) public presaleMintsByAddress;
-
-    /// @dev Zora Fee Manager address
-    IZoraFeeManager public immutable zoraFeeManager;
-
     /// @notice Only allow for users with admin access
     modifier onlyAdmin() {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Only admin allowed");
+        if (!hasRole(DEFAULT_ADMIN_ROLE, msg.sender)) {
+            revert Access_OnlyAdmin();
+        }
 
         _;
     }
@@ -139,18 +101,21 @@ contract ERC721Drop is
     /// @notice Only a given role has access or admin
     /// @param role role to check for alongside the admin role
     modifier onlyRoleOrAdmin(bytes32 role) {
-        require(
-            hasRole(DEFAULT_ADMIN_ROLE, msg.sender) ||
-                hasRole(role, msg.sender),
-            "Does not have proper role or admin"
-        );
+        if (
+            !hasRole(DEFAULT_ADMIN_ROLE, msg.sender) &&
+            !hasRole(role, msg.sender)
+        ) {
+            revert Access_MissingRoleOrAdmin(role);
+        }
 
         _;
     }
 
     /// @notice Allows user to mint tokens at a quantity
     modifier canMintTokens(uint256 quantity) {
-        require(quantity + _totalMinted() <= config.editionSize, SOLD_OUT);
+        if (quantity + _totalMinted() > config.editionSize) {
+            revert Mint_SoldOut();
+        }
 
         _;
     }
@@ -169,14 +134,18 @@ contract ERC721Drop is
 
     /// @notice Presale active
     modifier onlyPresaleActive() {
-        require(_presaleActive(), "Presale inactive");
+        if (!_presaleActive()) {
+            revert Presale_Inactive();
+        }
 
         _;
     }
 
     /// @notice Public sale active
     modifier onlyPublicSaleActive() {
-        require(_publicSaleActive(), "Sale inactive");
+        if (!_publicSaleActive()) {
+            revert Sale_Inactive();
+        }
 
         _;
     }
@@ -192,25 +161,29 @@ contract ERC721Drop is
     }
 
     /// @notice Global constructor – these variables will not change with further proxy deploys
+    /// @dev Marked as an initializer to prevent storage being used of base implementation. Can only be init'd by a proxy.
     /// @param _zoraFeeManager Zora Fee Manager
     /// @param _zoraERC721TransferHelper Transfer helper
     constructor(
         IZoraFeeManager _zoraFeeManager,
         address _zoraERC721TransferHelper,
         FactoryUpgradeGate _factoryUpgradeGate
-    ) {
+    ) initializer {
         zoraFeeManager = _zoraFeeManager;
         zoraERC721TransferHelper = _zoraERC721TransferHelper;
         factoryUpgradeGate = _factoryUpgradeGate;
     }
 
-    ///  @dev Create a new drop
+    ///  @dev Create a new drop contract
     ///  @param _contractName Contract name
     ///  @param _contractSymbol Contract symbol
     ///  @param _initialOwner User that owns and can mint the edition, gets royalty and sales payouts and can update the base url if needed.
     ///  @param _fundsRecipient Wallet/user that receives funds from sale
     ///  @param _editionSize Number of editions that can be minted in total. If 0, unlimited editions can be minted.
     ///  @param _royaltyBPS BPS of the royalty set on the contract. Can be 0 for no royalty.
+    ///  @param _salesConfig New sales config to set upon init
+    ///  @param _metadataRenderer Renderer contract to use
+    ///  @param _metadataRendererInit Renderer data initial contract
     function initialize(
         string memory _contractName,
         string memory _contractSymbol,
@@ -218,16 +191,10 @@ contract ERC721Drop is
         address payable _fundsRecipient,
         uint64 _editionSize,
         uint16 _royaltyBPS,
+        SalesConfiguration memory _salesConfig,
         IMetadataRenderer _metadataRenderer,
         bytes memory _metadataRendererInit
     ) public initializer {
-        // Metadata renderer cannot be zero address
-        require(address(_metadataRenderer) != address(0x0), ADDRESS_ZERO_ERROR);
-        // Funds recipient cannot be zero address
-        require(address(_fundsRecipient) != address(0x0), ADDRESS_ZERO_ERROR);
-        // Owner cannot be zero address
-        require(address(_initialOwner) != address(0x0), ADDRESS_ZERO_ERROR);
-
         // Setup ERC721A
         __ERC721A_init(_contractName, _contractSymbol);
         // Setup access control
@@ -239,10 +206,12 @@ contract ERC721Drop is
         // Set ownership to original sender of contract call
         _setOwner(_initialOwner);
 
-        require(
-            config.royaltyBPS < 50_01,
-            "Royalty BPS cannot be greater than 50%"
-        );
+        if (config.royaltyBPS > MAX_ROYALTY_BPS) {
+            revert Setup_RoyaltyPercentageTooHigh(MAX_ROYALTY_BPS);
+        }
+
+        // Update salesConfig
+        salesConfig = _salesConfig;
 
         // Setup config variables
         config.editionSize = _editionSize;
@@ -258,11 +227,19 @@ contract ERC721Drop is
         return hasRole(DEFAULT_ADMIN_ROLE, user);
     }
 
-    function _authorizeUpgrade(address newImplementation) internal override onlyAdmin {
-        require(
-            factoryUpgradeGate.isValidUpgrade(newImplementation),
-            "Invalid upgrade"
-        );
+    function _authorizeUpgrade(address newImplementation)
+        internal
+        override
+        onlyAdmin
+    {
+        if (
+            !factoryUpgradeGate.isValidUpgradePath(
+                newImplementation,
+                address(this)
+            )
+        ) {
+            revert Admin_InvalidUpgradeAddress(newImplementation);
+        }
     }
 
     /// @param tokenId Token ID to burn
@@ -279,7 +256,7 @@ contract ERC721Drop is
         override
         returns (address receiver, uint256 royaltyAmount)
     {
-        if (config.disableRoyalties) {
+        if (config.fundsRecipient == address(0)) {
             return (config.fundsRecipient, 0);
         }
         return (
@@ -289,22 +266,22 @@ contract ERC721Drop is
     }
 
     /// @notice Sale details
-    /// @return IZoraDrop.SaleDetails sale information details
+    /// @return IERC721Drop.SaleDetails sale information details
     function saleDetails()
         external
         view
-        returns (IZoraDrop.SaleDetails memory)
+        returns (IERC721Drop.SaleDetails memory)
     {
         return
-            IZoraDrop.SaleDetails({
+            IERC721Drop.SaleDetails({
                 publicSaleActive: _publicSaleActive(),
                 presaleActive: _presaleActive(),
-                presaleStart: salesConfig.presaleStart,
-                presaleEnd: salesConfig.presaleEnd,
+                publicSalePrice: salesConfig.publicSalePrice,
                 publicSaleStart: salesConfig.publicSaleStart,
                 publicSaleEnd: salesConfig.publicSaleEnd,
+                presaleStart: salesConfig.presaleStart,
+                presaleEnd: salesConfig.presaleEnd,
                 presaleMerkleRoot: salesConfig.presaleMerkleRoot,
-                publicSalePrice: salesConfig.publicSalePrice,
                 totalMinted: _totalMinted(),
                 maxSupply: config.editionSize,
                 maxSalePurchasePerAddress: salesConfig.maxSalePurchasePerAddress
@@ -317,10 +294,10 @@ contract ERC721Drop is
         external
         view
         override
-        returns (IZoraDrop.AddressMintDetails memory)
+        returns (IERC721Drop.AddressMintDetails memory)
     {
         return
-            IZoraDrop.AddressMintDetails({
+            IERC721Drop.AddressMintDetails({
                 presaleMints: presaleMintsByAddress[minter],
                 publicMints: _numberMinted(minter) -
                     presaleMintsByAddress[minter],
@@ -361,7 +338,6 @@ contract ERC721Drop is
      ***     PUBLIC MINTING FUNCTIONS       ***
      ***                                    ***
      *** ---------------------------------- ***
-     ***
      ***/
 
     /**
@@ -378,19 +354,23 @@ contract ERC721Drop is
     {
         uint256 salePrice = salesConfig.publicSalePrice;
 
-        require(msg.value == salePrice * quantity, "Wrong price");
-        require(
+        if (msg.value != salePrice * quantity) {
+            revert Purchase_WrongPrice(salePrice * quantity);
+        }
+
+        if (
             _numberMinted(_msgSender()) +
                 quantity -
-                presaleMintsByAddress[_msgSender()] <=
-                salesConfig.maxSalePurchasePerAddress,
-            TOO_MANY
-        );
+                presaleMintsByAddress[_msgSender()] >
+            salesConfig.maxSalePurchasePerAddress
+        ) {
+            revert Purchase_TooManyForAddress();
+        }
 
         _mintNFTs(_msgSender(), quantity);
         uint256 firstMintedTokenId = _lastMintedTokenId() - quantity;
 
-        emit IZoraDrop.Sale({
+        emit IERC721Drop.Sale({
             to: _msgSender(),
             quantity: quantity,
             pricePerToken: salePrice,
@@ -409,7 +389,7 @@ contract ERC721Drop is
             uint256 toMint = quantity > MAX_MINT_BATCH_SIZE
                 ? MAX_MINT_BATCH_SIZE
                 : quantity;
-            _mint({to: to, quantity: toMint, _data: "", safe: false});
+            _mint({to: to, quantity: toMint});
             quantity -= toMint;
         } while (quantity > 0);
     }
@@ -432,26 +412,32 @@ contract ERC721Drop is
         onlyPresaleActive
         returns (uint256)
     {
-        require(
-            MerkleProofUpgradeable.verify(
+        if (
+            !MerkleProofUpgradeable.verify(
                 merkleProof,
                 salesConfig.presaleMerkleRoot,
                 keccak256(
                     // address, uint256, uint256
                     abi.encode(msg.sender, maxQuantity, pricePerToken)
                 )
-            ),
-            "Needs to be approved"
-        );
-        require(msg.value == pricePerToken * quantity, "Wrong price");
+            )
+        ) {
+            revert Presale_MerkleNotApproved();
+        }
+
+        if (msg.value != pricePerToken * quantity) {
+            revert Purchase_WrongPrice(pricePerToken * quantity);
+        }
 
         presaleMintsByAddress[_msgSender()] += quantity;
-        require(presaleMintsByAddress[_msgSender()] <= maxQuantity, TOO_MANY);
+        if (presaleMintsByAddress[_msgSender()] > maxQuantity) {
+            revert Presale_TooManyForAddress();
+        }
 
         _mintNFTs(_msgSender(), quantity);
         uint256 firstMintedTokenId = _lastMintedTokenId() - quantity;
 
-        emit IZoraDrop.Sale({
+        emit IERC721Drop.Sale({
             to: _msgSender(),
             quantity: quantity,
             pricePerToken: pricePerToken,
@@ -467,7 +453,6 @@ contract ERC721Drop is
      ***     ADMIN MINTING FUNCTIONS        ***
      ***                                    ***
      *** ---------------------------------- ***
-     ***
      ***/
 
     /// @notice Mint admin
@@ -533,19 +518,24 @@ contract ERC721Drop is
         uint64 presaleEnd,
         bytes32 presaleMerkleRoot
     ) external onlyAdmin {
-        SalesConfiguration memory newConfig = SalesConfiguration({
-            publicSaleStart: publicSaleStart,
-            publicSaleEnd: publicSaleEnd,
-            presaleStart: presaleStart,
-            presaleEnd: presaleEnd,
-            publicSalePrice: publicSalePrice,
-            maxSalePurchasePerAddress: maxSalePurchasePerAddress,
-            presaleMerkleRoot: presaleMerkleRoot
-        });
+        // SalesConfiguration storage newConfig = SalesConfiguration({
+        //     publicSaleStart: publicSaleStart,
+        //     publicSaleEnd: publicSaleEnd,
+        //     presaleStart: presaleStart,
+        //     presaleEnd: presaleEnd,
+        //     publicSalePrice: publicSalePrice,
+        //     maxSalePurchasePerAddress: maxSalePurchasePerAddress,
+        //     presaleMerkleRoot: presaleMerkleRoot
+        // });
+        salesConfig.publicSalePrice = publicSalePrice;
+        salesConfig.maxSalePurchasePerAddress = maxSalePurchasePerAddress;
+        salesConfig.publicSaleStart = publicSaleStart;
+        salesConfig.publicSaleEnd = publicSaleEnd;
+        salesConfig.presaleStart = presaleStart;
+        salesConfig.presaleEnd = presaleEnd;
+        salesConfig.presaleMerkleRoot = presaleMerkleRoot;
 
-        emit SalesConfigChanged(_msgSender(), newConfig);
-
-        salesConfig = newConfig;
+        emit SalesConfigChanged(_msgSender());
     }
 
     /// @notice Set a different funds recipient
@@ -554,45 +544,50 @@ contract ERC721Drop is
         external
         onlyRoleOrAdmin(SALES_MANAGER_ROLE)
     {
-        require(newRecipientAddress != address(0x0), "Cannot set to 0x0");
-
+        // TODO(iain): funds recipient cannot be 0?
         config.fundsRecipient = newRecipientAddress;
         emit FundsRecipientChanged(newRecipientAddress, _msgSender());
-    }
-
-    /// @notice Disables on-chain royalties (allows a user to turn off royalties if needed)
-    /// @param disableRoyalties setting to disable royalties: true and royalties will be turned off, false enabled, default false.
-    function setDisableRoyalties(bool disableRoyalties)
-        external
-        onlyRoleOrAdmin(SALES_MANAGER_ROLE)
-    {
-        config.disableRoyalties = disableRoyalties;
     }
 
     /// @notice This withdraws ETH from the contract to the contract owner.
     function withdraw() external nonReentrant {
         address sender = _msgSender();
 
+        // Get fee amount
         uint256 funds = address(this).balance;
         (address payable feeRecipient, uint256 zoraFee) = zoraFeeForAmount(
             funds
         );
 
-        require(
-            hasRole(DEFAULT_ADMIN_ROLE, sender) ||
-                hasRole(SALES_MANAGER_ROLE, sender) ||
-                sender == feeRecipient ||
-                sender == config.fundsRecipient,
-            "Does not have proper role to withdraw"
-        );
+        if (
+            !hasRole(DEFAULT_ADMIN_ROLE, sender) &&
+            !hasRole(SALES_MANAGER_ROLE, sender) &&
+            sender != feeRecipient &&
+            sender != config.fundsRecipient
+        ) {
+            revert Access_WithdrawNotAllowed();
+        }
 
-        // No need for gas limit to trusted address.
+        // Payout ZORA fee
         if (zoraFee > 0) {
-            feeRecipient.sendValue(zoraFee);
+            (bool successFee, ) = feeRecipient.call{
+                value: zoraFee,
+                gas: FUNDS_SEND_GAS_LIMIT
+            }("");
+            if (!successFee) {
+                revert Withdraw_FundsSendFailure();
+            }
             funds -= zoraFee;
         }
-        // No need for gas limit to trusted address.
-        config.fundsRecipient.sendValue(funds);
+
+        // Payout recipient
+        (bool successFunds, ) = config.fundsRecipient.call{
+            value: funds,
+            gas: FUNDS_SEND_GAS_LIMIT
+        }("");
+        if (!successFunds) {
+            revert Withdraw_FundsSendFailure();
+        }
     }
 
     /// @notice Admin function to finalize and open edition sale
@@ -600,7 +595,9 @@ contract ERC721Drop is
         external
         onlyRoleOrAdmin(SALES_MANAGER_ROLE)
     {
-        require(config.editionSize == type(uint64).max, "Not open edition");
+        if (config.editionSize != type(uint64).max) {
+            revert Admin_UnableToFinalizeNotOpenEdition();
+        }
 
         config.editionSize = uint64(_totalMinted());
         emit OpenMintFinalized(_msgSender(), config.editionSize);
@@ -612,7 +609,6 @@ contract ERC721Drop is
      ***      GENERAL GETTER FUNCTIONS      ***
      ***                                    ***
      *** ---------------------------------- ***
-     ***
      ***/
 
     /// @notice Simple override for owner interface.
@@ -620,7 +616,7 @@ contract ERC721Drop is
     function owner()
         public
         view
-        override(OwnableSkeleton, IZoraDrop)
+        override(OwnableSkeleton, IERC721Drop)
         returns (address)
     {
         return super.owner();
@@ -646,6 +642,10 @@ contract ERC721Drop is
         override
         returns (string memory)
     {
+        if (!_exists(tokenId)) {
+            revert IERC721AUpgradeable.URIQueryForNonexistentToken();
+        }
+
         return config.metadataRenderer.tokenURI(tokenId);
     }
 
@@ -665,6 +665,6 @@ contract ERC721Drop is
             super.supportsInterface(interfaceId) ||
             type(IOwnable).interfaceId == interfaceId ||
             type(IERC2981Upgradeable).interfaceId == interfaceId ||
-            type(IZoraDrop).interfaceId == interfaceId;
+            type(IERC721Drop).interfaceId == interfaceId;
     }
 }

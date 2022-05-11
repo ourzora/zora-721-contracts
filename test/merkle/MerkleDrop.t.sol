@@ -3,11 +3,12 @@ pragma solidity 0.8.10;
 
 import {Vm} from "forge-std/Vm.sol";
 import {DSTest} from "ds-test/test.sol";
-
+import {IERC721Drop} from "../../src/interfaces/IERC721Drop.sol";
 import {ERC721Drop} from "../../src/ERC721Drop.sol";
 import {ZoraFeeManager} from "../../src/ZoraFeeManager.sol";
 import {DummyMetadataRenderer} from "../utils/DummyMetadataRenderer.sol";
-import {FactoryUpgradeGate} from "../../src/interfaces/FactoryUpgradeGate.sol";
+import {FactoryUpgradeGate} from "../../src/FactoryUpgradeGate.sol";
+import {ERC721DropProxy} from "../../src/ERC721DropProxy.sol";
 
 import {MerkleData} from "./MerkleData.sol";
 
@@ -32,6 +33,15 @@ contract ZoraNFTBaseTest is DSTest {
             _fundsRecipient: payable(DEFAULT_FUNDS_RECIPIENT_ADDRESS),
             _editionSize: 10,
             _royaltyBPS: 800,
+            _salesConfig: IERC721Drop.SalesConfiguration({
+                publicSaleStart: 0,
+                publicSaleEnd: 0,
+                presaleStart: 0,
+                presaleEnd: 0,
+                publicSalePrice: 0,
+                maxSalePurchasePerAddress: 0,
+                presaleMerkleRoot: bytes32(0)
+            }),
             _metadataRenderer: dummyRenderer,
             _metadataRendererInit: ""
         });
@@ -43,11 +53,16 @@ contract ZoraNFTBaseTest is DSTest {
         vm.prank(DEFAULT_ZORA_DAO_ADDRESS);
         feeManager = new ZoraFeeManager(250, DEFAULT_ZORA_DAO_ADDRESS);
         vm.prank(DEFAULT_ZORA_DAO_ADDRESS);
-        zoraNFTBase = new ERC721Drop(
-            feeManager,
-            address(1234),
-            FactoryUpgradeGate(address(0x0))
+
+        address impl = address(
+            new ERC721Drop(
+                feeManager,
+                address(1234),
+                FactoryUpgradeGate(address(0))
+            )
         );
+        address newDrop = address(new ERC721DropProxy(impl, ""));
+        zoraNFTBase = ERC721Drop(newDrop);
         merkleData = new MerkleData();
     }
 
@@ -126,7 +141,7 @@ contract ZoraNFTBaseTest is DSTest {
         vm.deal(address(item.user), 1 ether);
         vm.startPrank(address(item.user));
 
-        vm.expectRevert("Too many");
+        vm.expectRevert(IERC721Drop.Presale_TooManyForAddress.selector);
         zoraNFTBase.purchasePresale{value: item.mintPrice * 3}(
             3,
             item.maxMint,
@@ -152,7 +167,7 @@ contract ZoraNFTBaseTest is DSTest {
             "owner is wrong for new minted token"
         );
 
-        vm.expectRevert("Too many");
+        vm.expectRevert(IERC721Drop.Presale_TooManyForAddress.selector);
         zoraNFTBase.purchasePresale{value: item.mintPrice * 1}(
             1,
             item.maxMint,
@@ -165,7 +180,7 @@ contract ZoraNFTBaseTest is DSTest {
             zoraNFTBase.ownerOf(3) == address(item.user),
             "owner is wrong for new minted token"
         );
-        vm.expectRevert("Too many");
+        vm.expectRevert(IERC721Drop.Purchase_TooManyForAddress.selector);
         zoraNFTBase.purchase{value: 0.1 ether}(1);
         vm.stopPrank();
     }
@@ -179,7 +194,16 @@ contract ZoraNFTBaseTest is DSTest {
             _editionSize: 0,
             _royaltyBPS: 800,
             _metadataRenderer: dummyRenderer,
-            _metadataRendererInit: ""
+            _metadataRendererInit: "",
+            _salesConfig: IERC721Drop.SalesConfiguration({
+                publicSaleStart: 0,
+                publicSaleEnd: 0,
+                presaleStart: 0,
+                presaleEnd: 0,
+                publicSalePrice: 0,
+                maxSalePurchasePerAddress: 0,
+                presaleMerkleRoot: bytes32(0)
+            })
         });
 
         vm.startPrank(DEFAULT_OWNER_ADDRESS);
@@ -200,7 +224,7 @@ contract ZoraNFTBaseTest is DSTest {
         vm.deal(address(item.user), 1 ether);
         vm.startPrank(address(item.user));
 
-        vm.expectRevert("Sold out");
+        vm.expectRevert(IERC721Drop.Mint_SoldOut.selector);
         zoraNFTBase.purchasePresale{value: item.mintPrice}(
             1,
             item.maxMint,
@@ -232,7 +256,7 @@ contract ZoraNFTBaseTest is DSTest {
         MerkleData.MerkleEntry memory item = merkleData
             .getTestSetByName("test-3-addresses")
             .entries[0];
-        vm.expectRevert("Presale inactive");
+        vm.expectRevert(IERC721Drop.Presale_Inactive.selector);
         zoraNFTBase.purchasePresale{value: item.mintPrice}(
             1,
             item.maxMint,

@@ -102,13 +102,13 @@ interface IERC721Drop {
     /// @notice Return value for sales details to use with front-ends
     struct SaleDetails {
         // Synthesized status variables for sale and presale
-        bool presaleActive;
         bool publicSaleActive;
+        bool presaleActive;
+        // Price for public sale
+        uint256 publicSalePrice;
         // Timed sale actions for public sale
         uint64 publicSaleStart;
         uint64 publicSaleEnd;
-        // Price for public sale
-        uint256 publicSalePrice;
         // Timed sale actions for presale
         uint64 presaleStart;
         uint64 presaleEnd;

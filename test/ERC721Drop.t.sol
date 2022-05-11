@@ -44,7 +44,16 @@ contract ERC721DropTest is DSTest {
             _editionSize: editionSize,
             _royaltyBPS: 800,
             _metadataRenderer: dummyRenderer,
-            _metadataRendererInit: ""
+            _metadataRendererInit: "",
+            _salesConfig: IERC721Drop.SalesConfiguration({
+                publicSaleStart: 0,
+                publicSaleEnd: 0,
+                presaleStart: 0,
+                presaleEnd: 0,
+                publicSalePrice: 0,
+                maxSalePurchasePerAddress: 0,
+                presaleMerkleRoot: bytes32(0)
+            })
         });
 
         _;
@@ -100,7 +109,16 @@ contract ERC721DropTest is DSTest {
             _editionSize: 10,
             _royaltyBPS: 800,
             _metadataRenderer: dummyRenderer,
-            _metadataRendererInit: ""
+            _metadataRendererInit: "",
+            _salesConfig: IERC721Drop.SalesConfiguration({
+                publicSaleStart: 0,
+                publicSaleEnd: 0,
+                presaleStart: 0,
+                presaleEnd: 0,
+                publicSalePrice: 0,
+                maxSalePurchasePerAddress: 0,
+                presaleMerkleRoot: bytes32(0) 
+            })
         });
     }
 

@@ -56,7 +56,7 @@ contract ERC721Drop is
     uint256 internal constant MAX_MINT_BATCH_SIZE = 8;
 
     /// @dev Gas limit to send funds
-    uint256 internal constant FUNDS_SEND_GAS_LIMIT = 200_000;
+    uint256 internal constant FUNDS_SEND_GAS_LIMIT = 210_000;
 
     /// @notice Error string constants
     string internal constant SOLD_OUT = "Sold out";
@@ -79,8 +79,7 @@ contract ERC721Drop is
     uint16 constant MAX_ROYALTY_BPS = 50_00;
 
     event SalesConfigChanged(
-        address indexed changedBy,
-        SalesConfiguration salesConfig
+        address indexed changedBy
     );
 
     event FundsRecipientChanged(
@@ -162,6 +161,7 @@ contract ERC721Drop is
     }
 
     /// @notice Global constructor – these variables will not change with further proxy deploys
+    /// @dev Marked as an initializer to prevent storage being used of base implementation. Can only be init'd by a proxy.
     /// @param _zoraFeeManager Zora Fee Manager
     /// @param _zoraERC721TransferHelper Transfer helper
     constructor(
@@ -174,13 +174,16 @@ contract ERC721Drop is
         factoryUpgradeGate = _factoryUpgradeGate;
     }
 
-    ///  @dev Create a new drop
+    ///  @dev Create a new drop contract
     ///  @param _contractName Contract name
     ///  @param _contractSymbol Contract symbol
     ///  @param _initialOwner User that owns and can mint the edition, gets royalty and sales payouts and can update the base url if needed.
     ///  @param _fundsRecipient Wallet/user that receives funds from sale
     ///  @param _editionSize Number of editions that can be minted in total. If 0, unlimited editions can be minted.
     ///  @param _royaltyBPS BPS of the royalty set on the contract. Can be 0 for no royalty.
+    ///  @param _salesConfig New sales config to set upon init
+    ///  @param _metadataRenderer Renderer contract to use
+    ///  @param _metadataRendererInit Renderer data initial contract
     function initialize(
         string memory _contractName,
         string memory _contractSymbol,
@@ -188,6 +191,7 @@ contract ERC721Drop is
         address payable _fundsRecipient,
         uint64 _editionSize,
         uint16 _royaltyBPS,
+        SalesConfiguration memory _salesConfig,
         IMetadataRenderer _metadataRenderer,
         bytes memory _metadataRendererInit
     ) public initializer {
@@ -205,13 +209,9 @@ contract ERC721Drop is
         if (config.royaltyBPS > MAX_ROYALTY_BPS) {
             revert Setup_RoyaltyPercentageTooHigh(MAX_ROYALTY_BPS);
         }
-        
-        // TODO(iain):
-        // if (_defaultSalesPrice > 0) {
-        //     salesConfig.publicSalePrice = _defaultSalesPrice;
-        //     salesConfig.publicSaleEnd = type(uint64).max;
-        //     salesConfig.maxSalePurchasePerAddress = 10;
-        // }
+
+        // Update salesConfig
+        salesConfig = _salesConfig;
 
         // Setup config variables
         config.editionSize = _editionSize;
@@ -276,12 +276,12 @@ contract ERC721Drop is
             IERC721Drop.SaleDetails({
                 publicSaleActive: _publicSaleActive(),
                 presaleActive: _presaleActive(),
-                presaleStart: salesConfig.presaleStart,
-                presaleEnd: salesConfig.presaleEnd,
+                publicSalePrice: salesConfig.publicSalePrice,
                 publicSaleStart: salesConfig.publicSaleStart,
                 publicSaleEnd: salesConfig.publicSaleEnd,
+                presaleStart: salesConfig.presaleStart,
+                presaleEnd: salesConfig.presaleEnd,
                 presaleMerkleRoot: salesConfig.presaleMerkleRoot,
-                publicSalePrice: salesConfig.publicSalePrice,
                 totalMinted: _totalMinted(),
                 maxSupply: config.editionSize,
                 maxSalePurchasePerAddress: salesConfig.maxSalePurchasePerAddress
@@ -518,19 +518,24 @@ contract ERC721Drop is
         uint64 presaleEnd,
         bytes32 presaleMerkleRoot
     ) external onlyAdmin {
-        SalesConfiguration memory newConfig = SalesConfiguration({
-            publicSaleStart: publicSaleStart,
-            publicSaleEnd: publicSaleEnd,
-            presaleStart: presaleStart,
-            presaleEnd: presaleEnd,
-            publicSalePrice: publicSalePrice,
-            maxSalePurchasePerAddress: maxSalePurchasePerAddress,
-            presaleMerkleRoot: presaleMerkleRoot
-        });
+        // SalesConfiguration storage newConfig = SalesConfiguration({
+        //     publicSaleStart: publicSaleStart,
+        //     publicSaleEnd: publicSaleEnd,
+        //     presaleStart: presaleStart,
+        //     presaleEnd: presaleEnd,
+        //     publicSalePrice: publicSalePrice,
+        //     maxSalePurchasePerAddress: maxSalePurchasePerAddress,
+        //     presaleMerkleRoot: presaleMerkleRoot
+        // });
+        salesConfig.publicSalePrice = publicSalePrice;
+        salesConfig.maxSalePurchasePerAddress = maxSalePurchasePerAddress;
+        salesConfig.publicSaleStart = publicSaleStart;
+        salesConfig.publicSaleEnd = publicSaleEnd;
+        salesConfig.presaleStart = presaleStart;
+        salesConfig.presaleEnd = presaleEnd;
+        salesConfig.presaleMerkleRoot = presaleMerkleRoot;
 
-        emit SalesConfigChanged(_msgSender(), newConfig);
-
-        salesConfig = newConfig;
+        emit SalesConfigChanged(_msgSender());
     }
 
     /// @notice Set a different funds recipient

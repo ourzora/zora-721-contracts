@@ -8,12 +8,14 @@ import {SharedNFTLogic} from "../utils/SharedNFTLogic.sol";
 
 /// @notice EditionMetadataRenderer for editions support
 contract EditionMetadataRenderer is IMetadataRenderer {
+    /// @notice Storage for token edition information
     struct TokenEditionInfo {
         string description;
         string imageURI;
         string animationURI;
     }
 
+    /// @notice Event for updated Media URIs
     event MediaURIsUpdated(
         address indexed target,
         address sender,
@@ -21,6 +23,7 @@ contract EditionMetadataRenderer is IMetadataRenderer {
         string animationURI
     );
 
+    /// @notice Event for a new edition initialized
     event EditionInitialized(
         address indexed target,
         string description,
@@ -28,8 +31,11 @@ contract EditionMetadataRenderer is IMetadataRenderer {
         string animationURI
     );
 
+    /// @notice Token information mapping storage
     mapping(address => TokenEditionInfo) public tokenInfos;
 
+    /// @notice Modifier to require the sender to be an admin
+    /// @param target address that the user wants to modify
     modifier requireSenderAdmin(address target) {
         require(
             target == msg.sender || IERC721Drop(target).isAdmin(msg.sender),
@@ -39,12 +45,19 @@ contract EditionMetadataRenderer is IMetadataRenderer {
         _;
     }
 
+    /// @notice Reference to Shared NFT logic library
     SharedNFTLogic private immutable sharedNFTLogic;
 
+    /// @notice Constructor for library
+    /// @param _sharedNFTLogic reference to shared NFT logic library
     constructor(SharedNFTLogic _sharedNFTLogic) {
         sharedNFTLogic = _sharedNFTLogic;
     }
 
+    /// @notice Update media URIs
+    /// @param target target for contract to update metadata for
+    /// @param imageURI new image uri address
+    /// @param animationURI new animation uri address
     function updateMediaURIs(
         address target,
         string memory imageURI,
@@ -60,6 +73,8 @@ contract EditionMetadataRenderer is IMetadataRenderer {
         });
     }
 
+    /// @notice Default initializer for edition data from a specific contract
+    /// @param data data to init with
     function initializeWithData(bytes memory data) external {
         // data format: description, imageURI, animationURI
         (
@@ -81,6 +96,8 @@ contract EditionMetadataRenderer is IMetadataRenderer {
         });
     }
 
+    /// @notice Contract URI information getter
+    /// @return contract uri (if set) 
     function contractURI() external view override returns (string memory) {
         address target = msg.sender;
         bytes memory imageSpace = bytes("");
@@ -105,6 +122,9 @@ contract EditionMetadataRenderer is IMetadataRenderer {
             );
     }
 
+    /// @notice Token URI information getter
+    /// @param tokenId to get uri for
+    /// @return contract uri (if set) 
     function tokenURI(uint256 tokenId)
         external
         view

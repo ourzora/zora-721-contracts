@@ -57,13 +57,6 @@ contract ZoraNFTCreatorV1 is
         dropMetadataRenderer = _dropMetadataRenderer;
     }
 
-    /// @notice Call to validate upgrade for child drop contract.
-    /// @dev Can be upgraded to include a static list of allowable upgrades for child media contracts.
-    /// @param newImplementation proposed new implementation address
-    function isValidUpgrade(address newImplementation) external returns (bool) {
-        return false;
-    }
-
     /// @dev Initializes the proxy contract
     function initialize() external initializer {
         __Ownable_init();

@@ -7,6 +7,8 @@ import {IERC721Drop} from "../interfaces/IERC721Drop.sol";
 
 /// @notice Drops metadata system
 contract DropMetadataRenderer is IMetadataRenderer {
+
+    /// Event to mark updated metadata information
     event MetadataUpdated(
         address indexed target,
         string metadataBase,
@@ -14,8 +16,11 @@ contract DropMetadataRenderer is IMetadataRenderer {
         string contractURI,
         uint256 freezeAt
     );
+
+    /// @notice Hash to mark updated provenance hash
     event ProvenanceHashUpdated(address indexed target, bytes32 provenanceHash);
 
+    /// @notice Struct to store metadata info and update data
     struct MetadataURIInfo {
         string base;
         string extension;
@@ -23,6 +28,8 @@ contract DropMetadataRenderer is IMetadataRenderer {
         uint256 freezeAt;
     }
 
+    /// @notice Modifier to require the sender to be an admin
+    /// @param target address that the user wants to modify
     modifier requireSenderAdmin(address target) {
         require(
             target == msg.sender || IERC721Drop(target).isAdmin(msg.sender),
@@ -32,9 +39,14 @@ contract DropMetadataRenderer is IMetadataRenderer {
         _;
     }
 
+    /// @notice NFT metadata by contract
     mapping(address => MetadataURIInfo) public metadataBaseByContract;
+
+    /// @notice Optional provenance hashes for NFT metadata by contract
     mapping(address => bytes32) public provenanceHashes;
 
+    /// @notice Standard init for drop metadata from root drop contract
+    /// @param data passed in for initialization
     function initializeWithData(bytes memory data) external {
         // data format: string baseURI, string newContractURI
         (string memory initialBaseURI, string memory initialContractURI) = abi
@@ -48,7 +60,9 @@ contract DropMetadataRenderer is IMetadataRenderer {
         );
     }
 
-    /// @notice Update the 
+    /// @notice Update the provenance hash (optional) for a given nft
+    /// @param target target address to update
+    /// @param provenanceHash provenance hash to set
     function updateProvenanceHash(address target, bytes32 provenanceHash)
         external
         requireSenderAdmin(target)

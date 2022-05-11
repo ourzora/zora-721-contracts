@@ -78,9 +78,7 @@ contract ERC721Drop is
     /// @notice Max royalty BPS
     uint16 constant MAX_ROYALTY_BPS = 50_00;
 
-    event SalesConfigChanged(
-        address indexed changedBy
-    );
+    event SalesConfigChanged(address indexed changedBy);
 
     event FundsRecipientChanged(
         address indexed newAddress,

@@ -1,0 +1,91 @@
+{
+  "feeManager": {
+    "deployed": {
+      "deploy": {
+        "deployedTo": "0x8be95ebf74e399832373d43af52d98ab45f95426",
+        "deployer": "0x11142396bf5331381c8dd02669f1ed4a0be70d8d",
+        "transactionHash": "0xe6c1d434c4f7559aed272d5ce2cf8bf84245e37f20148eb178355aebea52ff0a"
+      },
+      "contractName": "ZoraFeeManager",
+      "contractPath": "src/ZoraFeeManager.sol",
+      "args": [
+        "5000",
+        "0xd1d1D4e36117aB794ec5d4c78cBD3a8904E691D0"
+      ]
+    },
+    "verify": {
+      "verify": "Submitted contract for verification:\n    Response: `OK`\n    GUID: `p3zxaiwvvcnhqyytczewzdcmhapgy3yhv9pphypakkh9cycw81`\n    url: https://etherscan.io/address/0x8be95ebf74e399832373d43af52d98ab45f95426#code\n",
+      "contractName": "ZoraFeeManager",
+      "contractPath": "src/ZoraFeeManager.sol"
+    }
+  },
+  "dropContract": {
+    "deployed": {
+      "deploy": {
+        "deployedTo": "0x0bebca5e4a4a12e8e1068176252ea29b1f42a3c1",
+        "deployer": "0x11142396bf5331381c8dd02669f1ed4a0be70d8d",
+        "transactionHash": "0xc3a2814468290bb6fbf031f9b64427d79f27ab850be3046d703cf2831ae1fbc7"
+      },
+      "contractName": "ERC721Drop",
+      "contractPath": "src/ERC721Drop.sol",
+      "args": [
+        "0x8be95ebf74e399832373d43af52d98ab45f95426",
+        "0x909e9efE4D87d1a6018C2065aE642b6D0447bc91",
+        "0xd3ef85b707db8132c20249272dec7e35d50a73a3"
+      ]
+    },
+    "verify": {
+      "verify": "Submitted contract for verification:\n    Response: `OK`\n    GUID: `4hrq58riuky3zfez3yqcriagvidp9jtiffk1stkzndzh9krjbt`\n    url: https://etherscan.io/address/0x0bebca5e4a4a12e8e1068176252ea29b1f42a3c1#code\n",
+      "contractName": "ERC721Drop",
+      "contractPath": "src/ERC721Drop.sol"
+    }
+  },
+  "dropMetadataContract": {
+    "deployed": {
+      "deploy": {
+        "deployedTo": "0xe34f57e344cbbdf66d0a35135d34f3a9d6c19254",
+        "deployer": "0x11142396bf5331381c8dd02669f1ed4a0be70d8d",
+        "transactionHash": "0xf06511e18a5dc7b8e477658f3fa2e568e843839585a7fe43acbbd453dc05234a"
+      },
+      "contractName": "DropMetadataRenderer",
+      "contractPath": "src/metadata/DropMetadataRenderer.sol"
+    },
+    "verify": {
+      "verify": "Submitted contract for verification:\n    Response: `OK`\n    GUID: `xagqsjtbqevky5b2xdq3qntxfz3jukibcabu3g1t4jinkgqwba`\n    url: https://etherscan.io/address/0xe34f57e344cbbdf66d0a35135d34f3a9d6c19254#code\n",
+      "contractName": "DropMetadataRenderer",
+      "contractPath": "src/metadata/DropMetadataRenderer.sol"
+    }
+  },
+  "editionsMetadataContract": {
+    "deployed": {
+      "deploy": {
+        "deployedTo": "0x72317cd2d60eaa108c948ba3d4cbce0235de17a4",
+        "deployer": "0x11142396bf5331381c8dd02669f1ed4a0be70d8d",
+        "transactionHash": "0xa96f3134bb2627be32ec4c115ac17807a3761f2165c02556b97a75166f9abf9a"
+      },
+      "contractName": "EditionMetadataRenderer",
+      "contractPath": "src/metadata/EditionMetadataRenderer.sol",
+      "args": [
+        "0xfca1fbf82a3a230f23780e98fd9bec3dbd0a9e9b"
+      ]
+    },
+    "verify": {
+      "verify": "Submitted contract for verification:\n    Response: `OK`\n    GUID: `6udeyahjatgag5xkyxuhyfcwyg4eba968keexxc2cjg8butdhb`\n    url: https://etherscan.io/address/0x72317cd2d60eaa108c948ba3d4cbce0235de17a4#code\n",
+      "contractName": "EditionMetadataRenderer",
+      "contractPath": "src/metadata/EditionMetadataRenderer.sol"
+    }
+  },
+  "creatorProxy": {
+    "deploy": {
+      "deployedTo": "0xf74b146ce44cc162b601dec3be331784db111dc1",
+      "deployer": "0x11142396bf5331381c8dd02669f1ed4a0be70d8d",
+      "transactionHash": "0x80490063512b735217d23c72ab85036b758c96d14a0d1c535d2cd26deaa25369"
+    },
+    "contractName": "ZoraNFTCreatorProxy",
+    "contractPath": "src/ZoraNFTCreatorProxy.sol",
+    "args": [
+      "0x824671a34ff9264c4571a011cb9cb56e1c63f419",
+      "\"\""
+    ]
+  }
+}

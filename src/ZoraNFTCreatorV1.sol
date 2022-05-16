@@ -93,7 +93,7 @@ contract ZoraNFTCreatorV1 is
             implementation, ""
         );
 
-        address newDropAddress = address(newDrop);
+        address payable newDropAddress = payable(address(newDrop));
 
         ERC721Drop(newDropAddress).initialize(
             name,

@@ -29,6 +29,7 @@ import {IERC721Drop} from "./interfaces/IERC721Drop.sol";
 import {IOwnable} from "./interfaces/IOwnable.sol";
 
 import {OwnableSkeleton} from "./utils/OwnableSkeleton.sol";
+import {FundsReceiver} from "./utils/FundsReceiver.sol";
 import {Version} from "./utils/Version.sol";
 import {FactoryUpgradeGate} from "./FactoryUpgradeGate.sol";
 import {ERC721DropStorageV1} from "./storage/ERC721DropStorageV1.sol";
@@ -49,6 +50,7 @@ contract ERC721Drop is
     AccessControlUpgradeable,
     IERC721Drop,
     OwnableSkeleton,
+    FundsReceiver,
     Version(6),
     ERC721DropStorageV1
 {
@@ -57,10 +59,6 @@ contract ERC721Drop is
 
     /// @dev Gas limit to send funds
     uint256 internal constant FUNDS_SEND_GAS_LIMIT = 210_000;
-
-    /// @notice Error string constants
-    string internal constant SOLD_OUT = "Sold out";
-    string internal constant TOO_MANY = "Too many";
 
     /// @notice Access control roles
     bytes32 public immutable MINTER_ROLE = keccak256("MINTER");

@@ -3,7 +3,7 @@
   "version": "1.0.3",
   "description": "NFT Contracts",
   "author": "ZORA",
-  "license": "GPL-3.0",
+  "license": "MIT",
   "private": false,
   "type": "module",
   "files": [

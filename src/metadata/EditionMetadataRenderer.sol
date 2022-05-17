@@ -31,6 +31,13 @@ contract EditionMetadataRenderer is IMetadataRenderer {
         string animationURI
     );
 
+    /// @notice Description updated for this
+    event DescriptionUpdated(
+        address indexed target,
+        address sender,
+        string newDescription
+    );
+
     /// @notice Token information mapping storage
     mapping(address => TokenEditionInfo) public tokenInfos;
 
@@ -73,6 +80,22 @@ contract EditionMetadataRenderer is IMetadataRenderer {
         });
     }
 
+    /// @notice Admin function to update description
+    /// @param target target description
+    /// @param newDescription new description
+    function updateDescription(address target, string memory newDescription)
+        external
+        requireSenderAdmin(target)
+    {
+        tokenInfos[target].description = newDescription;
+
+        emit DescriptionUpdated({
+            target: target,
+            sender: msg.sender,
+            newDescription: newDescription
+        });
+    }
+
     /// @notice Default initializer for edition data from a specific contract
     /// @param data data to init with
     function initializeWithData(bytes memory data) external {
@@ -97,7 +120,7 @@ contract EditionMetadataRenderer is IMetadataRenderer {
     }
 
     /// @notice Contract URI information getter
-    /// @return contract uri (if set) 
+    /// @return contract uri (if set)
     function contractURI() external view override returns (string memory) {
         address target = msg.sender;
         bytes memory imageSpace = bytes("");
@@ -124,7 +147,7 @@ contract EditionMetadataRenderer is IMetadataRenderer {
 
     /// @notice Token URI information getter
     /// @param tokenId to get uri for
-    /// @return contract uri (if set) 
+    /// @return contract uri (if set)
     function tokenURI(uint256 tokenId)
         external
         view

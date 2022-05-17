@@ -3,6 +3,7 @@ pragma solidity 0.8.10;
 
 import {EditionMetadataRenderer} from "../../src/metadata/EditionMetadataRenderer.sol";
 import {SharedNFTLogic} from "../../src/utils/SharedNFTLogic.sol";
+import {DropMockBase} from "./DropMockBase.sol";
 import {DSTest} from "ds-test/test.sol";
 import {Vm} from "forge-std/Vm.sol";
 
@@ -31,6 +32,38 @@ contract EditionMetadataRendererTest is DSTest {
         assertEq(imageURI, "https://example.com/image.png");
     }
 
+    function test_UpdateDescriptionAllowed() public {
+        vm.startPrank(address(0x123));
+        bytes memory data = abi.encode(
+            "Description for metadata",
+            "https://example.com/image.png",
+            "https://example.com/animation.mp4"
+        );
+        editionRenderer.initializeWithData(data);
+
+        editionRenderer.updateDescription(address(0x123), "new description");
+
+        (string memory updatedDescription, , ) = editionRenderer.tokenInfos(
+            address(0x123)
+        );
+        assertEq(updatedDescription, "new description");
+    }
+
+    function test_UpdateDescriptionNotAllowed() public {
+        DropMockBase base = new DropMockBase();
+        vm.startPrank(address(base));
+        bytes memory data = abi.encode(
+            "Description for metadata",
+            "https://example.com/image.png",
+            "https://example.com/animation.mp4"
+        );
+        editionRenderer.initializeWithData(data);
+        vm.stopPrank();
+
+        vm.expectRevert("Only admin");
+        editionRenderer.updateDescription(address(base), "new description");
+    }
+
     function test_AllowMetadataURIUpdates() public {
         vm.startPrank(address(0x123));
         bytes memory data = abi.encode(
@@ -54,5 +87,25 @@ contract EditionMetadataRendererTest is DSTest {
         assertEq(description, "Description for metadata");
         assertEq(animationURI, "https://example.com/animation.mp4");
         assertEq(imageURI, "https://example.com/image.png");
+    }
+
+    function test_MetadatURIUpdateNotAllowed() public {
+        DropMockBase base = new DropMockBase();
+        vm.startPrank(address(base));
+        bytes memory data = abi.encode(
+            "Description for metadata",
+            "https://example.com/image.png",
+            "https://example.com/animation.mp4"
+        );
+        editionRenderer.initializeWithData(data);
+        vm.stopPrank();
+
+        vm.prank(address(0x144));
+        vm.expectRevert("Only admin");
+        editionRenderer.updateMediaURIs(
+            address(base),
+            "https://example.com/image.png",
+            "https://example.com/animation.mp4"
+        );
     }
 }

@@ -49,7 +49,7 @@ contract ERC721Drop is
     AccessControlUpgradeable,
     IERC721Drop,
     OwnableSkeleton,
-    Version(6),
+    Version(7),
     ERC721DropStorageV1
 {
     /// @dev This is the max mint batch size for the optimized ERC721A mint contract

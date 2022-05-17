@@ -5,9 +5,10 @@ import {IMetadataRenderer} from "../interfaces/IMetadataRenderer.sol";
 import {IERC721Drop} from "../interfaces/IERC721Drop.sol";
 import {IERC721MetadataUpgradeable} from "@openzeppelin/contracts-upgradeable/interfaces/IERC721MetadataUpgradeable.sol";
 import {SharedNFTLogic} from "../utils/SharedNFTLogic.sol";
+import {MetadataRenderAdminCheck} from "./MetadataRenderAdminCheck.sol";
 
 /// @notice EditionMetadataRenderer for editions support
-contract EditionMetadataRenderer is IMetadataRenderer {
+contract EditionMetadataRenderer is IMetadataRenderer, MetadataRenderAdminCheck {
     /// @notice Storage for token edition information
     struct TokenEditionInfo {
         string description;
@@ -40,17 +41,6 @@ contract EditionMetadataRenderer is IMetadataRenderer {
 
     /// @notice Token information mapping storage
     mapping(address => TokenEditionInfo) public tokenInfos;
-
-    /// @notice Modifier to require the sender to be an admin
-    /// @param target address that the user wants to modify
-    modifier requireSenderAdmin(address target) {
-        require(
-            target == msg.sender || IERC721Drop(target).isAdmin(msg.sender),
-            "Only admin"
-        );
-
-        _;
-    }
 
     /// @notice Reference to Shared NFT logic library
     SharedNFTLogic private immutable sharedNFTLogic;

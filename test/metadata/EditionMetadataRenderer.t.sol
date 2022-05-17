@@ -2,6 +2,7 @@
 pragma solidity 0.8.10;
 
 import {EditionMetadataRenderer} from "../../src/metadata/EditionMetadataRenderer.sol";
+import {MetadataRenderAdminCheck} from "../../src/metadata/MetadataRenderAdminCheck.sol";
 import {SharedNFTLogic} from "../../src/utils/SharedNFTLogic.sol";
 import {DropMockBase} from "./DropMockBase.sol";
 import {DSTest} from "ds-test/test.sol";
@@ -60,7 +61,7 @@ contract EditionMetadataRendererTest is DSTest {
         editionRenderer.initializeWithData(data);
         vm.stopPrank();
 
-        vm.expectRevert("Only admin");
+        vm.expectRevert(MetadataRenderAdminCheck.Access_OnlyAdmin.selector);
         editionRenderer.updateDescription(address(base), "new description");
     }
 
@@ -101,7 +102,7 @@ contract EditionMetadataRendererTest is DSTest {
         vm.stopPrank();
 
         vm.prank(address(0x144));
-        vm.expectRevert("Only admin");
+        vm.expectRevert(MetadataRenderAdminCheck.Access_OnlyAdmin.selector);
         editionRenderer.updateMediaURIs(
             address(base),
             "https://example.com/image.png",

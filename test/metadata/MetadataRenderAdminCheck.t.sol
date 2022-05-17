@@ -28,7 +28,6 @@ contract EditionMetadataRendererTest is DSTest {
     function test_MetadataRenderAdminCheckSender() public {
         address testTarget = address(0x10);
         vm.startPrank(testTarget);
-        // vm.expectEmit(TestAdmin.Ok.selector);
         testAdmin.updateSomething(testTarget); 
     }
 

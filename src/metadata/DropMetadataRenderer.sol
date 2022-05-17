@@ -3,10 +3,11 @@ pragma solidity ^0.8.10;
 
 import {StringsUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/StringsUpgradeable.sol";
 import {IMetadataRenderer} from "../interfaces/IMetadataRenderer.sol";
-import {IERC721Drop} from "../interfaces/IERC721Drop.sol";
+import {MetadataRenderAdminCheck} from "./MetadataRenderAdminCheck.sol";
 
 /// @notice Drops metadata system
-contract DropMetadataRenderer is IMetadataRenderer {
+contract DropMetadataRenderer is IMetadataRenderer, MetadataRenderAdminCheck {
+    error MetadataFrozen();
 
     /// Event to mark updated metadata information
     event MetadataUpdated(
@@ -26,17 +27,6 @@ contract DropMetadataRenderer is IMetadataRenderer {
         string extension;
         string contractURI;
         uint256 freezeAt;
-    }
-
-    /// @notice Modifier to require the sender to be an admin
-    /// @param target address that the user wants to modify
-    modifier requireSenderAdmin(address target) {
-        require(
-            target == msg.sender || IERC721Drop(target).isAdmin(msg.sender),
-            "Only admin"
-        );
-
-        _;
     }
 
     /// @notice NFT metadata by contract
@@ -114,7 +104,10 @@ contract DropMetadataRenderer is IMetadataRenderer {
         string memory newContractURI,
         uint256 freezeAt
     ) internal {
-        require(freezeAt == 0 || freezeAt < block.timestamp, "Metadata frozen");
+        if (freezeAt != 0 && freezeAt > block.timestamp) {
+            revert MetadataFrozen();
+        }
+
         metadataBaseByContract[target] = MetadataURIInfo({
             base: metadataBase,
             extension: metadataExtension,

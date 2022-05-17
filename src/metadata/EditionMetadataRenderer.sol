@@ -25,6 +25,7 @@ contract EditionMetadataRenderer is IMetadataRenderer, MetadataRenderAdminCheck 
     );
 
     /// @notice Event for a new edition initialized
+    /// @dev admin function indexer feedback
     event EditionInitialized(
         address indexed target,
         string description,
@@ -32,7 +33,8 @@ contract EditionMetadataRenderer is IMetadataRenderer, MetadataRenderAdminCheck 
         string animationURI
     );
 
-    /// @notice Description updated for this
+    /// @notice Description updated for this edition
+    /// @dev admin function indexer feedback
     event DescriptionUpdated(
         address indexed target,
         address sender,

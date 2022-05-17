@@ -61,7 +61,7 @@ contract ZoraNFTBaseTest is DSTest {
                 FactoryUpgradeGate(address(0))
             )
         );
-        address newDrop = address(new ERC721DropProxy(impl, ""));
+        address payable newDrop = payable(address(new ERC721DropProxy(impl, "")));
         zoraNFTBase = ERC721Drop(newDrop);
         merkleData = new MerkleData();
     }

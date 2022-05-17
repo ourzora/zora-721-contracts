@@ -16,7 +16,7 @@ import {ERC721Drop} from "./ERC721Drop.sol";
 contract ZoraNFTCreatorV1 is
     OwnableUpgradeable,
     UUPSUpgradeable,
-    Version(1)
+    Version(2)
 {
     string private constant CANNOT_BE_ZERO = "Cannot be 0 address";
 

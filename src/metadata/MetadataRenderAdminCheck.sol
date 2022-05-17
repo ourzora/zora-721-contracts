@@ -9,7 +9,7 @@ contract MetadataRenderAdminCheck {
     /// @notice Modifier to require the sender to be an admin
     /// @param target address that the user wants to modify
     modifier requireSenderAdmin(address target) {
-        if (target != msg.sender && !IERC721Drop(target).isAdmin(msg.sender)) {
+        if (target != msg.sender || !IERC721Drop(target).isAdmin(msg.sender)) {
             revert Access_OnlyAdmin();
         }
 

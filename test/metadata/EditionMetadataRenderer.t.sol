@@ -5,8 +5,37 @@ import {EditionMetadataRenderer} from "../../src/metadata/EditionMetadataRendere
 import {MetadataRenderAdminCheck} from "../../src/metadata/MetadataRenderAdminCheck.sol";
 import {SharedNFTLogic} from "../../src/utils/SharedNFTLogic.sol";
 import {DropMockBase} from "./DropMockBase.sol";
+import {IERC721Drop} from "../../src/interfaces/IERC721Drop.sol";
 import {DSTest} from "ds-test/test.sol";
 import {Vm} from "forge-std/Vm.sol";
+
+contract IERC721OnChainDataMock {
+    IERC721Drop.SaleDetails private saleDetailsInternal;
+
+    constructor(uint256 totalMinted, uint256 maxSupply) {
+        saleDetailsInternal = IERC721Drop.SaleDetails({
+            publicSaleActive: false,
+            presaleActive: false,
+            publicSalePrice: 0,
+            publicSaleStart: 0,
+            publicSaleEnd: 0,
+            presaleStart: 0,
+            presaleEnd: 0,
+            presaleMerkleRoot: 0x0000000000000000000000000000000000000000000000000000000000000000,
+            maxSalePurchasePerAddress: 0,
+            totalMinted: totalMinted,
+            maxSupply: maxSupply
+        });
+    }
+
+    function name() external returns (string memory) {
+        return "MOCK NAME";
+    }
+
+    function saleDetails() external returns (IERC721Drop.SaleDetails memory) {
+        return saleDetailsInternal;
+    }
+}
 
 contract EditionMetadataRendererTest is DSTest {
     Vm public constant vm = Vm(HEVM_ADDRESS);
@@ -108,5 +137,31 @@ contract EditionMetadataRendererTest is DSTest {
             "https://example.com/image.png",
             "https://example.com/animation.mp4"
         );
+    }
+
+    function test_MetadataRenderingURI() public {
+        IERC721OnChainDataMock mock = new IERC721OnChainDataMock({
+            totalMinted: 10,
+            maxSupply: 100
+        });
+        vm.startPrank(address(mock));
+        editionRenderer.initializeWithData(
+            abi.encode("Description", "image", "animation")
+        );
+        // '{"name": "MOCK NAME 1/100", "description": "Description", "image": "image?id=1", "animation_url": "animation?id=1", "properties": {"number": 1, "name": "MOCK NAME"}}'
+        assertEq("data:application/json;base64,eyJuYW1lIjogIk1PQ0sgTkFNRSAxLzEwMCIsICJkZXNjcmlwdGlvbiI6ICJEZXNjcmlwdGlvbiIsICJpbWFnZSI6ICJpbWFnZT9pZD0xIiwgImFuaW1hdGlvbl91cmwiOiAiYW5pbWF0aW9uP2lkPTEiLCAicHJvcGVydGllcyI6IHsibnVtYmVyIjogMSwgIm5hbWUiOiAiTU9DSyBOQU1FIn19", editionRenderer.tokenURI(1));
+    }
+
+    function test_OpenEdition() public {
+        IERC721OnChainDataMock mock = new IERC721OnChainDataMock({
+            totalMinted: 10,
+            maxSupply: type(uint64).max
+        });
+        vm.startPrank(address(mock));
+        editionRenderer.initializeWithData(
+            abi.encode("Description", "image", "animation")
+        );
+        // {"name": "MOCK NAME 1", "description": "Description", "image": "image?id=1", "animation_url": "animation?id=1", "properties": {"number": 1, "name": "MOCK NAME"}}
+        assertEq("data:application/json;base64,eyJuYW1lIjogIk1PQ0sgTkFNRSAxIiwgImRlc2NyaXB0aW9uIjogIkRlc2NyaXB0aW9uIiwgImltYWdlIjogImltYWdlP2lkPTEiLCAiYW5pbWF0aW9uX3VybCI6ICJhbmltYXRpb24/aWQ9MSIsICJwcm9wZXJ0aWVzIjogeyJudW1iZXIiOiAxLCAibmFtZSI6ICJNT0NLIE5BTUUifX0=", editionRenderer.tokenURI(1));
     }
 }

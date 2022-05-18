@@ -17,10 +17,15 @@ export async function setupContracts() {
   const zoraERC721TransferHelperAddress =
     process.env.ZORA_ERC_721_TRANSFER_HELPER_ADDRESS;
   const feeDefaultBPS = process.env.FEE_DEFAULT_BPS;
-  const sharedNFTLogicAddress = process.env.SHARED_NFT_LOGIC_ADDRESS;
+  const creatorProxyAddress = process.env.CREATOR_PROXY_ADDRESS;
+  // const sharedNFTLogicAddress = process.env.SHARED_NFT_LOGIC_ADDRESS;
+  //
+  // if (!sharedNFTLogicAddress) {
+  //   throw new Error("shared nft logic address is required");
+  // }
 
-  if (!sharedNFTLogicAddress) {
-    throw new Error("shared nft logic address is required");
+  if (!creatorProxyAddress) {
+    throw new Error("creator proxy address is required");
   }
 
   if (!zoraERC721TransferHelperAddress) {
@@ -62,11 +67,11 @@ export async function setupContracts() {
   console.log("deployed drops metadata to", dropMetadataAddress);
 
   console.log("deploying shared nft logic");
-  // const sharedNFTLogicContract = await deployAndVerify(
-  //   "src/utils/SharedNFTLogic.sol:SharedNFTLogic"
-  // );
-  // const sharedNFTLogicAddress = sharedNFTLogicContract.deployed.deploy.deployedTo;
-  console.log("has shared nft logic to", sharedNFTLogicAddress);
+  const sharedNFTLogicContract = await deployAndVerify(
+    "src/utils/SharedNFTLogic.sol:SharedNFTLogic"
+  );
+  const sharedNFTLogicAddress = sharedNFTLogicContract.deployed.deploy.deployedTo;
+  console.log("deployed shared nft logic to", sharedNFTLogicAddress);
 
   console.log("deploying editions metadata");
   const editionsMetadataContract = await deployAndVerify(
@@ -87,26 +92,27 @@ export async function setupContracts() {
     creatorImpl.deployed.deploy.deployedTo
   );
 
-  console.log("deploying creator proxy");
-  const creatorProxy = await retryDeploy(
-    2,
-    "src/ZoraNFTCreatorProxy.sol:ZoraNFTCreatorProxy",
-    [creatorImpl.deployed.deploy.deployedTo, '""']
-  );
-  await timeout(10000);
-  await retryVerify(
-    3,
-    creatorProxy.deploy.deployedTo,
-    "src/ZoraNFTCreatorProxy.sol:ZoraNFTCreatorProxy",
-    [creatorImpl.deployed.deploy.deployedTo, []]
-  );
-  console.log("deployed creator proxy to ", creatorProxy.deploy.deployedTo);
+  // console.log("deploying creator proxy");
+  // const creatorProxy = await retryDeploy(
+  //   2,
+  //   "src/ZoraNFTCreatorProxy.sol:ZoraNFTCreatorProxy",
+  //   [creatorImpl.deployed.deploy.deployedTo, '""']
+  // );
+  // await timeout(10000);
+  // await retryVerify(
+  //   3,
+  //   creatorProxy.deploy.deployedTo,
+  //   "src/ZoraNFTCreatorProxy.sol:ZoraNFTCreatorProxy",
+  //   [creatorImpl.deployed.deploy.deployedTo, []]
+  // );
+  // console.log("deployed creator proxy to ", creatorProxy.deploy.deployedTo);
   return {
     feeManager,
     dropContract,
     dropMetadataContract,
     editionsMetadataContract,
-    creatorProxy,
+    creatorImpl,
+    creatorProxyAddress,
   };
 }
 

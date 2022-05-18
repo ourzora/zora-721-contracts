@@ -166,7 +166,7 @@ contract EditionMetadataRenderer is IMetadataRenderer, MetadataRenderAdminCheck 
                 imageUrl: info.imageURI,
                 animationUrl: info.animationURI,
                 tokenOfEdition: tokenId,
-                editionSize: media.saleDetails().maxSupply
+                editionSize: maxSupply
             });
     }
 }

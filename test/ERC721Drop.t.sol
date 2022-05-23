@@ -14,19 +14,21 @@ import {IMetadataRenderer} from "../src/interfaces/IMetadataRenderer.sol";
 import {FactoryUpgradeGate} from "../src/FactoryUpgradeGate.sol";
 import {ERC721DropProxy} from "../src/ERC721DropProxy.sol";
 
-
 contract ERC721DropTest is DSTest {
     ERC721Drop zoraNFTBase;
     MockUser mockUser;
     Vm public constant vm = Vm(HEVM_ADDRESS);
     DummyMetadataRenderer public dummyRenderer = new DummyMetadataRenderer();
     ZoraFeeManager public feeManager;
+    FactoryUpgradeGate public factoryUpgradeGate;
     address public constant DEFAULT_OWNER_ADDRESS = address(0x23499);
     address payable public constant DEFAULT_FUNDS_RECIPIENT_ADDRESS =
         payable(address(0x21303));
     address payable public constant DEFAULT_ZORA_DAO_ADDRESS =
         payable(address(0x999));
+    address public constant UPGRADE_GATE_ADMIN_ADDRESS = address(0x942924224);
     address public constant mediaContract = address(0x123456);
+    address public impl;
 
     struct Configuration {
         IMetadataRenderer metadataRenderer;
@@ -62,15 +64,14 @@ contract ERC721DropTest is DSTest {
     function setUp() public {
         vm.prank(DEFAULT_ZORA_DAO_ADDRESS);
         feeManager = new ZoraFeeManager(500, DEFAULT_ZORA_DAO_ADDRESS);
+        factoryUpgradeGate = new FactoryUpgradeGate(UPGRADE_GATE_ADMIN_ADDRESS);
         vm.prank(DEFAULT_ZORA_DAO_ADDRESS);
-        address impl = address(
-            new ERC721Drop(
-                feeManager,
-                address(1234),
-                FactoryUpgradeGate(address(0))
-            )
+        impl = address(
+            new ERC721Drop(feeManager, address(0x1234), factoryUpgradeGate)
         );
-        address payable newDrop = payable(address(new ERC721DropProxy(impl, "")));
+        address payable newDrop = payable(
+            address(new ERC721DropProxy(impl, ""))
+        );
         zoraNFTBase = ERC721Drop(newDrop);
     }
 
@@ -117,7 +118,7 @@ contract ERC721DropTest is DSTest {
                 presaleEnd: 0,
                 publicSalePrice: 0,
                 maxSalePurchasePerAddress: 0,
-                presaleMerkleRoot: bytes32(0) 
+                presaleMerkleRoot: bytes32(0)
             })
         });
     }
@@ -145,6 +146,27 @@ contract ERC721DropTest is DSTest {
             "owner is wrong for new minted token"
         );
         assertEq(address(zoraNFTBase).balance, amount);
+    }
+
+    function test_UpgradeApproved() public setupZoraNFTBase(10) {
+        address newImpl = address(
+            new ERC721Drop(
+                ZoraFeeManager(address(0xadadad)),
+                address(0x3333),
+                factoryUpgradeGate
+            )
+        );
+
+        address[] memory lastImpls = new address[](1);
+        lastImpls[0] = impl;
+        vm.prank(UPGRADE_GATE_ADMIN_ADDRESS);
+        factoryUpgradeGate.registerNewUpgradePath({
+            _newImpl: newImpl,
+            _supportedPrevImpls: lastImpls
+        });
+        vm.prank(DEFAULT_OWNER_ADDRESS);
+        zoraNFTBase.upgradeTo(newImpl);
+        assertEq(address(zoraNFTBase.zoraFeeManager()), address(0xadadad));
     }
 
     function test_PurchaseTime() public setupZoraNFTBase(10) {
@@ -220,7 +242,12 @@ contract ERC721DropTest is DSTest {
             presaleMerkleRoot: bytes32(0)
         });
         vm.prank(address(456));
-        vm.expectRevert(abi.encodeWithSelector(IERC721Drop.Purchase_WrongPrice.selector, 0.15 ether));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IERC721Drop.Purchase_WrongPrice.selector,
+                0.15 ether
+            )
+        );
         zoraNFTBase.purchase{value: 0.12 ether}(1);
     }
 
@@ -308,7 +335,9 @@ contract ERC721DropTest is DSTest {
         vm.prank(DEFAULT_OWNER_ADDRESS);
         zoraNFTBase.adminMint(address(0x1234), 2);
         vm.prank(DEFAULT_OWNER_ADDRESS);
-        vm.expectRevert(IERC721Drop.Admin_UnableToFinalizeNotOpenEdition.selector);
+        vm.expectRevert(
+            IERC721Drop.Admin_UnableToFinalizeNotOpenEdition.selector
+        );
         zoraNFTBase.finalizeOpenEdition();
     }
 
@@ -406,7 +435,12 @@ contract ERC721DropTest is DSTest {
         toMint[2] = address(0x12);
         toMint[3] = address(0x13);
         bytes32 minterRole = zoraNFTBase.MINTER_ROLE();
-        vm.expectRevert(abi.encodeWithSignature("Access_MissingRoleOrAdmin(bytes32)", minterRole));
+        vm.expectRevert(
+            abi.encodeWithSignature(
+                "Access_MissingRoleOrAdmin(bytes32)",
+                minterRole
+            )
+        );
         zoraNFTBase.adminMintAirdrop(toMint);
     }
 
@@ -452,7 +486,9 @@ contract ERC721DropTest is DSTest {
         vm.stopPrank();
 
         vm.prank(address(1));
-        vm.expectRevert(IERC721AUpgradeable.TransferCallerNotOwnerNorApproved.selector);
+        vm.expectRevert(
+            IERC721AUpgradeable.TransferCallerNotOwnerNorApproved.selector
+        );
         zoraNFTBase.burn(1);
     }
 

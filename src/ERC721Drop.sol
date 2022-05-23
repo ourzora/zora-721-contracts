@@ -223,16 +223,19 @@ contract ERC721Drop is
         return hasRole(DEFAULT_ADMIN_ROLE, user);
     }
 
+    /// @notice Connects this contract to the factory upgrade gate
+    /// @param newImplementation proposed new upgrade implementation
+    /// @dev Only can be called by admin
     function _authorizeUpgrade(address newImplementation)
         internal
         override
         onlyAdmin
     {
         if (
-            !factoryUpgradeGate.isValidUpgradePath(
-                newImplementation,
-                address(this)
-            )
+            !factoryUpgradeGate.isValidUpgradePath({
+                _newImpl: newImplementation,
+                _currentImpl: _getImplementation()
+            })
         ) {
             revert Admin_InvalidUpgradeAddress(newImplementation);
         }

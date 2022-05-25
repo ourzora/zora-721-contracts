@@ -98,14 +98,15 @@ contract ZoraNFTCreatorV1 is OwnableUpgradeable, UUPSUpgradeable, Version(2) {
     //        /|\
     //         |
     //        / \
-    /// @dev Function to setup the media contract across all metadata types
+    /// @notice Function to setup the media contract across all metadata types
+    /// @dev Called by edition and drop fns internally
     /// @param name Name for new contract (cannot be changed)
     /// @param symbol Symbol for new contract (cannot be changed)
     /// @param defaultAdmin Default admin address
     /// @param editionSize The max size of the media contract allowed
     /// @param royaltyBPS BPS for on-chain royalties (cannot be changed)
     /// @param fundsRecipient recipient for sale funds and, unless overridden, royalties
-    function setupMediaContract(
+    function setupDropsContract(
         string memory name,
         string memory symbol,
         address defaultAdmin,
@@ -115,7 +116,7 @@ contract ZoraNFTCreatorV1 is OwnableUpgradeable, UUPSUpgradeable, Version(2) {
         IERC721Drop.SalesConfiguration memory saleConfig,
         IMetadataRenderer metadataRenderer,
         bytes memory metadataInitializer
-    ) returns (address) {
+    ) public returns (address) {
         ERC721DropProxy newDrop = new ERC721DropProxy(implementation, "");
 
         address payable newDropAddress = payable(address(newDrop));
@@ -197,7 +198,7 @@ contract ZoraNFTCreatorV1 is OwnableUpgradeable, UUPSUpgradeable, Version(2) {
             metadataContractURI
         );
         return
-            setupMediaContract({
+            setupDropsContract({
                 defaultAdmin: defaultAdmin,
                 name: name,
                 symbol: symbol,
@@ -271,7 +272,7 @@ contract ZoraNFTCreatorV1 is OwnableUpgradeable, UUPSUpgradeable, Version(2) {
         );
 
         return
-            setupMediaContract({
+            setupDropsContract({
                 name: name,
                 symbol: symbol,
                 defaultAdmin: defaultAdmin,

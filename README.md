@@ -2,6 +2,17 @@
 
 ### Features these contracts support:
 
+1. ETH NFT sales
+2. Modular admin access and minting controls
+3. ERC2981 on-chain royalties
+4. Presale merkle trees
+5. On-chain modular rendering architecture
+6. ERC721A Gas savings / linear mint
+7. Limit mints per address when purchasing
+8. Allows for new features with opt-in gated user upgrades
+9. Allows for time-based open mints
+10. Includes a platform royalty fee mechanism
+11. Can admin mint NFTs to addresses and airdrop to lists of addresses
 
 ### What are these contracts?
 1. `ERC721Drop`

@@ -63,7 +63,7 @@ async function renderExample() {
   const testPath = join(
     __dirname,
     "../",
-    "contracts/test/merkle",
+    "test/merkle",
     "MerkleData.sol.ejs"
   );
   const resultPath = testPath.substring(0, testPath.length - 4);

@@ -13,11 +13,7 @@ import {IMetadataRenderer} from "./interfaces/IMetadataRenderer.sol";
 import {ERC721Drop} from "./ERC721Drop.sol";
 
 /// @notice Zora NFT Creator V1
-contract ZoraNFTCreatorV1 is
-    OwnableUpgradeable,
-    UUPSUpgradeable,
-    Version(2)
-{
+contract ZoraNFTCreatorV1 is OwnableUpgradeable, UUPSUpgradeable, Version(2) {
     string private constant CANNOT_BE_ZERO = "Cannot be 0 address";
 
     /// @notice Emitted when a edition is created reserving the corresponding token IDs.
@@ -71,14 +67,46 @@ contract ZoraNFTCreatorV1 is
         onlyOwner
     {}
 
-    /// @dev Internal function to setup the media contract across all metadata types
+    //        ,-.
+    //        `-'
+    //        /|\
+    //         |                    ,----------------.              ,----------.
+    //        / \                   |ZoraNFTCreatorV1|              |ERC721Drop|
+    //      Caller                  `-------+--------'              `----+-----'
+    //        |                       createDrop()                       |
+    //        | --------------------------------------------------------->
+    //        |                             |                            |
+    //        |                             |----.
+    //        |                             |    | initialize NFT metadata
+    //        |                             |<---'
+    //        |                             |                            |
+    //        |                             |           deploy           |
+    //        |                             | --------------------------->
+    //        |                             |                            |
+    //        |                             |       initialize drop      |
+    //        |                             | --------------------------->
+    //        |                             |                            |
+    //        |                             |----.                       |
+    //        |                             |    | emit CreatedDrop      |
+    //        |                             |<---'                       |
+    //        |                             |                            |
+    //        | return drop contract address|                            |
+    //        | <----------------------------                            |
+    //      Caller                  ,-------+--------.              ,----+-----.
+    //        ,-.                   |ZoraNFTCreatorV1|              |ERC721Drop|
+    //        `-'                   `----------------'              `----------'
+    //        /|\
+    //         |
+    //        / \
+    /// @notice Function to setup the media contract across all metadata types
+    /// @dev Called by edition and drop fns internally
     /// @param name Name for new contract (cannot be changed)
     /// @param symbol Symbol for new contract (cannot be changed)
     /// @param defaultAdmin Default admin address
     /// @param editionSize The max size of the media contract allowed
     /// @param royaltyBPS BPS for on-chain royalties (cannot be changed)
     /// @param fundsRecipient recipient for sale funds and, unless overridden, royalties
-    function _setupMediaContract(
+    function setupDropsContract(
         string memory name,
         string memory symbol,
         address defaultAdmin,
@@ -88,10 +116,8 @@ contract ZoraNFTCreatorV1 is
         IERC721Drop.SalesConfiguration memory saleConfig,
         IMetadataRenderer metadataRenderer,
         bytes memory metadataInitializer
-    ) internal returns (address) {
-        ERC721DropProxy newDrop = new ERC721DropProxy(
-            implementation, ""
-        );
+    ) public returns (address) {
+        ERC721DropProxy newDrop = new ERC721DropProxy(implementation, "");
 
         address payable newDropAddress = payable(address(newDrop));
 
@@ -107,7 +133,11 @@ contract ZoraNFTCreatorV1 is
             metadataInitializer
         );
 
-        emit CreatedDrop({creator: msg.sender, editionSize: editionSize, editionContractAddress: newDropAddress});
+        emit CreatedDrop({
+            creator: msg.sender,
+            editionSize: editionSize,
+            editionContractAddress: newDropAddress
+        });
 
         return newDropAddress;
     }
@@ -168,7 +198,7 @@ contract ZoraNFTCreatorV1 is
             metadataContractURI
         );
         return
-            _setupMediaContract({
+            setupDropsContract({
                 defaultAdmin: defaultAdmin,
                 name: name,
                 symbol: symbol,
@@ -211,7 +241,7 @@ contract ZoraNFTCreatorV1 is
     //        `-'                   `----------------'              `----------'
     //        /|\
     //         |
-    //        / \                                                               
+    //        / \
     /// @notice Creates a new edition contract as a factory with a deterministic address
     /// @notice Important: None of these fields (except the Url fields with the same hash) can be changed after calling
     /// @param name Name of the edition contract
@@ -242,7 +272,7 @@ contract ZoraNFTCreatorV1 is
         );
 
         return
-            _setupMediaContract({
+            setupDropsContract({
                 name: name,
                 symbol: symbol,
                 defaultAdmin: defaultAdmin,

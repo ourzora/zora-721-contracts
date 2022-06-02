@@ -66,6 +66,30 @@ interface IERC721Drop {
         uint256 firstPurchasedTokenId
     );
 
+    /// @notice Sales configuration has been changed
+    /// @dev To access new sales configuration, use getter function.
+    /// @param changedBy Changed by user
+    event SalesConfigChanged(address indexed changedBy);
+
+    /// @notice Event emitted when the funds recipient is changed
+    /// @param newAddress new address for the funds recipient
+    /// @param changedBy address that the recipient is changed by
+    event FundsRecipientChanged(
+        address indexed newAddress,
+        address indexed changedBy
+    );
+
+    /// @notice Event emitted when an open mint is finalized and further minting is closed forever on the contract.
+    /// @param sender address sending close mint
+    /// @param numberOfMints number of mints the contract is finalized at
+    event OpenMintFinalized(address indexed sender, uint256 numberOfMints);
+
+    /// @notice Event emitted when metadata renderer is updated.
+    /// @param sender address of the updater
+    /// @param renderer new metadata renderer address
+    event UpdatedMetadataRenderer(address sender, IMetadataRenderer renderer);
+
+
     /// @notice General configuration for NFT Minting and bookkeeping
     struct Configuration {
         /// @dev Metadata renderer (uint160)
@@ -164,6 +188,11 @@ interface IERC721Drop {
 
     /// @notice This is the opensea/public owner setting that can be set by the contract admin
     function owner() external view returns (address);
+
+    /// @notice Update the metadata renderer
+    /// @param newRenderer new address for renderer
+    /// @param setupRenderer data to call to bootstrap data for the new renderer (optional)
+    function setMetadataRenderer(IMetadataRenderer newRenderer, bytes memory setupRenderer) external;
 
     /// @notice This is an admin mint function to mint a quantity to a specific address
     /// @param to address to mint to

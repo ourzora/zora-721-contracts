@@ -51,7 +51,7 @@ contract ERC721Drop is
     IERC721Drop,
     OwnableSkeleton,
     FundsReceiver,
-    Version(7),
+    Version(8),
     ERC721DropStorageV1
 {
     /// @dev This is the max mint batch size for the optimized ERC721A mint contract
@@ -76,14 +76,6 @@ contract ERC721Drop is
     /// @notice Max royalty BPS
     uint16 constant MAX_ROYALTY_BPS = 50_00;
 
-    event SalesConfigChanged(address indexed changedBy);
-
-    event FundsRecipientChanged(
-        address indexed newAddress,
-        address indexed changedBy
-    );
-
-    event OpenMintFinalized(address indexed sender, uint256 numberOfMints);
 
     /// @notice Only allow for users with admin access
     modifier onlyAdmin() {
@@ -229,6 +221,7 @@ contract ERC721Drop is
     function _authorizeUpgrade(address newImplementation)
         internal
         override
+        view
         onlyAdmin
     {
         if (
@@ -748,6 +741,25 @@ contract ERC721Drop is
     /// @param newOwner new owner to set
     function setOwner(address newOwner) public onlyAdmin {
         _setOwner(newOwner);
+    }
+
+    /// @notice Set a new metadata renderer
+    /// @param newRenderer new renderer address to use
+    /// @param setupRenderer data to setup new renderer with
+    function setMetadataRenderer(
+        IMetadataRenderer newRenderer,
+        bytes memory setupRenderer
+    ) external onlyAdmin {
+        config.metadataRenderer = newRenderer;
+
+        if (setupRenderer.length > 0) {
+            newRenderer.initializeWithData(setupRenderer);
+        }
+
+        emit UpdatedMetadataRenderer({
+            sender: msg.sender,
+            renderer: newRenderer
+        });
     }
 
     //                       ,-.

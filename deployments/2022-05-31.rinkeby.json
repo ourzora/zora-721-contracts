@@ -1,0 +1,47 @@
+{
+  "editionsMetadataContract": {
+    "deployed": {
+      "deploy": {
+        "deployedTo": "0xb252141b304c632f859305b144330353bb2b332c",
+        "deployer": "0x7a6f726121030cadf9923333d5b6f29277024027",
+        "transactionHash": "0x453dc54ce4ff0ae97f71b673aaa0c53f8068efa2e763c3e2f2bc5ab2593d1bc6"
+      },
+      "contractName": "EditionMetadataRenderer",
+      "contractPath": "src/metadata/EditionMetadataRenderer.sol",
+      "args": [
+        "0xbd677ce2635bab1041931e742d0984fadae44c41"
+      ]
+    },
+    "verify": {
+      "verify": "Submitted contract for verification:\n    Response: `OK`\n    GUID: `tp8ehurs1qhtcvzhz1slzyjq8sfqwaqvpkv4blt1m7csnq8uru`\n    url: https://rinkeby.etherscan.io/address/0xb252141b304c632f859305b144330353bb2b332c#code\n",
+      "contractName": "EditionMetadataRenderer",
+      "contractPath": "src/metadata/EditionMetadataRenderer.sol"
+    }
+  },
+  "creatorImpl": {
+    "deployed": {
+      "deploy": {
+        "deployedTo": "0xf2162d53e31019f0e964290f68c5e38e27c4e173",
+        "deployer": "0x7a6f726121030cadf9923333d5b6f29277024027",
+        "transactionHash": "0x2aca45e74c6196941b0c8964206d028e83a7b6e3a8cd90df83073832b11da58b"
+      },
+      "contractName": "ZoraNFTCreatorV1",
+      "contractPath": "src/ZoraNFTCreatorV1.sol",
+      "args": [
+        "0xd1e304157bc63a3a96fa7441f2b1a7091f1498a6",
+        "0xb252141b304c632f859305b144330353bb2b332c",
+        "0xdd7900dccef58aa442d84d443d2525aad4f6e80b"
+      ]
+    },
+    "verify": {
+      "verify": "Submitted contract for verification:\n    Response: `OK`\n    GUID: `jlhjg87j1rqnnm2vweawky39bwncrrjyzgkwurkxwy3wuabvvn`\n    url: https://rinkeby.etherscan.io/address/0xf2162d53e31019f0e964290f68c5e38e27c4e173#code\n",
+      "contractName": "ZoraNFTCreatorV1",
+      "contractPath": "src/ZoraNFTCreatorV1.sol"
+    }
+  },
+  "creatorProxyAddress": "0x2d2acd205bd6d9d0b3e79990e093768375ad3a30",
+  "sharedNFTLogicAddress": "0xbd677ce2635bab1041931e742d0984fadae44c41",
+  "feeManagerAddress": "0xc2c222c66db9c69dc7afa1611bc8e3af30c23f25",
+  "dropContractAddress": "0xd1e304157bc63a3a96fa7441f2b1a7091f1498a6",
+  "dropMetadataAddress": "0xdd7900dccef58aa442d84d443d2525aad4f6e80b"
+}

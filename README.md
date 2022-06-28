@@ -48,7 +48,7 @@ The metadata renderer abstraction allows these drops contracts to power a variet
 1. Install [Foundry](https://github.com/foundry-rs/foundry)
 1. `yarn install`
 1. `git submodule init && git submodule update`
-1. `yarn build
+1. `yarn build`
 
 ### Bug Bounty
 5 ETH for any critical bugs that could result in loss of funds.

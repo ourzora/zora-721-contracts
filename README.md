@@ -29,7 +29,7 @@
 2. `ZoraNFTCreatorV1`
    Gas-optimized factory contract allowing you to easily + for a low gas transaction create your own drop contract.
 3. `DropMetadataRenderer`
-   A flexible metadata renderer architecture that allows for centralised and IFPS metadata group roots to be rendered.
+   A flexible metadata renderer architecture that allows for centralised and IPFS metadata group roots to be rendered.
 4. `EditionsMetadataRenderer`
    A partially on-chain renderer for editions that encodes name and description on-chain with media metadata off-chain.
 5. `UpgradeGate`

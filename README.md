@@ -42,7 +42,7 @@ The root drops contract can be upgraded to allow for product upgrades with new c
 for deployed contracts to be upgraded by the users of the platform to opt into new features.
 
 The metadata renderer abstraction allows these drops contracts to power a variety of on-chain powered projects and also.
-  
+   
 ### Local development
 
 1. Install [Foundry](https://github.com/foundry-rs/foundry)

@@ -76,7 +76,6 @@ contract ERC721Drop is
     /// @notice Max royalty BPS
     uint16 constant MAX_ROYALTY_BPS = 50_00;
 
-
     /// @notice Only allow for users with admin access
     modifier onlyAdmin() {
         if (!hasRole(DEFAULT_ADMIN_ROLE, msg.sender)) {
@@ -220,8 +219,8 @@ contract ERC721Drop is
     /// @dev Only can be called by admin
     function _authorizeUpgrade(address newImplementation)
         internal
-        override
         view
+        override
         onlyAdmin
     {
         if (
@@ -803,7 +802,7 @@ contract ERC721Drop is
         uint64 presaleStart,
         uint64 presaleEnd,
         bytes32 presaleMerkleRoot
-    ) external onlyAdmin {
+    ) external onlyRoleOrAdmin(SALES_MANAGER_ROLE) {
         // SalesConfiguration storage newConfig = SalesConfiguration({
         //     publicSaleStart: publicSaleStart,
         //     publicSaleEnd: publicSaleEnd,
@@ -925,6 +924,7 @@ contract ERC721Drop is
             funds
         );
 
+        // Check if withdrawn is allowed
         if (
             !hasRole(DEFAULT_ADMIN_ROLE, sender) &&
             !hasRole(SALES_MANAGER_ROLE, sender) &&
@@ -954,6 +954,15 @@ contract ERC721Drop is
         if (!successFunds) {
             revert Withdraw_FundsSendFailure();
         }
+
+        // Emit event for indexing
+        emit FundsWithdrawn(
+            msg.sender,
+            config.fundsRecipient,
+            funds,
+            feeRecipient,
+            zoraFee
+        );
     }
 
     //                       ,-.

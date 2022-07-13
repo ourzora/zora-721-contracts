@@ -27,11 +27,11 @@ import {IZoraFeeManager} from "./interfaces/IZoraFeeManager.sol";
 import {IMetadataRenderer} from "./interfaces/IMetadataRenderer.sol";
 import {IERC721Drop} from "./interfaces/IERC721Drop.sol";
 import {IOwnable} from "./interfaces/IOwnable.sol";
+import {IFactoryUpgradeGate} from "./interfaces/IFactoryUpgradeGate.sol";
 
 import {OwnableSkeleton} from "./utils/OwnableSkeleton.sol";
 import {FundsReceiver} from "./utils/FundsReceiver.sol";
 import {Version} from "./utils/Version.sol";
-import {FactoryUpgradeGate} from "./FactoryUpgradeGate.sol";
 import {ERC721DropStorageV1} from "./storage/ERC721DropStorageV1.sol";
 
 /**
@@ -68,7 +68,7 @@ contract ERC721Drop is
     address internal immutable zoraERC721TransferHelper;
 
     /// @dev Factory upgrade gate
-    FactoryUpgradeGate internal immutable factoryUpgradeGate;
+    IFactoryUpgradeGate internal immutable factoryUpgradeGate;
 
     /// @dev Zora Fee Manager address
     IZoraFeeManager public immutable zoraFeeManager;
@@ -78,7 +78,7 @@ contract ERC721Drop is
 
     /// @notice Only allow for users with admin access
     modifier onlyAdmin() {
-        if (!hasRole(DEFAULT_ADMIN_ROLE, msg.sender)) {
+        if (!hasRole(DEFAULT_ADMIN_ROLE, _msgSender())) {
             revert Access_OnlyAdmin();
         }
 
@@ -89,8 +89,8 @@ contract ERC721Drop is
     /// @param role role to check for alongside the admin role
     modifier onlyRoleOrAdmin(bytes32 role) {
         if (
-            !hasRole(DEFAULT_ADMIN_ROLE, msg.sender) &&
-            !hasRole(role, msg.sender)
+            !hasRole(DEFAULT_ADMIN_ROLE, _msgSender()) &&
+            !hasRole(role, _msgSender())
         ) {
             revert Access_MissingRoleOrAdmin(role);
         }
@@ -154,7 +154,7 @@ contract ERC721Drop is
     constructor(
         IZoraFeeManager _zoraFeeManager,
         address _zoraERC721TransferHelper,
-        FactoryUpgradeGate _factoryUpgradeGate
+        IFactoryUpgradeGate _factoryUpgradeGate
     ) initializer {
         zoraFeeManager = _zoraFeeManager;
         zoraERC721TransferHelper = _zoraERC721TransferHelper;
@@ -219,7 +219,6 @@ contract ERC721Drop is
     /// @dev Only can be called by admin
     function _authorizeUpgrade(address newImplementation)
         internal
-        view
         override
         onlyAdmin
     {
@@ -543,7 +542,7 @@ contract ERC721Drop is
                 salesConfig.presaleMerkleRoot,
                 keccak256(
                     // address, uint256, uint256
-                    abi.encode(msg.sender, maxQuantity, pricePerToken)
+                    abi.encode(_msgSender(), maxQuantity, pricePerToken)
                 )
             )
         ) {
@@ -756,7 +755,7 @@ contract ERC721Drop is
         }
 
         emit UpdatedMetadataRenderer({
-            sender: msg.sender,
+            sender: _msgSender(),
             renderer: newRenderer
         });
     }
@@ -924,7 +923,7 @@ contract ERC721Drop is
             funds
         );
 
-        // Check if withdrawn is allowed
+        // Check if withdraw is allowed for sender
         if (
             !hasRole(DEFAULT_ADMIN_ROLE, sender) &&
             !hasRole(SALES_MANAGER_ROLE, sender) &&
@@ -957,7 +956,7 @@ contract ERC721Drop is
 
         // Emit event for indexing
         emit FundsWithdrawn(
-            msg.sender,
+            _msgSender(),
             config.fundsRecipient,
             funds,
             feeRecipient,

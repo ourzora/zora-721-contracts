@@ -29,7 +29,7 @@
 2. `ZoraNFTCreatorV1`
    Gas-optimized factory contract allowing you to easily + for a low gas transaction create your own drop contract.
 3. `DropMetadataRenderer`
-   A flexible metadata renderer architecture that allows for centralised and IFPS metadata group roots to be rendered.
+   A flexible metadata renderer architecture that allows for centralised and IPFS metadata group roots to be rendered.
 4. `EditionsMetadataRenderer`
    A partially on-chain renderer for editions that encodes name and description on-chain with media metadata off-chain.
 5. `UpgradeGate`
@@ -42,13 +42,13 @@ The root drops contract can be upgraded to allow for product upgrades with new c
 for deployed contracts to be upgraded by the users of the platform to opt into new features.
 
 The metadata renderer abstraction allows these drops contracts to power a variety of on-chain powered projects and also.
-  
+   
 ### Local development
 
 1. Install [Foundry](https://github.com/foundry-rs/foundry)
 1. `yarn install`
 1. `git submodule init && git submodule update`
-1. `yarn build
+1. `yarn build`
 
 ### Bug Bounty
 5 ETH for any critical bugs that could result in loss of funds.

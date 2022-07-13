@@ -27,11 +27,11 @@ import {IZoraFeeManager} from "./interfaces/IZoraFeeManager.sol";
 import {IMetadataRenderer} from "./interfaces/IMetadataRenderer.sol";
 import {IERC721Drop} from "./interfaces/IERC721Drop.sol";
 import {IOwnable} from "./interfaces/IOwnable.sol";
+import {IFactoryUpgradeGate} from "./interfaces/IFactoryUpgradeGate.sol";
 
 import {OwnableSkeleton} from "./utils/OwnableSkeleton.sol";
 import {FundsReceiver} from "./utils/FundsReceiver.sol";
 import {Version} from "./utils/Version.sol";
-import {FactoryUpgradeGate} from "./FactoryUpgradeGate.sol";
 import {ERC721DropStorageV1} from "./storage/ERC721DropStorageV1.sol";
 
 /**
@@ -68,7 +68,7 @@ contract ERC721Drop is
     address internal immutable zoraERC721TransferHelper;
 
     /// @dev Factory upgrade gate
-    FactoryUpgradeGate internal immutable factoryUpgradeGate;
+    IFactoryUpgradeGate internal immutable factoryUpgradeGate;
 
     /// @dev Zora Fee Manager address
     IZoraFeeManager public immutable zoraFeeManager;
@@ -155,7 +155,7 @@ contract ERC721Drop is
     constructor(
         IZoraFeeManager _zoraFeeManager,
         address _zoraERC721TransferHelper,
-        FactoryUpgradeGate _factoryUpgradeGate
+        IFactoryUpgradeGate _factoryUpgradeGate
     ) initializer {
         zoraFeeManager = _zoraFeeManager;
         zoraERC721TransferHelper = _zoraERC721TransferHelper;
@@ -221,7 +221,6 @@ contract ERC721Drop is
     function _authorizeUpgrade(address newImplementation)
         internal
         override
-        view
         onlyAdmin
     {
         if (

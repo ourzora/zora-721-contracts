@@ -319,9 +319,9 @@ contract ERC721Drop is
         uint256 tokenId,
         uint256 quantity
     ) internal override {
-        try metadataRenderer.hasBatchTransferCallback() returns (bool enabled) {
+        try config.metadataRenderer.hasBatchTransferCallback() returns (bool enabled) {
             if (enabled) {
-                metadataRenderer.batchTransferCallback(
+                config.metadataRenderer.batchTransferCallback(
                     from,
                     to,
                     tokenId,

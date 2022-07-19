@@ -24,7 +24,7 @@ import {MerkleProofUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
 import {IZoraFeeManager} from "./interfaces/IZoraFeeManager.sol";
-import {IMetadataRenderer} from "./interfaces/IMetadataRenderer.sol";
+import {IMetadataRendererWithCallback} from "./interfaces/IMetadataRendererWithCallback.sol";
 import {IERC721Drop} from "./interfaces/IERC721Drop.sol";
 import {IOwnable} from "./interfaces/IOwnable.sol";
 import {IFactoryUpgradeGate} from "./interfaces/IFactoryUpgradeGate.sol";
@@ -75,7 +75,6 @@ contract ERC721Drop is
 
     /// @notice Max royalty BPS
     uint16 constant MAX_ROYALTY_BPS = 50_00;
-
 
     /// @notice Only allow for users with admin access
     modifier onlyAdmin() {
@@ -180,7 +179,7 @@ contract ERC721Drop is
         uint64 _editionSize,
         uint16 _royaltyBPS,
         SalesConfiguration memory _salesConfig,
-        IMetadataRenderer _metadataRenderer,
+        IMetadataRendererWithCallback _metadataRenderer,
         bytes memory _metadataRendererInit
     ) public initializer {
         // Setup ERC721A
@@ -312,6 +311,26 @@ contract ERC721Drop is
                     presaleMintsByAddress[minter],
                 totalMints: _numberMinted(minter)
             });
+    }
+
+    function _beforeTokenTransfers(
+        address from,
+        address to,
+        uint256 tokenId,
+        uint256 quantity
+    ) internal override {
+        try metadataRenderer.hasBatchTransferCallback() returns (bool enabled) {
+            if (enabled) {
+                metadataRenderer.batchTransferCallback(
+                    from,
+                    to,
+                    tokenId,
+                    quantity
+                );
+            }
+        } catch {
+            // no-op
+        }
     }
 
     /// @dev Setup auto-approval for Zora v3 access to sell NFT
@@ -746,7 +765,7 @@ contract ERC721Drop is
     /// @param newRenderer new renderer address to use
     /// @param setupRenderer data to setup new renderer with
     function setMetadataRenderer(
-        IMetadataRenderer newRenderer,
+        IMetadataRendererWithCallback newRenderer,
         bytes memory setupRenderer
     ) external onlyAdmin {
         config.metadataRenderer = newRenderer;
@@ -1035,8 +1054,8 @@ contract ERC721Drop is
     }
 
     /// @notice Getter for metadataRenderer contract
-    function metadataRenderer() external view returns (IMetadataRenderer) {
-        return IMetadataRenderer(config.metadataRenderer);
+    function metadataRenderer() external view returns (IMetadataRendererWithCallback) {
+        return IMetadataRendererWithCallback(config.metadataRenderer);
     }
 
     /// @notice Token URI Getter, proxies to metadataRenderer

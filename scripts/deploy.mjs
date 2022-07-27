@@ -24,10 +24,6 @@ export async function setupContracts() {
   //   throw new Error("shared nft logic address is required");
   // }
 
-  if (!creatorProxyAddress) {
-    throw new Error("creator proxy address is required");
-  }
-
   if (!zoraERC721TransferHelperAddress) {
     throw new Error("erc721 transfer helper address is required");
   }
@@ -70,7 +66,8 @@ export async function setupContracts() {
   const sharedNFTLogicContract = await deployAndVerify(
     "src/utils/SharedNFTLogic.sol:SharedNFTLogic"
   );
-  const sharedNFTLogicAddress = sharedNFTLogicContract.deployed.deploy.deployedTo;
+  const sharedNFTLogicAddress =
+    sharedNFTLogicContract.deployed.deploy.deployedTo;
   console.log("deployed shared nft logic to", sharedNFTLogicAddress);
 
   console.log("deploying editions metadata");

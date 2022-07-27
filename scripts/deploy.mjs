@@ -66,8 +66,7 @@ export async function setupContracts() {
   const sharedNFTLogicContract = await deployAndVerify(
     "src/utils/SharedNFTLogic.sol:SharedNFTLogic"
   );
-  const sharedNFTLogicAddress =
-    sharedNFTLogicContract.deployed.deploy.deployedTo;
+  const sharedNFTLogicAddress = sharedNFTLogicContract.deployed.deploy.deployedTo;
   console.log("deployed shared nft logic to", sharedNFTLogicAddress);
 
   console.log("deploying editions metadata");

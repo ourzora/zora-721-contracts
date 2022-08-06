@@ -76,10 +76,9 @@ contract ERC721Drop is
     /// @notice Max royalty BPS
     uint16 constant MAX_ROYALTY_BPS = 50_00;
 
-
     /// @notice Only allow for users with admin access
     modifier onlyAdmin() {
-        if (!hasRole(DEFAULT_ADMIN_ROLE, msg.sender)) {
+        if (!hasRole(DEFAULT_ADMIN_ROLE, _msgSender())) {
             revert Access_OnlyAdmin();
         }
 
@@ -90,8 +89,8 @@ contract ERC721Drop is
     /// @param role role to check for alongside the admin role
     modifier onlyRoleOrAdmin(bytes32 role) {
         if (
-            !hasRole(DEFAULT_ADMIN_ROLE, msg.sender) &&
-            !hasRole(role, msg.sender)
+            !hasRole(DEFAULT_ADMIN_ROLE, _msgSender()) &&
+            !hasRole(role, _msgSender())
         ) {
             revert Access_MissingRoleOrAdmin(role);
         }
@@ -543,7 +542,7 @@ contract ERC721Drop is
                 salesConfig.presaleMerkleRoot,
                 keccak256(
                     // address, uint256, uint256
-                    abi.encode(msg.sender, maxQuantity, pricePerToken)
+                    abi.encode(_msgSender(), maxQuantity, pricePerToken)
                 )
             )
         ) {
@@ -756,7 +755,7 @@ contract ERC721Drop is
         }
 
         emit UpdatedMetadataRenderer({
-            sender: msg.sender,
+            sender: _msgSender(),
             renderer: newRenderer
         });
     }
@@ -802,7 +801,7 @@ contract ERC721Drop is
         uint64 presaleStart,
         uint64 presaleEnd,
         bytes32 presaleMerkleRoot
-    ) external onlyAdmin {
+    ) external onlyRoleOrAdmin(SALES_MANAGER_ROLE) {
         // SalesConfiguration storage newConfig = SalesConfiguration({
         //     publicSaleStart: publicSaleStart,
         //     publicSaleEnd: publicSaleEnd,
@@ -924,6 +923,7 @@ contract ERC721Drop is
             funds
         );
 
+        // Check if withdraw is allowed for sender
         if (
             !hasRole(DEFAULT_ADMIN_ROLE, sender) &&
             !hasRole(SALES_MANAGER_ROLE, sender) &&
@@ -953,6 +953,15 @@ contract ERC721Drop is
         if (!successFunds) {
             revert Withdraw_FundsSendFailure();
         }
+
+        // Emit event for indexing
+        emit FundsWithdrawn(
+            _msgSender(),
+            config.fundsRecipient,
+            funds,
+            feeRecipient,
+            zoraFee
+        );
     }
 
     //                       ,-.

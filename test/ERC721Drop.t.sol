@@ -14,7 +14,39 @@ import {IMetadataRenderer} from "../src/interfaces/IMetadataRenderer.sol";
 import {FactoryUpgradeGate} from "../src/FactoryUpgradeGate.sol";
 import {ERC721DropProxy} from "../src/ERC721DropProxy.sol";
 
+// contract TestEventEmitter {
+//     function emitFundsWithdrawn(
+//         address withdrawnBy,
+//         address withdrawnTo,
+//         uint256 amount,
+//         address feeRecipient,
+//         uint256 feeAmount
+//     ) external {
+//         emit FundsWithdrawn(
+//             withdrawnBy,
+//             withdrawnTo,
+//             amount,
+//             feeRecipient,
+//             feeAmount
+//         );
+//     }
+// }
+
 contract ERC721DropTest is DSTest {
+    /// @notice Event emitted when the funds are withdrawn from the minting contract
+    /// @param withdrawnBy address that issued the withdraw
+    /// @param withdrawnTo address that the funds were withdrawn to
+    /// @param amount amount that was withdrawn
+    /// @param feeRecipient user getting withdraw fee (if any)
+    /// @param feeAmount amount of the fee getting sent (if any)
+    event FundsWithdrawn(
+        address indexed withdrawnBy,
+        address indexed withdrawnTo,
+        uint256 amount,
+        address feeRecipient,
+        uint256 feeAmount
+    );
+
     ERC721Drop zoraNFTBase;
     MockUser mockUser;
     Vm public constant vm = Vm(HEVM_ADDRESS);
@@ -255,7 +287,17 @@ contract ERC721DropTest is DSTest {
         vm.assume(amount > 0.01 ether);
         vm.deal(address(zoraNFTBase), amount);
         vm.prank(DEFAULT_OWNER_ADDRESS);
+        vm.expectEmit(true, true, true, true);
+        uint256 leftoverFunds = amount - (amount * 1) / 20;
+        emit FundsWithdrawn(
+            DEFAULT_OWNER_ADDRESS,
+            DEFAULT_FUNDS_RECIPIENT_ADDRESS,
+            leftoverFunds,
+            DEFAULT_ZORA_DAO_ADDRESS,
+            (amount * 1) / 20
+        );
         zoraNFTBase.withdraw();
+
         (, uint256 feeBps) = feeManager.getZORAWithdrawFeesBPS(
             address(zoraNFTBase)
         );
@@ -302,6 +344,46 @@ contract ERC721DropTest is DSTest {
         );
 
         assertEq(zoraNFTBase.saleDetails().totalMinted, limit);
+    }
+
+    function testSetSalesConfiguration() public setupZoraNFTBase(10) {
+        vm.prank(DEFAULT_OWNER_ADDRESS);
+        zoraNFTBase.setSaleConfiguration({
+            publicSaleStart: 0,
+            publicSaleEnd: type(uint64).max,
+            presaleStart: 0,
+            presaleEnd: 100,
+            publicSalePrice: 0.1 ether,
+            maxSalePurchasePerAddress: 10,
+            presaleMerkleRoot: bytes32(0)
+        });
+
+ 
+
+        (,,,,,uint64 presaleEndLookup,) = zoraNFTBase.salesConfig();
+        assertEq(presaleEndLookup, 100);
+
+        address SALES_MANAGER_ADDR = address(0x11002);
+        vm.startPrank(DEFAULT_OWNER_ADDRESS);
+        zoraNFTBase.grantRole(
+            zoraNFTBase.SALES_MANAGER_ROLE(),
+            SALES_MANAGER_ADDR
+        );
+        vm.stopPrank();
+        vm.prank(SALES_MANAGER_ADDR);
+        zoraNFTBase.setSaleConfiguration({
+            publicSaleStart: 0,
+            publicSaleEnd: type(uint64).max,
+            presaleStart: 100,
+            presaleEnd: 0,
+            publicSalePrice: 0.1 ether,
+            maxSalePurchasePerAddress: 1003,
+            presaleMerkleRoot: bytes32(0)
+        });
+
+        (,,,,uint64 presaleStartLookup2,uint64 presaleEndLookup2,) = zoraNFTBase.salesConfig();
+        assertEq(presaleEndLookup2, 0);
+        assertEq(presaleStartLookup2, 100);
     }
 
     function test_GlobalLimit(uint16 limit)

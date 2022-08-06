@@ -24,10 +24,6 @@ export async function setupContracts() {
   //   throw new Error("shared nft logic address is required");
   // }
 
-  if (!creatorProxyAddress) {
-    throw new Error("creator proxy address is required");
-  }
-
   if (!zoraERC721TransferHelperAddress) {
     throw new Error("erc721 transfer helper address is required");
   }

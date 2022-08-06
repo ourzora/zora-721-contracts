@@ -3,7 +3,6 @@ pragma solidity 0.8.10;
 
 import {EditionMetadataRenderer} from "../../src/metadata/EditionMetadataRenderer.sol";
 import {MetadataRenderAdminCheck} from "../../src/metadata/MetadataRenderAdminCheck.sol";
-import {SharedNFTLogic} from "../../src/utils/SharedNFTLogic.sol";
 import {DropMockBase} from "./DropMockBase.sol";
 import {DSTest} from "ds-test/test.sol";
 import {Vm} from "forge-std/Vm.sol";

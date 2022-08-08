@@ -10,7 +10,6 @@ import "../src/ZoraFeeManager.sol";
 import "../src/ZoraNFTCreatorProxy.sol";
 import {MockMetadataRenderer} from "./metadata/MockMetadataRenderer.sol";
 import {FactoryUpgradeGate} from "../src/FactoryUpgradeGate.sol";
-import {SharedNFTLogic} from "../src/utils/SharedNFTLogic.sol";
 import {IERC721AUpgradeable} from "erc721a-upgradeable/IERC721AUpgradeable.sol";
 
 contract ZoraFeeManagerTest is DSTest {
@@ -32,13 +31,12 @@ contract ZoraFeeManagerTest is DSTest {
             DEFAULT_ZORA_DAO_ADDRESS
         );
         vm.prank(DEFAULT_ZORA_DAO_ADDRESS);
-        SharedNFTLogic sharedLogic = new SharedNFTLogic();
         dropImpl = new ERC721Drop(
             feeManager,
             address(1234),
             FactoryUpgradeGate(address(0))
         );
-        editionMetadataRenderer = new EditionMetadataRenderer(sharedLogic);
+        editionMetadataRenderer = new EditionMetadataRenderer();
         dropMetadataRenderer = new DropMetadataRenderer();
         ZoraNFTCreatorV1 impl = new ZoraNFTCreatorV1(
             address(dropImpl),

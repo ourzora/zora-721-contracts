@@ -4,11 +4,15 @@ pragma solidity ^0.8.10;
 import {IMetadataRenderer} from "../interfaces/IMetadataRenderer.sol";
 import {IERC721Drop} from "../interfaces/IERC721Drop.sol";
 import {IERC721MetadataUpgradeable} from "@openzeppelin/contracts-upgradeable/interfaces/IERC721MetadataUpgradeable.sol";
-import {SharedNFTLogic} from "../utils/SharedNFTLogic.sol";
+import {NFTMetadataRenderer} from "../utils/NFTMetadataRenderer.sol";
 import {MetadataRenderAdminCheck} from "./MetadataRenderAdminCheck.sol";
 
+
 /// @notice EditionMetadataRenderer for editions support
-contract EditionMetadataRenderer is IMetadataRenderer, MetadataRenderAdminCheck {
+contract EditionMetadataRenderer is
+    IMetadataRenderer,
+    MetadataRenderAdminCheck
+{
     /// @notice Storage for token edition information
     struct TokenEditionInfo {
         string description;
@@ -43,15 +47,6 @@ contract EditionMetadataRenderer is IMetadataRenderer, MetadataRenderAdminCheck 
 
     /// @notice Token information mapping storage
     mapping(address => TokenEditionInfo) public tokenInfos;
-
-    /// @notice Reference to Shared NFT logic library
-    SharedNFTLogic private immutable sharedNFTLogic;
-
-    /// @notice Constructor for library
-    /// @param _sharedNFTLogic reference to shared NFT logic library
-    constructor(SharedNFTLogic _sharedNFTLogic) {
-        sharedNFTLogic = _sharedNFTLogic;
-    }
 
     /// @notice Update media URIs
     /// @param target target for contract to update metadata for
@@ -115,25 +110,12 @@ contract EditionMetadataRenderer is IMetadataRenderer, MetadataRenderAdminCheck 
     /// @return contract uri (if set)
     function contractURI() external view override returns (string memory) {
         address target = msg.sender;
-        bytes memory imageSpace = bytes("");
-        if (bytes(tokenInfos[target].imageURI).length > 0) {
-            imageSpace = abi.encodePacked(
-                '", "image": "',
-                tokenInfos[target].imageURI
-            );
-        }
+        TokenEditionInfo storage editionInfo = tokenInfos[target];
         return
-            string(
-                sharedNFTLogic.encodeMetadataJSON(
-                    abi.encodePacked(
-                        '{"name": "',
-                        IERC721MetadataUpgradeable(target).name(),
-                        '", "description": "',
-                        tokenInfos[target].description,
-                        imageSpace,
-                        '"}'
-                    )
-                )
+            NFTMetadataRenderer.encodeContractURIJSON(
+                IERC721MetadataUpgradeable(target).name(),
+                editionInfo.description,
+                editionInfo.imageURI
             );
     }
 
@@ -160,7 +142,7 @@ contract EditionMetadataRenderer is IMetadataRenderer, MetadataRenderAdminCheck 
         }
 
         return
-            sharedNFTLogic.createMetadataEdition({
+            NFTMetadataRenderer.createMetadataEdition({
                 name: IERC721MetadataUpgradeable(target).name(),
                 description: info.description,
                 imageUrl: info.imageURI,

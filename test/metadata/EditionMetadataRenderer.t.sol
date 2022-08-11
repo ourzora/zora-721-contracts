@@ -3,6 +3,7 @@ pragma solidity 0.8.10;
 
 import {EditionMetadataRenderer} from "../../src/metadata/EditionMetadataRenderer.sol";
 import {MetadataRenderAdminCheck} from "../../src/metadata/MetadataRenderAdminCheck.sol";
+import {IMetadataRenderer} from "../../src/interfaces/IMetadataRenderer.sol";
 import {DropMockBase} from "./DropMockBase.sol";
 import {IERC721Drop} from "../../src/interfaces/IERC721Drop.sol";
 import {DSTest} from "ds-test/test.sol";
@@ -10,6 +11,7 @@ import {Vm} from "forge-std/Vm.sol";
 
 contract IERC721OnChainDataMock {
     IERC721Drop.SaleDetails private saleDetailsInternal;
+    IERC721Drop.Configuration private configInternal;
 
     constructor(uint256 totalMinted, uint256 maxSupply) {
         saleDetailsInternal = IERC721Drop.SaleDetails({
@@ -25,6 +27,13 @@ contract IERC721OnChainDataMock {
             totalMinted: totalMinted,
             maxSupply: maxSupply
         });
+
+        configInternal = IERC721Drop.Configuration({
+            metadataRenderer: IMetadataRenderer(address(0x0)),
+            editionSize: 12,
+            royaltyBPS: 1000,
+            fundsRecipient: payable(address(0x163))
+        });
     }
 
     function name() external returns (string memory) {
@@ -33,6 +42,10 @@ contract IERC721OnChainDataMock {
 
     function saleDetails() external returns (IERC721Drop.SaleDetails memory) {
         return saleDetailsInternal;
+    }
+
+    function config() external returns (IERC721Drop.Configuration memory) {
+        return configInternal;
     }
 }
 
@@ -161,5 +174,17 @@ contract EditionMetadataRendererTest is DSTest {
         );
         // {"name": "MOCK NAME 1", "description": "Description", "image": "image", "animation_url": "animation", "properties": {"number": 1, "name": "MOCK NAME"}}
         assertEq("data:application/json;base64,eyJuYW1lIjogIk1PQ0sgTkFNRSAxIiwgImRlc2NyaXB0aW9uIjogIkRlc2NyaXB0aW9uIiwgImltYWdlIjogImltYWdlP2lkPTEiLCAiYW5pbWF0aW9uX3VybCI6ICJhbmltYXRpb24iLCAicHJvcGVydGllcyI6IHsibnVtYmVyIjogMSwgIm5hbWUiOiAiTU9DSyBOQU1FIn19", editionRenderer.tokenURI(1));
+    }
+
+    function test_ContractURI() public {
+        IERC721OnChainDataMock mock = new IERC721OnChainDataMock({
+            totalMinted: 20,
+            maxSupply: 10
+        });
+        vm.startPrank(address(mock));
+        editionRenderer.initializeWithData(
+            abi.encode("Description", "ipfs://image", "ipfs://animation")
+        );
+        assertEq("data:application/json;base64,eyJuYW1lIjogIk1PQ0sgTkFNRSIsICJkZXNjcmlwdGlvbiI6ICJEZXNjcmlwdGlvbiIsICJzZWxsZXJfZmVlX2Jhc2lzX3BvaW50cyI6IDEwMDAsICJmZWVfcmVjaXBpZW50IjogIjB4MDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDE2MyIsICJpbWFnZSI6ICJpcGZzOi8vaW1hZ2UifQ==", editionRenderer.contractURI());
     }
 }

@@ -41,7 +41,9 @@ library NFTMetadataRenderer {
     function encodeContractURIJSON(
         string memory name,
         string memory description,
-        string memory imageURI
+        string memory imageURI,
+        uint256 royaltyBPS,
+        address royaltyRecipient
     ) internal pure returns (string memory) {
         bytes memory imageSpace = bytes("");
         if (bytes(imageURI).length > 0) {
@@ -55,6 +57,11 @@ library NFTMetadataRenderer {
                         name,
                         '", "description": "',
                         description,
+                        // this is for opensea since they don't respect ERC2981 right now
+                        '", "seller_fee_basis_points": ',
+                        Strings.toString(royaltyBPS),
+                        ', "fee_recipient": "',
+                        Strings.toHexString(uint256(uint160(royaltyRecipient)), 20),
                         imageSpace,
                         '"}'
                     )

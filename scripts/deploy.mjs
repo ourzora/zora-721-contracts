@@ -1,8 +1,5 @@
 import {
   deployAndVerify,
-  retryDeploy,
-  retryVerify,
-  timeout,
 } from "./contract.mjs";
 import { writeFile } from "fs/promises";
 import dotenv from "dotenv";
@@ -76,6 +73,14 @@ export async function setupContracts() {
     "deployed creator implementation to",
     creatorImpl.deployed.deploy.deployedTo
   );
+
+  if (!creatorProxyAddress) {
+    const creatorProxyDeploy = await deployAndVerify(
+      "src/ZoraNFTCreatorProxy.sol:ZoraNFTCreatorProxy",
+      [creatorImpl.deployed.deploy.deployedTo, '0x']
+    );
+    creatorProxyAddress = creatorProxyDeploy.deploy.deployedTo;
+  }
 
   return {
     feeManager,

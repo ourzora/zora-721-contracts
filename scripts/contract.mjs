@@ -13,7 +13,7 @@ export function timeout(ms) {
 
 export async function deploy(contract, args = undefined) {
   const [contractPath, contractName] = contract.split(":");
-  const constructorArgs = args ? ["--constructor-args", args.join(" ")] : [];
+  const constructorArgs = args ? ["--constructor-args", args.join(" ") || '0x'] : [];
   const { stdout, stderr } = await execPromise(
     [
       "forge",
@@ -46,7 +46,9 @@ export async function verify(address, contract, args = undefined) {
     ["forge", "inspect", contractName, "abi"].join(" ")
   );
   const deployArgs = new Interface(inspectResult.stdout).encodeDeploy(args);
-  const constructorArgs = args ? ["--constructor-args", deployArgs] : [];
+  const constructorArgs = args
+    ? ["--constructor-args", deployArgs]
+    : ["--constructor-args", "0x"];
   const { stdout, stderr } = await execPromise(
     [
       "forge",

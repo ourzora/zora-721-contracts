@@ -52,23 +52,16 @@ export async function setupContracts() {
   console.log("deployed drop contract to ", dropContractAddress);
   console.log("deploying drops metadata");
   const dropMetadataContract = await deployAndVerify(
-    "src/metadata/DropMetadataRenderer.sol:DropMetadataRenderer"
+    "src/metadata/DropMetadataRenderer.sol:DropMetadataRenderer",
+    []
   );
   const dropMetadataAddress = dropMetadataContract.deployed.deploy.deployedTo;
   console.log("deployed drops metadata to", dropMetadataAddress);
 
-  console.log("deploying shared nft logic");
-  const sharedNFTLogicContract = await deployAndVerify(
-    "src/utils/SharedNFTLogic.sol:SharedNFTLogic"
-  );
-  const sharedNFTLogicAddress =
-    sharedNFTLogicContract.deployed.deploy.deployedTo;
-  console.log("deployed shared nft logic to", sharedNFTLogicAddress);
-
   console.log("deploying editions metadata");
   const editionsMetadataContract = await deployAndVerify(
     "src/metadata/EditionMetadataRenderer.sol:EditionMetadataRenderer",
-    [sharedNFTLogicAddress]
+    []
   );
   const editionsMetadataAddress =
     editionsMetadataContract.deployed.deploy.deployedTo;
@@ -84,20 +77,6 @@ export async function setupContracts() {
     creatorImpl.deployed.deploy.deployedTo
   );
 
-  // console.log("deploying creator proxy");
-  // const creatorProxy = await retryDeploy(
-  //   2,
-  //   "src/ZoraNFTCreatorProxy.sol:ZoraNFTCreatorProxy",
-  //   [creatorImpl.deployed.deploy.deployedTo, '""']
-  // );
-  // await timeout(10000);
-  // await retryVerify(
-  //   3,
-  //   creatorProxy.deploy.deployedTo,
-  //   "src/ZoraNFTCreatorProxy.sol:ZoraNFTCreatorProxy",
-  //   [creatorImpl.deployed.deploy.deployedTo, []]
-  // );
-  // console.log("deployed creator proxy to ", creatorProxy.deploy.deployedTo);
   return {
     feeManager,
     dropContract,

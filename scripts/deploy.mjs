@@ -1,9 +1,4 @@
-import {
-  deployAndVerify,
-  retryDeploy,
-  retryVerify,
-  timeout,
-} from "./contract.mjs";
+import { deployAndVerify } from "./contract.mjs";
 import { writeFile } from "fs/promises";
 import dotenv from "dotenv";
 import esMain from "es-main";
@@ -17,7 +12,7 @@ export async function setupContracts() {
   const zoraERC721TransferHelperAddress =
     process.env.ZORA_ERC_721_TRANSFER_HELPER_ADDRESS;
   const feeDefaultBPS = process.env.FEE_DEFAULT_BPS;
-  const creatorProxyAddress = process.env.CREATOR_PROXY_ADDRESS;
+  let creatorProxyAddress = process.env.CREATOR_PROXY_ADDRESS;
 
   if (!zoraERC721TransferHelperAddress) {
     throw new Error("erc721 transfer helper address is required");
@@ -76,6 +71,14 @@ export async function setupContracts() {
     "deployed creator implementation to",
     creatorImpl.deployed.deploy.deployedTo
   );
+
+  if (!creatorProxyAddress) {
+    const creatorProxyDeploy = await deployAndVerify(
+      "src/ZoraNFTCreatorProxy.sol:ZoraNFTCreatorProxy",
+      [creatorImpl.deployed.deploy.deployedTo, "0x"]
+    );
+    creatorProxyAddress = creatorProxyDeploy.deployed.deploy.deployedTo;
+  }
 
   return {
     feeManager,

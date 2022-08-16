@@ -142,8 +142,6 @@ library NFTMetadataRenderer {
                     abi.encodePacked(
                         'image": "',
                         imageUrl,
-                        "?id=",
-                        Strings.toString(tokenOfEdition),
                         '", "animation_url": "',
                         animationUrl,
                         '", "'

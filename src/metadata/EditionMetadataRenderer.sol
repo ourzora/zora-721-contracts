@@ -4,9 +4,13 @@ pragma solidity ^0.8.10;
 import {IMetadataRenderer} from "../interfaces/IMetadataRenderer.sol";
 import {IERC721Drop} from "../interfaces/IERC721Drop.sol";
 import {IERC721MetadataUpgradeable} from "@openzeppelin/contracts-upgradeable/interfaces/IERC721MetadataUpgradeable.sol";
+import {IERC2981Upgradeable} from "@openzeppelin/contracts-upgradeable/interfaces/IERC2981Upgradeable.sol";
 import {NFTMetadataRenderer} from "../utils/NFTMetadataRenderer.sol";
 import {MetadataRenderAdminCheck} from "./MetadataRenderAdminCheck.sol";
 
+interface DropConfigGetter {
+    function config() external view returns (IERC721Drop.Configuration memory config);
+}
 
 /// @notice EditionMetadataRenderer for editions support
 contract EditionMetadataRenderer is
@@ -111,12 +115,16 @@ contract EditionMetadataRenderer is
     function contractURI() external view override returns (string memory) {
         address target = msg.sender;
         TokenEditionInfo storage editionInfo = tokenInfos[target];
+        IERC721Drop.Configuration memory config = DropConfigGetter(target).config();
+
         return
-            NFTMetadataRenderer.encodeContractURIJSON(
-                IERC721MetadataUpgradeable(target).name(),
-                editionInfo.description,
-                editionInfo.imageURI
-            );
+            NFTMetadataRenderer.encodeContractURIJSON({
+                name: IERC721MetadataUpgradeable(target).name(),
+                description: editionInfo.description,
+                imageURI: editionInfo.imageURI,
+                royaltyBPS: uint256(config.royaltyBPS),
+                royaltyRecipient: config.fundsRecipient
+            });
     }
 
     /// @notice Token URI information getter

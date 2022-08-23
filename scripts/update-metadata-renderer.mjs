@@ -1,5 +1,6 @@
 import {
   deployAndVerify,
+  retryVerify,
 } from "./contract.mjs";
 import { writeFile } from "fs/promises";
 import dotenv from "dotenv";
@@ -10,7 +11,9 @@ dotenv.config({
 });
 
 export async function setupContracts() {
+  console.log(process.env);
   const creatorProxyAddress = process.env.CREATOR_PROXY_ADDRESS;
+  const sharedNFTLogicAddress = process.env.SHARED_NFT_LOGIC_ADDRESS;
 
   if (!creatorProxyAddress) {
     throw new Error("creator proxy address required");
@@ -37,41 +40,47 @@ export async function setupContracts() {
     throw new Error("At least one of drop or edition needs to be updated");
   }
 
+  let editionsMetadataContract;
+  let dropMetadataContract;
+
   if (!editionMetadataAddress) {
     console.log("deploying editions metadata");
-    const editionsMetadataContract = await deployAndVerify(
+    editionsMetadataContract = await deployAndVerify(
       "src/metadata/EditionMetadataRenderer.sol:EditionMetadataRenderer",
       []
     );
-    editionsMetadataAddress =
+    editionMetadataAddress =
       editionsMetadataContract.deployed.deploy.deployedTo;
-    console.log("deployed drops metadata to", editionsMetadataAddress);
+    console.log("deployed drops metadata to", editionMetadataAddress);
   }
 
   if (!dropMetadataAddress) {
     console.log("deploying drops metadata");
-    const editionsMetadataContract = await deployAndVerify(
+    dropMetadataContract = await deployAndVerify(
       "src/metadata/DropMetadataRenderer.sol:DropMetadataRenderer",
       [sharedNFTLogicAddress]
     );
-    editionsMetadataAddress =
-      editionsMetadataContract.deployed.deploy.deployedTo;
-    console.log("deployed drops metadata to", editionsMetadataAddress);
+    dropMetadataAddress =
+      dropMetadataContract.deployed.deploy.deployedTo;
+    console.log("deployed drops metadata to", dropMetadataAddress);
   }
 
   console.log("deploying creator implementation");
   const creatorImpl = await deployAndVerify(
     "src/ZoraNFTCreatorV1.sol:ZoraNFTCreatorV1",
-    [dropContractAddress, editionsMetadataAddress, dropMetadataAddress]
+    [dropContractAddress, editionMetadataAddress, dropMetadataAddress]
   );
   console.log(
     "deployed creator implementation to",
     creatorImpl.deployed.deploy.deployedTo
   );
 
+  // done on multisig:
+  // creatorV1.upgradeTo(NEW_CREATOR_IMPL_ADDRESS)
+
   return {
     feeManager,
-    dropContract,
+    dropContractAddress,
     dropMetadataContract,
     editionsMetadataContract,
     creatorImpl,

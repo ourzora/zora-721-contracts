@@ -1,0 +1,43 @@
+{
+  "feeManager": "0xe666ca2f5ab01a5e8ca19e505b2de3475a39d7d2",
+  "dropContractAddress": "0x478dc357913ec31b5015cbad60c8ddedff6299c1",
+  "editionsMetadataContract": {
+    "deployed": {
+      "deploy": {
+        "deployedTo": "0x2008C05685F9fA15BBD75d80e9A44ab0c7230577",
+        "deployer": "0xaD031EeE55f595dF6Dbd61e9ef3B908FaD1B3671",
+        "transactionHash": "0x4323d7bac79f9f66ead41e543ae56d4341dba0489a3f44bc998c91b8c29c75e6"
+      },
+      "contractName": "EditionMetadataRenderer",
+      "contractPath": "src/metadata/EditionMetadataRenderer.sol",
+      "args": []
+    },
+    "verify": {
+      "verify": "\nSubmitting verification for [src/metadata/EditionMetadataRenderer.sol:EditionMetadataRenderer] Ok(\"0x2008C05685F9fA15BBD75d80e9A44ab0c7230577\").\nSubmitted contract for verification:\n\tResponse: `OK`\n\tGUID: `cuhtzgibe8reibfmpr2ayi4acdj8ezsytp6qitdkmaqamabjfb`\n\tURL:\n        https://etherscan.io/address/0x2008c05685f9fa15bbd75d80e9a44ab0c7230577\n",
+      "contractName": "EditionMetadataRenderer",
+      "contractPath": "src/metadata/EditionMetadataRenderer.sol"
+    }
+  },
+  "creatorImpl": {
+    "deployed": {
+      "deploy": {
+        "deployedTo": "0x532142aE8e53a5F92B9dE1a43F1FFD6eF789e65e",
+        "deployer": "0xaD031EeE55f595dF6Dbd61e9ef3B908FaD1B3671",
+        "transactionHash": "0xca04683246a2ac6614f1e8d36694ac017c7f4846eb407e7ae0c9b0a06bc011e2"
+      },
+      "contractName": "ZoraNFTCreatorV1",
+      "contractPath": "src/ZoraNFTCreatorV1.sol",
+      "args": [
+        "0x478dc357913ec31b5015cbad60c8ddedff6299c1",
+        "0x2008C05685F9fA15BBD75d80e9A44ab0c7230577",
+        "0x5914d9a241008b9f02f22811bf3a77e02b84d226"
+      ]
+    },
+    "verify": {
+      "verify": "\nSubmitting verification for [src/ZoraNFTCreatorV1.sol:ZoraNFTCreatorV1] Ok(\"0x532142aE8e53a5F92B9dE1a43F1FFD6eF789e65e\").\nSubmitted contract for verification:\n\tResponse: `OK`\n\tGUID: `e2xekki9p3kejumnbj1gt6qlzven3wk5yskginh6cvw97ijp9e`\n\tURL:\n        https://etherscan.io/address/0x532142ae8e53a5f92b9de1a43f1ffd6ef789e65e\n",
+      "contractName": "ZoraNFTCreatorV1",
+      "contractPath": "src/ZoraNFTCreatorV1.sol"
+    }
+  },
+  "creatorProxyAddress": "0xf74b146ce44cc162b601dec3be331784db111dc1"
+}

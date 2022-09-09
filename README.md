@@ -3,7 +3,7 @@
 ### How do I integrate these in my own site?
 
 1. Use wagmi/ethers/web3.js with the given artifacts (in the node package) or typechain.
-2. Use our subgraph to find media / metadata information (rinkeby: https://thegraph.com/hosted-service/subgraph/iainnash/erc721droprinkeby) (mainnet: https://thegraph.com/hosted-service/subgraph/iainnash/zora-editions-mainnet)
+2. Use our subgraph to find media / metadata information (goerli: https://api.thegraph.com/subgraphs/name/iainnash/erc721drop-goerli) (rinkeby: https://thegraph.com/hosted-service/subgraph/iainnash/erc721droprinkeby) (mainnet: https://thegraph.com/hosted-service/subgraph/iainnash/zora-editions-mainnet)
 3. For your edition, call `address(edition).purchase(quantity, {value: price * quantity})`. Price and availability can be found from the subgraph or from the blockchain with the `saleInfo` call.
 4. Find the transfer() or sale() event from the transaction receipt to get the ID that the user minted.
 5. ✨

@@ -177,76 +177,71 @@ contract SplitHelpersTest is Test {
         assertEq(percentAllocations, expectedPercentAllocations);
     }
 
-    // function testCan_handleSomeDupeHolders(
-    //     bytes32 seed,
-    //     uint8 numHolders,
-    //     uint8 _numUniqHolders
-    // ) public {
-    //     vm.assume(numHolders > 0);
+    function testCan_handleSomeDupeHolders(
+        bytes32 seed,
+        uint8 numHolders,
+        uint8 _numUniqHolders
+    ) public {
+        vm.assume(numHolders > 0);
 
-    //     uint8 numUniqHolders = uint8(bound(_numUniqHolders, 1, numHolders));
-    //     address[] memory randAddresses = genRandAddressArray(seed, numHolders);
-    //     address[] memory addressesWithDupes = new address[](
-    //         randAddresses.length
-    //     );
-    //     for (uint32 i = 0; i < addressesWithDupes.length; i++) {
-    //         addressesWithDupes[i] = address(
-    //             uint160(randAddresses[i]) % numUniqHolders
-    //         );
-    //     }
+        uint8 numUniqHolders = uint8(bound(_numUniqHolders, 1, numHolders));
+        address[] memory randAddresses = genRandAddressArray(seed, numHolders);
+        address[] memory addressesWithDupes = new address[](
+            randAddresses.length
+        );
+        for (uint32 i = 0; i < addressesWithDupes.length; i++) {
+            addressesWithDupes[i] = address(
+                (uint160(randAddresses[i]) % numUniqHolders) + 1
+            );
+        }
 
-    //     address _nftContractAddress = MOCK_NFT;
-    //     uint32[] memory _tokenIds = new uint32[](numHolders);
-    //     for (uint32 i = 0; i < _tokenIds.length; i++) {
-    //         _tokenIds[i] = i;
-    //     }
-    //     vm.mockCall(
-    //         SPLIT_MAIN,
-    //         abi.encodeWithSelector(ISplitMain.createSplit.selector),
-    //         abi.encode(address(1))
-    //     );
-    //     sh = new TestSplitHelpers(_nftContractAddress);
+        uint32[] memory _tokenIds = new uint32[](numHolders);
+        for (uint32 i = 0; i < _tokenIds.length; i++) {
+            _tokenIds[i] = i + 1;
+        }
+        vm.mockCall(
+            SPLIT_MAIN,
+            abi.encodeWithSelector(ISplitMain.createSplit.selector),
+            abi.encode(address(1))
+        );
+        sh = new TestSplitHelpers(address(NFT_CONTRACT));
 
-    //     for (uint256 i = 0; i < _tokenIds.length; i++) {
-    //         vm.mockCall(
-    //             MOCK_NFT,
-    //             abi.encodeWithSelector(IERC721.ownerOf.selector, _tokenIds[i]),
-    //             abi.encode(addressesWithDupes[i])
-    //         );
-    //     }
-    //     (address[] memory recipients, uint32[] memory percentAllocations) = sh
-    //         .getRecipientsAndAllocations();
+        for (uint256 i = 0; i < _tokenIds.length; i++) {
+            NFT_CONTRACT.mint(addressesWithDupes[i], 1);
+        }
+        (address[] memory recipients, uint32[] memory percentAllocations) = sh
+            .getRecipientsAndAllocations();
 
-    //     for (uint256 i = 0; i < numUniqHolders; i++) {
-    //         for (uint256 j = 0; j < addressesWithDupes.length; j++) {
-    //             if (addressesWithDupes[j] == address(uint160(i))) {
-    //                 uniqAddresses.push(address(uint160(i)));
-    //                 break;
-    //             }
-    //         }
-    //     }
-    //     address[] memory expectedRecipients = uniqAddresses;
+        for (uint256 i = 0; i < numUniqHolders; i++) {
+            for (uint256 j = 0; j < addressesWithDupes.length; j++) {
+                if (addressesWithDupes[j] == address(uint160(i) + 1)) {
+                    uniqAddresses.push(address(uint160(i) + 1));
+                    break;
+                }
+            }
+        }
+        address[] memory expectedRecipients = uniqAddresses;
 
-    //     uint32 percentPerToken = uint32(PERCENTAGE_SCALE / numHolders);
-    //     uint32[] memory expectedPercentAllocations = new uint32[](
-    //         expectedRecipients.length
-    //     );
-    //     uint32 sum = 0;
-    //     for (uint256 i = 0; i < expectedPercentAllocations.length; i++) {
-    //         for (uint256 j = 0; j < addressesWithDupes.length; j++) {
-    //             if (expectedRecipients[i] == addressesWithDupes[j]) {
-    //                 expectedPercentAllocations[i] += percentPerToken;
-    //                 sum += percentPerToken;
-    //             }
-    //         }
-    //     }
-    //     expectedPercentAllocations[expectedPercentAllocations.length - 1] +=
-    //         PERCENTAGE_SCALE -
-    //         sum;
+        uint32 percentPerToken = uint32(PERCENTAGE_SCALE / numHolders);
+        uint32[] memory expectedPercentAllocations = new uint32[](
+            expectedRecipients.length
+        );
+        uint32 sum = 0;
+        for (uint256 i = 0; i < expectedPercentAllocations.length; i++) {
+            for (uint256 j = 0; j < addressesWithDupes.length; j++) {
+                if (expectedRecipients[i] == addressesWithDupes[j]) {
+                    expectedPercentAllocations[i] += percentPerToken;
+                    sum += percentPerToken;
+                }
+            }
+        }
+        expectedPercentAllocations[expectedPercentAllocations.length - 1] +=
+            PERCENTAGE_SCALE -
+            sum;
 
-    //     assertEq(recipients, expectedRecipients);
-    //     assertEq(percentAllocations, expectedPercentAllocations);
-    // }
+        assertEq(recipients, expectedRecipients);
+        assertEq(percentAllocations, expectedPercentAllocations);
+    }
 
     /// -----------------------------------------------------------------------
     /// helper fns

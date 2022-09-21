@@ -89,7 +89,6 @@ contract SplitHelpersTest is Test {
     }
 
     function testCan_handleAllDifferentHolders() public {
-        address _nftContractAddress = MOCK_NFT;
         uint32[] memory _tokenIds = new uint32[](10);
         for (uint32 i = 0; i < _tokenIds.length; i++) {
             _tokenIds[i] = i;
@@ -135,53 +134,48 @@ contract SplitHelpersTest is Test {
     /// correctness tests - fuzzing
     /// -----------------------------------------------------------------------
 
-    // function testCan_handleAllDifferentHolders(uint8 numHolders) public {
-    //     vm.assume(numHolders > 0);
+    function testCan_handleAllDifferentHolders(uint8 numHolders) public {
+        vm.assume(numHolders > 0);
 
-    //     address _nftContractAddress = MOCK_NFT;
-    //     uint32[] memory _tokenIds = new uint32[](numHolders);
-    //     for (uint32 i = 0; i < _tokenIds.length; i++) {
-    //         _tokenIds[i] = i;
-    //     }
-    //     vm.mockCall(
-    //         SPLIT_MAIN,
-    //         abi.encodeWithSelector(ISplitMain.createSplit.selector),
-    //         abi.encode(address(1))
-    //     );
-    //     sh = new TestSplitHelpers(_nftContractAddress);
+        uint32[] memory _tokenIds = new uint32[](numHolders);
+        for (uint32 i = 0; i < _tokenIds.length; i++) {
+            _tokenIds[i] = i;
+        }
+        vm.mockCall(
+            SPLIT_MAIN,
+            abi.encodeWithSelector(ISplitMain.createSplit.selector),
+            abi.encode(address(1))
+        );
+        sh = new TestSplitHelpers(address(NFT_CONTRACT));
 
-    //     for (uint256 i = 0; i < _tokenIds.length; i++) {
-    //         vm.mockCall(
-    //             MOCK_NFT,
-    //             abi.encodeWithSelector(IERC721.ownerOf.selector, _tokenIds[i]),
-    //             abi.encode(address(uint160(i)))
-    //         );
-    //     }
-    //     (address[] memory recipients, uint32[] memory percentAllocations) = sh
-    //         .getRecipientsAndAllocations();
+        for (uint256 i = 0; i < _tokenIds.length; i++) {
+            NFT_CONTRACT.mint(address(uint160(i + 1)), 1);
+        }
+        (address[] memory recipients, uint32[] memory percentAllocations) = sh
+            .getRecipientsAndAllocations();
 
-    //     address[] memory expectedRecipients = new address[](_tokenIds.length);
-    //     for (uint256 i = 0; i < expectedRecipients.length; i++) {
-    //         expectedRecipients[i] = address(uint160(i));
-    //     }
-    //     uint32 percentPerToken = uint32(
-    //         PERCENTAGE_SCALE / expectedRecipients.length
-    //     );
-    //     uint32[] memory expectedPercentAllocations = new uint32[](
-    //         _tokenIds.length
-    //     );
-    //     uint32 sum = 0;
-    //     for (uint256 i = 0; i < expectedPercentAllocations.length; i++) {
-    //         expectedPercentAllocations[i] = percentPerToken;
-    //         sum += percentPerToken;
-    //     }
-    //     expectedPercentAllocations[expectedPercentAllocations.length - 1] +=
-    //         PERCENTAGE_SCALE -
-    //         sum;
+        address[] memory expectedRecipients = new address[](_tokenIds.length);
+        for (uint256 i = 0; i < expectedRecipients.length; i++) {
+            expectedRecipients[i] = address(uint160(i + 1));
+        }
+        uint32 percentPerToken = uint32(
+            PERCENTAGE_SCALE / expectedRecipients.length
+        );
+        uint32[] memory expectedPercentAllocations = new uint32[](
+            _tokenIds.length
+        );
+        uint32 sum = 0;
+        for (uint256 i = 0; i < expectedPercentAllocations.length; i++) {
+            expectedPercentAllocations[i] = percentPerToken;
+            sum += percentPerToken;
+        }
+        expectedPercentAllocations[expectedPercentAllocations.length - 1] +=
+            PERCENTAGE_SCALE -
+            sum;
 
-    //     assertEq(recipients, expectedRecipients);
-    //     assertEq(percentAllocations, expectedPercentAllocations);
-    // }
+        assertEq(recipients, expectedRecipients);
+        assertEq(percentAllocations, expectedPercentAllocations);
+    }
 
     // function testCan_handleSomeDupeHolders(
     //     bytes32 seed,

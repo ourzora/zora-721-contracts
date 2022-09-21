@@ -16,15 +16,6 @@ contract TestSplitHelpers is SplitHelpers {
 contract NftContract is ERC721AUpgradeable, Test {
     constructor() initializer {
         __ERC721A_init("name", "symbol");
-        // for (uint32 i = 0; i < 10; i++) {
-        //     address addr = address(
-        //         uint160(
-        //             uint256(
-        //                 keccak256(abi.encodePacked(i, blockhash(block.number)))
-        //             )
-        //         )
-        //     );
-        // }
     }
 
     function mint(address _address, uint256 _quantity) public {

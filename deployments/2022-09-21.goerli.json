@@ -1,0 +1,99 @@
+{
+  "feeManager": {
+    "deployed": {
+      "deploy": {
+        "deployedTo": "0x66d8adfe10e5b2e1a8cd3e1d64e3983ec2d2bbeb",
+        "deployer": "0x35ce1fb8caa3758190ac65edbcbc9647b8800e8f",
+        "transactionHash": "0xf7e3ff804e1cf3781dfd87e6f4cbe3db7b6ca18c90d5dcfae99fb9d8d59d1f49"
+      },
+      "contractName": "ZoraFeeManager",
+      "contractPath": "src/ZoraFeeManager.sol",
+      "args": [
+        "0",
+        "0xcfBf34d385EA2d5Eb947063b67eA226dcDA3DC38"
+      ]
+    },
+    "verify": {
+      "verify": "\nSubmitting verification for [src/ZoraFeeManager.sol:ZoraFeeManager] 0x66d8adfe10e5b2e1a8cd3e1d64e3983ec2d2bbeb.\nSubmitted contract for verification:\n\tResponse: `OK`\n\tGUID: `i2chwx8m4rpkpzn77dskjjkypvxugw4lzwj8dfjk4c3xtckujp`\n\tURL: https://goerli.etherscan.io/address/0x66d8adfe10e5b2e1a8cd3e1d64e3983ec2d2bbeb\n",
+      "contractName": "ZoraFeeManager",
+      "contractPath": "src/ZoraFeeManager.sol"
+    }
+  },
+  "dropContract": {
+    "deployed": {
+      "deploy": {
+        "deployedTo": "0xf0574a74a31e1a66ce83a8d8cf920caafd4931b3",
+        "deployer": "0x35ce1fb8caa3758190ac65edbcbc9647b8800e8f",
+        "transactionHash": "0x389ee923238f43c0423547571752da1f60389ae6638fdbfd453e17568609a9a8"
+      },
+      "contractName": "ERC721Drop",
+      "contractPath": "src/ERC721Drop.sol",
+      "args": [
+        "0x66d8adfe10e5b2e1a8cd3e1d64e3983ec2d2bbeb",
+        "0x0000000000000000000000000000000000000000",
+        "0xe066c72b6ef6b22f9dcd559de6b1e09996f960c6"
+      ]
+    },
+    "verify": {
+      "verify": "\nSubmitting verification for [src/ERC721Drop.sol:ERC721Drop] 0xf0574a74a31e1a66ce83a8d8cf920caafd4931b3.\nSubmitted contract for verification:\n\tResponse: `OK`\n\tGUID: `fhji8gymeyczjerwibuuyssydtlr7eqrmrlu6b67muucl3ddui`\n\tURL: https://goerli.etherscan.io/address/0xf0574a74a31e1a66ce83a8d8cf920caafd4931b3\n",
+      "contractName": "ERC721Drop",
+      "contractPath": "src/ERC721Drop.sol"
+    }
+  },
+  "dropMetadataContract": {
+    "deployed": {
+      "deploy": {
+        "deployedTo": "0x8f324e1df34c646160531d6ff9e1a617e1e69f1d",
+        "deployer": "0x35ce1fb8caa3758190ac65edbcbc9647b8800e8f",
+        "transactionHash": "0x4b4cfd8645af0a331c1382b30a8b492cf6b3323f9993092ab387c5e22570b1ff"
+      },
+      "contractName": "DropMetadataRenderer",
+      "contractPath": "src/metadata/DropMetadataRenderer.sol",
+      "args": []
+    },
+    "verify": {
+      "verify": "\nSubmitting verification for [src/metadata/DropMetadataRenderer.sol:DropMetadataRenderer] 0x8f324e1df34c646160531d6ff9e1a617e1e69f1d.\nSubmitted contract for verification:\n\tResponse: `OK`\n\tGUID: `rbkxjck4unssyvzwcgvhksuvs4tdalgsvlj5nz5h6wsa5cmbrg`\n\tURL: https://goerli.etherscan.io/address/0x8f324e1df34c646160531d6ff9e1a617e1e69f1d\n",
+      "contractName": "DropMetadataRenderer",
+      "contractPath": "src/metadata/DropMetadataRenderer.sol"
+    }
+  },
+  "editionsMetadataContract": {
+    "deployed": {
+      "deploy": {
+        "deployedTo": "0xf23c0e71de3e84fcca238cfe084a4dcbda236a52",
+        "deployer": "0x35ce1fb8caa3758190ac65edbcbc9647b8800e8f",
+        "transactionHash": "0xe53e2a8364a48f66b09ee0f9092b135e536eae092d25dd3a7ac93b63803db1ad"
+      },
+      "contractName": "EditionMetadataRenderer",
+      "contractPath": "src/metadata/EditionMetadataRenderer.sol",
+      "args": []
+    },
+    "verify": {
+      "verify": "\nSubmitting verification for [src/metadata/EditionMetadataRenderer.sol:EditionMetadataRenderer] 0xf23c0e71de3e84fcca238cfe084a4dcbda236a52.\nSubmitted contract for verification:\n\tResponse: `OK`\n\tGUID: `g2awyakvsizpnqztkq7nfd6fyahn7bjqgk1firw1qerxmzkvq6`\n\tURL: https://goerli.etherscan.io/address/0xf23c0e71de3e84fcca238cfe084a4dcbda236a52\n",
+      "contractName": "EditionMetadataRenderer",
+      "contractPath": "src/metadata/EditionMetadataRenderer.sol"
+    }
+  },
+  "creatorImpl": {
+    "deployed": {
+      "deploy": {
+        "deployedTo": "0x7b2403729e51a123c8ccd6cd04cd0438b0fd78a1",
+        "deployer": "0x35ce1fb8caa3758190ac65edbcbc9647b8800e8f",
+        "transactionHash": "0x339bbed329545a0915c5b35758a4ff0080f1a9f7c469d102e5cd7ff88a346046"
+      },
+      "contractName": "ZoraNFTCreatorV1",
+      "contractPath": "src/ZoraNFTCreatorV1.sol",
+      "args": [
+        "0xf0574a74a31e1a66ce83a8d8cf920caafd4931b3",
+        "0xf23c0e71de3e84fcca238cfe084a4dcbda236a52",
+        "0x8f324e1df34c646160531d6ff9e1a617e1e69f1d"
+      ]
+    },
+    "verify": {
+      "verify": "\nSubmitting verification for [src/ZoraNFTCreatorV1.sol:ZoraNFTCreatorV1] 0x7b2403729e51a123c8ccd6cd04cd0438b0fd78a1.\nSubmitted contract for verification:\n\tResponse: `OK`\n\tGUID: `evdefjqks6vg37ihty9wmiipqkuirel8zyr6qw4sitvbtkuyqe`\n\tURL: https://goerli.etherscan.io/address/0x7b2403729e51a123c8ccd6cd04cd0438b0fd78a1\n",
+      "contractName": "ZoraNFTCreatorV1",
+      "contractPath": "src/ZoraNFTCreatorV1.sol"
+    }
+  },
+  "creatorProxyAddress": "0x0f6f792f5c9451335a951fab683df09af3508a12"
+}

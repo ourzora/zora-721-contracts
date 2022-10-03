@@ -15,7 +15,10 @@ contract SplitRegistry is SplitRegistryNFT, IRegistry {
         pure
         returns (uint256)
     {
-        return (uint160(sender) << 32) + uint32(splitIndex);
+        if (splitIndex > type(uint96).max) {
+            revert TokenIDTooLarge();
+        }
+        return (uint160(sender) << 96) + uint96(splitIndex);
     }
 
     function _extractTokenId(uint256 tokenId)
@@ -24,7 +27,7 @@ contract SplitRegistry is SplitRegistryNFT, IRegistry {
         returns (address sender, uint256 splitIndex)
     {
         splitIndex = tokenId | ~type(uint160).max;
-        sender = address(uint160(tokenId >> 32));
+        sender = address(uint160(tokenId << 96));
     }
 
     function mint(uint256 id, address user) external {
@@ -37,23 +40,31 @@ contract SplitRegistry is SplitRegistryNFT, IRegistry {
 
     function _setOwner() internal {}
 
-    function _getOwner(uint256 tokenId) internal override returns (address) {
+    function _getOwner(uint256 tokenId)
+        internal
+        view
+        override
+        returns (address)
+    {
         (address sender, uint256 splitIndex) = _extractTokenId(tokenId);
         return IDropsSplitter(sender).shareOwner(splitIndex);
     }
 
     function _setOwner(uint256 tokenId, address newOwner) internal override {
         (address sender, uint256 splitIndex) = _extractTokenId(tokenId);
-        IDropsSplitter(sender).onRegistryTransfer(splitIndex, payable(newOwner));
+        IDropsSplitter(sender).onRegistryTransfer(
+            splitIndex,
+            payable(newOwner)
+        );
     }
 
     function tokenURI(uint256 id) public view override returns (string memory) {
-      // Use rendering library for split NFT
-      return '';
+        // Use rendering library for split NFT
+        return "";
     }
 
     function contractURI() public returns (string memory) {
-      // Return constant string
-      return '';
+        // Return constant string
+        return "";
     }
 }

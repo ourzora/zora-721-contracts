@@ -21,7 +21,11 @@ interface IDropsSplitter {
     error ShareDenominatorMismatch();
     error PlatformDenomiantorMismatch();
     error WrongSenderAccount();
+    error SharesSizeTooLarge();
 
     event UserSharesUpdated(Share[] shares, uint96 denominator);
     event PlatformSharesUpdated(Share[] shares, uint96 denominator);
+
+    event PlatformSplitWithdrawn(address user, uint256 amount);
+    event UserSplitWithdrawn(address user, uint256 amount);
 }

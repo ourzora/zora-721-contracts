@@ -87,7 +87,7 @@ abstract contract SplitRegistryNFT {
 
     function _setOwner(uint256 id, address to) internal virtual;
 
-    function _getOwner(uint256 id) internal virtual returns (address);
+    function _getOwner(uint256 id) internal virtual view returns (address);
 
     function isApprovedForAll(address owner, address operator)
         public
@@ -198,7 +198,8 @@ abstract contract SplitRegistryNFT {
     function _mint(address to, uint256 id) internal virtual {
         require(to != address(0), "INVALID_RECIPIENT");
 
-        require(_getOwner(id) == address(0), "ALREADY_MINTED");
+        // assume nft is not minted already
+        // require(_getOwner(id) == address(0), "ALREADY_MINTED");
 
         // Counter overflow is incredibly unrealistic.
         unchecked {
@@ -212,7 +213,7 @@ abstract contract SplitRegistryNFT {
     }
 
     function _burn(uint256 id) internal virtual {
-        address owner = _ownerOf[id];
+        address owner = _getOwner(id);
 
         require(owner != address(0), "NOT_MINTED");
 

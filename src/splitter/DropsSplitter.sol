@@ -10,6 +10,8 @@ import {SplitterStorage} from "./SplitterStorage.sol";
 import {IRegistry} from "./interfaces/IRegistry.sol";
 import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
 
+import {console2} from "forge-std/console2.sol";
+
 contract DropsSplitter is SplitterStorage, FundsReceiver {
     using SafeSender for IERC20Upgradeable;
     using SafeSender for address payable;
@@ -24,13 +26,21 @@ contract DropsSplitter is SplitterStorage, FundsReceiver {
         _;
     }
 
+    modifier validateMaxSharesSize(uint256 size, uint256 max) {
+        if (size > max) {
+            revert SharesSizeTooLarge();
+        }
+
+        _;
+    }
+
     constructor(IRegistry _newRegistry) {
         registry = _newRegistry;
     }
 
     function getCombinedNumerator(Share[] memory shares)
         internal
-        view
+        pure
         returns (uint256 numerator)
     {
         for (uint256 i = 0; i < shares.length; i++) {
@@ -48,26 +58,8 @@ contract DropsSplitter is SplitterStorage, FundsReceiver {
         Share[] memory _platformShares,
         uint96 _platformDenominator
     ) public {
-        if (getCombinedNumerator(_userShares) != _userDenominator) {
-            revert ShareDenominatorMismatch();
-        }
-        if (getCombinedNumerator(_platformShares) > _platformDenominator) {
-            revert PlatformDenomiantorMismatch();
-        }
-
-        for (uint256 i = 0; i < _userShares.length; i++) {
-            shares.userShares.push(_userShares[i]);
-            registry.mint(i, _userShares[i].user);
-        }
-        shares.userDenominator = _userDenominator;
-
-        for (uint256 i = 0; i < _platformShares.length; i++) {
-            shares.platformShares.push(_platformShares[i]);
-        }
-        shares.platformDenominator = _platformDenominator;
-
-        emit UserSharesUpdated(_userShares, _userDenominator);
-        emit PlatformSharesUpdated(_platformShares, _platformDenominator);
+        _updatePlatformSplit(_platformShares, _platformDenominator);
+        _updateUserSplit(_userShares, _userDenominator);
     }
 
     /// @notice Called by registry
@@ -79,8 +71,15 @@ contract DropsSplitter is SplitterStorage, FundsReceiver {
         emit UserSharesUpdated(shares.userShares, shares.userDenominator);
     }
 
-    function updateSplit(Share[] memory _newShares, uint96 _newDenominator)
+    function updateUserSplit(Share[] memory _newShares, uint96 _newDenominator)
         external
+    {
+        _updateUserSplit(_newShares, _newDenominator);
+    }
+
+    function _updateUserSplit(Share[] memory _newShares, uint96 _newDenominator)
+        internal
+        validateMaxSharesSize(_newShares.length, 8)
     {
         if (getCombinedNumerator(_newShares) != _newDenominator) {
             revert ShareDenominatorMismatch();
@@ -117,8 +116,15 @@ contract DropsSplitter is SplitterStorage, FundsReceiver {
 
     function updatePlatformSplit(
         Share[] memory _newPlatformShares,
-        uint8 _newDenominator
+        uint96 _newDenominator
     ) external {
+        _updatePlatformSplit(_newPlatformShares, _newDenominator);
+    }
+
+    function _updatePlatformSplit(
+        Share[] memory _newPlatformShares,
+        uint96 _newDenominator
+    ) internal validateMaxSharesSize(_newPlatformShares.length, 4) {
         if (getCombinedNumerator(_newPlatformShares) > _newDenominator) {
             revert PlatformDenomiantorMismatch();
         }
@@ -136,6 +142,13 @@ contract DropsSplitter is SplitterStorage, FundsReceiver {
         emit PlatformSharesUpdated(_newPlatformShares, _newDenominator);
     }
 
+    /// TODO: call with purchase fn
+    function setPrimaryBalance(uint256 _primaryBalance) external {
+        require (_primaryBalance <= address(this).balance, "too high");
+        primaryBalance = _primaryBalance;
+    }
+
+    /// TODO: re-entracy + access control
     function withdrawETH() external {
         // if no shares are set, fall back to previous distribution method???
         // such as after an upgrade
@@ -151,32 +164,40 @@ contract DropsSplitter is SplitterStorage, FundsReceiver {
                 uint256 value = (primaryBalance *
                     shares.platformShares[i].numerator) /
                     shares.platformDenominator;
-                shares.platformShares[i].user.safeSendETH(value);
                 balance -= value;
+                emit PlatformSplitWithdrawn(shares.platformShares[i].user, value);
+                shares.platformShares[i].user.safeSendETH(value);
             }
         }
 
-        for (uint256 i = shares.userShares.length; i >= 0; i--) {
+        for (uint256 i = shares.userShares.length; i > 0;) {
+            // i cannot increment below 0 for test :(
+            if (i != 0) {
+                i--;
+            }
+
             // For the first recipient, send all remaining value.
             uint256 value = i == 0
                 ? balance
                 : (balance * shares.userShares[i].numerator) /
                     shares.userDenominator;
-            shares.userShares[i].user.safeSendETH(value);
             balance -= value;
+            emit UserSplitWithdrawn(shares.userShares[i].user, value);
+            shares.userShares[i].user.safeSendETH(value);
         }
     }
 
+    /// TODO: re-entracy + access control
     function withdrawERC20(IERC20Upgradeable tokenAddress) external {
         uint256 balance = tokenAddress.balanceOf(address(this));
-        for (uint256 i = shares.userShares.length; i >= 0; i--) {
+        for (uint256 i = shares.userShares.length; i-- > 0;) {
             // For the first recipient, send all remaining value.
             uint256 value = i == 0
                 ? balance
                 : (balance * shares.userShares[i].numerator) /
                     shares.userDenominator;
-            tokenAddress.safeSendERC20(shares.userShares[i].user, value);
             balance -= value;
+            tokenAddress.safeSendERC20(shares.userShares[i].user, value);
         }
     }
 }

@@ -8,7 +8,7 @@ pragma solidity ^0.8.10;
 contract FundsReceiver {
     event FundsReceived(address indexed source, uint256 amount);
 
-    receive() external payable {
+    receive() external virtual payable {
         emit FundsReceived(msg.sender, msg.value);
     }
 }

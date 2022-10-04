@@ -18,7 +18,8 @@ contract SplitRegistry is SplitRegistryNFT, IRegistry {
         if (splitIndex > type(uint96).max) {
             revert TokenIDTooLarge();
         }
-        return (uint160(sender) << 96) + uint96(splitIndex);
+
+        return (uint256(uint160(sender)) << 96) + splitIndex;
     }
 
     function _extractTokenId(uint256 tokenId)
@@ -26,8 +27,8 @@ contract SplitRegistry is SplitRegistryNFT, IRegistry {
         pure
         returns (address sender, uint256 splitIndex)
     {
-        splitIndex = tokenId | ~type(uint160).max;
-        sender = address(uint160(tokenId << 96));
+        sender = address(uint160(tokenId >> 96));
+        splitIndex = uint96(tokenId);
     }
 
     function mint(uint256 id, address user) external {
@@ -37,8 +38,6 @@ contract SplitRegistry is SplitRegistryNFT, IRegistry {
     function burn(uint256 id) external {
         _burn(_getTokenId(msg.sender, id));
     }
-
-    function _setOwner() internal {}
 
     function _getOwner(uint256 tokenId)
         internal

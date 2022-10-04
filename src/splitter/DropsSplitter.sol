@@ -101,8 +101,12 @@ contract DropsSplitter is SplitterStorage, FundsReceiver {
             }
         }
 
+        uint256 lastSharesSize = shares.userShares.length;
         delete shares.userShares;
         for (uint256 i = 0; i < _newShares.length; i++) {
+            if (i >= lastSharesSize) {
+                registry.mint(i, _newShares[i].user);
+            }
             shares.userShares.push(
                 Share({
                     user: _newShares[i].user,

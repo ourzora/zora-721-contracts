@@ -104,4 +104,39 @@ contract DropsSplitterTest is Test {
         // test withdraw ETH
         splitter.withdrawETH();
     }
+
+    function test_TransferSplitNFT() public {
+        IDropsSplitter.Share[] memory userShares = new IDropsSplitter.Share[](
+            2
+        );
+        userShares[0].user = payable(address(0x123));
+        userShares[0].numerator = 1;
+        vm.label(userShares[0].user, "original recipient 1");
+        userShares[1].user = payable(address(0x124));
+        vm.label(userShares[1].user, "original recipient 2");
+        userShares[1].numerator = 1;
+
+        IDropsSplitter.Share[]
+            memory platformShares = new IDropsSplitter.Share[](0);
+
+        splitter.setup(userShares, 2, platformShares, 0);
+
+        vm.label(address(0x999), "new nft recipient");
+
+        vm.prank(userShares[1].user);
+        registry.transferFrom(
+            userShares[1].user,
+            address(0x999),
+            11015061303681644283183956932350962241103292912371396810468013215899229093889
+        );
+
+        address payable sender = payable(address(0x03));
+        vm.deal(sender, 2 ether);
+        vm.prank(sender);
+        // only safe in tests
+        payable(address(splitter)).safeSendETH(1 ether);
+
+        // test withdraw ETH
+        splitter.withdrawETH();
+    }
 }

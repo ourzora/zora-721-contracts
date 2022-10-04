@@ -6,9 +6,11 @@ import {Test} from "forge-std/test.sol";
 import {DropsSplitter} from "../../src/splitter/DropsSplitter.sol";
 import {SplitRegistry} from "../../src/splitter/SplitRegistry.sol";
 import {IDropsSplitter} from "../../src/splitter/interfaces/IDropsSplitter.sol";
+import {SafeSender} from "../../src/utils/SafeSender.sol";
 
 /// @notice Test for drops splitter
 contract DropsSplitterTest is Test {
+    using SafeSender for address payable;
     SplitRegistry public registry;
     DropsSplitter public splitter;
 
@@ -34,7 +36,7 @@ contract DropsSplitterTest is Test {
         vm.deal(sender, 2 ether);
         vm.prank(sender);
         // only safe in tests
-        payable(address(splitter)).transfer(1 ether);
+        payable(address(splitter)).safeSendETH(1 ether);
 
         // test withdraw ETH
         splitter.withdrawETH();
@@ -45,10 +47,10 @@ contract DropsSplitterTest is Test {
             2
         );
         userShares[0].user = payable(address(0x123));
-        vm.tag(userShares[0].user, "user share 0");
+        vm.label(userShares[0].user, "user share 0");
         userShares[0].numerator = 1;
         userShares[1].user = payable(address(0x124));
-        vm.tag(userShares[1].user, "user share 1");
+        vm.label(userShares[1].user, "user share 1");
         userShares[1].numerator = 1;
 
         IDropsSplitter.Share[]
@@ -58,8 +60,9 @@ contract DropsSplitterTest is Test {
         address payable sender = payable(address(0x03));
         vm.deal(sender, 2 ether);
         vm.prank(sender);
+
         // only safe in tests
-        payable(address(splitter)).transfer(1 ether);
+        payable(address(splitter)).safeSendETH(1 ether);
 
         // test withdraw ETH
         splitter.withdrawETH();
@@ -85,7 +88,7 @@ contract DropsSplitterTest is Test {
             memory platformShares = new IDropsSplitter.Share[](1);
 
         platformShares[0].user = payable(address(0x0323));
-        vm.tag(platformShares[0].user, "platform user");
+        vm.label(platformShares[0].user, "platform user");
         platformShares[0].numerator = 1;
 
         splitter.setup(userShares, 0, platformShares, 1);
@@ -94,7 +97,7 @@ contract DropsSplitterTest is Test {
         vm.deal(sender, 2 ether);
         vm.prank(sender);
         // only safe in tests
-        payable(address(splitter)).transfer(1 ether);
+        payable(address(splitter)).safeSendETH(1 ether);
 
         splitter.setPrimaryBalance(1 ether);
 

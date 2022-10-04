@@ -127,6 +127,7 @@ contract DropsSplitterTest is Test {
         registry.transferFrom(
             userShares[1].user,
             address(0x999),
+            // this is the address shifted to the left 96 bits appended to the index of the split
             11015061303681644283183956932350962241103292912371396810468013215899229093889
         );
 

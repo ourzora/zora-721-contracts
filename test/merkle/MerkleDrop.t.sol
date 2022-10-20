@@ -5,7 +5,6 @@ import {Vm} from "forge-std/Vm.sol";
 import {DSTest} from "ds-test/test.sol";
 import {IERC721Drop} from "../../src/interfaces/IERC721Drop.sol";
 import {ERC721Drop} from "../../src/ERC721Drop.sol";
-import {ZoraFeeManager} from "../../src/ZoraFeeManager.sol";
 import {DummyMetadataRenderer} from "../utils/DummyMetadataRenderer.sol";
 import {FactoryUpgradeGate} from "../../src/FactoryUpgradeGate.sol";
 import {ERC721DropProxy} from "../../src/ERC721DropProxy.sol";
@@ -16,7 +15,6 @@ contract ZoraNFTBaseTest is DSTest {
     ERC721Drop zoraNFTBase;
     Vm public constant vm = Vm(HEVM_ADDRESS);
     DummyMetadataRenderer public dummyRenderer = new DummyMetadataRenderer();
-    ZoraFeeManager public feeManager;
     MerkleData public merkleData;
     address public constant DEFAULT_OWNER_ADDRESS = address(0x23499);
     address payable public constant DEFAULT_FUNDS_RECIPIENT_ADDRESS =
@@ -51,17 +49,12 @@ contract ZoraNFTBaseTest is DSTest {
 
     function setUp() public {
         vm.prank(DEFAULT_ZORA_DAO_ADDRESS);
-        feeManager = new ZoraFeeManager(250, DEFAULT_ZORA_DAO_ADDRESS);
-        vm.prank(DEFAULT_ZORA_DAO_ADDRESS);
-
         address impl = address(
-            new ERC721Drop(
-                feeManager,
-                address(1234),
-                FactoryUpgradeGate(address(0))
-            )
+            new ERC721Drop(address(1234), FactoryUpgradeGate(address(0)))
         );
-        address payable newDrop = payable(address(new ERC721DropProxy(impl, "")));
+        address payable newDrop = payable(
+            address(new ERC721DropProxy(impl, ""))
+        );
         zoraNFTBase = ERC721Drop(newDrop);
         merkleData = new MerkleData();
     }

@@ -11,7 +11,6 @@ export async function setupContracts() {
   const feeManagerAdminAddress = process.env.FEE_MANAGER_ADMIN_ADDRESS;
   const zoraERC721TransferHelperAddress =
     process.env.ZORA_ERC_721_TRANSFER_HELPER_ADDRESS;
-  const feeDefaultBPS = process.env.FEE_DEFAULT_BPS;
   let creatorProxyAddress = process.env.CREATOR_PROXY_ADDRESS;
 
   if (!zoraERC721TransferHelperAddress) {
@@ -30,16 +29,8 @@ export async function setupContracts() {
   const upgradeGateAddress = upgradeGate.deployed.deploy.deployedTo;
   console.log("Deployed upgrade gate to", upgradeGateAddress);
 
-  console.log("deploying fee manager");
-  const feeManager = await deployAndVerify(
-    "src/ZoraFeeManager.sol:ZoraFeeManager",
-    [feeDefaultBPS, feeManagerAdminAddress]
-  );
-  const feeManagerAddress = feeManager.deployed.deploy.deployedTo;
-  console.log("deployed fee manager to ", feeManagerAddress);
   console.log("deploying Erc721Drop");
   const dropContract = await deployAndVerify("src/ERC721Drop.sol:ERC721Drop", [
-    feeManagerAddress,
     zoraERC721TransferHelperAddress,
     upgradeGateAddress,
   ]);
@@ -81,7 +72,6 @@ export async function setupContracts() {
   }
 
   return {
-    feeManager,
     dropContract,
     dropMetadataContract,
     editionsMetadataContract,

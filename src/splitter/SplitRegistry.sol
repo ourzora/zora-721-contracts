@@ -3,9 +3,9 @@ pragma solidity ^0.8.10;
 
 import {SplitRegistryNFT} from "./SplitRegistryNFT.sol";
 import {IDropsSplitter} from "./interfaces/IDropsSplitter.sol";
-import {IRegistry} from "./interfaces/IRegistry.sol";
+import {ISplitRegistry} from "./interfaces/ISplitRegistry.sol";
 
-contract SplitRegistry is SplitRegistryNFT, IRegistry {
+contract SplitRegistry is SplitRegistryNFT, ISplitRegistry {
     constructor() {
         setup("ZORA Split Registry", "ZSPLIT");
     }
@@ -57,7 +57,7 @@ contract SplitRegistry is SplitRegistryNFT, IRegistry {
         );
     }
 
-    function tokenURI(uint256 id) public view override returns (string memory) {
+    function tokenURI(uint256) public view override returns (string memory) {
         // Use rendering library for split NFT
         return "";
     }

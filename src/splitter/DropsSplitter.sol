@@ -2,22 +2,31 @@
 pragma solidity ^0.8.10;
 
 import {IERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/interfaces/IERC20Upgradeable.sol";
+import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 
 import {IDropsSplitter} from "./interfaces/IDropsSplitter.sol";
 import {SafeSender} from "../utils/SafeSender.sol";
 import {FundsReceiver} from "../utils/FundsReceiver.sol";
 import {SplitterStorage} from "./SplitterStorage.sol";
-import {IRegistry} from "./interfaces/IRegistry.sol";
+import {ISplitRegistry} from "./interfaces/ISplitRegistry.sol";
 import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
 
-import {console2} from "forge-std/console2.sol";
-
-contract DropsSplitter is SplitterStorage, FundsReceiver {
+abstract contract DropsSplitter is
+    SplitterStorage,
+    FundsReceiver,
+    ReentrancyGuardUpgradeable
+{
     using SafeSender for IERC20Upgradeable;
     using SafeSender for address payable;
 
-    IRegistry public immutable registry;
+    ISplitRegistry immutable registry;
 
+    constructor(ISplitRegistry _splitRegistry) {
+        registry = _splitRegistry;
+    }
+
+    /// @notice Allows only the sender of the address to update the function
+    /// @param matches address to allow
     modifier onlySender(address matches) {
         if (matches != msg.sender) {
             revert WrongSenderAccount();
@@ -26,6 +35,9 @@ contract DropsSplitter is SplitterStorage, FundsReceiver {
         _;
     }
 
+    /// @notice Validates max share size is less than max
+    /// @param size size to validate
+    /// @param max max to validate
     modifier validateMaxSharesSize(uint256 size, uint256 max) {
         if (size > max) {
             revert SharesSizeTooLarge();
@@ -34,35 +46,62 @@ contract DropsSplitter is SplitterStorage, FundsReceiver {
         _;
     }
 
-    constructor(IRegistry _newRegistry) {
-        registry = _newRegistry;
-    }
-
-    function getCombinedNumerator(Share[] memory shares)
+    function getCombinedNumerator(Share[] memory _shares)
         internal
         pure
         returns (uint256 numerator)
     {
-        for (uint256 i = 0; i < shares.length; i++) {
-            numerator += shares[i].numerator;
+        for (uint256 i = 0; i < _shares.length; i++) {
+            numerator += _shares[i].numerator;
         }
     }
 
+    /// @notice Get the owner of a specific share ID
+    /// @param id share ID to get the owner of
+    /// @return The user of the share to return
     function shareOwner(uint256 id) external view override returns (address) {
         return shares.userShares[id].user;
     }
 
-    function setup(
+    function getShareForUser(address user)
+        external
+        view
+        returns (
+            address share,
+            uint256 numerator,
+            uint256 denominator
+        )
+    {
+        for (uint256 i = 0; i < shares.userShares.length; i++) {
+            if (shares.userShares[i].user == user) {
+                share = shares.userShares[i].user;
+                numerator = shares.userShares[i].numerator;
+                denominator = shares.userDenominator;
+            }
+        }
+    }
+
+    function _setupSplit(
         Share[] memory _userShares,
         uint96 _userDenominator,
         Share[] memory _platformShares,
         uint96 _platformDenominator
-    ) public {
+    ) internal {
         _updatePlatformSplit(_platformShares, _platformDenominator);
         _updateUserSplit(_userShares, _userDenominator);
     }
 
-    /// @notice Called by registry
+    function _setupSplit(SplitSetupParams memory _params) internal {
+        _updatePlatformSplit(
+            _params.platformShares,
+            _params.platformDenominator
+        );
+        _updateUserSplit(_params.userShares, _params.userDenominator);
+    }
+
+    /// @notice Called by registry when an NFT is transferred
+    /// @param id of the NFT transferred
+    /// @param recipient new recipient of the transfer
     function onRegistryTransfer(uint256 id, address payable recipient)
         external
         onlySender(address(registry))
@@ -118,13 +157,20 @@ contract DropsSplitter is SplitterStorage, FundsReceiver {
         emit UserSharesUpdated(_newShares, _newDenominator);
     }
 
+    /// @dev Throws on authorized split update
+    function _authorizeSplitUpdate() internal virtual;
+
     function updatePlatformSplit(
         Share[] memory _newPlatformShares,
         uint96 _newDenominator
     ) external {
+        _authorizeSplitUpdate();
         _updatePlatformSplit(_newPlatformShares, _newDenominator);
     }
 
+    /// @notice Set platform split to new shares and denominator.
+    /// @param _newPlatformShares New platform shares in split
+    /// @param _newDenominator New deonominator of split
     function _updatePlatformSplit(
         Share[] memory _newPlatformShares,
         uint96 _newDenominator
@@ -146,19 +192,18 @@ contract DropsSplitter is SplitterStorage, FundsReceiver {
         emit PlatformSharesUpdated(_newPlatformShares, _newDenominator);
     }
 
-    /// TODO: call with purchase fn
-    function setPrimaryBalance(uint256 _primaryBalance) external {
-        require (_primaryBalance <= address(this).balance, "too high");
+    function _setPrimaryBalance(uint256 _primaryBalance) internal {
+        require(_primaryBalance <= address(this).balance, "too high");
         primaryBalance = _primaryBalance;
     }
 
-    /// TODO: re-entracy + access control
-    function withdrawETH() external {
+    function withdrawETH() external nonReentrant {
         // if no shares are set, fall back to previous distribution method???
         // such as after an upgrade
 
         // if (shares.userShares.length == 0) {
-        //   // process upgrade
+        //     _legacySharesPayout();
+        //     process upgrade
         // }
 
         uint256 balance = address(this).balance;
@@ -169,12 +214,15 @@ contract DropsSplitter is SplitterStorage, FundsReceiver {
                     shares.platformShares[i].numerator) /
                     shares.platformDenominator;
                 balance -= value;
-                emit PlatformSplitWithdrawn(shares.platformShares[i].user, value);
+                emit PlatformSplitWithdrawn(
+                    shares.platformShares[i].user,
+                    value
+                );
                 shares.platformShares[i].user.safeSendETH(value);
             }
         }
 
-        for (uint256 i = shares.userShares.length; i > 0;) {
+        for (uint256 i = shares.userShares.length; i > 0; ) {
             // i cannot increment below 0 for test :(
             if (i != 0) {
                 i--;
@@ -191,10 +239,12 @@ contract DropsSplitter is SplitterStorage, FundsReceiver {
         }
     }
 
-    /// TODO: re-entracy + access control
-    function withdrawERC20(IERC20Upgradeable tokenAddress) external {
+    function withdrawERC20(IERC20Upgradeable tokenAddress)
+        external
+        nonReentrant
+    {
         uint256 balance = tokenAddress.balanceOf(address(this));
-        for (uint256 i = shares.userShares.length; i-- > 0;) {
+        for (uint256 i = shares.userShares.length; i-- > 0; ) {
             // For the first recipient, send all remaining value.
             uint256 value = i == 0
                 ? balance

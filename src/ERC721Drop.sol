@@ -23,16 +23,18 @@ import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/se
 import {MerkleProofUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/cryptography/MerkleProofUpgradeable.sol";
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
-import {IZoraFeeManager} from "./interfaces/IZoraFeeManager.sol";
 import {IMetadataRenderer} from "./interfaces/IMetadataRenderer.sol";
 import {IERC721Drop} from "./interfaces/IERC721Drop.sol";
 import {IOwnable} from "./interfaces/IOwnable.sol";
 import {IFactoryUpgradeGate} from "./interfaces/IFactoryUpgradeGate.sol";
+import {ISplitRegistry} from "./splitter/interfaces/ISplitRegistry.sol";
 
 import {OwnableSkeleton} from "./utils/OwnableSkeleton.sol";
 import {FundsReceiver} from "./utils/FundsReceiver.sol";
 import {Version} from "./utils/Version.sol";
 import {ERC721DropStorageV1} from "./storage/ERC721DropStorageV1.sol";
+
+import {DropsSplitter} from "./splitter/DropsSplitter.sol";
 
 /**
  * @notice ZORA NFT Base contract for Drops and Editions
@@ -48,9 +50,10 @@ contract ERC721Drop is
     IERC2981Upgradeable,
     ReentrancyGuardUpgradeable,
     AccessControlUpgradeable,
+    DropsSplitter,
     IERC721Drop,
     OwnableSkeleton,
-    FundsReceiver,
+    // FundsReceiver has been moved to drops contract
     Version(8),
     ERC721DropStorageV1
 {
@@ -71,7 +74,7 @@ contract ERC721Drop is
     IFactoryUpgradeGate internal immutable factoryUpgradeGate;
 
     /// @dev Zora Fee Manager address
-    IZoraFeeManager public immutable zoraFeeManager;
+    ISplitRegistry public immutable splitRegistry;
 
     /// @notice Max royalty BPS
     uint16 constant MAX_ROYALTY_BPS = 50_00;
@@ -149,23 +152,24 @@ contract ERC721Drop is
 
     /// @notice Global constructor – these variables will not change with further proxy deploys
     /// @dev Marked as an initializer to prevent storage being used of base implementation. Can only be init'd by a proxy.
-    /// @param _zoraFeeManager Zora Fee Manager
     /// @param _zoraERC721TransferHelper Transfer helper
+    /// @param _factoryUpgradeGate Upgrade gate
+    /// @param _splitRegistry Registry for splits
     constructor(
-        IZoraFeeManager _zoraFeeManager,
         address _zoraERC721TransferHelper,
-        IFactoryUpgradeGate _factoryUpgradeGate
-    ) initializer {
-        zoraFeeManager = _zoraFeeManager;
+        IFactoryUpgradeGate _factoryUpgradeGate,
+        ISplitRegistry _splitRegistry
+    ) initializer DropsSplitter(_splitRegistry) {
         zoraERC721TransferHelper = _zoraERC721TransferHelper;
         factoryUpgradeGate = _factoryUpgradeGate;
+        splitRegistry = _splitRegistry;
     }
 
     ///  @dev Create a new drop contract
     ///  @param _contractName Contract name
     ///  @param _contractSymbol Contract symbol
     ///  @param _initialOwner User that owns and can mint the edition, gets royalty and sales payouts and can update the base url if needed.
-    ///  @param _fundsRecipient Wallet/user that receives funds from sale
+    ///  @param _splitSetup Setup for drop split
     ///  @param _editionSize Number of editions that can be minted in total. If 0, unlimited editions can be minted.
     ///  @param _royaltyBPS BPS of the royalty set on the contract. Can be 0 for no royalty.
     ///  @param _salesConfig New sales config to set upon init
@@ -175,7 +179,7 @@ contract ERC721Drop is
         string memory _contractName,
         string memory _contractSymbol,
         address _initialOwner,
-        address payable _fundsRecipient,
+        SplitSetupParams calldata _splitSetup,
         uint64 _editionSize,
         uint16 _royaltyBPS,
         SalesConfiguration memory _salesConfig,
@@ -193,6 +197,8 @@ contract ERC721Drop is
         // Set ownership to original sender of contract call
         _setOwner(_initialOwner);
 
+        _setupSplit(_splitSetup);
+
         if (config.royaltyBPS > MAX_ROYALTY_BPS) {
             revert Setup_RoyaltyPercentageTooHigh(MAX_ROYALTY_BPS);
         }
@@ -204,7 +210,6 @@ contract ERC721Drop is
         config.editionSize = _editionSize;
         config.metadataRenderer = _metadataRenderer;
         config.royaltyBPS = _royaltyBPS;
-        config.fundsRecipient = _fundsRecipient;
         _metadataRenderer.initializeWithData(_metadataRendererInit);
     }
 
@@ -212,6 +217,10 @@ contract ERC721Drop is
     /// @return boolean if address is admin
     function isAdmin(address user) external view returns (bool) {
         return hasRole(DEFAULT_ADMIN_ROLE, user);
+    }
+
+    function _authorizeSplitUpdate() override internal onlyAdmin {
+        /// Check that split can be updated – now only for admins.
     }
 
     /// @notice Connects this contract to the factory upgrade gate
@@ -327,17 +336,6 @@ contract ERC721Drop is
             return true;
         }
         return super.isApprovedForAll(nftOwner, operator);
-    }
-
-    /// @dev Gets the zora fee for amount of withdraw
-    /// @param amount amount of funds to get fee for
-    function zoraFeeForAmount(uint256 amount)
-        public
-        returns (address payable, uint256)
-    {
-        (address payable recipient, uint256 bps) = zoraFeeManager
-            .getZORAWithdrawFeesBPS(address(this));
-        return (recipient, (amount * bps) / 10_000);
     }
 
     /**
@@ -914,35 +912,24 @@ contract ERC721Drop is
     //                        |                    |                        |
     //                       / \                  / \                      / \
     /// @notice This withdraws ETH from the contract to the contract owner.
+    /// @dev Deprecated: For new contracts, use the splits infrastructure
     function withdraw() external nonReentrant {
         address sender = _msgSender();
 
+        if (config.fundsRecipient == address(0x0)) {
+            revert Withdraw_UseSplitInstead();
+        }
+
         // Get fee amount
         uint256 funds = address(this).balance;
-        (address payable feeRecipient, uint256 zoraFee) = zoraFeeForAmount(
-            funds
-        );
 
         // Check if withdraw is allowed for sender
         if (
             !hasRole(DEFAULT_ADMIN_ROLE, sender) &&
             !hasRole(SALES_MANAGER_ROLE, sender) &&
-            sender != feeRecipient &&
             sender != config.fundsRecipient
         ) {
             revert Access_WithdrawNotAllowed();
-        }
-
-        // Payout ZORA fee
-        if (zoraFee > 0) {
-            (bool successFee, ) = feeRecipient.call{
-                value: zoraFee,
-                gas: FUNDS_SEND_GAS_LIMIT
-            }("");
-            if (!successFee) {
-                revert Withdraw_FundsSendFailure();
-            }
-            funds -= zoraFee;
         }
 
         // Payout recipient
@@ -959,8 +946,8 @@ contract ERC721Drop is
             _msgSender(),
             config.fundsRecipient,
             funds,
-            feeRecipient,
-            zoraFee
+            address(0x0),
+            0
         );
     }
 

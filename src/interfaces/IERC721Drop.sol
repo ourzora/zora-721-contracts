@@ -30,6 +30,8 @@ interface IERC721Drop {
     /// @notice Cannot withdraw funds due to ETH send failure.
     error Withdraw_FundsSendFailure();
 
+    error Withdraw_UseSplitInstead();
+
     // Sale/Purchase errors
     /// @notice Sale is inactive
     error Sale_Inactive();

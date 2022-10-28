@@ -9,6 +9,8 @@ import {ZoraFeeManager} from "../../src/ZoraFeeManager.sol";
 import {DummyMetadataRenderer} from "../utils/DummyMetadataRenderer.sol";
 import {FactoryUpgradeGate} from "../../src/FactoryUpgradeGate.sol";
 import {ERC721DropProxy} from "../../src/ERC721DropProxy.sol";
+import {IDropsSplitter} from "../../src/splitter/interfaces/IDropsSplitter.sol";
+import {SplitRegistry} from "../../src/splitter/SplitRegistry.sol";
 
 import {MerkleData} from "./MerkleData.sol";
 
@@ -16,7 +18,7 @@ contract ZoraNFTBaseTest is DSTest {
     ERC721Drop zoraNFTBase;
     Vm public constant vm = Vm(HEVM_ADDRESS);
     DummyMetadataRenderer public dummyRenderer = new DummyMetadataRenderer();
-    ZoraFeeManager public feeManager;
+    SplitRegistry public splitRegistry = new SplitRegistry();
     MerkleData public merkleData;
     address public constant DEFAULT_OWNER_ADDRESS = address(0x23499);
     address payable public constant DEFAULT_FUNDS_RECIPIENT_ADDRESS =
@@ -30,7 +32,7 @@ contract ZoraNFTBaseTest is DSTest {
             _contractName: "Test NFT",
             _contractSymbol: "TNFT",
             _initialOwner: DEFAULT_OWNER_ADDRESS,
-            _fundsRecipient: payable(DEFAULT_FUNDS_RECIPIENT_ADDRESS),
+            _splitSetup: makeSplitSetup(1, 1, DEFAULT_FUNDS_RECIPIENT_ADDRESS),
             _editionSize: 10,
             _royaltyBPS: 800,
             _salesConfig: IERC721Drop.SalesConfiguration({
@@ -51,14 +53,13 @@ contract ZoraNFTBaseTest is DSTest {
 
     function setUp() public {
         vm.prank(DEFAULT_ZORA_DAO_ADDRESS);
-        feeManager = new ZoraFeeManager(250, DEFAULT_ZORA_DAO_ADDRESS);
         vm.prank(DEFAULT_ZORA_DAO_ADDRESS);
 
         address impl = address(
             new ERC721Drop(
-                feeManager,
                 address(1234),
-                FactoryUpgradeGate(address(0))
+                FactoryUpgradeGate(address(0)),
+                splitRegistry
             )
         );
         address payable newDrop = payable(address(new ERC721DropProxy(impl, "")));
@@ -185,12 +186,33 @@ contract ZoraNFTBaseTest is DSTest {
         vm.stopPrank();
     }
 
+     function makeSplitSetup(
+        uint256 countUser,
+        uint256 countPlatform,
+        address payable recipient
+    ) internal pure returns (IDropsSplitter.SplitSetupParams memory) {
+        IDropsSplitter.Share[] memory userShares = new IDropsSplitter.Share[](
+            countUser
+        );
+        userShares[0].numerator = 1;
+        userShares[0].user = recipient;
+        IDropsSplitter.Share[]
+            memory platformShares = new IDropsSplitter.Share[](countPlatform);
+        return
+            IDropsSplitter.SplitSetupParams({
+                userDenominator: 1,
+                platformShares: platformShares,
+                userShares: userShares,
+                platformDenominator: 0
+            });
+    }
+
     function test_MerklePurchaseAndPublicSaleEditionSizeZero() public {
         zoraNFTBase.initialize({
             _contractName: "Test NFT",
             _contractSymbol: "TNFT",
             _initialOwner: DEFAULT_OWNER_ADDRESS,
-            _fundsRecipient: payable(DEFAULT_FUNDS_RECIPIENT_ADDRESS),
+            _splitSetup: makeSplitSetup(1, 1, DEFAULT_FUNDS_RECIPIENT_ADDRESS),
             _editionSize: 0,
             _royaltyBPS: 800,
             _metadataRenderer: dummyRenderer,

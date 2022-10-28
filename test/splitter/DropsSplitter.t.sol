@@ -5,18 +5,44 @@ import {Test} from "forge-std/test.sol";
 
 import {DropsSplitter} from "../../src/splitter/DropsSplitter.sol";
 import {SplitRegistry} from "../../src/splitter/SplitRegistry.sol";
+import {ISplitRegistry} from "../../src/splitter/interfaces/ISplitRegistry.sol";
 import {IDropsSplitter} from "../../src/splitter/interfaces/IDropsSplitter.sol";
 import {SafeSender} from "../../src/utils/SafeSender.sol";
+
+contract TestingSplitterImpl is DropsSplitter {
+    constructor(ISplitRegistry _splitRegistry) DropsSplitter(_splitRegistry) {
+    }
+    function setup(
+        Share[] memory _userShares,
+        uint96 _userDenominator,
+        Share[] memory _platformShares,
+        uint96 _platformDenominator
+    ) external {
+        _setupSplit(_userShares, _userDenominator, _platformShares, _platformDenominator);
+    }
+
+    function setup(SplitSetupParams memory _params) internal {
+        _setupSplit(_params);
+    }
+
+    function setPrimaryBalance(uint256 _primaryBalance) external {
+        _setPrimaryBalance(_primaryBalance);
+    }
+
+    function _authorizeSplitUpdate() override internal {
+        // pass, by default authorize upgrade for testing
+    }
+}
 
 /// @notice Test for drops splitter
 contract DropsSplitterTest is Test {
     using SafeSender for address payable;
     SplitRegistry public registry;
-    DropsSplitter public splitter;
+    TestingSplitterImpl public splitter;
 
     function setUp() public {
         registry = new SplitRegistry();
-        splitter = new DropsSplitter(registry);
+        splitter = new TestingSplitterImpl(registry);
     }
 
     function test_Init() public {
@@ -134,7 +160,7 @@ contract DropsSplitterTest is Test {
         address payable sender = payable(address(0x03));
         vm.deal(sender, 2 ether);
         vm.prank(sender);
-        // only safe in tests
+
         payable(address(splitter)).safeSendETH(1 ether);
 
         // test withdraw ETH

@@ -12,6 +12,8 @@ import {DropMetadataRenderer} from "./metadata/DropMetadataRenderer.sol";
 import {IMetadataRenderer} from "./interfaces/IMetadataRenderer.sol";
 import {ERC721Drop} from "./ERC721Drop.sol";
 
+import {IDropsSplitter} from "./splitter/interfaces/IDropsSplitter.sol";
+
 /// @notice Zora NFT Creator V1
 contract ZoraNFTCreatorV1 is OwnableUpgradeable, UUPSUpgradeable, Version(2) {
     string private constant CANNOT_BE_ZERO = "Cannot be 0 address";
@@ -117,15 +119,24 @@ contract ZoraNFTCreatorV1 is OwnableUpgradeable, UUPSUpgradeable, Version(2) {
         IMetadataRenderer metadataRenderer,
         bytes memory metadataInitializer
     ) public returns (address) {
-        ERC721DropProxy newDrop = new ERC721DropProxy(implementation, "");
+        address payable newDrop = payable(address(new ERC721DropProxy(implementation, "")));
 
-        address payable newDropAddress = payable(address(newDrop));
+        IDropsSplitter.Share[] memory userShares = new IDropsSplitter.Share[](
+            1
+        );
+        IDropsSplitter.Share[]
+            memory platformShares = new IDropsSplitter.Share[](0);
 
-        ERC721Drop(newDropAddress).initialize(
+        ERC721Drop(newDrop).initialize(
             name,
             symbol,
             defaultAdmin,
-            fundsRecipient,
+            IDropsSplitter.SplitSetupParams({
+                userDenominator: 1,
+                platformShares: platformShares,
+                userShares: userShares,
+                platformDenominator: 0
+            }),
             editionSize,
             royaltyBPS,
             saleConfig,
@@ -136,10 +147,10 @@ contract ZoraNFTCreatorV1 is OwnableUpgradeable, UUPSUpgradeable, Version(2) {
         emit CreatedDrop({
             creator: msg.sender,
             editionSize: editionSize,
-            editionContractAddress: newDropAddress
+            editionContractAddress: newDrop
         });
 
-        return newDropAddress;
+        return newDrop;
     }
 
     //        ,-.

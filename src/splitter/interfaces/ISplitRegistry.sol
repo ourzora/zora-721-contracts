@@ -2,7 +2,7 @@
 pragma solidity ^0.8.10;
 
 
-interface IRegistry {
+interface ISplitRegistry {
     error TokenIDTooLarge();
 
     function mint(uint256 id, address user) external;

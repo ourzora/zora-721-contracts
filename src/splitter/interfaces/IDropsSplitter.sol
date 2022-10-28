@@ -18,6 +18,13 @@ interface IDropsSplitter {
         uint96 platformDenominator;
     }
 
+    struct SplitSetupParams {
+        Share[] userShares;
+        Share[] platformShares;
+        uint96 userDenominator;
+        uint96 platformDenominator;
+    }
+
     error ShareDenominatorMismatch();
     error PlatformDenomiantorMismatch();
     error WrongSenderAccount();

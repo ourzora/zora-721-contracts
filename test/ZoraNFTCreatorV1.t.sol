@@ -4,13 +4,18 @@ pragma solidity 0.8.10;
 import {DSTest} from "ds-test/test.sol";
 import {Vm} from "forge-std/Vm.sol";
 
+import {SplitRegistry} from "../src/splitter/SplitRegistry.sol";
 import {IMetadataRenderer} from "../src/interfaces/IMetadataRenderer.sol";
-import "../src/ZoraNFTCreatorV1.sol";
-import "../src/ZoraFeeManager.sol";
-import "../src/ZoraNFTCreatorProxy.sol";
+import {ZoraNFTCreatorV1} from "../src/ZoraNFTCreatorV1.sol";
+import {ZoraFeeManager} from "../src/ZoraFeeManager.sol";
+import {ZoraNFTCreatorProxy} from "../src/ZoraNFTCreatorProxy.sol";
 import {MockMetadataRenderer} from "./metadata/MockMetadataRenderer.sol";
 import {FactoryUpgradeGate} from "../src/FactoryUpgradeGate.sol";
 import {IERC721AUpgradeable} from "erc721a-upgradeable/IERC721AUpgradeable.sol";
+import {ERC721Drop} from "../src/ERC721Drop.sol";
+import {IERC721Drop} from "../src/interfaces/IERC721Drop.sol";
+import {EditionMetadataRenderer} from "../src/metadata/EditionMetadataRenderer.sol";
+import {DropMetadataRenderer} from "../src/metadata/DropMetadataRenderer.sol";
 
 contract ZoraFeeManagerTest is DSTest {
     Vm public constant vm = Vm(HEVM_ADDRESS);
@@ -19,6 +24,7 @@ contract ZoraFeeManagerTest is DSTest {
         payable(address(0x21303));
     address payable public constant DEFAULT_ZORA_DAO_ADDRESS =
         payable(address(0x999));
+    SplitRegistry public splitRegistry;
     ERC721Drop public dropImpl;
     ZoraNFTCreatorV1 public creator;
     EditionMetadataRenderer public editionMetadataRenderer;
@@ -26,15 +32,12 @@ contract ZoraFeeManagerTest is DSTest {
 
     function setUp() public {
         vm.prank(DEFAULT_ZORA_DAO_ADDRESS);
-        ZoraFeeManager feeManager = new ZoraFeeManager(
-            500,
-            DEFAULT_ZORA_DAO_ADDRESS
-        );
+        
         vm.prank(DEFAULT_ZORA_DAO_ADDRESS);
         dropImpl = new ERC721Drop(
-            feeManager,
             address(1234),
-            FactoryUpgradeGate(address(0))
+            FactoryUpgradeGate(address(0)),
+            splitRegistry
         );
         editionMetadataRenderer = new EditionMetadataRenderer();
         dropMetadataRenderer = new DropMetadataRenderer();

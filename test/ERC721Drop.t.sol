@@ -13,6 +13,9 @@ import {MockUser} from "./utils/MockUser.sol";
 import {IMetadataRenderer} from "../src/interfaces/IMetadataRenderer.sol";
 import {FactoryUpgradeGate} from "../src/FactoryUpgradeGate.sol";
 import {ERC721DropProxy} from "../src/ERC721DropProxy.sol";
+import {IDropsSplitter} from "../src/splitter/interfaces/IDropsSplitter.sol";
+import {ISplitRegistry} from "../src/splitter/interfaces/ISplitRegistry.sol";
+import {SplitRegistry} from "../src/splitter/SplitRegistry.sol";
 
 // contract TestEventEmitter {
 //     function emitFundsWithdrawn(
@@ -47,8 +50,30 @@ contract ERC721DropTest is DSTest {
         uint256 feeAmount
     );
 
+    function makeSplitSetup(
+        uint256 countUser,
+        uint256 countPlatform,
+        address payable recipient
+    ) internal returns (IDropsSplitter.SplitSetupParams memory) {
+        IDropsSplitter.Share[] memory userShares = new IDropsSplitter.Share[](
+            countUser
+        );
+        userShares[0].numerator = 1;
+        userShares[0].user = recipient;
+        IDropsSplitter.Share[]
+            memory platformShares = new IDropsSplitter.Share[](countPlatform);
+        return
+            IDropsSplitter.SplitSetupParams({
+                userDenominator: 1,
+                platformShares: platformShares,
+                userShares: userShares,
+                platformDenominator: 0
+            });
+    }
+
     ERC721Drop zoraNFTBase;
     MockUser mockUser;
+    SplitRegistry splitRegistry;
     Vm public constant vm = Vm(HEVM_ADDRESS);
     DummyMetadataRenderer public dummyRenderer = new DummyMetadataRenderer();
     ZoraFeeManager public feeManager;
@@ -74,7 +99,7 @@ contract ERC721DropTest is DSTest {
             _contractName: "Test NFT",
             _contractSymbol: "TNFT",
             _initialOwner: DEFAULT_OWNER_ADDRESS,
-            _fundsRecipient: payable(DEFAULT_FUNDS_RECIPIENT_ADDRESS),
+            _splitSetup: makeSplitSetup(1, 0, DEFAULT_FUNDS_RECIPIENT_ADDRESS),
             _editionSize: editionSize,
             _royaltyBPS: 800,
             _metadataRenderer: dummyRenderer,
@@ -95,11 +120,11 @@ contract ERC721DropTest is DSTest {
 
     function setUp() public {
         vm.prank(DEFAULT_ZORA_DAO_ADDRESS);
-        feeManager = new ZoraFeeManager(500, DEFAULT_ZORA_DAO_ADDRESS);
+        splitRegistry = new SplitRegistry();
         factoryUpgradeGate = new FactoryUpgradeGate(UPGRADE_GATE_ADMIN_ADDRESS);
         vm.prank(DEFAULT_ZORA_DAO_ADDRESS);
         impl = address(
-            new ERC721Drop(feeManager, address(0x1234), factoryUpgradeGate)
+            new ERC721Drop(address(0x1234), factoryUpgradeGate, splitRegistry)
         );
         address payable newDrop = payable(
             address(new ERC721DropProxy(impl, ""))
@@ -123,10 +148,11 @@ contract ERC721DropTest is DSTest {
         require(address(renderer) == address(dummyRenderer));
         require(editionSize == 10, "EditionSize is wrong");
         require(royaltyBPS == 800, "RoyaltyBPS is wrong");
-        require(
-            fundsRecipient == payable(DEFAULT_FUNDS_RECIPIENT_ADDRESS),
-            "FundsRecipient is wrong"
-        );
+        (
+            address recipient,
+            uint256 numerator,
+            uint256 denominator
+        ) = zoraNFTBase.getShareForUser(DEFAULT_FUNDS_RECIPIENT_ADDRESS);
 
         string memory name = zoraNFTBase.name();
         string memory symbol = zoraNFTBase.symbol();
@@ -138,7 +164,7 @@ contract ERC721DropTest is DSTest {
             _contractName: "Test NFT",
             _contractSymbol: "TNFT",
             _initialOwner: DEFAULT_OWNER_ADDRESS,
-            _fundsRecipient: payable(DEFAULT_FUNDS_RECIPIENT_ADDRESS),
+            _splitSetup: makeSplitSetup(1, 0, DEFAULT_FUNDS_RECIPIENT_ADDRESS),
             _editionSize: 10,
             _royaltyBPS: 800,
             _metadataRenderer: dummyRenderer,
@@ -183,9 +209,9 @@ contract ERC721DropTest is DSTest {
     function test_UpgradeApproved() public setupZoraNFTBase(10) {
         address newImpl = address(
             new ERC721Drop(
-                ZoraFeeManager(address(0xadadad)),
                 address(0x3333),
-                factoryUpgradeGate
+                factoryUpgradeGate,
+                ISplitRegistry(address(0xd00ad))
             )
         );
 
@@ -198,7 +224,7 @@ contract ERC721DropTest is DSTest {
         });
         vm.prank(DEFAULT_OWNER_ADDRESS);
         zoraNFTBase.upgradeTo(newImpl);
-        assertEq(address(zoraNFTBase.zoraFeeManager()), address(0xadadad));
+        assertEq(address(zoraNFTBase.splitRegistry()), address(0xd00ad));
     }
 
     function test_PurchaseTime() public setupZoraNFTBase(10) {
@@ -293,27 +319,16 @@ contract ERC721DropTest is DSTest {
             DEFAULT_OWNER_ADDRESS,
             DEFAULT_FUNDS_RECIPIENT_ADDRESS,
             leftoverFunds,
-            DEFAULT_ZORA_DAO_ADDRESS,
-            (amount * 1) / 20
+            address(0x0),
+            0
         );
         zoraNFTBase.withdraw();
 
-        (, uint256 feeBps) = feeManager.getZORAWithdrawFeesBPS(
-            address(zoraNFTBase)
-        );
-        assertEq(feeBps, 500);
-
-        assertTrue(
-            DEFAULT_ZORA_DAO_ADDRESS.balance <
-                ((uint256(amount) * 1_000 * 5) / 100000) + 2 ||
-                DEFAULT_ZORA_DAO_ADDRESS.balance >
-                ((uint256(amount) * 1_000 * 5) / 100000) + 2
-        );
         assertTrue(
             DEFAULT_FUNDS_RECIPIENT_ADDRESS.balance >
-                ((uint256(amount) * 1_000 * 95) / 100000) - 2 ||
+                ((uint256(amount) * 1_000 * 100) / 100000) - 2 ||
                 DEFAULT_FUNDS_RECIPIENT_ADDRESS.balance <
-                ((uint256(amount) * 1_000 * 95) / 100000) + 2
+                ((uint256(amount) * 1_000 * 100) / 100000) + 2
         );
     }
 
@@ -358,9 +373,7 @@ contract ERC721DropTest is DSTest {
             presaleMerkleRoot: bytes32(0)
         });
 
- 
-
-        (,,,,,uint64 presaleEndLookup,) = zoraNFTBase.salesConfig();
+        (, , , , , uint64 presaleEndLookup, ) = zoraNFTBase.salesConfig();
         assertEq(presaleEndLookup, 100);
 
         address SALES_MANAGER_ADDR = address(0x11002);
@@ -381,7 +394,15 @@ contract ERC721DropTest is DSTest {
             presaleMerkleRoot: bytes32(0)
         });
 
-        (,,,,uint64 presaleStartLookup2,uint64 presaleEndLookup2,) = zoraNFTBase.salesConfig();
+        (
+            ,
+            ,
+            ,
+            ,
+            uint64 presaleStartLookup2,
+            uint64 presaleEndLookup2,
+
+        ) = zoraNFTBase.salesConfig();
         assertEq(presaleEndLookup2, 0);
         assertEq(presaleStartLookup2, 100);
     }

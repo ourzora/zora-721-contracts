@@ -3,7 +3,6 @@ pragma solidity ^0.8.10;
 
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import {Base64} from "@openzeppelin/contracts/utils/Base64.sol";
-import {IPublicSharedMetadata} from "../interfaces/IPublicSharedMetadata.sol";
 
 /// NFT metadata library for rendering metadata associated with editions
 library NFTMetadataRenderer {
@@ -25,8 +24,7 @@ library NFTMetadataRenderer {
     ) internal pure returns (string memory) {
         string memory _tokenMediaData = tokenMediaData(
             imageUrl,
-            animationUrl,
-            tokenOfEdition
+            animationUrl
         );
         bytes memory json = createMetadataJSON(
             name,
@@ -131,8 +129,7 @@ library NFTMetadataRenderer {
     /// @param animationUrl URL of animation to render for edition
     function tokenMediaData(
         string memory imageUrl,
-        string memory animationUrl,
-        uint256 tokenOfEdition
+        string memory animationUrl
     ) internal pure returns (string memory) {
         bool hasImage = bytes(imageUrl).length > 0;
         bool hasAnimation = bytes(animationUrl).length > 0;

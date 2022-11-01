@@ -1,15 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.10;
 
-import {DSTest} from "ds-test/test.sol";
 import {ZoraFeeManager} from "../src/ZoraFeeManager.sol";
 import {MockUser} from "./utils/MockUser.sol";
-import {Vm} from "forge-std/Vm.sol";
+import {Test} from "forge-std/Test.sol";
 
-contract ZoraFeeManagerTest is DSTest {
+contract ZoraFeeManagerTest is Test {
     ZoraFeeManager feeManager;
     MockUser mockUser;
-    Vm public constant vm = Vm(HEVM_ADDRESS);
     address public constant DEFAULT_ADMIN_ADDRESS = address(23499);
     address public constant mediaContract = address(123456);
 

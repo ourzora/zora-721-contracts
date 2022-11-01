@@ -6,8 +6,7 @@ import {MetadataRenderAdminCheck} from "../../src/metadata/MetadataRenderAdminCh
 import {IMetadataRenderer} from "../../src/interfaces/IMetadataRenderer.sol";
 import {DropMockBase} from "./DropMockBase.sol";
 import {IERC721Drop} from "../../src/interfaces/IERC721Drop.sol";
-import {DSTest} from "ds-test/test.sol";
-import {Vm} from "forge-std/Vm.sol";
+import {Test} from "forge-std/Test.sol";
 
 contract IERC721OnChainDataMock {
     IERC721Drop.SaleDetails private saleDetailsInternal;
@@ -49,8 +48,7 @@ contract IERC721OnChainDataMock {
     }
 }
 
-contract EditionMetadataRendererTest is DSTest {
-    Vm public constant vm = Vm(HEVM_ADDRESS);
+contract EditionMetadataRendererTest is Test {
     address public constant mediaContract = address(123456);
     EditionMetadataRenderer public editionRenderer =
         new EditionMetadataRenderer();

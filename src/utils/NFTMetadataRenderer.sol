@@ -22,10 +22,7 @@ library NFTMetadataRenderer {
         uint256 tokenOfEdition,
         uint256 editionSize
     ) internal pure returns (string memory) {
-        string memory _tokenMediaData = tokenMediaData(
-            imageUrl,
-            animationUrl
-        );
+        string memory _tokenMediaData = tokenMediaData(imageUrl, animationUrl);
         bytes memory json = createMetadataJSON(
             name,
             description,
@@ -40,12 +37,17 @@ library NFTMetadataRenderer {
         string memory name,
         string memory description,
         string memory imageURI,
+        string memory animationURI,
         uint256 royaltyBPS,
         address royaltyRecipient
     ) internal pure returns (string memory) {
         bytes memory imageSpace = bytes("");
+        bytes memory animationSpace = bytes("");
         if (bytes(imageURI).length > 0) {
             imageSpace = abi.encodePacked('", "image": "', imageURI);
+        }
+        if (bytes(animationURI).length > 0) {
+            animationSpace = abi.encodePacked('", "animation": "', animationURI);
         }
         return
             string(
@@ -59,8 +61,12 @@ library NFTMetadataRenderer {
                         '", "seller_fee_basis_points": ',
                         Strings.toString(royaltyBPS),
                         ', "fee_recipient": "',
-                        Strings.toHexString(uint256(uint160(royaltyRecipient)), 20),
+                        Strings.toHexString(
+                            uint256(uint160(royaltyRecipient)),
+                            20
+                        ),
                         imageSpace,
+                        animationSpace,
                         '"}'
                     )
                 )
@@ -123,14 +129,31 @@ library NFTMetadataRenderer {
             );
     }
 
+    function encodeDataURI(string memory mimeType, bytes memory data)
+        internal
+        pure
+        returns (string memory)
+    {
+        return
+            string(
+                abi.encodePacked(
+                    "data:",
+                    mimeType,
+                    ";base64,",
+                    Base64.encode(data)
+                )
+            );
+    }
+
     /// Generates edition metadata from storage information as base64-json blob
     /// Combines the media data and metadata
     /// @param imageUrl URL of image to render for edition
     /// @param animationUrl URL of animation to render for edition
-    function tokenMediaData(
-        string memory imageUrl,
-        string memory animationUrl
-    ) internal pure returns (string memory) {
+    function tokenMediaData(string memory imageUrl, string memory animationUrl)
+        internal
+        pure
+        returns (string memory)
+    {
         bool hasImage = bytes(imageUrl).length > 0;
         bool hasAnimation = bytes(animationUrl).length > 0;
         if (hasImage && hasAnimation) {

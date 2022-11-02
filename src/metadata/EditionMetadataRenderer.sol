@@ -122,6 +122,7 @@ contract EditionMetadataRenderer is
                 name: IERC721MetadataUpgradeable(target).name(),
                 description: editionInfo.description,
                 imageURI: editionInfo.imageURI,
+                animationURI: editionInfo.animationURI,
                 royaltyBPS: uint256(config.royaltyBPS),
                 royaltyRecipient: config.fundsRecipient
             });

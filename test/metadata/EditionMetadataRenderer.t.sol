@@ -185,7 +185,7 @@ contract EditionMetadataRendererTest is DSTest {
         editionRenderer.initializeWithData(
             abi.encode("Description", "ipfs://image", "ipfs://animation")
         );
-        // {"name": "MOCK NAME", "description": "Description", "seller_fee_basis_points": 1000, "fee_recipient": "0x0000000000000000000000000000000000000163", "image": "ipfs://image", "animation": "ipfs://animation"}
-        assertEq("data:application/json;base64,eyJuYW1lIjogIk1PQ0sgTkFNRSIsICJkZXNjcmlwdGlvbiI6ICJEZXNjcmlwdGlvbiIsICJzZWxsZXJfZmVlX2Jhc2lzX3BvaW50cyI6IDEwMDAsICJmZWVfcmVjaXBpZW50IjogIjB4MDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDE2MyIsICJpbWFnZSI6ICJpcGZzOi8vaW1hZ2UiLCAiYW5pbWF0aW9uIjogImlwZnM6Ly9hbmltYXRpb24ifQ==", editionRenderer.contractURI());
+        // {"name": "MOCK NAME", "description": "Description", "seller_fee_basis_points": 1000, "fee_recipient": "0x0000000000000000000000000000000000000163", "image": "ipfs://image", "animation_url": "ipfs://animation"}
+        assertEq("data:application/json;base64,eyJuYW1lIjogIk1PQ0sgTkFNRSIsICJkZXNjcmlwdGlvbiI6ICJEZXNjcmlwdGlvbiIsICJzZWxsZXJfZmVlX2Jhc2lzX3BvaW50cyI6IDEwMDAsICJmZWVfcmVjaXBpZW50IjogIjB4MDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDE2MyIsICJpbWFnZSI6ICJpcGZzOi8vaW1hZ2UiLCAiYW5pbWF0aW9uX3VybCI6ICJpcGZzOi8vYW5pbWF0aW9uIn0=", editionRenderer.contractURI());
     }
 }

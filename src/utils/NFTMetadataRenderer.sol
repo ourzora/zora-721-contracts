@@ -10,21 +10,21 @@ library NFTMetadataRenderer {
     /// Combines the media data and metadata
     /// @param name Name of NFT in metadata
     /// @param description Description of NFT in metadata
-    /// @param imageUrl URL of image to render for edition
-    /// @param animationUrl URL of animation to render for edition
+    /// @param imageURI URI of image to render for edition
+    /// @param animationURI URI of animation to render for edition
     /// @param tokenOfEdition Token ID for specific token
     /// @param editionSize Size of entire edition to show
     function createMetadataEdition(
         string memory name,
         string memory description,
-        string memory imageUrl,
-        string memory animationUrl,
+        string memory imageURI,
+        string memory animationURI,
         uint256 tokenOfEdition,
         uint256 editionSize
     ) internal pure returns (string memory) {
         string memory _tokenMediaData = tokenMediaData(
-            imageUrl,
-            animationUrl
+            imageURI,
+            animationURI
         );
         bytes memory json = createMetadataJSON(
             name,
@@ -40,6 +40,7 @@ library NFTMetadataRenderer {
         string memory name,
         string memory description,
         string memory imageURI,
+        string memory animationURI,
         uint256 royaltyBPS,
         address royaltyRecipient
     ) internal pure returns (string memory) {
@@ -47,6 +48,11 @@ library NFTMetadataRenderer {
         if (bytes(imageURI).length > 0) {
             imageSpace = abi.encodePacked('", "image": "', imageURI);
         }
+        bytes memory animationSpace = bytes("");
+        if (bytes(animationURI).length > 0) {
+            animationSpace = abi.encodePacked('", "animation_url": "', animationURI);
+        }
+
         return
             string(
                 encodeMetadataJSON(
@@ -61,6 +67,7 @@ library NFTMetadataRenderer {
                         ', "fee_recipient": "',
                         Strings.toHexString(uint256(uint160(royaltyRecipient)), 20),
                         imageSpace,
+                        animationSpace,
                         '"}'
                     )
                 )

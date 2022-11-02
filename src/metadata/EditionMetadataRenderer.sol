@@ -9,7 +9,10 @@ import {NFTMetadataRenderer} from "../utils/NFTMetadataRenderer.sol";
 import {MetadataRenderAdminCheck} from "./MetadataRenderAdminCheck.sol";
 
 interface DropConfigGetter {
-    function config() external view returns (IERC721Drop.Configuration memory config);
+    function config()
+        external
+        view
+        returns (IERC721Drop.Configuration memory config);
 }
 
 /// @notice EditionMetadataRenderer for editions support
@@ -115,13 +118,15 @@ contract EditionMetadataRenderer is
     function contractURI() external view override returns (string memory) {
         address target = msg.sender;
         TokenEditionInfo storage editionInfo = tokenInfos[target];
-        IERC721Drop.Configuration memory config = DropConfigGetter(target).config();
+        IERC721Drop.Configuration memory config = DropConfigGetter(target)
+            .config();
 
         return
             NFTMetadataRenderer.encodeContractURIJSON({
                 name: IERC721MetadataUpgradeable(target).name(),
                 description: editionInfo.description,
                 imageURI: editionInfo.imageURI,
+                animationURI: editionInfo.animationURI,
                 royaltyBPS: uint256(config.royaltyBPS),
                 royaltyRecipient: config.fundsRecipient
             });
@@ -153,8 +158,8 @@ contract EditionMetadataRenderer is
             NFTMetadataRenderer.createMetadataEdition({
                 name: IERC721MetadataUpgradeable(target).name(),
                 description: info.description,
-                imageUrl: info.imageURI,
-                animationUrl: info.animationURI,
+                imageURI: info.imageURI,
+                animationURI: info.animationURI,
                 tokenOfEdition: tokenId,
                 editionSize: maxSupply
             });

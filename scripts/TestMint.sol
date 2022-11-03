@@ -20,8 +20,13 @@ contract SetupDaoScript is Script {
     }
 
     function run() public {
-        // vm.startBroadcast();
+        testMint();
+        vm.prank(creator.owner());
+        creator.upgradeTo(newImpl);
+        testMint();
+    }
 
+    function testMint() public {
         vm.startPrank(sender);
 
         address payable self = payable(sender);
@@ -78,5 +83,6 @@ contract SetupDaoScript is Script {
         console2.log(dropContract.contractURI());
 
         // vm.stopBroadcast();
+        vm.stopPrank();
     }
 }

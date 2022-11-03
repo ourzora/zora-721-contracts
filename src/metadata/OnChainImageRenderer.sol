@@ -8,6 +8,7 @@ import {IERC2981Upgradeable} from "@openzeppelin/contracts-upgradeable/interface
 import {NFTMetadataRenderer} from "../utils/NFTMetadataRenderer.sol";
 import {MetadataRenderAdminCheck} from "./MetadataRenderAdminCheck.sol";
 import {BytecodeStorage} from "../utils/BytecodeStorage.sol";
+import {console2} from "forge-std/console2.sol";
 
 interface DropConfigGetter {
     function config()
@@ -68,7 +69,7 @@ contract OnChainImageRenderer is IMetadataRenderer, MetadataRenderAdminCheck {
             animation: animation
         });
         dataStorage[target] = BytecodeStorage.writeToBytecode(
-            abi.encode(editionInfo)
+            abi.encode((editionInfo))
         );
         emit MediaDataUpdated({
             target: target,
@@ -150,8 +151,20 @@ contract OnChainImageRenderer is IMetadataRenderer, MetadataRenderAdminCheck {
         return editionInfo(target).description;
     }
 
-    function editionInfo(address target) public view returns (TokenEditionInfo memory) {
-        return abi.decode(
+    function editionInfo(address target) public view returns (TokenEditionInfo memory result) {
+        console2.log(string(BytecodeStorage.readFromBytecode(dataStorage[target])));
+        // return TokenEditionInfo({
+        //     description: "testing2",
+        //     image: MediaData({
+        //         mimeType: 'image/svg+xml',
+        //         data: ''
+        //     }),
+        //     animation: MediaData({
+        //         mimeType: '',
+        //         data: ''
+        //     })
+        // });
+        (result) = abi.decode(
             BytecodeStorage.readFromBytecode(dataStorage[target]),
             (TokenEditionInfo)
         );

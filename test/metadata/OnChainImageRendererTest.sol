@@ -66,11 +66,11 @@ contract OnchainEditionMetadataRendererTest is DSTest {
                 "",
                 "https://example.com/animation.mp4"
             );
-        bytes memory data = abi.encode(
-            "Description for metadata",
-            mediaDataImage,
-            mediaDataAnimation
-        );
+        bytes memory data = abi.encode(OnChainImageRenderer.TokenEditionInfo({
+            description: "Description for metadata",
+            image: mediaDataImage,
+            animation: mediaDataAnimation
+        }));
         editionRenderer.initializeWithData(data);
         OnChainImageRenderer.TokenEditionInfo
             memory editionInfo = editionRenderer.editionInfo(address(0x123));
@@ -96,11 +96,11 @@ contract OnchainEditionMetadataRendererTest is DSTest {
                 "text/html",
                 "<!doctype html><html><head></head><body>asdfjiawef asdf asd fasjkldfklajsdfjlkasdjlkfaljskdf alkjsdfj klasdfjlkas dlkjfkljas df ljkasdlkjfalkjsdfkljasdfl kjasdljkfjlk asdfljk aslkdj flkjasd flkjasdljk falkjsdfl jkasdljk faljksd flkj asdlkjfaljksd flkasdfjlk afd</body></html>"
             );
-        bytes memory data = abi.encode(
-            "Description for metadata",
-            mediaDataImage,
-            mediaDataAnimation
-        );
+        bytes memory data = abi.encode(OnChainImageRenderer.TokenEditionInfo({
+            description: "Description for metadata",
+            image: mediaDataImage,
+            animation: mediaDataAnimation
+        }));
         editionRenderer.initializeWithData(data);
         OnChainImageRenderer.TokenEditionInfo
             memory editionInfo = editionRenderer.editionInfo(address(0x123));
@@ -127,11 +127,11 @@ contract OnchainEditionMetadataRendererTest is DSTest {
                 "<!doctype html><html><head></head><body>asdfjiawef asdf asd fasjkldfklajsdfjlkasdjlkfaljskdf alkjsdfj klasdfjlkas dlkjfkljas df ljkasdlkjfalkjsdfkljasdfl kjasdljkfjlk asdfljk aslkdj flkjasd flkjasdljk falkjsdfl jkasdljk faljksd flkj asdlkjfaljksd flkasdfjlk afd</body></html>"
             );
 
-        bytes memory data = abi.encode(
-            "Description for metadata 2",
-            mediaDataImage,
-            mediaDataAnimation
-        );
+        bytes memory data = abi.encode(OnChainImageRenderer.TokenEditionInfo({
+            description: "Description for metadata 2",
+            image: mediaDataImage,
+            animation: mediaDataAnimation
+    }));
         editionRenderer.initializeWithData(data);
 
         mediaDataAnimation.data = "";
@@ -165,11 +165,11 @@ contract OnchainEditionMetadataRendererTest is DSTest {
                 "<!doctype html><html><head></head><body>asdfjiawef asdf asd fasjkldfklajsdfjlkasdjlkfaljskdf alkjsdfj klasdfjlkas dlkjfkljas df ljkasdlkjfalkjsdfkljasdfl kjasdljkfjlk asdfljk aslkdj flkjasd flkjasdljk falkjsdfl jkasdljk faljksd flkj asdlkjfaljksd flkasdfjlk afd</body></html>"
             );
 
-        bytes memory data = abi.encode(
-            "Description for metadata 2",
-            mediaDataImage,
-            mediaDataAnimation
-        );
+        bytes memory data = abi.encode(OnChainImageRenderer.TokenEditionInfo({
+            description: "Description for metadata 2",
+            image: mediaDataImage,
+            animation: mediaDataAnimation
+    }));
         editionRenderer.initializeWithData(data);
 
         vm.prank(address(0x144));
@@ -199,11 +199,11 @@ contract OnchainEditionMetadataRendererTest is DSTest {
                 "text/html",
                 "<!doctype html><html><head></head><body>asdfjiawef asdf asd fasjkldfklajsdfjlkasdjlkfaljskdf alkjsdfj klasdfjlkas dlkjfkljas df ljkasdlkjfalkjsdfkljasdfl kjasdljkfjlk asdfljk aslkdj flkjasd flkjasdljk falkjsdfl jkasdljk faljksd flkj asdlkjfaljksd flkasdfjlk afd</body></html>"
             );
-        bytes memory data = abi.encode(
-            "Description for metadata",
-            mediaDataImage,
-            mediaDataAnimation
-        );
+        bytes memory data = abi.encode(OnChainImageRenderer.TokenEditionInfo({
+            description: "Description for metadata",
+            image: mediaDataImage,
+            animation: mediaDataAnimation
+    }));
         editionRenderer.initializeWithData(data);
 
         //
@@ -229,11 +229,11 @@ contract OnchainEditionMetadataRendererTest is DSTest {
                 "",
                 "https://animation-provider.com/animation.mp4"
             );
-        bytes memory data = abi.encode(
-            "Very very long silly description for metadata",
-            mediaDataImage,
-            mediaDataAnimation
-        );
+        bytes memory data = abi.encode(OnChainImageRenderer.TokenEditionInfo({
+            description: "Very very long silly description for metadata",
+            image: mediaDataImage,
+            animation: mediaDataAnimation
+    }));
         editionRenderer.initializeWithData(data);
 
         //
@@ -259,11 +259,11 @@ contract OnchainEditionMetadataRendererTest is DSTest {
                 "",
                 "https://animation-provider.com/animation.mp4"
             );
-        bytes memory data = abi.encode(
-            "Very very long silly description for metadata",
-            mediaDataImage,
-            mediaDataAnimation
-        );
+        bytes memory data = abi.encode(OnChainImageRenderer.TokenEditionInfo({
+            description: "Very very long silly description for metadata",
+            image: mediaDataImage,
+            animation: mediaDataAnimation
+    }));
         editionRenderer.initializeWithData(data);
         assertEq(
             "data:application/json;base64,eyJuYW1lIjogIk1PQ0sgTkFNRSIsICJkZXNjcmlwdGlvbiI6ICJEZXNjcmlwdGlvbiIsICJzZWxsZXJfZmVlX2Jhc2lzX3BvaW50cyI6IDEwMDAsICJmZWVfcmVjaXBpZW50IjogIjB4MDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDE2MyIsICJpbWFnZSI6ICJpcGZzOi8vaW1hZ2UifQ==",

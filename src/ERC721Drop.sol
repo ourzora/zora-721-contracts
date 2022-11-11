@@ -25,6 +25,7 @@ import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/U
 
 import {IZoraFeeManager} from "./interfaces/IZoraFeeManager.sol";
 import {IMetadataRenderer} from "./interfaces/IMetadataRenderer.sol";
+import {IOperatorFilterRegistry} from "./interfaces/IOperatorFilterRegistry.sol";
 import {IERC721Drop} from "./interfaces/IERC721Drop.sol";
 import {IOwnable} from "./interfaces/IOwnable.sol";
 import {IFactoryUpgradeGate} from "./interfaces/IFactoryUpgradeGate.sol";
@@ -51,14 +52,14 @@ contract ERC721Drop is
     IERC721Drop,
     OwnableSkeleton,
     FundsReceiver,
-    Version(8),
+    Version(9),
     ERC721DropStorageV1
 {
     /// @dev This is the max mint batch size for the optimized ERC721A mint contract
-    uint256 internal constant MAX_MINT_BATCH_SIZE = 8;
+    uint256 internal immutable MAX_MINT_BATCH_SIZE = 8;
 
     /// @dev Gas limit to send funds
-    uint256 internal constant FUNDS_SEND_GAS_LIMIT = 210_000;
+    uint256 internal immutable FUNDS_SEND_GAS_LIMIT = 210_000;
 
     /// @notice Access control roles
     bytes32 public immutable MINTER_ROLE = keccak256("MINTER");
@@ -75,6 +76,11 @@ contract ERC721Drop is
 
     /// @notice Max royalty BPS
     uint16 constant MAX_ROYALTY_BPS = 50_00;
+
+    address immutable marketFilterDAOAddress;
+
+    IOperatorFilterRegistry immutable operatorFilterRegistry =
+        IOperatorFilterRegistry(0x000000000000AAeB6D7670E522A718067333cd4E);
 
     /// @notice Only allow for users with admin access
     modifier onlyAdmin() {
@@ -154,11 +160,13 @@ contract ERC721Drop is
     constructor(
         IZoraFeeManager _zoraFeeManager,
         address _zoraERC721TransferHelper,
-        IFactoryUpgradeGate _factoryUpgradeGate
+        IFactoryUpgradeGate _factoryUpgradeGate,
+        address _marketFilterDAOAddress
     ) initializer {
         zoraFeeManager = _zoraFeeManager;
         zoraERC721TransferHelper = _zoraERC721TransferHelper;
         factoryUpgradeGate = _factoryUpgradeGate;
+        marketFilterDAOAddress = _marketFilterDAOAddress;
     }
 
     ///  @dev Create a new drop contract
@@ -569,6 +577,75 @@ contract ERC721Drop is
         });
 
         return firstMintedTokenId;
+    }
+
+    /**
+     *** ---------------------------------- ***
+     ***                                    ***
+     ***     ADMIN OPERATOR FILTERING       ***
+     ***                                    ***
+     *** ---------------------------------- ***
+     ***/
+
+    /// @notice Proxy to update market filter settings in the main registry contracts
+    /// @notice Requires admin permissions
+    /// @param args Calldata args to pass to the registry
+    function updateMarketFilterSettings(bytes calldata args)
+        external
+        onlyAdmin
+        returns (bytes memory)
+    {
+        (bool success, bytes memory ret) = address(operatorFilterRegistry).call(
+            args
+        );
+        if (!success) {
+            revert RemoteOperatorFilterRegistryCallFailed();
+        }
+        return ret;
+    }
+
+    /// @notice Manage subscription to the DAO for marketplace filtering based off royalty payouts.
+    /// @param enable Enable filtering to non-royalty payout marketplaces
+    function manageMarketFilterDAOSubscription(bool enable) external onlyAdmin {
+        address self = address(this);
+        if (marketFilterDAOAddress == address(0x0)) {
+            revert MarketFilterDAOAddressNotSupportedForChain();
+        }
+        if (!operatorFilterRegistry.isRegistered(self) && enable) {
+            operatorFilterRegistry.registerAndSubscribe(self, marketFilterDAOAddress);
+        } else if (enable) {
+            operatorFilterRegistry.subscribe(self, marketFilterDAOAddress);
+        } else {
+            operatorFilterRegistry.unsubscribe(marketFilterDAOAddress, false);
+            operatorFilterRegistry.unregister(self);
+        }
+    }
+
+    /// @notice Hook to filter operators (no-op if no filters are registered)
+    /// @dev Part of ERC721A token hooks
+    /// @param from Transfer from user
+    /// @param to Transfer to user
+    /// @param startTokenId Token ID to start with
+    /// @param quantity Quantity of token being transferred
+    function _beforeTokenTransfers(
+        address from,
+        address to,
+        uint256 startTokenId,
+        uint256 quantity
+    ) internal virtual override {
+        if (
+            from != msg.sender &&
+            address(operatorFilterRegistry).code.length > 0
+        ) {
+            if (
+                !operatorFilterRegistry.isOperatorAllowed(
+                    address(this),
+                    msg.sender
+                )
+            ) {
+                revert OperatorNotAllowed(msg.sender);
+            }
+        }
     }
 
     /**

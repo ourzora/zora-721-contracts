@@ -13,6 +13,9 @@ import {MockUser} from "./utils/MockUser.sol";
 import {IMetadataRenderer} from "../src/interfaces/IMetadataRenderer.sol";
 import {FactoryUpgradeGate} from "../src/FactoryUpgradeGate.sol";
 import {ERC721DropProxy} from "../src/ERC721DropProxy.sol";
+import {OperatorFilterRegistry} from "./filterer/OperatorFilterRegistry.sol";
+import {IOperatorFilterRegistry} from "../src/interfaces/IOperatorFilterRegistry.sol";
+import {OperatorFilterRegistryErrorsAndEvents} from "./filterer/OperatorFilterRegistryErrorsAndEvents.sol";
 
 // contract TestEventEmitter {
 //     function emitFundsWithdrawn(
@@ -99,12 +102,39 @@ contract ERC721DropTest is DSTest {
         factoryUpgradeGate = new FactoryUpgradeGate(UPGRADE_GATE_ADMIN_ADDRESS);
         vm.prank(DEFAULT_ZORA_DAO_ADDRESS);
         impl = address(
-            new ERC721Drop(feeManager, address(0x1234), factoryUpgradeGate)
+            new ERC721Drop(
+                feeManager,
+                address(0x1234),
+                factoryUpgradeGate,
+                address(0x0)
+            )
         );
         address payable newDrop = payable(
             address(new ERC721DropProxy(impl, ""))
         );
         zoraNFTBase = ERC721Drop(newDrop);
+    }
+
+    modifier factoryWithSubscriptionAddress(address subscriptionAddress) {
+        vm.etch(
+            address(0x000000000000AAeB6D7670E522A718067333cd4E),
+            address(new OperatorFilterRegistry()).code
+        );
+        vm.prank(DEFAULT_ZORA_DAO_ADDRESS);
+        impl = address(
+            new ERC721Drop(
+                feeManager,
+                address(0x1234),
+                factoryUpgradeGate,
+                address(subscriptionAddress)
+            )
+        );
+        address payable newDrop = payable(
+            address(new ERC721DropProxy(impl, ""))
+        );
+        zoraNFTBase = ERC721Drop(newDrop);
+
+        _;
     }
 
     function test_Init() public setupZoraNFTBase(10) {
@@ -155,6 +185,41 @@ contract ERC721DropTest is DSTest {
         });
     }
 
+    function test_SubscriptionEnabled()
+        public
+        factoryWithSubscriptionAddress(address(0x123456))
+        setupZoraNFTBase(10)
+    {
+        IOperatorFilterRegistry operatorFilterRegistry = IOperatorFilterRegistry(
+                0x000000000000AAeB6D7670E522A718067333cd4E
+            );
+        vm.startPrank(address(0x123456));
+        operatorFilterRegistry.register(address(0x123456));
+        operatorFilterRegistry.updateOperator(
+            address(0x123456),
+            address(0xcafeea3),
+            true
+        );
+        vm.stopPrank();
+        vm.startPrank(DEFAULT_OWNER_ADDRESS);
+        zoraNFTBase.manageMarketFilterDAOSubscription(true);
+        zoraNFTBase.adminMint(DEFAULT_OWNER_ADDRESS, 10);
+        zoraNFTBase.setApprovalForAll(address(0xcafeea3), true);
+        vm.stopPrank();
+        vm.prank(address(0xcafeea3));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                OperatorFilterRegistryErrorsAndEvents.AddressFiltered.selector,
+                address(0xcafeea3)
+            )
+        );
+        zoraNFTBase.transferFrom(DEFAULT_OWNER_ADDRESS, address(0x123456), 1);
+        vm.prank(DEFAULT_OWNER_ADDRESS);
+        zoraNFTBase.manageMarketFilterDAOSubscription(false);
+        vm.prank(address(0xcafeea3));
+        zoraNFTBase.transferFrom(DEFAULT_OWNER_ADDRESS, address(0x123456), 1);
+    }
+
     function test_Purchase(uint64 amount) public setupZoraNFTBase(10) {
         vm.prank(DEFAULT_OWNER_ADDRESS);
         zoraNFTBase.setSaleConfiguration({
@@ -185,7 +250,8 @@ contract ERC721DropTest is DSTest {
             new ERC721Drop(
                 ZoraFeeManager(address(0xadadad)),
                 address(0x3333),
-                factoryUpgradeGate
+                factoryUpgradeGate,
+                address(0x0)
             )
         );
 
@@ -358,9 +424,7 @@ contract ERC721DropTest is DSTest {
             presaleMerkleRoot: bytes32(0)
         });
 
- 
-
-        (,,,,,uint64 presaleEndLookup,) = zoraNFTBase.salesConfig();
+        (, , , , , uint64 presaleEndLookup, ) = zoraNFTBase.salesConfig();
         assertEq(presaleEndLookup, 100);
 
         address SALES_MANAGER_ADDR = address(0x11002);
@@ -381,7 +445,15 @@ contract ERC721DropTest is DSTest {
             presaleMerkleRoot: bytes32(0)
         });
 
-        (,,,,uint64 presaleStartLookup2,uint64 presaleEndLookup2,) = zoraNFTBase.salesConfig();
+        (
+            ,
+            ,
+            ,
+            ,
+            uint64 presaleStartLookup2,
+            uint64 presaleEndLookup2,
+
+        ) = zoraNFTBase.salesConfig();
         assertEq(presaleEndLookup2, 0);
         assertEq(presaleStartLookup2, 100);
     }

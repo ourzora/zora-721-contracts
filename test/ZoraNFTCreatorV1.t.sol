@@ -34,7 +34,8 @@ contract ZoraFeeManagerTest is DSTest {
         dropImpl = new ERC721Drop(
             feeManager,
             address(1234),
-            FactoryUpgradeGate(address(0))
+            FactoryUpgradeGate(address(0)),
+            address(0)
         );
         editionMetadataRenderer = new EditionMetadataRenderer();
         dropMetadataRenderer = new DropMetadataRenderer();

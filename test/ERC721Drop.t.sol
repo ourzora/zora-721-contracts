@@ -257,7 +257,6 @@ contract ERC721DropTest is DSTest {
         setupZoraNFTBase(10)
     {
         vm.startPrank(address(DEFAULT_OWNER_ADDRESS));
-        vm.expectRevert(IERC721Drop.Access_OnlyAdmin.selector);
         bytes memory baseCall = abi.encodeWithSelector(
             IOperatorFilterRegistry.register.selector,
             address(zoraNFTBase)

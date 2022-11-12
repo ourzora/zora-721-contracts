@@ -16,7 +16,7 @@ import {FactoryUpgradeGate} from "../src/FactoryUpgradeGate.sol";
 import {ERC721DropProxy} from "../src/ERC721DropProxy.sol";
 import {OperatorFilterRegistry} from "./filter/OperatorFilterRegistry.sol";
 import {OperatorFilterRegistryErrorsAndEvents} from "./filter/OperatorFilterRegistryErrorsAndEvents.sol";
-import {OwnedSubscriptionManager} from "./filter/OwnedSubscriptionManager.sol";
+import {OwnedSubscriptionManager} from "../src/filter/OwnedSubscriptionManager.sol";
 
 // contract TestEventEmitter {
 //     function emitFundsWithdrawn(
@@ -223,6 +223,47 @@ contract ERC721DropTest is DSTest {
         zoraNFTBase.manageMarketFilterDAOSubscription(false);
         vm.prank(address(0xcafeea3));
         zoraNFTBase.transferFrom(DEFAULT_OWNER_ADDRESS, address(0x123456), 1);
+    }
+
+    function test_OnlyAdminEnableSubscription()
+        public
+        factoryWithSubscriptionAddress(ownedSubscriptionManager)
+        setupZoraNFTBase(10)
+    {
+        vm.startPrank(address(0xcafecafe));
+        vm.expectRevert(IERC721Drop.Access_OnlyAdmin.selector);
+        zoraNFTBase.manageMarketFilterDAOSubscription(true);
+        vm.stopPrank();
+    }
+
+    function test_ProxySubscriptionAccessOnlyAdmin()
+        public
+        factoryWithSubscriptionAddress(ownedSubscriptionManager)
+        setupZoraNFTBase(10)
+    {
+        vm.startPrank(address(0xcafecafe));
+        vm.expectRevert(IERC721Drop.Access_OnlyAdmin.selector);
+        bytes memory baseCall = abi.encodeWithSelector(
+            IOperatorFilterRegistry.register.selector,
+            address(zoraNFTBase)
+        );
+        zoraNFTBase.updateMarketFilterSettings(baseCall);
+        vm.stopPrank();
+    }
+
+    function test_ProxySubscriptionAccess()
+        public
+        factoryWithSubscriptionAddress(ownedSubscriptionManager)
+        setupZoraNFTBase(10)
+    {
+        vm.startPrank(address(DEFAULT_OWNER_ADDRESS));
+        vm.expectRevert(IERC721Drop.Access_OnlyAdmin.selector);
+        bytes memory baseCall = abi.encodeWithSelector(
+            IOperatorFilterRegistry.register.selector,
+            address(zoraNFTBase)
+        );
+        zoraNFTBase.updateMarketFilterSettings(baseCall);
+        vm.stopPrank();
     }
 
     function test_Purchase(uint64 amount) public setupZoraNFTBase(10) {

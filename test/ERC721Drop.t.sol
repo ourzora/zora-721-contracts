@@ -241,12 +241,12 @@ contract ERC721DropTest is DSTest {
         factoryWithSubscriptionAddress(ownedSubscriptionManager)
         setupZoraNFTBase(10)
     {
-        vm.startPrank(address(0xcafecafe));
-        vm.expectRevert(IERC721Drop.Access_OnlyAdmin.selector);
         bytes memory baseCall = abi.encodeWithSelector(
             IOperatorFilterRegistry.register.selector,
             address(zoraNFTBase)
         );
+        vm.startPrank(address(0xcafecafe));
+        vm.expectRevert(IERC721Drop.Access_OnlyAdmin.selector);
         zoraNFTBase.updateMarketFilterSettings(baseCall);
         vm.stopPrank();
     }

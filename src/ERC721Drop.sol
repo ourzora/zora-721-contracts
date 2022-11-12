@@ -616,7 +616,7 @@ contract ERC721Drop is
         } else if (enable) {
             operatorFilterRegistry.subscribe(self, marketFilterDAOAddress);
         } else {
-            operatorFilterRegistry.unsubscribe(marketFilterDAOAddress, false);
+            operatorFilterRegistry.unsubscribe(self, false);
             operatorFilterRegistry.unregister(self);
         }
     }

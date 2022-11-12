@@ -5,17 +5,18 @@ import {Vm} from "forge-std/Vm.sol";
 import {DSTest} from "ds-test/test.sol";
 import {IERC721AUpgradeable} from "erc721a-upgradeable/IERC721AUpgradeable.sol";
 
-import {IERC721Drop} from "../src/interfaces/IERC721Drop.sol";
 import {ERC721Drop} from "../src/ERC721Drop.sol";
 import {ZoraFeeManager} from "../src/ZoraFeeManager.sol";
 import {DummyMetadataRenderer} from "./utils/DummyMetadataRenderer.sol";
 import {MockUser} from "./utils/MockUser.sol";
+import {IOperatorFilterRegistry} from "../src/interfaces/IOperatorFilterRegistry.sol";
 import {IMetadataRenderer} from "../src/interfaces/IMetadataRenderer.sol";
+import {IERC721Drop} from "../src/interfaces/IERC721Drop.sol";
 import {FactoryUpgradeGate} from "../src/FactoryUpgradeGate.sol";
 import {ERC721DropProxy} from "../src/ERC721DropProxy.sol";
-import {OperatorFilterRegistry} from "./filterer/OperatorFilterRegistry.sol";
-import {IOperatorFilterRegistry} from "../src/interfaces/IOperatorFilterRegistry.sol";
-import {OperatorFilterRegistryErrorsAndEvents} from "./filterer/OperatorFilterRegistryErrorsAndEvents.sol";
+import {OperatorFilterRegistry} from "./filter/OperatorFilterRegistry.sol";
+import {OperatorFilterRegistryErrorsAndEvents} from "./filter/OperatorFilterRegistryErrorsAndEvents.sol";
+import {OwnedSubscriptionManager} from "./filter/OwnedSubscriptionManager.sol";
 
 // contract TestEventEmitter {
 //     function emitFundsWithdrawn(
@@ -64,6 +65,7 @@ contract ERC721DropTest is DSTest {
     address public constant UPGRADE_GATE_ADMIN_ADDRESS = address(0x942924224);
     address public constant mediaContract = address(0x123456);
     address public impl;
+    address public ownedSubscriptionManager;
 
     struct Configuration {
         IMetadataRenderer metadataRenderer;
@@ -100,6 +102,14 @@ contract ERC721DropTest is DSTest {
         vm.prank(DEFAULT_ZORA_DAO_ADDRESS);
         feeManager = new ZoraFeeManager(500, DEFAULT_ZORA_DAO_ADDRESS);
         factoryUpgradeGate = new FactoryUpgradeGate(UPGRADE_GATE_ADMIN_ADDRESS);
+        vm.etch(
+            address(0x000000000000AAeB6D7670E522A718067333cd4E),
+            address(new OperatorFilterRegistry()).code
+        );
+        ownedSubscriptionManager = address(
+            new OwnedSubscriptionManager(address(0x123456))
+        );
+
         vm.prank(DEFAULT_ZORA_DAO_ADDRESS);
         impl = address(
             new ERC721Drop(
@@ -116,10 +126,6 @@ contract ERC721DropTest is DSTest {
     }
 
     modifier factoryWithSubscriptionAddress(address subscriptionAddress) {
-        vm.etch(
-            address(0x000000000000AAeB6D7670E522A718067333cd4E),
-            address(new OperatorFilterRegistry()).code
-        );
         vm.prank(DEFAULT_ZORA_DAO_ADDRESS);
         impl = address(
             new ERC721Drop(
@@ -187,16 +193,15 @@ contract ERC721DropTest is DSTest {
 
     function test_SubscriptionEnabled()
         public
-        factoryWithSubscriptionAddress(address(0x123456))
+        factoryWithSubscriptionAddress(ownedSubscriptionManager)
         setupZoraNFTBase(10)
     {
         IOperatorFilterRegistry operatorFilterRegistry = IOperatorFilterRegistry(
                 0x000000000000AAeB6D7670E522A718067333cd4E
             );
         vm.startPrank(address(0x123456));
-        operatorFilterRegistry.register(address(0x123456));
         operatorFilterRegistry.updateOperator(
-            address(0x123456),
+            ownedSubscriptionManager,
             address(0xcafeea3),
             true
         );

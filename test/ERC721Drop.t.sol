@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.10;
 
-import {Vm} from "forge-std/Vm.sol";
-import {DSTest} from "ds-test/test.sol";
+import {Test} from "forge-std/Test.sol";
 import {IERC721AUpgradeable} from "erc721a-upgradeable/IERC721AUpgradeable.sol";
 
 import {ERC721Drop} from "../src/ERC721Drop.sol";
@@ -36,7 +35,7 @@ import {OwnedSubscriptionManager} from "../src/filter/OwnedSubscriptionManager.s
 //     }
 // }
 
-contract ERC721DropTest is DSTest {
+contract ERC721DropTest is Test {
     /// @notice Event emitted when the funds are withdrawn from the minting contract
     /// @param withdrawnBy address that issued the withdraw
     /// @param withdrawnTo address that the funds were withdrawn to
@@ -53,7 +52,6 @@ contract ERC721DropTest is DSTest {
 
     ERC721Drop zoraNFTBase;
     MockUser mockUser;
-    Vm public constant vm = Vm(HEVM_ADDRESS);
     DummyMetadataRenderer public dummyRenderer = new DummyMetadataRenderer();
     ZoraFeeManager public feeManager;
     FactoryUpgradeGate public factoryUpgradeGate;

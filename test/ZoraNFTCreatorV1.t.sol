@@ -1,9 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.10;
 
-import {DSTest} from "ds-test/test.sol";
-import {Vm} from "forge-std/Vm.sol";
-
+import {Test} from "forge-std/Test.sol";
 import {IMetadataRenderer} from "../src/interfaces/IMetadataRenderer.sol";
 import "../src/ZoraNFTCreatorV1.sol";
 import "../src/ZoraFeeManager.sol";
@@ -12,8 +10,7 @@ import {MockMetadataRenderer} from "./metadata/MockMetadataRenderer.sol";
 import {FactoryUpgradeGate} from "../src/FactoryUpgradeGate.sol";
 import {IERC721AUpgradeable} from "erc721a-upgradeable/IERC721AUpgradeable.sol";
 
-contract ZoraFeeManagerTest is DSTest {
-    Vm public constant vm = Vm(HEVM_ADDRESS);
+contract ZoraFeeManagerTest is Test {
     address public constant DEFAULT_OWNER_ADDRESS = address(0x23499);
     address payable public constant DEFAULT_FUNDS_RECIPIENT_ADDRESS =
         payable(address(0x21303));

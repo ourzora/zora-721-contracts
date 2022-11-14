@@ -1,0 +1,2478 @@
+{
+  "_names": [
+      "backgrounds",
+      "0",
+      "1",
+      "2",
+      "3",
+      "4c",
+      "5",
+      "6"
+  ],
+  "_items": [
+      {
+          "propertyId": "0",
+          "name": "9-5",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "0",
+          "name": "9-4",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "0",
+          "name": "9-6",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "0",
+          "name": "9-7",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "0",
+          "name": "9-3",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "0",
+          "name": "9-2",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "0",
+          "name": "9-0",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "0",
+          "name": "9-1",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "0",
+          "name": "9-9",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "0",
+          "name": "9-8",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "0",
+          "name": "9-14",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "0",
+          "name": "9-13",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "0",
+          "name": "9-12",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "0",
+          "name": "9-10",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "0",
+          "name": "9-11",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "1",
+          "name": "0_22_2_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "1",
+          "name": "0_14_2_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "1",
+          "name": "0_21_1_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "1",
+          "name": "0_07_1_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "1",
+          "name": "0_04_10_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "1",
+          "name": "0_15_6_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "1",
+          "name": "0_23_6_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "1",
+          "name": "0_05_6_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "1",
+          "name": "0_05_4_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "1",
+          "name": "0_23_4_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "1",
+          "name": "0_23_4_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "1",
+          "name": "0_05_4_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "1",
+          "name": "0_04_10_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "1",
+          "name": "0_15_6_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "1",
+          "name": "0_05_6_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "1",
+          "name": "0_23_6_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "1",
+          "name": "0_07_1_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "1",
+          "name": "0_21_1_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "1",
+          "name": "0_22_2_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "1",
+          "name": "0_14_2_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "1",
+          "name": "0_11_8_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "1",
+          "name": "0_23_2_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "1",
+          "name": "0_20_1_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "1",
+          "name": "0_20_1_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "1",
+          "name": "0_23_2_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "1",
+          "name": "0_11_8_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "1",
+          "name": "0_06_6_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "1",
+          "name": "0_23_5_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "1",
+          "name": "0_03_8_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "1",
+          "name": "0_14_1_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "1",
+          "name": "0_21_10_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "1",
+          "name": "0_21_10_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "1",
+          "name": "0_14_1_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "1",
+          "name": "0_03_8_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "1",
+          "name": "0_23_5_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "1",
+          "name": "0_06_6_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "1",
+          "name": "0_09_10_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "1",
+          "name": "0_a_0",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "1",
+          "name": "0_15_1_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "1",
+          "name": "0_23_1_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "1",
+          "name": "0_a_1",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "1",
+          "name": "0_22_7_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "1",
+          "name": "0_14_5_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "1",
+          "name": "0_14_5_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "1",
+          "name": "0_22_7_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "1",
+          "name": "0_a_3",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "1",
+          "name": "0_15_1_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "1",
+          "name": "0_23_1_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "1",
+          "name": "0_a_2",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "1",
+          "name": "0_09_10_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "1",
+          "name": "0_01_5_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "1",
+          "name": "0_01_7_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "1",
+          "name": "0_01_7_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "1",
+          "name": "0_01_5_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "1",
+          "name": "0_01_1_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "1",
+          "name": "0_11_3_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "1",
+          "name": "0_09_5_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "1",
+          "name": "0_11_3_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "1",
+          "name": "0_09_5_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "1",
+          "name": "0_11_4_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "1",
+          "name": "0_01_4_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "1",
+          "name": "0_21_9_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "1",
+          "name": "0_08_6_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "1",
+          "name": "0_18_6_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "1",
+          "name": "0_13_1_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "1",
+          "name": "0_10_2_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "1",
+          "name": "0_10_2_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "1",
+          "name": "0_13_1_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "1",
+          "name": "0_08_6_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "1",
+          "name": "0_18_6_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "1",
+          "name": "0_21_9_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "1",
+          "name": "0_11_4_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "1",
+          "name": "0_01_4_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "1",
+          "name": "0_02_1_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "1",
+          "name": "0_02_3_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "1",
+          "name": "0_02_3_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "1",
+          "name": "0_02_1_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "2",
+          "name": "1_01_1_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "2",
+          "name": "1_09_5_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "2",
+          "name": "1_11_3_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "2",
+          "name": "1_09_5_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "2",
+          "name": "1_11_3_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "2",
+          "name": "1_01_5_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "2",
+          "name": "1_01_7_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "2",
+          "name": "1_01_7_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "2",
+          "name": "1_01_5_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "2",
+          "name": "1_02_1_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "2",
+          "name": "1_02_3_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "2",
+          "name": "1_a_3",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "2",
+          "name": "1_a_2",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "2",
+          "name": "1_a_0",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "2",
+          "name": "1_a_1",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "2",
+          "name": "1_02_3_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "2",
+          "name": "1_02_1_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "2",
+          "name": "1_21_9_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "2",
+          "name": "1_01_4_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "2",
+          "name": "1_11_4_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "2",
+          "name": "1_18_6_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "2",
+          "name": "1_08_6_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "2",
+          "name": "1_13_1_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "2",
+          "name": "1_10_2_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "2",
+          "name": "1_10_2_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "2",
+          "name": "1_13_1_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "2",
+          "name": "1_18_6_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "2",
+          "name": "1_08_6_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "2",
+          "name": "1_01_4_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "2",
+          "name": "1_11_4_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "2",
+          "name": "1_21_9_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "2",
+          "name": "1_11_8_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "2",
+          "name": "1_23_2_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "2",
+          "name": "1_20_1_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "2",
+          "name": "1_20_1_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "2",
+          "name": "1_23_2_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "2",
+          "name": "1_11_8_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "2",
+          "name": "1_14_2_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "2",
+          "name": "1_22_2_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "2",
+          "name": "1_07_1_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "2",
+          "name": "1_21_1_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "2",
+          "name": "1_05_6_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "2",
+          "name": "1_23_6_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "2",
+          "name": "1_15_6_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "2",
+          "name": "1_04_10_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "2",
+          "name": "1_23_4_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "2",
+          "name": "1_05_4_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "2",
+          "name": "1_05_4_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "2",
+          "name": "1_23_4_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "2",
+          "name": "1_23_6_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "2",
+          "name": "1_05_6_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "2",
+          "name": "1_04_10_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "2",
+          "name": "1_15_6_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "2",
+          "name": "1_21_1_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "2",
+          "name": "1_07_1_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "2",
+          "name": "1_14_2_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "2",
+          "name": "1_22_2_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "2",
+          "name": "1_23_1_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "2",
+          "name": "1_15_1_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "2",
+          "name": "1_09_10_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "2",
+          "name": "1_22_7_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "2",
+          "name": "1_14_5_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "2",
+          "name": "1_14_5_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "2",
+          "name": "1_22_7_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "2",
+          "name": "1_09_10_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "2",
+          "name": "1_23_1_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "2",
+          "name": "1_15_1_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "2",
+          "name": "1_03_8_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "2",
+          "name": "1_06_6_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "2",
+          "name": "1_23_5_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "2",
+          "name": "1_21_10_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "2",
+          "name": "1_14_1_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "2",
+          "name": "1_14_1_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "2",
+          "name": "1_21_10_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "2",
+          "name": "1_23_5_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "2",
+          "name": "1_06_6_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "2",
+          "name": "1_03_8_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "3",
+          "name": "2_14_1_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "3",
+          "name": "2_a_0",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "3",
+          "name": "2_06_6_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "3",
+          "name": "2_23_5_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "3",
+          "name": "2_a_1",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "3",
+          "name": "2_03_8_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "3",
+          "name": "2_03_8_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "3",
+          "name": "2_a_3",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "3",
+          "name": "2_23_5_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "3",
+          "name": "2_06_6_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "3",
+          "name": "2_a_2",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "3",
+          "name": "2_14_1_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "3",
+          "name": "2_22_7_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "3",
+          "name": "2_14_5_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "3",
+          "name": "2_23_1_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "3",
+          "name": "2_15_1_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "3",
+          "name": "2_23_1_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "3",
+          "name": "2_15_1_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "3",
+          "name": "2_14_5_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "3",
+          "name": "2_22_7_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "3",
+          "name": "2_05_6_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "3",
+          "name": "2_23_6_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "3",
+          "name": "2_15_6_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "3",
+          "name": "2_23_4_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "3",
+          "name": "2_05_4_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "3",
+          "name": "2_14_2_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "3",
+          "name": "2_22_2_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "3",
+          "name": "2_07_1_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "3",
+          "name": "2_21_1_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "3",
+          "name": "2_21_1_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "3",
+          "name": "2_07_1_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "3",
+          "name": "2_14_2_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "3",
+          "name": "2_22_2_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "3",
+          "name": "2_05_4_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "3",
+          "name": "2_23_4_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "3",
+          "name": "2_23_6_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "3",
+          "name": "2_05_6_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "3",
+          "name": "2_15_6_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "3",
+          "name": "2_23_2_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "3",
+          "name": "2_20_1_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "3",
+          "name": "2_11_8_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "3",
+          "name": "2_11_8_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "3",
+          "name": "2_20_1_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "3",
+          "name": "2_23_2_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "3",
+          "name": "2_18_6_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "3",
+          "name": "2_08_6_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "3",
+          "name": "2_13_1_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "3",
+          "name": "2_10_2_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "3",
+          "name": "2_01_4_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "3",
+          "name": "2_11_4_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "3",
+          "name": "2_21_10_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "3",
+          "name": "2_21_9_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "3",
+          "name": "2_21_9_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "3",
+          "name": "2_21_10_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "3",
+          "name": "2_01_4_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "3",
+          "name": "2_11_4_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "3",
+          "name": "2_10_2_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "3",
+          "name": "2_13_1_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "3",
+          "name": "2_18_6_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "3",
+          "name": "2_08_6_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "3",
+          "name": "2_09_10_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "3",
+          "name": "2_02_1_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "3",
+          "name": "2_02_3_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "3",
+          "name": "2_02_3_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "3",
+          "name": "2_02_1_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "3",
+          "name": "2_09_10_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "3",
+          "name": "2_01_5_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "3",
+          "name": "2_01_7_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "3",
+          "name": "2_04_10_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "3",
+          "name": "2_04_10_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "3",
+          "name": "2_01_7_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "3",
+          "name": "2_01_5_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "3",
+          "name": "2_01_1_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "3",
+          "name": "2_09_5_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "3",
+          "name": "2_11_3_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "3",
+          "name": "2_09_5_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "3",
+          "name": "2_11_3_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "4",
+          "name": "3_09_10_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "4",
+          "name": "3_02_1_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "4",
+          "name": "3_02_3_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "4",
+          "name": "3_02_3_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "4",
+          "name": "3_02_1_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "4",
+          "name": "3_09_10_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "4",
+          "name": "3_a_3",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "4",
+          "name": "3_08_6_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "4",
+          "name": "3_18_6_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "4",
+          "name": "3_13_1_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "4",
+          "name": "3_10_2_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "4",
+          "name": "3_21_9_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "4",
+          "name": "3_11_4_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "4",
+          "name": "3_01_4_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "4",
+          "name": "3_a_2",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "4",
+          "name": "3_21_10_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "4",
+          "name": "3_21_10_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "4",
+          "name": "3_a_0",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "4",
+          "name": "3_11_4_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "4",
+          "name": "3_01_4_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "4",
+          "name": "3_21_9_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "4",
+          "name": "3_10_2_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "4",
+          "name": "3_13_1_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "4",
+          "name": "3_08_6_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "4",
+          "name": "3_18_6_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "4",
+          "name": "3_a_1",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "4",
+          "name": "3_01_1_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "4",
+          "name": "3_11_3_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "4",
+          "name": "3_09_5_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "4",
+          "name": "3_11_3_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "4",
+          "name": "3_09_5_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "4",
+          "name": "3_01_5_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "4",
+          "name": "3_01_7_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "4",
+          "name": "3_04_10_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "4",
+          "name": "3_04_10_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "4",
+          "name": "3_01_7_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "4",
+          "name": "3_01_5_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "4",
+          "name": "3_22_7_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "4",
+          "name": "3_14_5_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "4",
+          "name": "3_15_1_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "4",
+          "name": "3_23_1_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "4",
+          "name": "3_15_1_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "4",
+          "name": "3_23_1_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "4",
+          "name": "3_14_5_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "4",
+          "name": "3_22_7_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "4",
+          "name": "3_14_1_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "4",
+          "name": "3_03_8_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "4",
+          "name": "3_06_6_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "4",
+          "name": "3_23_5_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "4",
+          "name": "3_23_5_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "4",
+          "name": "3_06_6_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "4",
+          "name": "3_03_8_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "4",
+          "name": "3_14_1_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "4",
+          "name": "3_23_2_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "4",
+          "name": "3_20_1_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "4",
+          "name": "3_11_8_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "4",
+          "name": "3_11_8_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "4",
+          "name": "3_20_1_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "4",
+          "name": "3_23_2_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "4",
+          "name": "3_15_6_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "4",
+          "name": "3_23_6_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "4",
+          "name": "3_05_6_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "4",
+          "name": "3_05_4_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "4",
+          "name": "3_23_4_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "4",
+          "name": "3_22_2_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "4",
+          "name": "3_14_2_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "4",
+          "name": "3_21_1_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "4",
+          "name": "3_07_1_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "4",
+          "name": "3_07_1_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "4",
+          "name": "3_21_1_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "4",
+          "name": "3_22_2_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "4",
+          "name": "3_14_2_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "4",
+          "name": "3_23_4_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "4",
+          "name": "3_05_4_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "4",
+          "name": "3_15_6_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "4",
+          "name": "3_05_6_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "4",
+          "name": "3_23_6_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "5",
+          "name": "4c-1",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "5",
+          "name": "4c-0",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "5",
+          "name": "4c-2",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "5",
+          "name": "4c-3",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "5",
+          "name": "4c-7",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "5",
+          "name": "4c-6",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "5",
+          "name": "4c-4",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "5",
+          "name": "4c-5",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "5",
+          "name": "4c-13",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "5",
+          "name": "4c-12",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "5",
+          "name": "4c-10",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "5",
+          "name": "4c-11",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "5",
+          "name": "4c-14",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "5",
+          "name": "4c-8",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "5",
+          "name": "4c-9",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "6",
+          "name": "5_20_1_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "6",
+          "name": "5_23_2_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "6",
+          "name": "5_11_8_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "6",
+          "name": "5_11_8_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "6",
+          "name": "5_23_2_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "6",
+          "name": "5_20_1_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "6",
+          "name": "5_04_10_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "6",
+          "name": "5_05_4_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "6",
+          "name": "5_23_4_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "6",
+          "name": "5_15_6_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "6",
+          "name": "5_23_6_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "6",
+          "name": "5_05_6_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "6",
+          "name": "5_21_1_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "6",
+          "name": "5_07_1_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "6",
+          "name": "5_22_2_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "6",
+          "name": "5_14_2_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "6",
+          "name": "5_22_2_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "6",
+          "name": "5_14_2_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "6",
+          "name": "5_07_1_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "6",
+          "name": "5_21_1_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "6",
+          "name": "5_15_6_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "6",
+          "name": "5_05_6_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "6",
+          "name": "5_23_6_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "6",
+          "name": "5_04_10_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "6",
+          "name": "5_23_4_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "6",
+          "name": "5_05_4_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "6",
+          "name": "5_14_5_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "6",
+          "name": "5_22_7_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "6",
+          "name": "5_09_10_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "6",
+          "name": "5_15_1_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "6",
+          "name": "5_23_1_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "6",
+          "name": "5_15_1_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "6",
+          "name": "5_23_1_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "6",
+          "name": "5_09_10_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "6",
+          "name": "5_22_7_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "6",
+          "name": "5_14_5_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "6",
+          "name": "5_14_1_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "6",
+          "name": "5_21_10_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "6",
+          "name": "5_23_5_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "6",
+          "name": "5_06_6_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "6",
+          "name": "5_03_8_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "6",
+          "name": "5_03_8_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "6",
+          "name": "5_06_6_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "6",
+          "name": "5_23_5_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "6",
+          "name": "5_21_10_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "6",
+          "name": "5_14_1_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "6",
+          "name": "5_a_2",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "6",
+          "name": "5_11_3_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "6",
+          "name": "5_09_5_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "6",
+          "name": "5_a_3",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "6",
+          "name": "5_a_1",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "6",
+          "name": "5_01_1_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "6",
+          "name": "5_11_3_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "6",
+          "name": "5_09_5_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "6",
+          "name": "5_a_0",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "6",
+          "name": "5_01_7_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "6",
+          "name": "5_01_5_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "6",
+          "name": "5_01_5_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "6",
+          "name": "5_01_7_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "6",
+          "name": "5_02_3_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "6",
+          "name": "5_02_1_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "6",
+          "name": "5_02_1_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "6",
+          "name": "5_02_3_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "6",
+          "name": "5_10_2_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "6",
+          "name": "5_08_6_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "6",
+          "name": "5_18_6_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "6",
+          "name": "5_13_1_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "6",
+          "name": "5_11_4_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "6",
+          "name": "5_01_4_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "6",
+          "name": "5_21_9_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "6",
+          "name": "5_21_9_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "6",
+          "name": "5_11_4_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "6",
+          "name": "5_01_4_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "6",
+          "name": "5_13_1_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "6",
+          "name": "5_08_6_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "6",
+          "name": "5_18_6_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "6",
+          "name": "5_10_2_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "7",
+          "name": "6_21_9_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "7",
+          "name": "6_11_4_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "7",
+          "name": "6_21_10_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "7",
+          "name": "6_01_4_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "7",
+          "name": "6_10_2_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "7",
+          "name": "6_08_6_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "7",
+          "name": "6_18_6_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "7",
+          "name": "6_13_1_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "7",
+          "name": "6_13_1_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "7",
+          "name": "6_08_6_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "7",
+          "name": "6_18_6_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "7",
+          "name": "6_10_2_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "7",
+          "name": "6_11_4_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "7",
+          "name": "6_01_4_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "7",
+          "name": "6_21_10_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "7",
+          "name": "6_21_9_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "7",
+          "name": "6_02_3_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "7",
+          "name": "6_02_1_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "7",
+          "name": "6_09_10_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "7",
+          "name": "6_09_10_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "7",
+          "name": "6_02_1_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "7",
+          "name": "6_02_3_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "7",
+          "name": "6_04_10_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "7",
+          "name": "6_01_7_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "7",
+          "name": "6_01_5_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "7",
+          "name": "6_01_7_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "7",
+          "name": "6_04_10_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "7",
+          "name": "6_01-5 b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "7",
+          "name": "6_11_3_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "7",
+          "name": "6_09_5_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "7",
+          "name": "6_01_1_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "7",
+          "name": "6_11_3_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "7",
+          "name": "6_09_5_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "7",
+          "name": "6_03_8_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "7",
+          "name": "6_23_5_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "7",
+          "name": "6_06_6_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "7",
+          "name": "6_14_1_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "7",
+          "name": "6_14_1_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "7",
+          "name": "6_06_6_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "7",
+          "name": "6_23_5_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "7",
+          "name": "6_03_8_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "7",
+          "name": "6_15_1_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "7",
+          "name": "6_23_1_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "7",
+          "name": "6_14_5_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "7",
+          "name": "6_22_7_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "7",
+          "name": "6_22_7_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "7",
+          "name": "6_14_5_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "7",
+          "name": "6_15_1_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "7",
+          "name": "6_23_1_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "7",
+          "name": "6_21_1_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "7",
+          "name": "6_07_1_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "7",
+          "name": "6_22_2_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "7",
+          "name": "6_14_2_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "7",
+          "name": "6_a_1",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "7",
+          "name": "6_a_0",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "7",
+          "name": "6_05_4_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "7",
+          "name": "6_23_4_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "7",
+          "name": "6_15_6_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "7",
+          "name": "6_23_6_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "7",
+          "name": "6_05_6_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "7",
+          "name": "6_15_6_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "7",
+          "name": "6_05_6_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "7",
+          "name": "6_23_6_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "7",
+          "name": "6_23_4_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "7",
+          "name": "6_05_4_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "7",
+          "name": "6_a_2",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "7",
+          "name": "6_22_2_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "7",
+          "name": "6_a_3",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "7",
+          "name": "6_14_2_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "7",
+          "name": "6_07_1_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "7",
+          "name": "6_21_1_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "7",
+          "name": "6_11_8_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "7",
+          "name": "6_20_1_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "7",
+          "name": "6_23_2_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "7",
+          "name": "6_23_2_w",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "7",
+          "name": "6_20_1_b",
+          "isNewProperty": true
+      },
+      {
+          "propertyId": "7",
+          "name": "6_11_8_w",
+          "isNewProperty": true
+      }
+  ],
+  "_ipfsGroup": {
+      "baseUri": "ipfs://bafybeieah7wjevdirq3clfpno4mkgn6z7vhdnqqniba62pwyfbwzf7mzqi/",
+      "extension": ".svg"
+  }
+}

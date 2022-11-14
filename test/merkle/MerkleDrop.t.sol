@@ -56,10 +56,13 @@ contract ZoraNFTBaseTest is Test {
             new ERC721Drop(
                 feeManager,
                 address(1234),
-                FactoryUpgradeGate(address(0))
+                FactoryUpgradeGate(address(0)),
+                address(0)
             )
         );
-        address payable newDrop = payable(address(new ERC721DropProxy(impl, "")));
+        address payable newDrop = payable(
+            address(new ERC721DropProxy(impl, ""))
+        );
         zoraNFTBase = ERC721Drop(newDrop);
         merkleData = new MerkleData();
     }

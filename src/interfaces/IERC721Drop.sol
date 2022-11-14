@@ -30,6 +30,18 @@ interface IERC721Drop {
     /// @notice Cannot withdraw funds due to ETH send failure.
     error Withdraw_FundsSendFailure();
 
+    /// @notice Thrown when the operator for the contract is not allowed
+    /// @dev Used when strict enforcement of marketplaces for creator royalties is desired.
+    error OperatorNotAllowed(address operator);
+
+    /// @notice Thrown when there is no active market filter DAO address supported for the current chain
+    /// @dev Used for enabling and disabling filter for the given chain.
+    error MarketFilterDAOAddressNotSupportedForChain();
+
+    /// @notice Used when the operator filter registry external call fails
+    /// @dev Used for bubbling error up to clients. 
+    error RemoteOperatorFilterRegistryCallFailed();
+
     // Sale/Purchase errors
     /// @notice Sale is inactive
     error Sale_Inactive();
@@ -102,7 +114,6 @@ interface IERC721Drop {
     /// @param sender address of the updater
     /// @param renderer new metadata renderer address
     event UpdatedMetadataRenderer(address sender, IMetadataRenderer renderer);
-
 
     /// @notice General configuration for NFT Minting and bookkeeping
     struct Configuration {
@@ -206,7 +217,10 @@ interface IERC721Drop {
     /// @notice Update the metadata renderer
     /// @param newRenderer new address for renderer
     /// @param setupRenderer data to call to bootstrap data for the new renderer (optional)
-    function setMetadataRenderer(IMetadataRenderer newRenderer, bytes memory setupRenderer) external;
+    function setMetadataRenderer(
+        IMetadataRenderer newRenderer,
+        bytes memory setupRenderer
+    ) external;
 
     /// @notice This is an admin mint function to mint a quantity to a specific address
     /// @param to address to mint to

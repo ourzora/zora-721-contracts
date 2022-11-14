@@ -27,17 +27,6 @@ contract Deploy is Script {
                 subscriptionOwner
             );
         address[] memory blockedOperatorsList = new address[](7);
-
-// Fee registry testnet
-// 0x00000000000111AbE46ff893f3B2fdF1F759a8A8
-// 0x59728544B08AB483533076417FbBB2fD0B17CE3a
-// 0xF849de01B080aDC3A814FaBE1E2087475cF2E354
-// 0x2B2e8cDA09bBA9660dCA5cB6233787738Ad68329
-
-// 0xf42aa99F011A1fA7CDA90E5E98b277E306BcA83e
-// 0x024aC22ACdB367a3ae52A3D94aC6649fdc1f0779
-// 0xFED24eC7E22f573c2e08AEF55aA6797Ca2b3A051
-
         blockedOperatorsList[0] = address(
             0xf42aa99F011A1fA7CDA90E5E98b277E306BcA83e
         );

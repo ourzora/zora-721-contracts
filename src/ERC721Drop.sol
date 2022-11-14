@@ -34,6 +34,7 @@ import {OwnableSkeleton} from "./utils/OwnableSkeleton.sol";
 import {FundsReceiver} from "./utils/FundsReceiver.sol";
 import {Version} from "./utils/Version.sol";
 import {ERC721DropStorageV1} from "./storage/ERC721DropStorageV1.sol";
+import {Multicall} from "@openzeppelin/contracts/utils/Multicall.sol";
 
 /**
  * @notice ZORA NFT Base contract for Drops and Editions
@@ -50,6 +51,7 @@ contract ERC721Drop is
     ReentrancyGuardUpgradeable,
     AccessControlUpgradeable,
     IERC721Drop,
+    Multicall,
     OwnableSkeleton,
     FundsReceiver,
     Version(9),

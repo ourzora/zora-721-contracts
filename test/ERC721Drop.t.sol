@@ -367,6 +367,34 @@ contract ERC721DropTest is Test {
         );
     }
 
+    function test_MintMulticall() public setupZoraNFTBase(10) {
+        vm.startPrank(DEFAULT_OWNER_ADDRESS);
+        bytes[] memory calls = new bytes[](3);
+        calls[0] = abi.encodeWithSelector(
+            IERC721Drop.adminMint.selector,
+            DEFAULT_OWNER_ADDRESS,
+            5 
+        );
+        calls[1] = abi.encodeWithSelector(
+            IERC721Drop.adminMint.selector,
+            address(0x123),
+            3
+        );
+        calls[2] = abi.encodeWithSelector(
+            IERC721Drop.saleDetails.selector
+        );
+        bytes[] memory results = zoraNFTBase.multicall(calls);
+
+        (bool saleActive, bool presaleActive, uint256 publicSalePrice, , , , , , , ,) = abi.decode(results[2], (bool, bool, uint256, uint64, uint64, uint64, uint64, bytes32, uint256, uint256, uint256));
+        assertTrue(!saleActive);
+        assertTrue(!presaleActive);
+        assertEq(publicSalePrice, 0);
+        (uint256 firstMintedId) = abi.decode(results[0], (uint256));
+        (uint256 secondMintedId) = abi.decode(results[1], (uint256));
+        assertEq(firstMintedId, 5);
+        assertEq(secondMintedId, 8);
+    }
+
     function test_MintWrongValue() public setupZoraNFTBase(10) {
         vm.deal(address(456), 1 ether);
         vm.prank(address(456));

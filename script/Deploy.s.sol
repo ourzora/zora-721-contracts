@@ -71,8 +71,8 @@ contract Deploy is Script {
         console2.log("Setup operators ---");
         // Add opensea contracts to test
         OwnedSubscriptionManager ownedSubscriptionManager = setupBlockedOperators(
-            subscriptionOwner
-        );
+                subscriptionOwner
+            );
 
         console2.log("Setup contracts ---");
         ZoraFeeManager feeManager = new ZoraFeeManager(500, subscriptionOwner);
@@ -95,7 +95,10 @@ contract Deploy is Script {
             dropMetadata
         );
 
-        ZoraNFTCreatorProxy factory = new ZoraNFTCreatorProxy(address(factoryImpl), "");
+        ZoraNFTCreatorProxy factory = new ZoraNFTCreatorProxy(
+            address(factoryImpl),
+            abi.encodeWithSelector(ZoraNFTCreatorV1.initialize.selector)
+        );
 
         console2.log("Factory: ");
         console2.log(address(factory));

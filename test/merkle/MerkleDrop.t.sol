@@ -24,6 +24,7 @@ contract ZoraNFTBaseTest is Test {
     address public constant mediaContract = address(0x123456);
 
     modifier setupZoraNFTBase() {
+        bytes[] memory setupCalls = new bytes[](0);
         zoraNFTBase.initialize({
             _contractName: "Test NFT",
             _contractSymbol: "TNFT",
@@ -31,15 +32,7 @@ contract ZoraNFTBaseTest is Test {
             _fundsRecipient: payable(DEFAULT_FUNDS_RECIPIENT_ADDRESS),
             _editionSize: 10,
             _royaltyBPS: 800,
-            _salesConfig: IERC721Drop.SalesConfiguration({
-                publicSaleStart: 0,
-                publicSaleEnd: 0,
-                presaleStart: 0,
-                presaleEnd: 0,
-                publicSalePrice: 0,
-                maxSalePurchasePerAddress: 0,
-                presaleMerkleRoot: bytes32(0)
-            }),
+            _setupCalls: setupCalls,
             _metadataRenderer: dummyRenderer,
             _metadataRendererInit: ""
         });
@@ -184,6 +177,7 @@ contract ZoraNFTBaseTest is Test {
     }
 
     function test_MerklePurchaseAndPublicSaleEditionSizeZero() public {
+        bytes[] memory setupCalls = new bytes[](0);
         zoraNFTBase.initialize({
             _contractName: "Test NFT",
             _contractSymbol: "TNFT",
@@ -191,17 +185,9 @@ contract ZoraNFTBaseTest is Test {
             _fundsRecipient: payable(DEFAULT_FUNDS_RECIPIENT_ADDRESS),
             _editionSize: 0,
             _royaltyBPS: 800,
+            _setupCalls: setupCalls,
             _metadataRenderer: dummyRenderer,
-            _metadataRendererInit: "",
-            _salesConfig: IERC721Drop.SalesConfiguration({
-                publicSaleStart: 0,
-                publicSaleEnd: 0,
-                presaleStart: 0,
-                presaleEnd: 0,
-                publicSalePrice: 0,
-                maxSalePurchasePerAddress: 0,
-                presaleMerkleRoot: bytes32(0)
-            })
+            _metadataRendererInit: ""
         });
 
         vm.startPrank(DEFAULT_OWNER_ADDRESS);

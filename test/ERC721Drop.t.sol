@@ -73,6 +73,7 @@ contract ERC721DropTest is Test {
     }
 
     modifier setupZoraNFTBase(uint64 editionSize) {
+        bytes[] memory setupCalls = new bytes[](0);
         zoraNFTBase.initialize({
             _contractName: "Test NFT",
             _contractSymbol: "TNFT",
@@ -80,17 +81,9 @@ contract ERC721DropTest is Test {
             _fundsRecipient: payable(DEFAULT_FUNDS_RECIPIENT_ADDRESS),
             _editionSize: editionSize,
             _royaltyBPS: 800,
+            _setupCalls: setupCalls,
             _metadataRenderer: dummyRenderer,
-            _metadataRendererInit: "",
-            _salesConfig: IERC721Drop.SalesConfiguration({
-                publicSaleStart: 0,
-                publicSaleEnd: 0,
-                presaleStart: 0,
-                presaleEnd: 0,
-                publicSalePrice: 0,
-                maxSalePurchasePerAddress: 0,
-                presaleMerkleRoot: bytes32(0)
-            })
+            _metadataRendererInit: ""
         });
 
         _;
@@ -168,6 +161,7 @@ contract ERC721DropTest is Test {
         require(keccak256(bytes(symbol)) == keccak256(bytes("TNFT")));
 
         vm.expectRevert("Initializable: contract is already initialized");
+        bytes[] memory setupCalls = new bytes[](0);
         zoraNFTBase.initialize({
             _contractName: "Test NFT",
             _contractSymbol: "TNFT",
@@ -175,17 +169,9 @@ contract ERC721DropTest is Test {
             _fundsRecipient: payable(DEFAULT_FUNDS_RECIPIENT_ADDRESS),
             _editionSize: 10,
             _royaltyBPS: 800,
+            _setupCalls: setupCalls,
             _metadataRenderer: dummyRenderer,
-            _metadataRendererInit: "",
-            _salesConfig: IERC721Drop.SalesConfiguration({
-                publicSaleStart: 0,
-                publicSaleEnd: 0,
-                presaleStart: 0,
-                presaleEnd: 0,
-                publicSalePrice: 0,
-                maxSalePurchasePerAddress: 0,
-                presaleMerkleRoot: bytes32(0)
-            })
+            _metadataRendererInit: ""
         });
     }
 

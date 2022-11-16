@@ -13,7 +13,7 @@ import {IMetadataRenderer} from "./interfaces/IMetadataRenderer.sol";
 import {ERC721Drop} from "./ERC721Drop.sol";
 
 /// @notice Zora NFT Creator V1
-contract ZoraNFTCreatorV1 is OwnableUpgradeable, UUPSUpgradeable, Version(4) {
+contract ZoraNFTCreatorV2 is OwnableUpgradeable, UUPSUpgradeable, Version(3) {
     string private constant CANNOT_BE_ZERO = "Cannot be 0 address";
 
     /// @notice Emitted when a edition is created reserving the corresponding token IDs.
@@ -67,6 +67,33 @@ contract ZoraNFTCreatorV1 is OwnableUpgradeable, UUPSUpgradeable, Version(4) {
         onlyOwner
     {}
 
+    function createAndConfigureDrop(
+        string memory name,
+        string memory symbol,
+        address defaultAdmin,
+        uint64 editionSize,
+        uint16 royaltyBPS,
+        address payable fundsRecipient,
+        bytes[] memory setupCalls,
+        IMetadataRenderer metadataRenderer,
+        bytes memory metadataInitializer
+    ) public returns (address payable newDropAddress) {
+        ERC721DropProxy newDrop = new ERC721DropProxy(implementation, "");
+
+        newDropAddress = payable(address(newDrop));
+        ERC721Drop(newDropAddress).initialize({
+            _contractName: name,
+            _contractSymbol: symbol,
+            _initialOwner: defaultAdmin,
+            _fundsRecipient: fundsRecipient,
+            _editionSize: editionSize,
+            _royaltyBPS: royaltyBPS,
+            _setupCalls: setupCalls,
+            _metadataRenderer: metadataRenderer,
+            _metadataRendererInit: metadataInitializer
+        });
+    }
+
     //        ,-.
     //        `-'
     //        /|\
@@ -98,6 +125,7 @@ contract ZoraNFTCreatorV1 is OwnableUpgradeable, UUPSUpgradeable, Version(4) {
     //        /|\
     //         |
     //        / \
+    /// @notice deprecated: Will be removed in 2023
     /// @notice Function to setup the media contract across all metadata types
     /// @dev Called by edition and drop fns internally
     /// @param name Name for new contract (cannot be changed)
@@ -117,21 +145,28 @@ contract ZoraNFTCreatorV1 is OwnableUpgradeable, UUPSUpgradeable, Version(4) {
         IMetadataRenderer metadataRenderer,
         bytes memory metadataInitializer
     ) public returns (address) {
-        ERC721DropProxy newDrop = new ERC721DropProxy(implementation, "");
-
-        address payable newDropAddress = payable(address(newDrop));
-
-        ERC721Drop(newDropAddress).initialize(
-            name,
-            symbol,
-            defaultAdmin,
-            fundsRecipient,
-            editionSize,
-            royaltyBPS,
-            saleConfig,
-            metadataRenderer,
-            metadataInitializer
+        bytes[] memory setupData = new bytes[](1);
+        setupData[0] = abi.encodeWithSelector(
+            ERC721Drop.setSaleConfiguration.selector,
+            saleConfig.publicSalePrice,
+            saleConfig.maxSalePurchasePerAddress,
+            saleConfig.publicSaleStart,
+            saleConfig.publicSaleEnd,
+            saleConfig.presaleStart,
+            saleConfig.presaleEnd,
+            saleConfig.presaleMerkleRoot
         );
+        address newDropAddress = createAndConfigureDrop({
+            name: name,
+            symbol: symbol,
+            defaultAdmin: defaultAdmin,
+            fundsRecipient: fundsRecipient,
+            editionSize: editionSize,
+            royaltyBPS: royaltyBPS,
+            setupCalls: setupData,
+            metadataRenderer: metadataRenderer,
+            metadataInitializer: metadataInitializer
+        });
 
         emit CreatedDrop({
             creator: msg.sender,
@@ -173,6 +208,7 @@ contract ZoraNFTCreatorV1 is OwnableUpgradeable, UUPSUpgradeable, Version(4) {
     //        /|\
     //         |
     //        / \
+    /// @notice @deprecated Will be removed in 2023
     /// @dev Setup the media contract for a drop
     /// @param name Name for new contract (cannot be changed)
     /// @param symbol Symbol for new contract (cannot be changed)
@@ -244,6 +280,7 @@ contract ZoraNFTCreatorV1 is OwnableUpgradeable, UUPSUpgradeable, Version(4) {
     //        / \
     /// @notice Creates a new edition contract as a factory with a deterministic address
     /// @notice Important: None of these fields (except the Url fields with the same hash) can be changed after calling
+    /// @notice deprecated: Will be removed in 2023
     /// @param name Name of the edition contract
     /// @param symbol Symbol of the edition contract
     /// @param defaultAdmin Default admin address

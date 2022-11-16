@@ -33,8 +33,8 @@ import {IFactoryUpgradeGate} from "./interfaces/IFactoryUpgradeGate.sol";
 import {OwnableSkeleton} from "./utils/OwnableSkeleton.sol";
 import {FundsReceiver} from "./utils/FundsReceiver.sol";
 import {Version} from "./utils/Version.sol";
+import {PublicMulticall} from "./utils/PublicMulticall.sol";
 import {ERC721DropStorageV1} from "./storage/ERC721DropStorageV1.sol";
-import {Multicall} from "@openzeppelin/contracts/utils/Multicall.sol";
 
 /**
  * @notice ZORA NFT Base contract for Drops and Editions
@@ -51,7 +51,7 @@ contract ERC721Drop is
     ReentrancyGuardUpgradeable,
     AccessControlUpgradeable,
     IERC721Drop,
-    Multicall,
+    PublicMulticall,
     OwnableSkeleton,
     FundsReceiver,
     Version(9),
@@ -85,8 +85,11 @@ contract ERC721Drop is
         IOperatorFilterRegistry(0x000000000000AAeB6D7670E522A718067333cd4E);
 
     /// @notice Only allow for users with admin access
-    modifier onlyAdmin() {
-        if (!hasRole(DEFAULT_ADMIN_ROLE, _msgSender())) {
+    modifier onlyAdminOrSelf() {
+        if (
+            !hasRole(DEFAULT_ADMIN_ROLE, _msgSender()) &&
+            _msgSender() != address(this)
+        ) {
             revert Access_OnlyAdmin();
         }
 
@@ -95,10 +98,11 @@ contract ERC721Drop is
 
     /// @notice Only a given role has access or admin
     /// @param role role to check for alongside the admin role
-    modifier onlyRoleOrAdmin(bytes32 role) {
+    modifier onlyRoleOrAdminOrSelf(bytes32 role) {
         if (
             !hasRole(DEFAULT_ADMIN_ROLE, _msgSender()) &&
-            !hasRole(role, _msgSender())
+            !hasRole(role, _msgSender()) &&
+            _msgSender() != address(this)
         ) {
             revert Access_MissingRoleOrAdmin(role);
         }
@@ -178,7 +182,7 @@ contract ERC721Drop is
     ///  @param _fundsRecipient Wallet/user that receives funds from sale
     ///  @param _editionSize Number of editions that can be minted in total. If type(uint64).max, unlimited editions can be minted as an open edition.
     ///  @param _royaltyBPS BPS of the royalty set on the contract. Can be 0 for no royalty.
-    ///  @param _salesConfig New sales config to set upon init
+    ///  @param _setupCalls Bytes-encoded list of setup multicalls
     ///  @param _metadataRenderer Renderer contract to use
     ///  @param _metadataRendererInit Renderer data initial contract
     function initialize(
@@ -188,7 +192,7 @@ contract ERC721Drop is
         address payable _fundsRecipient,
         uint64 _editionSize,
         uint16 _royaltyBPS,
-        SalesConfiguration memory _salesConfig,
+        bytes[] memory _setupCalls,
         IMetadataRenderer _metadataRenderer,
         bytes memory _metadataRendererInit
     ) public initializer {
@@ -206,9 +210,6 @@ contract ERC721Drop is
         if (config.royaltyBPS > MAX_ROYALTY_BPS) {
             revert Setup_RoyaltyPercentageTooHigh(MAX_ROYALTY_BPS);
         }
-
-        // Update salesConfig
-        salesConfig = _salesConfig;
 
         // Setup config variables
         config.editionSize = _editionSize;
@@ -230,7 +231,7 @@ contract ERC721Drop is
     function _authorizeUpgrade(address newImplementation)
         internal
         override
-        onlyAdmin
+        onlyAdminOrSelf
     {
         if (
             !factoryUpgradeGate.isValidUpgradePath({
@@ -702,7 +703,7 @@ contract ERC721Drop is
     /// @param quantity quantity to mint
     function adminMint(address recipient, uint256 quantity)
         external
-        onlyRoleOrAdmin(MINTER_ROLE)
+        onlyRoleOrAdminOrSelf(MINTER_ROLE)
         canMintTokens(quantity)
         returns (uint256)
     {
@@ -760,7 +761,7 @@ contract ERC721Drop is
     function adminMintAirdrop(address[] calldata recipients)
         external
         override
-        onlyRoleOrAdmin(MINTER_ROLE)
+        onlyRoleOrAdminOrSelf(MINTER_ROLE)
         canMintTokens(recipients.length)
         returns (uint256)
     {
@@ -816,7 +817,7 @@ contract ERC721Drop is
     //                       / \
     /// @dev Set new owner for royalties / opensea
     /// @param newOwner new owner to set
-    function setOwner(address newOwner) public onlyAdmin {
+    function setOwner(address newOwner) public onlyAdminOrSelf {
         _setOwner(newOwner);
     }
 
@@ -826,7 +827,7 @@ contract ERC721Drop is
     function setMetadataRenderer(
         IMetadataRenderer newRenderer,
         bytes memory setupRenderer
-    ) external onlyAdmin {
+    ) external onlyAdminOrSelf {
         config.metadataRenderer = newRenderer;
 
         if (setupRenderer.length > 0) {
@@ -880,7 +881,7 @@ contract ERC721Drop is
         uint64 presaleStart,
         uint64 presaleEnd,
         bytes32 presaleMerkleRoot
-    ) external onlyRoleOrAdmin(SALES_MANAGER_ROLE) {
+    ) external onlyRoleOrAdminOrSelf(SALES_MANAGER_ROLE) {
         // SalesConfiguration storage newConfig = SalesConfiguration({
         //     publicSaleStart: publicSaleStart,
         //     publicSaleEnd: publicSaleEnd,
@@ -936,7 +937,7 @@ contract ERC721Drop is
     /// @param newRecipientAddress new funds recipient address
     function setFundsRecipient(address payable newRecipientAddress)
         external
-        onlyRoleOrAdmin(SALES_MANAGER_ROLE)
+        onlyRoleOrAdminOrSelf(SALES_MANAGER_ROLE)
     {
         // TODO(iain): funds recipient cannot be 0?
         config.fundsRecipient = newRecipientAddress;
@@ -1087,7 +1088,7 @@ contract ERC721Drop is
     /// @notice Admin function to finalize and open edition sale
     function finalizeOpenEdition()
         external
-        onlyRoleOrAdmin(SALES_MANAGER_ROLE)
+        onlyRoleOrAdminOrSelf(SALES_MANAGER_ROLE)
     {
         if (config.editionSize != type(uint64).max) {
             revert Admin_UnableToFinalizeNotOpenEdition();

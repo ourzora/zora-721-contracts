@@ -79,10 +79,9 @@ contract ERC721Drop is
     uint16 constant MAX_ROYALTY_BPS = 50_00;
 
     /// @notice Only allow for users with admin access
-    modifier onlyAdminOrSelf() {
+    modifier onlyAdmin() {
         if (
-            !hasRole(DEFAULT_ADMIN_ROLE, _msgSender()) &&
-            _msgSender() != address(this)
+            !hasRole(DEFAULT_ADMIN_ROLE, _msgSender())
         ) {
             revert Access_OnlyAdmin();
         }
@@ -92,7 +91,7 @@ contract ERC721Drop is
 
     /// @notice Only a given role has access or admin
     /// @param role role to check for alongside the admin role
-    modifier onlyRoleOrAdminOrSelf(bytes32 role) {
+    modifier onlyRoleOrAdmin(bytes32 role) {
         if (
             !hasRole(DEFAULT_ADMIN_ROLE, _msgSender()) &&
             !hasRole(role, _msgSender()) &&
@@ -184,7 +183,7 @@ contract ERC721Drop is
         address payable _fundsRecipient,
         uint64 _editionSize,
         uint16 _royaltyBPS,
-        bytes[] memory _setupCalls,
+        bytes[] calldata _setupCalls,
         IMetadataRenderer _metadataRenderer,
         bytes memory _metadataRendererInit
     ) public initializer {
@@ -198,6 +197,15 @@ contract ERC721Drop is
         _setupRole(DEFAULT_ADMIN_ROLE, _initialOwner);
         // Set ownership to original sender of contract call
         _setOwner(_initialOwner);
+
+        if (_setupCalls.length > 0) {
+            // Setup temporary role
+            _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
+            // Execute setupCalls
+            multicall(_setupCalls);
+            // Remove temporary role
+            _revokeRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        }
 
         if (config.royaltyBPS > MAX_ROYALTY_BPS) {
             revert Setup_RoyaltyPercentageTooHigh(MAX_ROYALTY_BPS);
@@ -223,7 +231,7 @@ contract ERC721Drop is
     function _authorizeUpgrade(address newImplementation)
         internal
         override
-        onlyAdminOrSelf
+        onlyAdmin
     {
         if (
             !factoryUpgradeGate.isValidUpgradePath({
@@ -626,7 +634,7 @@ contract ERC721Drop is
     /// @param quantity quantity to mint
     function adminMint(address recipient, uint256 quantity)
         external
-        onlyRoleOrAdminOrSelf(MINTER_ROLE)
+        onlyRoleOrAdmin(MINTER_ROLE)
         canMintTokens(quantity)
         returns (uint256)
     {
@@ -684,7 +692,7 @@ contract ERC721Drop is
     function adminMintAirdrop(address[] calldata recipients)
         external
         override
-        onlyRoleOrAdminOrSelf(MINTER_ROLE)
+        onlyRoleOrAdmin(MINTER_ROLE)
         canMintTokens(recipients.length)
         returns (uint256)
     {
@@ -740,7 +748,7 @@ contract ERC721Drop is
     //                       / \
     /// @dev Set new owner for royalties / opensea
     /// @param newOwner new owner to set
-    function setOwner(address newOwner) public onlyAdminOrSelf {
+    function setOwner(address newOwner) public onlyAdmin {
         _setOwner(newOwner);
     }
 
@@ -750,7 +758,7 @@ contract ERC721Drop is
     function setMetadataRenderer(
         IMetadataRenderer newRenderer,
         bytes memory setupRenderer
-    ) external onlyAdminOrSelf {
+    ) external onlyAdmin {
         config.metadataRenderer = newRenderer;
 
         if (setupRenderer.length > 0) {
@@ -804,7 +812,7 @@ contract ERC721Drop is
         uint64 presaleStart,
         uint64 presaleEnd,
         bytes32 presaleMerkleRoot
-    ) external onlyRoleOrAdminOrSelf(SALES_MANAGER_ROLE) {
+    ) external onlyRoleOrAdmin(SALES_MANAGER_ROLE) {
         salesConfig.publicSalePrice = publicSalePrice;
         salesConfig.maxSalePurchasePerAddress = maxSalePurchasePerAddress;
         salesConfig.publicSaleStart = publicSaleStart;
@@ -851,7 +859,7 @@ contract ERC721Drop is
     /// @param newRecipientAddress new funds recipient address
     function setFundsRecipient(address payable newRecipientAddress)
         external
-        onlyRoleOrAdminOrSelf(SALES_MANAGER_ROLE)
+        onlyRoleOrAdmin(SALES_MANAGER_ROLE)
     {
         // TODO(iain): funds recipient cannot be 0?
         config.fundsRecipient = newRecipientAddress;
@@ -1002,7 +1010,7 @@ contract ERC721Drop is
     /// @notice Admin function to finalize and open edition sale
     function finalizeOpenEdition()
         external
-        onlyRoleOrAdminOrSelf(SALES_MANAGER_ROLE)
+        onlyRoleOrAdmin(SALES_MANAGER_ROLE)
     {
         if (config.editionSize != type(uint64).max) {
             revert Admin_UnableToFinalizeNotOpenEdition();

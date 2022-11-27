@@ -42,9 +42,8 @@ contract ZoraNFTCreatorV2Test is Test {
             dropMetadataRenderer
         );
         creator = ZoraNFTCreatorV2(
-            address(new ZoraNFTCreatorProxy(address(impl), ""))
+            address(new ZoraNFTCreatorProxy(address(impl), abi.encodeWithSelector(ZoraNFTCreatorV2.initialize.selector)))
         );
-        creator.initialize();
     }
 
     function test_CreateEdition() public {

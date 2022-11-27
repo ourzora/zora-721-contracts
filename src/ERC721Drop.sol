@@ -882,15 +882,6 @@ contract ERC721Drop is
         uint64 presaleEnd,
         bytes32 presaleMerkleRoot
     ) external onlyRoleOrAdminOrSelf(SALES_MANAGER_ROLE) {
-        // SalesConfiguration storage newConfig = SalesConfiguration({
-        //     publicSaleStart: publicSaleStart,
-        //     publicSaleEnd: publicSaleEnd,
-        //     presaleStart: presaleStart,
-        //     presaleEnd: presaleEnd,
-        //     publicSalePrice: publicSalePrice,
-        //     maxSalePurchasePerAddress: maxSalePurchasePerAddress,
-        //     presaleMerkleRoot: presaleMerkleRoot
-        // });
         salesConfig.publicSalePrice = publicSalePrice;
         salesConfig.maxSalePurchasePerAddress = maxSalePurchasePerAddress;
         salesConfig.publicSaleStart = publicSaleStart;

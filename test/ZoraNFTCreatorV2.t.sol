@@ -113,6 +113,10 @@ contract ZoraNFTCreatorV2Test is Test {
             ""
         );
         ERC721Drop drop = ERC721Drop(payable(deployedDrop));
+        ERC721Drop.SaleDetails memory saleDetails = drop.saleDetails();
+        assertEq(saleDetails.publicSaleStart, 0);
+        assertEq(saleDetails.publicSaleEnd, type(uint64).max);
+
         vm.expectRevert(
             IERC721AUpgradeable.URIQueryForNonexistentToken.selector
         );

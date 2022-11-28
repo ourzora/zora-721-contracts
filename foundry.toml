@@ -7,3 +7,5 @@ test = 'test'
 src = 'src'
 libs = ['lib']
 gas_reports = ['*']
+
+fs_permissions = [{ access = "read", path = "./addresses"}]

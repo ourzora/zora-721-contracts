@@ -13,7 +13,7 @@ import {IMetadataRenderer} from "./interfaces/IMetadataRenderer.sol";
 import {ERC721Drop} from "./ERC721Drop.sol";
 
 /// @notice Zora NFT Creator V1
-contract ZoraNFTCreatorV2 is OwnableUpgradeable, UUPSUpgradeable, Version(3) {
+contract ZoraNFTCreatorV2 is OwnableUpgradeable, UUPSUpgradeable, Version(5) {
     string private constant CANNOT_BE_ZERO = "Cannot be 0 address";
 
     /// @notice Emitted when a edition is created reserving the corresponding token IDs.

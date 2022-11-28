@@ -41,7 +41,12 @@ contract ZoraNFTCreatorV2Test is Test {
             dropMetadataRenderer
         );
         creator = ZoraNFTCreatorV2(
-            address(new ZoraNFTCreatorProxy(address(impl), abi.encodeWithSelector(ZoraNFTCreatorV2.initialize.selector)))
+            address(
+                new ZoraNFTCreatorProxy(
+                    address(impl),
+                    abi.encodeWithSelector(ZoraNFTCreatorV2.initialize.selector)
+                )
+            )
         );
     }
 
@@ -55,10 +60,10 @@ contract ZoraNFTCreatorV2Test is Test {
             DEFAULT_FUNDS_RECIPIENT_ADDRESS,
             IERC721Drop.SalesConfiguration({
                 publicSaleStart: 0,
-                publicSaleEnd: 0,
+                publicSaleEnd: type(uint64).max,
                 presaleStart: 0,
                 presaleEnd: 0,
-                publicSalePrice: 0,
+                publicSalePrice: 0.1 ether,
                 maxSalePurchasePerAddress: 0,
                 presaleMerkleRoot: bytes32(0)
             }),
@@ -66,6 +71,11 @@ contract ZoraNFTCreatorV2Test is Test {
             "animation",
             "image"
         );
+        ERC721Drop drop = ERC721Drop(payable(deployedEdition));
+        vm.startPrank(DEFAULT_FUNDS_RECIPIENT_ADDRESS);
+        vm.deal(DEFAULT_FUNDS_RECIPIENT_ADDRESS, 10 ether);
+        drop.purchase{value: 1 ether}(10);
+        assertEq(drop.totalSupply(), 10);
     }
 
     function test_CreateDrop() public {
@@ -78,7 +88,7 @@ contract ZoraNFTCreatorV2Test is Test {
             DEFAULT_FUNDS_RECIPIENT_ADDRESS,
             IERC721Drop.SalesConfiguration({
                 publicSaleStart: 0,
-                publicSaleEnd: 0,
+                publicSaleEnd: type(uint64).max,
                 presaleStart: 0,
                 presaleEnd: 0,
                 publicSalePrice: 0,
@@ -88,6 +98,9 @@ contract ZoraNFTCreatorV2Test is Test {
             "metadata_uri",
             "metadata_contract_uri"
         );
+        ERC721Drop drop = ERC721Drop(payable(deployedDrop));
+        drop.purchase(10);
+        assertEq(drop.totalSupply(), 10);
     }
 
     function test_CreateGenericDrop() public {

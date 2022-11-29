@@ -10,6 +10,7 @@
     "typechain",
     "contracts",
     "deployments",
+    "addresses",
     "dist/artifacts/*",
     "dist/typechain/*"
   ],

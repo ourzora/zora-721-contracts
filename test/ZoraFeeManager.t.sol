@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.10;
+pragma solidity ^0.8.10;
 
 import {ZoraFeeManager} from "../src/ZoraFeeManager.sol";
 import {MockUser} from "./utils/MockUser.sol";

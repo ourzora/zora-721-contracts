@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0
-pragma solidity 0.8.10;
+pragma solidity ^0.8.10;
 
 import {EditionMetadataRenderer} from "../../src/metadata/EditionMetadataRenderer.sol";
 import {MetadataRenderAdminCheck} from "../../src/metadata/MetadataRenderAdminCheck.sol";

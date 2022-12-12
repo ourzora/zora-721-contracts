@@ -21,4 +21,5 @@ jobs:
         continue-on-error: false
         id: storage-inspect-check
         run: |
+          forge build
           yarn storage-inspect:check

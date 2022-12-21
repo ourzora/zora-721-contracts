@@ -7,7 +7,7 @@ import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 
 import {ERC721Drop} from "../src/ERC721Drop.sol";
 import {ERC721DropProxy} from "../src/ERC721DropProxy.sol";
-import {ZoraNFTCreatorV1} from "../src/ZoraNFTCreatorV1.sol";
+import {ZoraNFTCreatorV2} from "../src/ZoraNFTCreatorV2.sol";
 import {ZoraNFTCreatorProxy} from "../src/ZoraNFTCreatorProxy.sol";
 import {ZoraFeeManager} from "../src/ZoraFeeManager.sol";
 import {IOperatorFilterRegistry} from "../src/interfaces/IOperatorFilterRegistry.sol";
@@ -62,7 +62,7 @@ contract DeployNewERC721Drop is Script {
         console2.log("Drop IMPL: ");
         console2.log(address(dropImplementation));
 
-        ZoraNFTCreatorV1 zoraNFTCreator = new ZoraNFTCreatorV1({
+        ZoraNFTCreatorV2 zoraNFTCreator = new ZoraNFTCreatorV2({
             _implementation: address(dropImplementation),
             _editionMetadataRenderer: EditionMetadataRenderer(
                 editionMetadataRenderer

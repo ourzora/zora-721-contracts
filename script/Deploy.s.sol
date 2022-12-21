@@ -95,7 +95,7 @@ contract Deploy is Script {
             dropMetadata
         );
 
-        // Sets owner as deployer - then transfer ownership
+        // Sets owner as deployer - then the deployer address can transfer ownership
         ZoraNFTCreatorProxy factory = new ZoraNFTCreatorProxy(
             address(factoryImpl),
             abi.encodeWithSignature(ZoraNFTCreatorV1.initialize.selector)

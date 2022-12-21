@@ -3,7 +3,7 @@ pragma solidity ^0.8.10;
 
 import {Test} from "forge-std/Test.sol";
 import {IMetadataRenderer} from "../src/interfaces/IMetadataRenderer.sol";
-import "../src/ZoraNFTCreatorV2.sol";
+import "../src/ZoraNFTCreatorV1.sol";
 import "../src/ZoraFeeManager.sol";
 import "../src/ZoraNFTCreatorProxy.sol";
 import {MockMetadataRenderer} from "./metadata/MockMetadataRenderer.sol";
@@ -17,7 +17,7 @@ contract ZoraNFTCreatorV1Test is Test {
     address payable public constant DEFAULT_ZORA_DAO_ADDRESS =
         payable(address(0x999));
     ERC721Drop public dropImpl;
-    ZoraNFTCreatorV2 public creator;
+    ZoraNFTCreatorV1 public creator;
     EditionMetadataRenderer public editionMetadataRenderer;
     DropMetadataRenderer public dropMetadataRenderer;
 
@@ -36,7 +36,7 @@ contract ZoraNFTCreatorV1Test is Test {
         );
         editionMetadataRenderer = new EditionMetadataRenderer();
         dropMetadataRenderer = new DropMetadataRenderer();
-        ZoraNFTCreatorV2 impl = new ZoraNFTCreatorV2(
+        ZoraNFTCreatorV1 impl = new ZoraNFTCreatorV1(
             address(dropImpl),
             editionMetadataRenderer,
             dropMetadataRenderer

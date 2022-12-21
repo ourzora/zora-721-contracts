@@ -7,7 +7,7 @@ import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 
 import {ERC721Drop} from "../src/ERC721Drop.sol";
 import {ERC721DropProxy} from "../src/ERC721DropProxy.sol";
-import {ZoraNFTCreatorV2} from "../src/ZoraNFTCreatorV2.sol";
+import {ZoraNFTCreatorV1} from "../src/ZoraNFTCreatorV1.sol";
 import {ZoraNFTCreatorProxy} from "../src/ZoraNFTCreatorProxy.sol";
 import {ZoraFeeManager} from "../src/ZoraFeeManager.sol";
 import {IOperatorFilterRegistry} from "../src/interfaces/IOperatorFilterRegistry.sol";
@@ -89,7 +89,7 @@ contract Deploy is Script {
             _marketFilterDAOAddress: address(ownedSubscriptionManager)
         });
 
-        ZoraNFTCreatorV2 factoryImpl = new ZoraNFTCreatorV2(
+        ZoraNFTCreatorV1 factoryImpl = new ZoraNFTCreatorV1(
             address(dropImplementation),
             editionMetadata,
             dropMetadata

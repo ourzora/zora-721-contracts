@@ -1,14 +1,12 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.10;
+pragma solidity ^0.8.10;
 
-import {DSTest} from "ds-test/test.sol";
-import {Vm} from "forge-std/Vm.sol";
+import {Test} from "forge-std/Test.sol";
 
 import {DropMockBase} from "./DropMockBase.sol";
 import {DropMetadataRenderer} from "../../src/metadata/DropMetadataRenderer.sol";
 
-contract DropMetadataRendererTest is DSTest {
-    Vm public constant vm = Vm(HEVM_ADDRESS);
+contract DropMetadataRendererTest is Test {
     address public constant mediaContract = address(123456);
     DropMetadataRenderer public renderer;
 

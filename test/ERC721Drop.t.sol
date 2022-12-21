@@ -1,18 +1,21 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.10;
+pragma solidity ^0.8.10;
 
-import {Vm} from "forge-std/Vm.sol";
-import {DSTest} from "ds-test/test.sol";
+import {Test} from "forge-std/Test.sol";
 import {IERC721AUpgradeable} from "erc721a-upgradeable/IERC721AUpgradeable.sol";
 
-import {IERC721Drop} from "../src/interfaces/IERC721Drop.sol";
 import {ERC721Drop} from "../src/ERC721Drop.sol";
 import {ZoraFeeManager} from "../src/ZoraFeeManager.sol";
 import {DummyMetadataRenderer} from "./utils/DummyMetadataRenderer.sol";
 import {MockUser} from "./utils/MockUser.sol";
+import {IOperatorFilterRegistry} from "../src/interfaces/IOperatorFilterRegistry.sol";
 import {IMetadataRenderer} from "../src/interfaces/IMetadataRenderer.sol";
+import {IERC721Drop} from "../src/interfaces/IERC721Drop.sol";
 import {FactoryUpgradeGate} from "../src/FactoryUpgradeGate.sol";
 import {ERC721DropProxy} from "../src/ERC721DropProxy.sol";
+import {OperatorFilterRegistry} from "./filter/OperatorFilterRegistry.sol";
+import {OperatorFilterRegistryErrorsAndEvents} from "./filter/OperatorFilterRegistryErrorsAndEvents.sol";
+import {OwnedSubscriptionManager} from "../src/filter/OwnedSubscriptionManager.sol";
 
 // contract TestEventEmitter {
 //     function emitFundsWithdrawn(
@@ -32,7 +35,7 @@ import {ERC721DropProxy} from "../src/ERC721DropProxy.sol";
 //     }
 // }
 
-contract ERC721DropTest is DSTest {
+contract ERC721DropTest is Test {
     /// @notice Event emitted when the funds are withdrawn from the minting contract
     /// @param withdrawnBy address that issued the withdraw
     /// @param withdrawnTo address that the funds were withdrawn to
@@ -49,7 +52,6 @@ contract ERC721DropTest is DSTest {
 
     ERC721Drop zoraNFTBase;
     MockUser mockUser;
-    Vm public constant vm = Vm(HEVM_ADDRESS);
     DummyMetadataRenderer public dummyRenderer = new DummyMetadataRenderer();
     ZoraFeeManager public feeManager;
     FactoryUpgradeGate public factoryUpgradeGate;
@@ -61,6 +63,7 @@ contract ERC721DropTest is DSTest {
     address public constant UPGRADE_GATE_ADMIN_ADDRESS = address(0x942924224);
     address public constant mediaContract = address(0x123456);
     address public impl;
+    address public ownedSubscriptionManager;
 
     struct Configuration {
         IMetadataRenderer metadataRenderer;
@@ -97,14 +100,45 @@ contract ERC721DropTest is DSTest {
         vm.prank(DEFAULT_ZORA_DAO_ADDRESS);
         feeManager = new ZoraFeeManager(500, DEFAULT_ZORA_DAO_ADDRESS);
         factoryUpgradeGate = new FactoryUpgradeGate(UPGRADE_GATE_ADMIN_ADDRESS);
+        vm.etch(
+            address(0x000000000000AAeB6D7670E522A718067333cd4E),
+            address(new OperatorFilterRegistry()).code
+        );
+        ownedSubscriptionManager = address(
+            new OwnedSubscriptionManager(address(0x123456))
+        );
+
         vm.prank(DEFAULT_ZORA_DAO_ADDRESS);
         impl = address(
-            new ERC721Drop(feeManager, address(0x1234), factoryUpgradeGate)
+            new ERC721Drop(
+                feeManager,
+                address(0x1234),
+                factoryUpgradeGate,
+                address(0x0)
+            )
         );
         address payable newDrop = payable(
             address(new ERC721DropProxy(impl, ""))
         );
         zoraNFTBase = ERC721Drop(newDrop);
+    }
+
+    modifier factoryWithSubscriptionAddress(address subscriptionAddress) {
+        vm.prank(DEFAULT_ZORA_DAO_ADDRESS);
+        impl = address(
+            new ERC721Drop(
+                feeManager,
+                address(0x1234),
+                factoryUpgradeGate,
+                address(subscriptionAddress)
+            )
+        );
+        address payable newDrop = payable(
+            address(new ERC721DropProxy(impl, ""))
+        );
+        zoraNFTBase = ERC721Drop(newDrop);
+
+        _;
     }
 
     function test_Init() public setupZoraNFTBase(10) {
@@ -155,6 +189,80 @@ contract ERC721DropTest is DSTest {
         });
     }
 
+    function test_SubscriptionEnabled()
+        public
+        factoryWithSubscriptionAddress(ownedSubscriptionManager)
+        setupZoraNFTBase(10)
+    {
+        IOperatorFilterRegistry operatorFilterRegistry = IOperatorFilterRegistry(
+                0x000000000000AAeB6D7670E522A718067333cd4E
+            );
+        vm.startPrank(address(0x123456));
+        operatorFilterRegistry.updateOperator(
+            ownedSubscriptionManager,
+            address(0xcafeea3),
+            true
+        );
+        vm.stopPrank();
+        vm.startPrank(DEFAULT_OWNER_ADDRESS);
+        zoraNFTBase.manageMarketFilterDAOSubscription(true);
+        zoraNFTBase.adminMint(DEFAULT_OWNER_ADDRESS, 10);
+        zoraNFTBase.setApprovalForAll(address(0xcafeea3), true);
+        vm.stopPrank();
+        vm.prank(address(0xcafeea3));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                OperatorFilterRegistryErrorsAndEvents.AddressFiltered.selector,
+                address(0xcafeea3)
+            )
+        );
+        zoraNFTBase.transferFrom(DEFAULT_OWNER_ADDRESS, address(0x123456), 1);
+        vm.prank(DEFAULT_OWNER_ADDRESS);
+        zoraNFTBase.manageMarketFilterDAOSubscription(false);
+        vm.prank(address(0xcafeea3));
+        zoraNFTBase.transferFrom(DEFAULT_OWNER_ADDRESS, address(0x123456), 1);
+    }
+
+    function test_OnlyAdminEnableSubscription()
+        public
+        factoryWithSubscriptionAddress(ownedSubscriptionManager)
+        setupZoraNFTBase(10)
+    {
+        vm.startPrank(address(0xcafecafe));
+        vm.expectRevert(IERC721Drop.Access_OnlyAdmin.selector);
+        zoraNFTBase.manageMarketFilterDAOSubscription(true);
+        vm.stopPrank();
+    }
+
+    function test_ProxySubscriptionAccessOnlyAdmin()
+        public
+        factoryWithSubscriptionAddress(ownedSubscriptionManager)
+        setupZoraNFTBase(10)
+    {
+        bytes memory baseCall = abi.encodeWithSelector(
+            IOperatorFilterRegistry.register.selector,
+            address(zoraNFTBase)
+        );
+        vm.startPrank(address(0xcafecafe));
+        vm.expectRevert(IERC721Drop.Access_OnlyAdmin.selector);
+        zoraNFTBase.updateMarketFilterSettings(baseCall);
+        vm.stopPrank();
+    }
+
+    function test_ProxySubscriptionAccess()
+        public
+        factoryWithSubscriptionAddress(ownedSubscriptionManager)
+        setupZoraNFTBase(10)
+    {
+        vm.startPrank(address(DEFAULT_OWNER_ADDRESS));
+        bytes memory baseCall = abi.encodeWithSelector(
+            IOperatorFilterRegistry.register.selector,
+            address(zoraNFTBase)
+        );
+        zoraNFTBase.updateMarketFilterSettings(baseCall);
+        vm.stopPrank();
+    }
+
     function test_Purchase(uint64 amount) public setupZoraNFTBase(10) {
         vm.prank(DEFAULT_OWNER_ADDRESS);
         zoraNFTBase.setSaleConfiguration({
@@ -185,7 +293,8 @@ contract ERC721DropTest is DSTest {
             new ERC721Drop(
                 ZoraFeeManager(address(0xadadad)),
                 address(0x3333),
-                factoryUpgradeGate
+                factoryUpgradeGate,
+                address(0x0)
             )
         );
 
@@ -358,9 +467,7 @@ contract ERC721DropTest is DSTest {
             presaleMerkleRoot: bytes32(0)
         });
 
- 
-
-        (,,,,,uint64 presaleEndLookup,) = zoraNFTBase.salesConfig();
+        (, , , , , uint64 presaleEndLookup, ) = zoraNFTBase.salesConfig();
         assertEq(presaleEndLookup, 100);
 
         address SALES_MANAGER_ADDR = address(0x11002);
@@ -381,7 +488,15 @@ contract ERC721DropTest is DSTest {
             presaleMerkleRoot: bytes32(0)
         });
 
-        (,,,,uint64 presaleStartLookup2,uint64 presaleEndLookup2,) = zoraNFTBase.salesConfig();
+        (
+            ,
+            ,
+            ,
+            ,
+            uint64 presaleStartLookup2,
+            uint64 presaleEndLookup2,
+
+        ) = zoraNFTBase.salesConfig();
         assertEq(presaleEndLookup2, 0);
         assertEq(presaleStartLookup2, 100);
     }

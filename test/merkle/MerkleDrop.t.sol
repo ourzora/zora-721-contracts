@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.10;
+pragma solidity ^0.8.10;
 
-import {Vm} from "forge-std/Vm.sol";
-import {DSTest} from "ds-test/test.sol";
+import {Test} from "forge-std/Test.sol";
 import {IERC721Drop} from "../../src/interfaces/IERC721Drop.sol";
 import {ERC721Drop} from "../../src/ERC721Drop.sol";
 import {ZoraFeeManager} from "../../src/ZoraFeeManager.sol";
@@ -12,9 +11,8 @@ import {ERC721DropProxy} from "../../src/ERC721DropProxy.sol";
 
 import {MerkleData} from "./MerkleData.sol";
 
-contract ZoraNFTBaseTest is DSTest {
+contract ZoraNFTBaseTest is Test {
     ERC721Drop zoraNFTBase;
-    Vm public constant vm = Vm(HEVM_ADDRESS);
     DummyMetadataRenderer public dummyRenderer = new DummyMetadataRenderer();
     ZoraFeeManager public feeManager;
     MerkleData public merkleData;
@@ -58,10 +56,13 @@ contract ZoraNFTBaseTest is DSTest {
             new ERC721Drop(
                 feeManager,
                 address(1234),
-                FactoryUpgradeGate(address(0))
+                FactoryUpgradeGate(address(0)),
+                address(0)
             )
         );
-        address payable newDrop = payable(address(new ERC721DropProxy(impl, "")));
+        address payable newDrop = payable(
+            address(new ERC721DropProxy(impl, ""))
+        );
         zoraNFTBase = ERC721Drop(newDrop);
         merkleData = new MerkleData();
     }

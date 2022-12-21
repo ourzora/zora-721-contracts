@@ -1,14 +1,13 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.10;
+pragma solidity ^0.8.10;
 
 import {Vm} from "forge-std/Vm.sol";
-import {DSTest} from "ds-test/test.sol";
+import {Test} from "forge-std/Test.sol";
 
 import {FactoryUpgradeGate} from "../src/FactoryUpgradeGate.sol";
 
 /// @notice Test for factory upgrade gate
-contract FactoryUpgradeGateTest is DSTest {
-    Vm public constant vm = Vm(HEVM_ADDRESS);
+contract FactoryUpgradeGateTest is Test {
     FactoryUpgradeGate public gate;
 
     function setUp() public {

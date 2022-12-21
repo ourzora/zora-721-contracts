@@ -1,11 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0
-pragma solidity 0.8.10;
+pragma solidity ^0.8.10;
 
 import {EditionMetadataRenderer} from "../../src/metadata/EditionMetadataRenderer.sol";
 import {MetadataRenderAdminCheck} from "../../src/metadata/MetadataRenderAdminCheck.sol";
 import {DropMockBase} from "./DropMockBase.sol";
-import {DSTest} from "ds-test/test.sol";
-import {Vm} from "forge-std/Vm.sol";
+import {Test} from "forge-std/Test.sol";
 
 contract TestAdmin is MetadataRenderAdminCheck {
     event Ok();
@@ -14,8 +13,7 @@ contract TestAdmin is MetadataRenderAdminCheck {
     }
 }
 
-contract EditionMetadataRendererTest is DSTest {
-    Vm public constant vm = Vm(HEVM_ADDRESS);
+contract EditionMetadataRendererTest is Test {
     DropMockBase public mockBase;
     TestAdmin public testAdmin;
 

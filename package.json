@@ -1,6 +1,6 @@
 {
   "name": "@zoralabs/nft-drop-contracts",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "ZORA NFT Drops Contracts",
   "author": "ZORA",
   "license": "MIT",
@@ -10,6 +10,7 @@
     "typechain",
     "contracts",
     "deployments",
+    "addresses",
     "dist/artifacts/*",
     "dist/typechain/*"
   ],
@@ -20,7 +21,9 @@
     "typechain": "yarn run clean && yarn run build && typechain --target=ethers-v5 'dist/artifacts/*/*[!.metadata].json' --out-dir dist/typechain-src && tsc",
     "prepack": "yarn run typechain",
     "deploy": "node scripts/deploy.mjs",
-    "build": "forge build"
+    "build": "forge build",
+    "storage-inspect:check": "./script/storage-check.sh check ERC721Drop ERC721DropProxy FactoryUpgradeGate ZoraFeeManager ZoraNFTCreatorProxy ZoraNFTCreatorV1",
+    "storage-inspect:generate": "./script/storage-check.sh generate ERC721Drop ERC721DropProxy FactoryUpgradeGate ZoraFeeManager ZoraNFTCreatorProxy ZoraNFTCreatorV1"
   },
   "devDependencies": {
     "dotenv": "^10.0.0",

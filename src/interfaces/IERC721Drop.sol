@@ -39,7 +39,7 @@ interface IERC721Drop {
     error MarketFilterDAOAddressNotSupportedForChain();
 
     /// @notice Used when the operator filter registry external call fails
-    /// @dev Used for bubbling error up to clients. 
+    /// @dev Used for bubbling error up to clients.
     error RemoteOperatorFilterRegistryCallFailed();
 
     // Sale/Purchase errors
@@ -114,6 +114,24 @@ interface IERC721Drop {
     /// @param sender address of the updater
     /// @param renderer new metadata renderer address
     event UpdatedMetadataRenderer(address sender, IMetadataRenderer renderer);
+
+    /// @notice Admin function to update the sales configuration settings
+    /// @param publicSalePrice public sale price in ether
+    /// @param maxSalePurchasePerAddress Max # of purchases (public) per address allowed
+    /// @param publicSaleStart unix timestamp when the public sale starts
+    /// @param publicSaleEnd unix timestamp when the public sale ends (set to 0 to disable)
+    /// @param presaleStart unix timestamp when the presale starts
+    /// @param presaleEnd unix timestamp when the presale ends
+    /// @param presaleMerkleRoot merkle root for the presale information
+    function setSaleConfiguration(
+        uint104 publicSalePrice,
+        uint32 maxSalePurchasePerAddress,
+        uint64 publicSaleStart,
+        uint64 publicSaleEnd,
+        uint64 presaleStart,
+        uint64 presaleEnd,
+        bytes32 presaleMerkleRoot
+    ) external;
 
     /// @notice General configuration for NFT Minting and bookkeeping
     struct Configuration {

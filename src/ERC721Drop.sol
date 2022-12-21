@@ -33,6 +33,7 @@ import {IFactoryUpgradeGate} from "./interfaces/IFactoryUpgradeGate.sol";
 import {OwnableSkeleton} from "./utils/OwnableSkeleton.sol";
 import {FundsReceiver} from "./utils/FundsReceiver.sol";
 import {Version} from "./utils/Version.sol";
+import {PublicMulticall} from "./utils/PublicMulticall.sol";
 import {ERC721DropStorageV1} from "./storage/ERC721DropStorageV1.sol";
 
 /**
@@ -50,6 +51,7 @@ contract ERC721Drop is
     ReentrancyGuardUpgradeable,
     AccessControlUpgradeable,
     IERC721Drop,
+    PublicMulticall,
     OwnableSkeleton,
     FundsReceiver,
     Version(9),
@@ -84,7 +86,9 @@ contract ERC721Drop is
 
     /// @notice Only allow for users with admin access
     modifier onlyAdmin() {
-        if (!hasRole(DEFAULT_ADMIN_ROLE, _msgSender())) {
+        if (
+            !hasRole(DEFAULT_ADMIN_ROLE, _msgSender())
+        ) {
             revert Access_OnlyAdmin();
         }
 
@@ -176,7 +180,7 @@ contract ERC721Drop is
     ///  @param _fundsRecipient Wallet/user that receives funds from sale
     ///  @param _editionSize Number of editions that can be minted in total. If type(uint64).max, unlimited editions can be minted as an open edition.
     ///  @param _royaltyBPS BPS of the royalty set on the contract. Can be 0 for no royalty.
-    ///  @param _salesConfig New sales config to set upon init
+    ///  @param _setupCalls Bytes-encoded list of setup multicalls
     ///  @param _metadataRenderer Renderer contract to use
     ///  @param _metadataRendererInit Renderer data initial contract
     function initialize(
@@ -186,7 +190,7 @@ contract ERC721Drop is
         address payable _fundsRecipient,
         uint64 _editionSize,
         uint16 _royaltyBPS,
-        SalesConfiguration memory _salesConfig,
+        bytes[] calldata _setupCalls,
         IMetadataRenderer _metadataRenderer,
         bytes memory _metadataRendererInit
     ) public initializer {
@@ -201,12 +205,18 @@ contract ERC721Drop is
         // Set ownership to original sender of contract call
         _setOwner(_initialOwner);
 
+        if (_setupCalls.length > 0) {
+            // Setup temporary role
+            _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
+            // Execute setupCalls
+            multicall(_setupCalls);
+            // Remove temporary role
+            _revokeRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        }
+
         if (config.royaltyBPS > MAX_ROYALTY_BPS) {
             revert Setup_RoyaltyPercentageTooHigh(MAX_ROYALTY_BPS);
         }
-
-        // Update salesConfig
-        salesConfig = _salesConfig;
 
         // Setup config variables
         config.editionSize = _editionSize;
@@ -869,7 +879,13 @@ contract ERC721Drop is
     //                        |
     //                       / \
     /// @dev This sets the sales configuration
-    // / @param publicSalePrice New public sale price
+    /// @param publicSalePrice New public sale price
+    /// @param maxSalePurchasePerAddress Max # of purchases (public) per address allowed
+    /// @param publicSaleStart unix timestamp when the public sale starts
+    /// @param publicSaleEnd unix timestamp when the public sale ends (set to 0 to disable)
+    /// @param presaleStart unix timestamp when the presale starts
+    /// @param presaleEnd unix timestamp when the presale ends
+    /// @param presaleMerkleRoot merkle root for the presale information
     function setSaleConfiguration(
         uint104 publicSalePrice,
         uint32 maxSalePurchasePerAddress,
@@ -879,15 +895,6 @@ contract ERC721Drop is
         uint64 presaleEnd,
         bytes32 presaleMerkleRoot
     ) external onlyRoleOrAdmin(SALES_MANAGER_ROLE) {
-        // SalesConfiguration storage newConfig = SalesConfiguration({
-        //     publicSaleStart: publicSaleStart,
-        //     publicSaleEnd: publicSaleEnd,
-        //     presaleStart: presaleStart,
-        //     presaleEnd: presaleEnd,
-        //     publicSalePrice: publicSalePrice,
-        //     maxSalePurchasePerAddress: maxSalePurchasePerAddress,
-        //     presaleMerkleRoot: presaleMerkleRoot
-        // });
         salesConfig.publicSalePrice = publicSalePrice;
         salesConfig.maxSalePurchasePerAddress = maxSalePurchasePerAddress;
         salesConfig.publicSaleStart = publicSaleStart;

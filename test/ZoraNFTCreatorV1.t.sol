@@ -10,7 +10,7 @@ import {MockMetadataRenderer} from "./metadata/MockMetadataRenderer.sol";
 import {FactoryUpgradeGate} from "../src/FactoryUpgradeGate.sol";
 import {IERC721AUpgradeable} from "erc721a-upgradeable/IERC721AUpgradeable.sol";
 
-contract ZoraFeeManagerTest is Test {
+contract ZoraNFTCreatorV1Test is Test {
     address public constant DEFAULT_OWNER_ADDRESS = address(0x23499);
     address payable public constant DEFAULT_FUNDS_RECIPIENT_ADDRESS =
         payable(address(0x21303));
@@ -42,9 +42,13 @@ contract ZoraFeeManagerTest is Test {
             dropMetadataRenderer
         );
         creator = ZoraNFTCreatorV1(
-            address(new ZoraNFTCreatorProxy(address(impl), ""))
+            address(
+                new ZoraNFTCreatorProxy(
+                    address(impl),
+                    abi.encodeWithSelector(ZoraNFTCreatorV1.initialize.selector)
+                )
+            )
         );
-        creator.initialize();
     }
 
     function test_CreateEdition() public {
@@ -57,10 +61,10 @@ contract ZoraFeeManagerTest is Test {
             DEFAULT_FUNDS_RECIPIENT_ADDRESS,
             IERC721Drop.SalesConfiguration({
                 publicSaleStart: 0,
-                publicSaleEnd: 0,
+                publicSaleEnd: type(uint64).max,
                 presaleStart: 0,
                 presaleEnd: 0,
-                publicSalePrice: 0,
+                publicSalePrice: 0.1 ether,
                 maxSalePurchasePerAddress: 0,
                 presaleMerkleRoot: bytes32(0)
             }),
@@ -68,6 +72,11 @@ contract ZoraFeeManagerTest is Test {
             "animation",
             "image"
         );
+        ERC721Drop drop = ERC721Drop(payable(deployedEdition));
+        vm.startPrank(DEFAULT_FUNDS_RECIPIENT_ADDRESS);
+        vm.deal(DEFAULT_FUNDS_RECIPIENT_ADDRESS, 10 ether);
+        drop.purchase{value: 1 ether}(10);
+        assertEq(drop.totalSupply(), 10);
     }
 
     function test_CreateDrop() public {
@@ -80,7 +89,7 @@ contract ZoraFeeManagerTest is Test {
             DEFAULT_FUNDS_RECIPIENT_ADDRESS,
             IERC721Drop.SalesConfiguration({
                 publicSaleStart: 0,
-                publicSaleEnd: 0,
+                publicSaleEnd: type(uint64).max,
                 presaleStart: 0,
                 presaleEnd: 0,
                 publicSalePrice: 0,
@@ -90,6 +99,9 @@ contract ZoraFeeManagerTest is Test {
             "metadata_uri",
             "metadata_contract_uri"
         );
+        ERC721Drop drop = ERC721Drop(payable(deployedDrop));
+        drop.purchase(10);
+        assertEq(drop.totalSupply(), 10);
     }
 
     function test_CreateGenericDrop() public {
@@ -114,6 +126,10 @@ contract ZoraFeeManagerTest is Test {
             ""
         );
         ERC721Drop drop = ERC721Drop(payable(deployedDrop));
+        ERC721Drop.SaleDetails memory saleDetails = drop.saleDetails();
+        assertEq(saleDetails.publicSaleStart, 0);
+        assertEq(saleDetails.publicSaleEnd, type(uint64).max);
+
         vm.expectRevert(
             IERC721AUpgradeable.URIQueryForNonexistentToken.selector
         );

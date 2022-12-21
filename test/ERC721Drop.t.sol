@@ -17,6 +17,7 @@ import {OperatorFilterRegistry} from "./filter/OperatorFilterRegistry.sol";
 import {OperatorFilterRegistryErrorsAndEvents} from "./filter/OperatorFilterRegistryErrorsAndEvents.sol";
 import {OwnedSubscriptionManager} from "../src/filter/OwnedSubscriptionManager.sol";
 
+
 // contract TestEventEmitter {
 //     function emitFundsWithdrawn(
 //         address withdrawnBy,
@@ -73,6 +74,7 @@ contract ERC721DropTest is Test {
     }
 
     modifier setupZoraNFTBase(uint64 editionSize) {
+        bytes[] memory setupCalls = new bytes[](0);
         zoraNFTBase.initialize({
             _contractName: "Test NFT",
             _contractSymbol: "TNFT",
@@ -80,17 +82,9 @@ contract ERC721DropTest is Test {
             _fundsRecipient: payable(DEFAULT_FUNDS_RECIPIENT_ADDRESS),
             _editionSize: editionSize,
             _royaltyBPS: 800,
+            _setupCalls: setupCalls,
             _metadataRenderer: dummyRenderer,
-            _metadataRendererInit: "",
-            _salesConfig: IERC721Drop.SalesConfiguration({
-                publicSaleStart: 0,
-                publicSaleEnd: 0,
-                presaleStart: 0,
-                presaleEnd: 0,
-                publicSalePrice: 0,
-                maxSalePurchasePerAddress: 0,
-                presaleMerkleRoot: bytes32(0)
-            })
+            _metadataRendererInit: ""
         });
 
         _;
@@ -168,6 +162,7 @@ contract ERC721DropTest is Test {
         require(keccak256(bytes(symbol)) == keccak256(bytes("TNFT")));
 
         vm.expectRevert("Initializable: contract is already initialized");
+        bytes[] memory setupCalls = new bytes[](0);
         zoraNFTBase.initialize({
             _contractName: "Test NFT",
             _contractSymbol: "TNFT",
@@ -175,17 +170,9 @@ contract ERC721DropTest is Test {
             _fundsRecipient: payable(DEFAULT_FUNDS_RECIPIENT_ADDRESS),
             _editionSize: 10,
             _royaltyBPS: 800,
+            _setupCalls: setupCalls,
             _metadataRenderer: dummyRenderer,
-            _metadataRendererInit: "",
-            _salesConfig: IERC721Drop.SalesConfiguration({
-                publicSaleStart: 0,
-                publicSaleEnd: 0,
-                presaleStart: 0,
-                presaleEnd: 0,
-                publicSalePrice: 0,
-                maxSalePurchasePerAddress: 0,
-                presaleMerkleRoot: bytes32(0)
-            })
+            _metadataRendererInit: ""
         });
     }
 
@@ -365,6 +352,76 @@ contract ERC721DropTest is Test {
             zoraNFTBase.ownerOf(1) == DEFAULT_OWNER_ADDRESS,
             "Owner is wrong for new minted token"
         );
+    }
+
+    function test_MintMulticall() public setupZoraNFTBase(10) {
+        vm.startPrank(DEFAULT_OWNER_ADDRESS);
+        bytes[] memory calls = new bytes[](3);
+        calls[0] = abi.encodeWithSelector(
+            IERC721Drop.adminMint.selector,
+            DEFAULT_OWNER_ADDRESS,
+            5 
+        );
+        calls[1] = abi.encodeWithSelector(
+            IERC721Drop.adminMint.selector,
+            address(0x123),
+            3
+        );
+        calls[2] = abi.encodeWithSelector(
+            IERC721Drop.saleDetails.selector
+        );
+        bytes[] memory results = zoraNFTBase.multicall(calls);
+
+        (bool saleActive, bool presaleActive, uint256 publicSalePrice, , , , , , , ,) = abi.decode(results[2], (bool, bool, uint256, uint64, uint64, uint64, uint64, bytes32, uint256, uint256, uint256));
+        assertTrue(!saleActive);
+        assertTrue(!presaleActive);
+        assertEq(publicSalePrice, 0);
+        (uint256 firstMintedId) = abi.decode(results[0], (uint256));
+        (uint256 secondMintedId) = abi.decode(results[1], (uint256));
+        assertEq(firstMintedId, 5);
+        assertEq(secondMintedId, 8);
+    }
+
+    function test_UpdatePriceMulticall() public setupZoraNFTBase(10) {
+       vm.startPrank(DEFAULT_OWNER_ADDRESS);
+        bytes[] memory calls = new bytes[](3);
+        calls[0] = abi.encodeWithSelector(
+            IERC721Drop.setSaleConfiguration.selector,
+            0.1 ether,
+            2,
+            0,
+            type(uint64).max,
+            0,
+            0,
+            bytes32(0)
+        );
+        calls[1] = abi.encodeWithSelector(
+            IERC721Drop.adminMint.selector,
+            address(0x123),
+            3
+        );
+        calls[2] = abi.encodeWithSelector(
+            IERC721Drop.adminMint.selector,
+            address(0x123),
+            3
+        );
+        bytes[] memory results = zoraNFTBase.multicall(calls);
+
+        IERC721Drop.SaleDetails memory saleDetails = zoraNFTBase.saleDetails();
+
+        assertTrue(saleDetails.publicSaleActive);
+        assertTrue(!saleDetails.presaleActive);
+        assertEq(saleDetails.publicSalePrice, 0.1 ether);
+        (uint256 firstMintedId) = abi.decode(results[1], (uint256));
+        (uint256 secondMintedId) = abi.decode(results[2], (uint256));
+        assertEq(firstMintedId, 3);
+        assertEq(secondMintedId, 6); 
+        vm.stopPrank();
+        vm.startPrank(address(0x111));
+        vm.deal(address(0x111), 0.3 ether);
+        zoraNFTBase.purchase{value: 0.2 ether}(2);
+        assertEq(zoraNFTBase.balanceOf(address(0x111)), 2);
+        vm.stopPrank();
     }
 
     function test_MintWrongValue() public setupZoraNFTBase(10) {

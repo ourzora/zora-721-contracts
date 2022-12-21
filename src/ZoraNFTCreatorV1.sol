@@ -23,7 +23,7 @@ contract ZoraNFTCreatorV1 is OwnableUpgradeable, UUPSUpgradeable, Version(4) {
         uint256 editionSize
     );
 
-    /// @notice Address for implementation of ZoraNFTBase to clone
+    /// @notice Address for implementation of ERC721Drop to clone
     address public immutable implementation;
 
     /// @notice Edition metdata renderer
@@ -33,7 +33,7 @@ contract ZoraNFTCreatorV1 is OwnableUpgradeable, UUPSUpgradeable, Version(4) {
     DropMetadataRenderer public immutable dropMetadataRenderer;
 
     /// @notice Initializes factory with address of implementation logic
-    /// @param _implementation SingleEditionMintable logic implementation contract to clone
+    /// @param _implementation ERC721Drop logic implementation contract to clone
     /// @param _editionMetadataRenderer Metadata renderer for editions
     /// @param _dropMetadataRenderer Metadata renderer for drops
     constructor(

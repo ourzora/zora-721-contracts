@@ -22,8 +22,8 @@
     "prepack": "yarn run typechain",
     "deploy": "node scripts/deploy.mjs",
     "build": "forge build",
-    "storage-inspect:check": "./script/storage-check.sh check ERC721Drop ERC721DropProxy FactoryUpgradeGate ZoraFeeManager ZoraNFTCreatorProxy ZoraNFTCreatorV1",
-    "storage-inspect:generate": "./script/storage-check.sh generate ERC721Drop ERC721DropProxy FactoryUpgradeGate ZoraFeeManager ZoraNFTCreatorProxy ZoraNFTCreatorV1"
+    "storage-inspect:check": "./script/storage-check.sh check ERC721Drop ERC721DropProxy FactoryUpgradeGate ZoraFeeManager ZoraNFTCreatorProxy ZoraNFTCreatorV2",
+    "storage-inspect:generate": "./script/storage-check.sh generate ERC721Drop ERC721DropProxy FactoryUpgradeGate ZoraFeeManager ZoraNFTCreatorProxy ZoraNFTCreatorV2"
   },
   "devDependencies": {
     "dotenv": "^10.0.0",

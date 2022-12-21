@@ -98,7 +98,7 @@ contract ZoraNFTCreatorV2 is OwnableUpgradeable, UUPSUpgradeable, Version(3) {
     //        `-'
     //        /|\
     //         |                    ,----------------.              ,----------.
-    //        / \                   |ZoraNFTCreatorV1|              |ERC721Drop|
+    //        / \                   |ZoraNFTCreatorV2|              |ERC721Drop|
     //      Caller                  `-------+--------'              `----+-----'
     //        |                       createDrop()                       |
     //        | --------------------------------------------------------->
@@ -120,7 +120,7 @@ contract ZoraNFTCreatorV2 is OwnableUpgradeable, UUPSUpgradeable, Version(3) {
     //        | return drop contract address|                            |
     //        | <----------------------------                            |
     //      Caller                  ,-------+--------.              ,----+-----.
-    //        ,-.                   |ZoraNFTCreatorV1|              |ERC721Drop|
+    //        ,-.                   |ZoraNFTCreatorV2|              |ERC721Drop|
     //        `-'                   `----------------'              `----------'
     //        /|\
     //         |
@@ -181,7 +181,7 @@ contract ZoraNFTCreatorV2 is OwnableUpgradeable, UUPSUpgradeable, Version(3) {
     //        `-'
     //        /|\
     //         |                    ,----------------.              ,----------.
-    //        / \                   |ZoraNFTCreatorV1|              |ERC721Drop|
+    //        / \                   |ZoraNFTCreatorV2|              |ERC721Drop|
     //      Caller                  `-------+--------'              `----+-----'
     //        |                       createDrop()                       |
     //        | --------------------------------------------------------->
@@ -203,7 +203,7 @@ contract ZoraNFTCreatorV2 is OwnableUpgradeable, UUPSUpgradeable, Version(3) {
     //        | return drop contract address|                            |
     //        | <----------------------------                            |
     //      Caller                  ,-------+--------.              ,----+-----.
-    //        ,-.                   |ZoraNFTCreatorV1|              |ERC721Drop|
+    //        ,-.                   |ZoraNFTCreatorV2|              |ERC721Drop|
     //        `-'                   `----------------'              `----------'
     //        /|\
     //         |
@@ -251,7 +251,7 @@ contract ZoraNFTCreatorV2 is OwnableUpgradeable, UUPSUpgradeable, Version(3) {
     //        `-'
     //        /|\
     //         |                    ,----------------.              ,----------.
-    //        / \                   |ZoraNFTCreatorV1|              |ERC721Drop|
+    //        / \                   |ZoraNFTCreatorV2|              |ERC721Drop|
     //      Caller                  `-------+--------'              `----+-----'
     //        |                      createEdition()                     |
     //        | --------------------------------------------------------->
@@ -273,7 +273,7 @@ contract ZoraNFTCreatorV2 is OwnableUpgradeable, UUPSUpgradeable, Version(3) {
     //        | return drop contract address|                            |
     //        | <----------------------------                            |
     //      Caller                  ,-------+--------.              ,----+-----.
-    //        ,-.                   |ZoraNFTCreatorV1|              |ERC721Drop|
+    //        ,-.                   |ZoraNFTCreatorV2|              |ERC721Drop|
     //        `-'                   `----------------'              `----------'
     //        /|\
     //         |

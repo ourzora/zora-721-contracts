@@ -17,6 +17,7 @@ import {OperatorFilterRegistry} from "./filter/OperatorFilterRegistry.sol";
 import {OperatorFilterRegistryErrorsAndEvents} from "./filter/OperatorFilterRegistryErrorsAndEvents.sol";
 import {OwnedSubscriptionManager} from "../src/filter/OwnedSubscriptionManager.sol";
 
+
 // contract TestEventEmitter {
 //     function emitFundsWithdrawn(
 //         address withdrawnBy,
@@ -400,18 +401,21 @@ contract ERC721DropTest is Test {
             3
         );
         calls[2] = abi.encodeWithSelector(
-            IERC721Drop.saleDetails.selector
+            IERC721Drop.adminMint.selector,
+            address(0x123),
+            3
         );
         bytes[] memory results = zoraNFTBase.multicall(calls);
 
-        (bool saleActive, bool presaleActive, uint256 publicSalePrice, , , , , , , ,) = abi.decode(results[2], (bool, bool, uint256, uint64, uint64, uint64, uint64, bytes32, uint256, uint256, uint256));
-        assertTrue(saleActive);
-        assertTrue(!presaleActive);
-        assertEq(publicSalePrice, 0.1 ether);
-        (uint256 firstMintedId) = abi.decode(results[0], (uint256));
-        (uint256 secondMintedId) = abi.decode(results[1], (uint256));
-        assertEq(firstMintedId, 5);
-        assertEq(secondMintedId, 8); 
+        IERC721Drop.SaleDetails memory saleDetails = zoraNFTBase.saleDetails();
+
+        assertTrue(saleDetails.publicSaleActive);
+        assertTrue(!saleDetails.presaleActive);
+        assertEq(saleDetails.publicSalePrice, 0.1 ether);
+        (uint256 firstMintedId) = abi.decode(results[1], (uint256));
+        (uint256 secondMintedId) = abi.decode(results[2], (uint256));
+        assertEq(firstMintedId, 3);
+        assertEq(secondMintedId, 6); 
         vm.stopPrank();
         vm.startPrank(address(0x111));
         vm.deal(address(0x111), 0.3 ether);

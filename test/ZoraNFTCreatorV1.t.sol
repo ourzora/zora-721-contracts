@@ -3,21 +3,21 @@ pragma solidity ^0.8.10;
 
 import {Test} from "forge-std/Test.sol";
 import {IMetadataRenderer} from "../src/interfaces/IMetadataRenderer.sol";
-import "../src/ZoraNFTCreatorV2.sol";
+import "../src/ZoraNFTCreatorV1.sol";
 import "../src/ZoraFeeManager.sol";
 import "../src/ZoraNFTCreatorProxy.sol";
 import {MockMetadataRenderer} from "./metadata/MockMetadataRenderer.sol";
 import {FactoryUpgradeGate} from "../src/FactoryUpgradeGate.sol";
 import {IERC721AUpgradeable} from "erc721a-upgradeable/IERC721AUpgradeable.sol";
 
-contract ZoraNFTCreatorV2Test is Test {
+contract ZoraNFTCreatorV1Test is Test {
     address public constant DEFAULT_OWNER_ADDRESS = address(0x23499);
     address payable public constant DEFAULT_FUNDS_RECIPIENT_ADDRESS =
         payable(address(0x21303));
     address payable public constant DEFAULT_ZORA_DAO_ADDRESS =
         payable(address(0x999));
     ERC721Drop public dropImpl;
-    ZoraNFTCreatorV2 public creator;
+    ZoraNFTCreatorV1 public creator;
     EditionMetadataRenderer public editionMetadataRenderer;
     DropMetadataRenderer public dropMetadataRenderer;
 
@@ -36,16 +36,16 @@ contract ZoraNFTCreatorV2Test is Test {
         );
         editionMetadataRenderer = new EditionMetadataRenderer();
         dropMetadataRenderer = new DropMetadataRenderer();
-        ZoraNFTCreatorV2 impl = new ZoraNFTCreatorV2(
+        ZoraNFTCreatorV1 impl = new ZoraNFTCreatorV1(
             address(dropImpl),
             editionMetadataRenderer,
             dropMetadataRenderer
         );
-        creator = ZoraNFTCreatorV2(
+        creator = ZoraNFTCreatorV1(
             address(
                 new ZoraNFTCreatorProxy(
                     address(impl),
-                    abi.encodeWithSelector(ZoraNFTCreatorV2.initialize.selector)
+                    abi.encodeWithSelector(ZoraNFTCreatorV1.initialize.selector)
                 )
             )
         );

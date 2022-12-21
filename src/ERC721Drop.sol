@@ -100,8 +100,7 @@ contract ERC721Drop is
     modifier onlyRoleOrAdmin(bytes32 role) {
         if (
             !hasRole(DEFAULT_ADMIN_ROLE, _msgSender()) &&
-            !hasRole(role, _msgSender()) &&
-            _msgSender() != address(this)
+            !hasRole(role, _msgSender())
         ) {
             revert Access_MissingRoleOrAdmin(role);
         }
@@ -880,7 +879,13 @@ contract ERC721Drop is
     //                        |
     //                       / \
     /// @dev This sets the sales configuration
-    // / @param publicSalePrice New public sale price
+    /// @param publicSalePrice New public sale price
+    /// @param maxSalePurchasePerAddress Max # of purchases (public) per address allowed
+    /// @param publicSaleStart unix timestamp when the public sale starts
+    /// @param publicSaleEnd unix timestamp when the public sale ends (set to 0 to disable)
+    /// @param presaleStart unix timestamp when the presale starts
+    /// @param presaleEnd unix timestamp when the presale ends
+    /// @param presaleMerkleRoot merkle root for the presale information
     function setSaleConfiguration(
         uint104 publicSalePrice,
         uint32 maxSalePurchasePerAddress,

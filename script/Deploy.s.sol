@@ -98,7 +98,7 @@ contract Deploy is Script {
         // Sets owner as deployer - then the deployer address can transfer ownership
         ZoraNFTCreatorProxy factory = new ZoraNFTCreatorProxy(
             address(factoryImpl),
-            abi.encodeWithSignature(ZoraNFTCreatorV1.initialize.selector)
+            abi.encodeWithSelector(ZoraNFTCreatorV1.initialize.selector)
         );
 
         console2.log("Factory: ");

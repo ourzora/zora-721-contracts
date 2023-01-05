@@ -28,6 +28,7 @@ import {IMetadataRenderer} from "./interfaces/IMetadataRenderer.sol";
 import {IOperatorFilterRegistry} from "./interfaces/IOperatorFilterRegistry.sol";
 import {IERC721Drop} from "./interfaces/IERC721Drop.sol";
 import {IOwnable} from "./interfaces/IOwnable.sol";
+import {IERC4906} from "./interfaces/IERC4906.sol";
 import {IFactoryUpgradeGate} from "./interfaces/IFactoryUpgradeGate.sol";
 
 import {OwnableSkeleton} from "./utils/OwnableSkeleton.sol";
@@ -48,6 +49,7 @@ contract ERC721Drop is
     ERC721AUpgradeable,
     UUPSUpgradeable,
     IERC2981Upgradeable,
+    IERC4906,
     ReentrancyGuardUpgradeable,
     AccessControlUpgradeable,
     IERC721Drop,
@@ -86,9 +88,7 @@ contract ERC721Drop is
 
     /// @notice Only allow for users with admin access
     modifier onlyAdmin() {
-        if (
-            !hasRole(DEFAULT_ADMIN_ROLE, _msgSender())
-        ) {
+        if (!hasRole(DEFAULT_ADMIN_ROLE, _msgSender())) {
             revert Access_OnlyAdmin();
         }
 
@@ -622,7 +622,10 @@ contract ERC721Drop is
             revert MarketFilterDAOAddressNotSupportedForChain();
         }
         if (!operatorFilterRegistry.isRegistered(self) && enable) {
-            operatorFilterRegistry.registerAndSubscribe(self, marketFilterDAOAddress);
+            operatorFilterRegistry.registerAndSubscribe(
+                self,
+                marketFilterDAOAddress
+            );
         } else if (enable) {
             operatorFilterRegistry.subscribe(self, marketFilterDAOAddress);
         } else {
@@ -845,6 +848,25 @@ contract ERC721Drop is
             sender: _msgSender(),
             renderer: newRenderer
         });
+
+        _notifyMetadataUpdate();
+    }
+
+    /// @notice Calls the metadata renderer contract to make an update and uses the EIP4906 event to notify
+    /// @param data raw calldata to call the metadata renderer contract with.
+    /// @dev Only accessible via an admin role
+    function callMetadataRenderer(bytes memory data) public
+        onlyAdmin
+        returns (bytes memory)
+    {
+        (bool success, bytes memory response) = address(config.metadataRenderer).call(
+            data
+        );
+        if (!success) {
+            revert ExternalMetadataRenderer_CallFailed();
+        }
+        _notifyMetadataUpdate();
+        return response;
     }
 
     //                       ,-.
@@ -1148,6 +1170,21 @@ contract ERC721Drop is
         return config.metadataRenderer.tokenURI(tokenId);
     }
 
+    /// @notice Internal function to notify that all metadata may/was updated in the update
+    /// @dev Since we don't know what tokens were updated, most calls to a metadata renderer
+    ///      update the metadata we can assume all tokens metadata changed
+    function _notifyMetadataUpdate() internal {
+        uint256 totalMinted = _totalMinted();
+
+        // If we have tokens to notify about
+        if (totalMinted > 0) {
+            emit BatchMetadataUpdate(
+                _startTokenId(),
+                totalMinted + _startTokenId()
+            );
+        }
+    }
+
     /// @notice ERC165 supports interface
     /// @param interfaceId interface id to check if supported
     function supportsInterface(bytes4 interfaceId)
@@ -1164,6 +1201,7 @@ contract ERC721Drop is
             super.supportsInterface(interfaceId) ||
             type(IOwnable).interfaceId == interfaceId ||
             type(IERC2981Upgradeable).interfaceId == interfaceId ||
-            type(IERC721Drop).interfaceId == interfaceId;
+            type(IERC721Drop).interfaceId == interfaceId ||
+            type(IERC4906).interfaceId == interfaceId;
     }
 }

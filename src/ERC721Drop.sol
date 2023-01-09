@@ -16,6 +16,7 @@ pragma solidity ^0.8.10;
  */
 
 import {ERC721AUpgradeable} from "erc721a-upgradeable/ERC721AUpgradeable.sol";
+import {IERC721Upgradeable} from "@openzeppelin/contracts-upgradeable/interfaces/IERC721Upgradeable.sol";
 import {IERC721AUpgradeable} from "erc721a-upgradeable/IERC721AUpgradeable.sol";
 import {IERC2981Upgradeable, IERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/interfaces/IERC2981Upgradeable.sol";
 import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
@@ -30,7 +31,6 @@ import {IERC721Drop} from "./interfaces/IERC721Drop.sol";
 import {IOwnable} from "./interfaces/IOwnable.sol";
 import {IERC4906} from "./interfaces/IERC4906.sol";
 import {IFactoryUpgradeGate} from "./interfaces/IFactoryUpgradeGate.sol";
-
 import {OwnableSkeleton} from "./utils/OwnableSkeleton.sol";
 import {FundsReceiver} from "./utils/FundsReceiver.sol";
 import {Version} from "./utils/Version.sol";
@@ -338,7 +338,7 @@ contract ERC721Drop is
     function isApprovedForAll(address nftOwner, address operator)
         public
         view
-        override(ERC721AUpgradeable)
+        override(IERC721Upgradeable, ERC721AUpgradeable)
         returns (bool)
     {
         if (operator == zoraERC721TransferHelper) {
@@ -855,13 +855,13 @@ contract ERC721Drop is
     /// @notice Calls the metadata renderer contract to make an update and uses the EIP4906 event to notify
     /// @param data raw calldata to call the metadata renderer contract with.
     /// @dev Only accessible via an admin role
-    function callMetadataRenderer(bytes memory data) public
+    function callMetadataRenderer(bytes memory data)
+        public
         onlyAdmin
         returns (bytes memory)
     {
-        (bool success, bytes memory response) = address(config.metadataRenderer).call(
-            data
-        );
+        (bool success, bytes memory response) = address(config.metadataRenderer)
+            .call(data);
         if (!success) {
             revert ExternalMetadataRenderer_CallFailed();
         }
@@ -1201,7 +1201,8 @@ contract ERC721Drop is
             super.supportsInterface(interfaceId) ||
             type(IOwnable).interfaceId == interfaceId ||
             type(IERC2981Upgradeable).interfaceId == interfaceId ||
-            type(IERC721Drop).interfaceId == interfaceId ||
-            type(IERC4906).interfaceId == interfaceId;
+            // Because the EIP-4906 spec is event-based a numerically relevant interfaceId is used.
+            bytes4(0x49064906) == interfaceId ||
+            type(IERC721Drop).interfaceId == interfaceId;
     }
 }

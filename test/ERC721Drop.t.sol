@@ -17,7 +17,6 @@ import {OperatorFilterRegistry} from "./filter/OperatorFilterRegistry.sol";
 import {OperatorFilterRegistryErrorsAndEvents} from "./filter/OperatorFilterRegistryErrorsAndEvents.sol";
 import {OwnedSubscriptionManager} from "../src/filter/OwnedSubscriptionManager.sol";
 
-
 // contract TestEventEmitter {
 //     function emitFundsWithdrawn(
 //         address withdrawnBy,
@@ -360,30 +359,55 @@ contract ERC721DropTest is Test {
         calls[0] = abi.encodeWithSelector(
             IERC721Drop.adminMint.selector,
             DEFAULT_OWNER_ADDRESS,
-            5 
+            5
         );
         calls[1] = abi.encodeWithSelector(
             IERC721Drop.adminMint.selector,
             address(0x123),
             3
         );
-        calls[2] = abi.encodeWithSelector(
-            IERC721Drop.saleDetails.selector
-        );
+        calls[2] = abi.encodeWithSelector(IERC721Drop.saleDetails.selector);
         bytes[] memory results = zoraNFTBase.multicall(calls);
 
-        (bool saleActive, bool presaleActive, uint256 publicSalePrice, , , , , , , ,) = abi.decode(results[2], (bool, bool, uint256, uint64, uint64, uint64, uint64, bytes32, uint256, uint256, uint256));
+        (
+            bool saleActive,
+            bool presaleActive,
+            uint256 publicSalePrice,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+
+        ) = abi.decode(
+                results[2],
+                (
+                    bool,
+                    bool,
+                    uint256,
+                    uint64,
+                    uint64,
+                    uint64,
+                    uint64,
+                    bytes32,
+                    uint256,
+                    uint256,
+                    uint256
+                )
+            );
         assertTrue(!saleActive);
         assertTrue(!presaleActive);
         assertEq(publicSalePrice, 0);
-        (uint256 firstMintedId) = abi.decode(results[0], (uint256));
-        (uint256 secondMintedId) = abi.decode(results[1], (uint256));
+        uint256 firstMintedId = abi.decode(results[0], (uint256));
+        uint256 secondMintedId = abi.decode(results[1], (uint256));
         assertEq(firstMintedId, 5);
         assertEq(secondMintedId, 8);
     }
 
     function test_UpdatePriceMulticall() public setupZoraNFTBase(10) {
-       vm.startPrank(DEFAULT_OWNER_ADDRESS);
+        vm.startPrank(DEFAULT_OWNER_ADDRESS);
         bytes[] memory calls = new bytes[](3);
         calls[0] = abi.encodeWithSelector(
             IERC721Drop.setSaleConfiguration.selector,
@@ -412,10 +436,10 @@ contract ERC721DropTest is Test {
         assertTrue(saleDetails.publicSaleActive);
         assertTrue(!saleDetails.presaleActive);
         assertEq(saleDetails.publicSalePrice, 0.1 ether);
-        (uint256 firstMintedId) = abi.decode(results[1], (uint256));
-        (uint256 secondMintedId) = abi.decode(results[2], (uint256));
+        uint256 firstMintedId = abi.decode(results[1], (uint256));
+        uint256 secondMintedId = abi.decode(results[2], (uint256));
         assertEq(firstMintedId, 3);
-        assertEq(secondMintedId, 6); 
+        assertEq(secondMintedId, 6);
         vm.stopPrank();
         vm.startPrank(address(0x111));
         vm.deal(address(0x111), 0.3 ether);
@@ -746,7 +770,37 @@ contract ERC721DropTest is Test {
         zoraNFTBase.burn(1);
     }
 
-    // Add test burn failure state for users that don't own the token
+    function test_AdminMetadataRendererUpdateCall()
+        public
+        setupZoraNFTBase(10)
+    {
+        vm.startPrank(DEFAULT_OWNER_ADDRESS);
+        assertEq(dummyRenderer.someState(), "");
+        zoraNFTBase.callMetadataRenderer(
+            abi.encodeWithSelector(
+                DummyMetadataRenderer.updateSomeState.selector,
+                "new state",
+                address(zoraNFTBase)
+            )
+        );
+        assertEq(dummyRenderer.someState(), "new state");
+    }
+
+    function test_NonAdminMetadataRendererUpdateCall()
+        public
+        setupZoraNFTBase(10)
+    {
+        vm.startPrank(address(0x99493));
+        assertEq(dummyRenderer.someState(), "");
+        bytes memory targetCall = abi.encodeWithSelector(
+            DummyMetadataRenderer.updateSomeState.selector,
+            "new state",
+            address(zoraNFTBase)
+        );
+        vm.expectRevert(IERC721Drop.Access_OnlyAdmin.selector);
+        zoraNFTBase.callMetadataRenderer(targetCall);
+        assertEq(dummyRenderer.someState(), "");
+    }
 
     function test_EIP165() public view {
         require(zoraNFTBase.supportsInterface(0x01ffc9a7), "supports 165");
@@ -756,6 +810,7 @@ contract ERC721DropTest is Test {
             "supports 721-metdata"
         );
         require(zoraNFTBase.supportsInterface(0x2a55205a), "supports 2981");
+        require(zoraNFTBase.supportsInterface(0x49064906), "supports 4906");
         require(
             !zoraNFTBase.supportsInterface(0x0000000),
             "doesnt allow non-interface"

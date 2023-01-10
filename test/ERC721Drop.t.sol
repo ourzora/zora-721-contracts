@@ -18,24 +18,6 @@ import {OperatorFilterRegistryErrorsAndEvents} from "./filter/OperatorFilterRegi
 import {OwnedSubscriptionManager} from "../src/filter/OwnedSubscriptionManager.sol";
 
 
-// contract TestEventEmitter {
-//     function emitFundsWithdrawn(
-//         address withdrawnBy,
-//         address withdrawnTo,
-//         uint256 amount,
-//         address feeRecipient,
-//         uint256 feeAmount
-//     ) external {
-//         emit FundsWithdrawn(
-//             withdrawnBy,
-//             withdrawnTo,
-//             amount,
-//             feeRecipient,
-//             feeAmount
-//         );
-//     }
-// }
-
 contract ERC721DropTest is Test {
     /// @notice Event emitted when the funds are withdrawn from the minting contract
     /// @param withdrawnBy address that issued the withdraw
@@ -92,7 +74,7 @@ contract ERC721DropTest is Test {
 
     function setUp() public {
         vm.prank(DEFAULT_ZORA_DAO_ADDRESS);
-        feeManager = new ZoraFeeManager(500, DEFAULT_ZORA_DAO_ADDRESS);
+        feeManager = new ZoraFeeManager(0, DEFAULT_ZORA_DAO_ADDRESS);
         factoryUpgradeGate = new FactoryUpgradeGate(UPGRADE_GATE_ADMIN_ADDRESS);
         vm.etch(
             address(0x000000000000AAeB6D7670E522A718067333cd4E),
@@ -115,6 +97,8 @@ contract ERC721DropTest is Test {
             address(new ERC721DropProxy(impl, ""))
         );
         zoraNFTBase = ERC721Drop(newDrop);
+        vm.prank(DEFAULT_ZORA_DAO_ADDRESS);
+        feeManager.setFeeOverride(address(zoraNFTBase), 500);
     }
 
     modifier factoryWithSubscriptionAddress(address subscriptionAddress) {
@@ -174,6 +158,29 @@ contract ERC721DropTest is Test {
             _metadataRenderer: dummyRenderer,
             _metadataRendererInit: ""
         });
+    }
+
+    function test_InitFailsTooHighRoyalty() public {
+        bytes[] memory setupCalls = new bytes[](0);
+        vm.expectRevert(abi.encodeWithSelector(IERC721Drop.Setup_RoyaltyPercentageTooHigh.selector, 5000));
+        zoraNFTBase.initialize({
+            _contractName: "Test NFT",
+            _contractSymbol: "TNFT",
+            _initialOwner: DEFAULT_OWNER_ADDRESS,
+            _fundsRecipient: payable(DEFAULT_FUNDS_RECIPIENT_ADDRESS),
+            _editionSize: 10,
+            // 80% royalty is above 50% max.
+            _royaltyBPS: 8000,
+            _setupCalls: setupCalls,
+            _metadataRenderer: dummyRenderer,
+            _metadataRendererInit: ""
+        });
+    }
+
+    function test_IsAdminGetter() public setupZoraNFTBase(1) {
+        assertTrue(zoraNFTBase.isAdmin(DEFAULT_OWNER_ADDRESS));
+        assertTrue(!zoraNFTBase.isAdmin(address(0x999)));
+        assertTrue(!zoraNFTBase.isAdmin(address(0)));
     }
 
     function test_SubscriptionEnabled()
@@ -250,6 +257,19 @@ contract ERC721DropTest is Test {
         vm.stopPrank();
     }
 
+    function test_RoyaltyInfo() public setupZoraNFTBase(10) {
+        // assert 800 royaltyAmount or 8%
+        (address recipient, uint256 royaltyAmount) = zoraNFTBase.royaltyInfo(10, 1 ether);
+        assertEq(royaltyAmount, 0.08 ether);
+    }
+
+    function test_NoRoyaltyInfoNoFundsRecipientAddress() public setupZoraNFTBase(10) {
+        zoraNFTBase.setFundsRecipient(payable(address(0)));
+        // assert 800 royaltyAmount or 8%
+        (address recipient, uint256 royaltyAmount) = zoraNFTBase.royaltyInfo(10, 1 ether);
+        assertEq(royaltyAmount, 0 ether);
+    }
+
     function test_Purchase(uint64 amount) public setupZoraNFTBase(10) {
         vm.prank(DEFAULT_OWNER_ADDRESS);
         zoraNFTBase.setSaleConfiguration({
@@ -295,6 +315,23 @@ contract ERC721DropTest is Test {
         vm.prank(DEFAULT_OWNER_ADDRESS);
         zoraNFTBase.upgradeTo(newImpl);
         assertEq(address(zoraNFTBase.zoraFeeManager()), address(0xadadad));
+    }
+
+
+    function test_UpgradeFailsNotApproved() public setupZoraNFTBase(10) {
+        address newImpl = address(
+            new ERC721Drop(
+                ZoraFeeManager(address(0xadadad)),
+                address(0x3333),
+                factoryUpgradeGate,
+                address(0x0)
+            )
+        );
+
+        vm.prank(DEFAULT_OWNER_ADDRESS);
+        vm.expectRevert(abi.encodeWithSelector(IERC721Drop.Admin_InvalidUpgradeAddress.selector, newImpl));
+        zoraNFTBase.upgradeTo(newImpl);
+        assertEq(address(zoraNFTBase.zoraFeeManager()), address(feeManager));
     }
 
     function test_PurchaseTime() public setupZoraNFTBase(10) {
@@ -480,6 +517,38 @@ contract ERC721DropTest is Test {
                 ((uint256(amount) * 1_000 * 95) / 100000) - 2 ||
                 DEFAULT_FUNDS_RECIPIENT_ADDRESS.balance <
                 ((uint256(amount) * 1_000 * 95) / 100000) + 2
+        );
+    }
+
+
+    function test_WithdrawNoZoraFee(uint128 amount) public setupZoraNFTBase(10) {
+        vm.assume(amount > 0.01 ether);
+
+        vm.prank(DEFAULT_ZORA_DAO_ADDRESS);
+        feeManager.setFeeOverride(address(zoraNFTBase), 0);
+        address payable fundsRecipientTarget = payable(address(0x1123));
+        vm.prank(DEFAULT_OWNER_ADDRESS);
+        zoraNFTBase.setFundsRecipient(fundsRecipientTarget);
+
+        vm.deal(address(zoraNFTBase), amount);
+        vm.prank(DEFAULT_OWNER_ADDRESS);
+        vm.expectEmit(true, true, true, true);
+        emit FundsWithdrawn(
+            DEFAULT_OWNER_ADDRESS,
+            fundsRecipientTarget,
+            amount,
+            DEFAULT_ZORA_DAO_ADDRESS,
+            0
+        );
+        zoraNFTBase.withdraw();
+
+        (, uint256 feeBps) = feeManager.getZORAWithdrawFeesBPS(
+            address(zoraNFTBase)
+        );
+        assertEq(feeBps, 0);
+
+        assertTrue(
+            fundsRecipientTarget.balance == uint256(amount)
         );
     }
 

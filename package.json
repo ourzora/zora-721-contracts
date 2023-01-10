@@ -21,6 +21,7 @@
     "typechain": "yarn run clean && yarn run build && typechain --target=ethers-v5 'dist/artifacts/*/*[!.metadata].json' --out-dir dist/typechain-src && tsc",
     "prepack": "yarn run typechain",
     "deploy": "node scripts/deploy.mjs",
+    "coverage": "forge coverage --report lcov",
     "build": "forge build",
     "storage-inspect:check": "./script/storage-check.sh check ERC721Drop ERC721DropProxy FactoryUpgradeGate ZoraFeeManager ZoraNFTCreatorProxy ZoraNFTCreatorV1",
     "storage-inspect:generate": "./script/storage-check.sh generate ERC721Drop ERC721DropProxy FactoryUpgradeGate ZoraFeeManager ZoraNFTCreatorProxy ZoraNFTCreatorV1"
@@ -30,7 +31,6 @@
     "ejs": "^3.1.7",
     "keccak256": "^1.0.6",
     "merkletreejs": "0.2.31",
-    "isomorphic-fetch": "^3.0.0",
     "es-main": "^1.0.2"
   },
   "dependencies": {

@@ -17,24 +17,6 @@ import {OperatorFilterRegistry} from "./filter/OperatorFilterRegistry.sol";
 import {OperatorFilterRegistryErrorsAndEvents} from "./filter/OperatorFilterRegistryErrorsAndEvents.sol";
 import {OwnedSubscriptionManager} from "../src/filter/OwnedSubscriptionManager.sol";
 
-// contract TestEventEmitter {
-//     function emitFundsWithdrawn(
-//         address withdrawnBy,
-//         address withdrawnTo,
-//         uint256 amount,
-//         address feeRecipient,
-//         uint256 feeAmount
-//     ) external {
-//         emit FundsWithdrawn(
-//             withdrawnBy,
-//             withdrawnTo,
-//             amount,
-//             feeRecipient,
-//             feeAmount
-//         );
-//     }
-// }
-
 contract ERC721DropTest is Test {
     /// @notice Event emitted when the funds are withdrawn from the minting contract
     /// @param withdrawnBy address that issued the withdraw
@@ -351,6 +333,45 @@ contract ERC721DropTest is Test {
             zoraNFTBase.ownerOf(1) == DEFAULT_OWNER_ADDRESS,
             "Owner is wrong for new minted token"
         );
+    }
+
+    function test_MulticallAccessControl() public setupZoraNFTBase(10) {
+        vm.prank(DEFAULT_OWNER_ADDRESS);
+        zoraNFTBase.setSaleConfiguration({
+            publicSaleStart: 0,
+            publicSaleEnd: type(uint64).max,
+            presaleStart: 0,
+            presaleEnd: 0,
+            publicSalePrice: 0,
+            maxSalePurchasePerAddress: 10,
+            presaleMerkleRoot: bytes32(0)
+        });
+
+        address notAdmin = address(0x444);
+        bytes[] memory calls = new bytes[](2);
+        calls[0] = abi.encodeWithSelector(IERC721Drop.purchase.selector, 1);
+        calls[1] = abi.encodeWithSelector(
+            IERC721Drop.adminMint.selector,
+            address(0x123),
+            3
+        );
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IERC721Drop.Access_MissingRoleOrAdmin.selector,
+                bytes32(
+                    0xf0887ba65ee2024ea881d91b74c2450ef19e1557f03bed3ea9f16b037cbe2dc9
+                )
+            )
+        );
+        zoraNFTBase.multicall(calls);
+
+        assertEq(zoraNFTBase.balanceOf(address(0x123)), 0);
+
+        vm.prank(DEFAULT_OWNER_ADDRESS);
+        zoraNFTBase.multicall(calls);
+
+        assertEq(zoraNFTBase.balanceOf(address(0x123)), 3);
     }
 
     function test_MintMulticall() public setupZoraNFTBase(10) {

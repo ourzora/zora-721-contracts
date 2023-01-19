@@ -30,6 +30,9 @@ interface IERC721Drop {
     /// @notice Cannot withdraw funds due to ETH send failure.
     error Withdraw_FundsSendFailure();
 
+    /// @notice Call to external metadata renderer failed.
+    error ExternalMetadataRenderer_CallFailed();
+
     /// @notice Thrown when the operator for the contract is not allowed
     /// @dev Used when strict enforcement of marketplaces for creator royalties is desired.
     error OperatorNotAllowed(address operator);

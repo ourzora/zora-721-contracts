@@ -894,7 +894,37 @@ contract ERC721DropTest is Test {
         zoraNFTBase.burn(1);
     }
 
-    // Add test burn failure state for users that don't own the token
+    function test_AdminMetadataRendererUpdateCall()
+        public
+        setupZoraNFTBase(10)
+    {
+        vm.startPrank(DEFAULT_OWNER_ADDRESS);
+        assertEq(dummyRenderer.someState(), "");
+        zoraNFTBase.callMetadataRenderer(
+            abi.encodeWithSelector(
+                DummyMetadataRenderer.updateSomeState.selector,
+                "new state",
+                address(zoraNFTBase)
+            )
+        );
+        assertEq(dummyRenderer.someState(), "new state");
+    }
+
+    function test_NonAdminMetadataRendererUpdateCall()
+        public
+        setupZoraNFTBase(10)
+    {
+        vm.startPrank(address(0x99493));
+        assertEq(dummyRenderer.someState(), "");
+        bytes memory targetCall = abi.encodeWithSelector(
+            DummyMetadataRenderer.updateSomeState.selector,
+            "new state",
+            address(zoraNFTBase)
+        );
+        vm.expectRevert(IERC721Drop.Access_OnlyAdmin.selector);
+        zoraNFTBase.callMetadataRenderer(targetCall);
+        assertEq(dummyRenderer.someState(), "");
+    }
 
     function test_EIP165() public view {
         require(zoraNFTBase.supportsInterface(0x01ffc9a7), "supports 165");
@@ -904,6 +934,7 @@ contract ERC721DropTest is Test {
             "supports 721-metdata"
         );
         require(zoraNFTBase.supportsInterface(0x2a55205a), "supports 2981");
+        require(zoraNFTBase.supportsInterface(0x49064906), "supports 4906");
         require(
             !zoraNFTBase.supportsInterface(0x0000000),
             "doesnt allow non-interface"

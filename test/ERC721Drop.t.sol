@@ -17,7 +17,6 @@ import {OperatorFilterRegistry} from "./filter/OperatorFilterRegistry.sol";
 import {OperatorFilterRegistryErrorsAndEvents} from "./filter/OperatorFilterRegistryErrorsAndEvents.sol";
 import {OwnedSubscriptionManager} from "../src/filter/OwnedSubscriptionManager.sol";
 
-
 contract ERC721DropTest is Test {
     /// @notice Event emitted when the funds are withdrawn from the minting contract
     /// @param withdrawnBy address that issued the withdraw
@@ -261,15 +260,24 @@ contract ERC721DropTest is Test {
 
     function test_RoyaltyInfo() public setupZoraNFTBase(10) {
         // assert 800 royaltyAmount or 8%
-        (address recipient, uint256 royaltyAmount) = zoraNFTBase.royaltyInfo(10, 1 ether);
+        (address recipient, uint256 royaltyAmount) = zoraNFTBase.royaltyInfo(
+            10,
+            1 ether
+        );
         assertEq(royaltyAmount, 0.08 ether);
     }
 
-    function test_NoRoyaltyInfoNoFundsRecipientAddress() public setupZoraNFTBase(10) {
+    function test_NoRoyaltyInfoNoFundsRecipientAddress()
+        public
+        setupZoraNFTBase(10)
+    {
         vm.prank(DEFAULT_OWNER_ADDRESS);
         zoraNFTBase.setFundsRecipient(payable(address(0)));
         // assert 800 royaltyAmount or 8%
-        (address recipient, uint256 royaltyAmount) = zoraNFTBase.royaltyInfo(10, 1 ether);
+        (address recipient, uint256 royaltyAmount) = zoraNFTBase.royaltyInfo(
+            10,
+            1 ether
+        );
         assertEq(royaltyAmount, 0 ether);
     }
 
@@ -320,7 +328,6 @@ contract ERC721DropTest is Test {
         assertEq(address(zoraNFTBase.zoraFeeManager()), address(0xadadad));
     }
 
-
     function test_UpgradeFailsNotApproved() public setupZoraNFTBase(10) {
         address newImpl = address(
             new ERC721Drop(
@@ -332,7 +339,12 @@ contract ERC721DropTest is Test {
         );
 
         vm.prank(DEFAULT_OWNER_ADDRESS);
-        vm.expectRevert(abi.encodeWithSelector(IERC721Drop.Admin_InvalidUpgradeAddress.selector, newImpl));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IERC721Drop.Admin_InvalidUpgradeAddress.selector,
+                newImpl
+            )
+        );
         zoraNFTBase.upgradeTo(newImpl);
         assertEq(address(zoraNFTBase.zoraFeeManager()), address(feeManager));
     }
@@ -394,36 +406,100 @@ contract ERC721DropTest is Test {
         );
     }
 
+    function test_MulticallAccessControl() public setupZoraNFTBase(10) {
+        vm.prank(DEFAULT_OWNER_ADDRESS);
+        zoraNFTBase.setSaleConfiguration({
+            publicSaleStart: 0,
+            publicSaleEnd: type(uint64).max,
+            presaleStart: 0,
+            presaleEnd: 0,
+            publicSalePrice: 0,
+            maxSalePurchasePerAddress: 10,
+            presaleMerkleRoot: bytes32(0)
+        });
+
+        address notAdmin = address(0x444);
+        bytes[] memory calls = new bytes[](2);
+        calls[0] = abi.encodeWithSelector(IERC721Drop.purchase.selector, 1);
+        calls[1] = abi.encodeWithSelector(
+            IERC721Drop.adminMint.selector,
+            address(0x123),
+            3
+        );
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IERC721Drop.Access_MissingRoleOrAdmin.selector,
+                bytes32(
+                    0xf0887ba65ee2024ea881d91b74c2450ef19e1557f03bed3ea9f16b037cbe2dc9
+                )
+            )
+        );
+        zoraNFTBase.multicall(calls);
+
+        assertEq(zoraNFTBase.balanceOf(address(0x123)), 0);
+
+        vm.prank(DEFAULT_OWNER_ADDRESS);
+        zoraNFTBase.multicall(calls);
+
+        assertEq(zoraNFTBase.balanceOf(address(0x123)), 3);
+    }
+
     function test_MintMulticall() public setupZoraNFTBase(10) {
         vm.startPrank(DEFAULT_OWNER_ADDRESS);
         bytes[] memory calls = new bytes[](3);
         calls[0] = abi.encodeWithSelector(
             IERC721Drop.adminMint.selector,
             DEFAULT_OWNER_ADDRESS,
-            5 
+            5
         );
         calls[1] = abi.encodeWithSelector(
             IERC721Drop.adminMint.selector,
             address(0x123),
             3
         );
-        calls[2] = abi.encodeWithSelector(
-            IERC721Drop.saleDetails.selector
-        );
+        calls[2] = abi.encodeWithSelector(IERC721Drop.saleDetails.selector);
         bytes[] memory results = zoraNFTBase.multicall(calls);
 
-        (bool saleActive, bool presaleActive, uint256 publicSalePrice, , , , , , , ,) = abi.decode(results[2], (bool, bool, uint256, uint64, uint64, uint64, uint64, bytes32, uint256, uint256, uint256));
+        (
+            bool saleActive,
+            bool presaleActive,
+            uint256 publicSalePrice,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+
+        ) = abi.decode(
+                results[2],
+                (
+                    bool,
+                    bool,
+                    uint256,
+                    uint64,
+                    uint64,
+                    uint64,
+                    uint64,
+                    bytes32,
+                    uint256,
+                    uint256,
+                    uint256
+                )
+            );
         assertTrue(!saleActive);
         assertTrue(!presaleActive);
         assertEq(publicSalePrice, 0);
-        (uint256 firstMintedId) = abi.decode(results[0], (uint256));
-        (uint256 secondMintedId) = abi.decode(results[1], (uint256));
+        uint256 firstMintedId = abi.decode(results[0], (uint256));
+        uint256 secondMintedId = abi.decode(results[1], (uint256));
         assertEq(firstMintedId, 5);
         assertEq(secondMintedId, 8);
     }
 
     function test_UpdatePriceMulticall() public setupZoraNFTBase(10) {
-       vm.startPrank(DEFAULT_OWNER_ADDRESS);
+        vm.startPrank(DEFAULT_OWNER_ADDRESS);
         bytes[] memory calls = new bytes[](3);
         calls[0] = abi.encodeWithSelector(
             IERC721Drop.setSaleConfiguration.selector,
@@ -452,10 +528,10 @@ contract ERC721DropTest is Test {
         assertTrue(saleDetails.publicSaleActive);
         assertTrue(!saleDetails.presaleActive);
         assertEq(saleDetails.publicSalePrice, 0.1 ether);
-        (uint256 firstMintedId) = abi.decode(results[1], (uint256));
-        (uint256 secondMintedId) = abi.decode(results[2], (uint256));
+        uint256 firstMintedId = abi.decode(results[1], (uint256));
+        uint256 secondMintedId = abi.decode(results[2], (uint256));
         assertEq(firstMintedId, 3);
-        assertEq(secondMintedId, 6); 
+        assertEq(secondMintedId, 6);
         vm.stopPrank();
         vm.startPrank(address(0x111));
         vm.deal(address(0x111), 0.3 ether);
@@ -523,8 +599,10 @@ contract ERC721DropTest is Test {
         );
     }
 
-
-    function test_WithdrawNoZoraFee(uint128 amount) public setupZoraNFTBase(10) {
+    function test_WithdrawNoZoraFee(uint128 amount)
+        public
+        setupZoraNFTBase(10)
+    {
         vm.assume(amount > 0.01 ether);
 
         vm.prank(DEFAULT_ZORA_DAO_ADDRESS);
@@ -550,9 +628,7 @@ contract ERC721DropTest is Test {
         );
         assertEq(feeBps, 0);
 
-        assertTrue(
-            fundsRecipientTarget.balance == uint256(amount)
-        );
+        assertTrue(fundsRecipientTarget.balance == uint256(amount));
     }
 
     function test_MintLimit(uint8 limit) public setupZoraNFTBase(5000) {

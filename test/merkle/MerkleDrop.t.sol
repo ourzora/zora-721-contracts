@@ -113,6 +113,78 @@ contract ZoraNFTBaseTest is Test {
         vm.stopPrank();
     }
 
+    function test_MerklePurchaseFailureWrongPrice() public setupZoraNFTBase {
+        vm.startPrank(DEFAULT_OWNER_ADDRESS);
+        zoraNFTBase.setSaleConfiguration({
+            publicSaleStart: 0,
+            publicSaleEnd: 0,
+            presaleStart: 0,
+            presaleEnd: type(uint64).max,
+            publicSalePrice: 0 ether,
+            maxSalePurchasePerAddress: 0,
+            presaleMerkleRoot: merkleData
+                .getTestSetByName("test-3-addresses")
+                .root
+        });
+        vm.stopPrank();
+
+        MerkleData.MerkleEntry memory item;
+
+        item = merkleData.getTestSetByName("test-3-addresses").entries[0];
+        vm.deal(address(item.user), 1 ether);
+        vm.startPrank(address(item.user));
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IERC721Drop.Purchase_WrongPrice.selector,
+                item.mintPrice
+            )
+        );
+        zoraNFTBase.purchasePresale{value: item.mintPrice - 1}(
+            1,
+            item.maxMint,
+            item.mintPrice,
+            item.proof
+        );
+        assertEq(zoraNFTBase.saleDetails().maxSupply, 10);
+        assertEq(zoraNFTBase.saleDetails().totalMinted, 0);
+        vm.stopPrank();
+    }
+
+    function test_MerklePurchaseFailureWrongRoot() public setupZoraNFTBase {
+        vm.startPrank(DEFAULT_OWNER_ADDRESS);
+        zoraNFTBase.setSaleConfiguration({
+            publicSaleStart: 0,
+            publicSaleEnd: 0,
+            presaleStart: 0,
+            presaleEnd: type(uint64).max,
+            publicSalePrice: 0 ether,
+            maxSalePurchasePerAddress: 0,
+            presaleMerkleRoot: merkleData
+                .getTestSetByName("test-3-addresses")
+                .root
+        });
+        vm.stopPrank();
+
+        MerkleData.MerkleEntry memory item;
+
+        item = merkleData.getTestSetByName("test-3-addresses").entries[0];
+        vm.deal(address(item.user), 1 ether);
+        vm.startPrank(address(item.user));
+
+        vm.expectRevert(IERC721Drop.Presale_MerkleNotApproved.selector);
+        item.proof[1] = item.proof[1] & bytes32(bytes4(0xcafecafe));
+        zoraNFTBase.purchasePresale{value: item.mintPrice - 1}(
+            1,
+            item.maxMint,
+            item.mintPrice,
+            item.proof
+        );
+        assertEq(zoraNFTBase.saleDetails().maxSupply, 10);
+        assertEq(zoraNFTBase.saleDetails().totalMinted, 0);
+        vm.stopPrank();
+    }
+
     function test_MerklePurchaseAndPublicSalePurchaseLimits()
         public
         setupZoraNFTBase

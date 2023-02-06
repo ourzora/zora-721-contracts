@@ -74,6 +74,12 @@ contract ERC721Drop is
     /// @dev Factory upgrade gate
     IFactoryUpgradeGate public immutable factoryUpgradeGate;
 
+    /// @notice Zora Mint Fee
+    uint256 public immutable ZORA_MINT_FEE;
+
+    /// @notice Mint Fee Recipient
+    address payable public immutable ZORA_MINT_FEE_RECIPIENT;
+
     /// @notice Max royalty BPS
     uint16 constant MAX_ROYALTY_BPS = 50_00;
 
@@ -162,11 +168,15 @@ contract ERC721Drop is
     constructor(
         address _zoraERC721TransferHelper,
         IFactoryUpgradeGate _factoryUpgradeGate,
-        address _marketFilterDAOAddress
+        address _marketFilterDAOAddress,
+        uint256 _mintFeeAmount,
+        address payable _mintFeeRecipient
     ) initializer {
         zoraERC721TransferHelper = _zoraERC721TransferHelper;
         factoryUpgradeGate = _factoryUpgradeGate;
         marketFilterDAOAddress = _marketFilterDAOAddress;
+        ZORA_MINT_FEE = _mintFeeAmount;
+        ZORA_MINT_FEE_RECIPIENT = _mintFeeRecipient;
     }
 
     ///  @dev Create a new drop contract
@@ -298,7 +308,7 @@ contract ERC721Drop is
             IERC721Drop.SaleDetails({
                 publicSaleActive: _publicSaleActive(),
                 presaleActive: _presaleActive(),
-                publicSalePrice: salesConfig.publicSalePrice,
+                publicSalePrice: salesConfig.publicSalePrice + ZORA_MINT_FEE,
                 publicSaleStart: salesConfig.publicSaleStart,
                 publicSaleEnd: salesConfig.publicSaleEnd,
                 presaleStart: salesConfig.presaleStart,
@@ -343,15 +353,15 @@ contract ERC721Drop is
         return super.isApprovedForAll(nftOwner, operator);
     }
 
-    /// @notice Deprecated: no withdraw fees
+    /// @notice ZORA fee is fixed now per mint
     /// @dev Gets the zora fee for amount of withdraw
-    function zoraFeeForAmount(uint256)
+    function zoraFeeForAmount(uint256 quantity)
         public
-        pure
+        view
         returns (address payable recipient, uint256 fee)
     {
-        recipient = payable(address(0));
-        fee = 0;
+        recipient = ZORA_MINT_FEE_RECIPIENT;
+        fee = ZORA_MINT_FEE * quantity;
     }
 
     /**
@@ -644,7 +654,7 @@ contract ERC721Drop is
     ) internal virtual override {
         if (
             from != address(0) && // skip on mints
-            from != msg.sender    // skip on transfers from sender
+            from != msg.sender // skip on transfers from sender
         ) {
             if (
                 !operatorFilterRegistry.isOperatorAllowed(

@@ -9,7 +9,6 @@ import {ERC721Drop} from "../src/ERC721Drop.sol";
 import {ERC721DropProxy} from "../src/ERC721DropProxy.sol";
 import {ZoraNFTCreatorV1} from "../src/ZoraNFTCreatorV1.sol";
 import {ZoraNFTCreatorProxy} from "../src/ZoraNFTCreatorProxy.sol";
-import {ZoraFeeManager} from "../src/ZoraFeeManager.sol";
 import {IOperatorFilterRegistry} from "../src/interfaces/IOperatorFilterRegistry.sol";
 import {OwnedSubscriptionManager} from "../src/filter/OwnedSubscriptionManager.sol";
 import {FactoryUpgradeGate} from "../src/FactoryUpgradeGate.sol";
@@ -24,24 +23,25 @@ contract Deploy is Script {
         console.log("CHAIN_ID", chainID);
 
         console2.log("Starting ---");
+        console2.log("Setup operators ---");
 
         vm.startBroadcast();
         address daoFilterMarketAddress = vm.envAddress(
             "SUBSCRIPTION_MARKET_FILTER_ADDRESS"
         );
-        address managementOwner = vm.envAddress("MANAGAMENT_OWNER_ADDRESS");
-        console2.log("Setup operators ---");
 
-        console2.log("Setup contracts ---");
-        ZoraFeeManager feeManager = new ZoraFeeManager(500, managementOwner);
+        address factoryUpgradeGateOwner = vm.envAddress(
+            "FACTORY_UPGRADE_GATE_OWNER"
+        );
+
+        // Add opensea contracts to test
         DropMetadataRenderer dropMetadata = new DropMetadataRenderer();
         EditionMetadataRenderer editionMetadata = new EditionMetadataRenderer();
         FactoryUpgradeGate factoryUpgradeGate = new FactoryUpgradeGate(
-            managementOwner
+            factoryUpgradeGateOwner
         );
 
         ERC721Drop dropImplementation = new ERC721Drop({
-            _zoraFeeManager: feeManager,
             _zoraERC721TransferHelper: address(0x0),
             _factoryUpgradeGate: factoryUpgradeGate,
             _marketFilterDAOAddress: address(daoFilterMarketAddress)
@@ -64,13 +64,13 @@ contract Deploy is Script {
 
         vm.stopBroadcast();
 
-        string memory filePath = string(
-            abi.encodePacked(
-                "deploys/",
-                chainID.toString(),
-                ".upgradeMetadata.txt"
-            )
-        );
+        // string memory filePath = string(
+        //     abi.encodePacked(
+        //         "deploys/",
+        //         chainID.toString(),
+        //         ".upgradeMetadata.txt"
+        //     )
+        // );
         // vm.writeFile(filePath, "");
         // vm.writeLine(
         //     filePath,

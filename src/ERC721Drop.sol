@@ -56,7 +56,7 @@ contract ERC721Drop is
     PublicMulticall,
     OwnableSkeleton,
     FundsReceiver,
-    Version(9),
+    Version(10),
     ERC721DropStorageV1
 {
     /// @dev This is the max mint batch size for the optimized ERC721A mint contract

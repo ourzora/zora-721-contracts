@@ -9,7 +9,6 @@ import {ERC721Drop} from "../src/ERC721Drop.sol";
 import {ERC721DropProxy} from "../src/ERC721DropProxy.sol";
 import {ZoraNFTCreatorV1} from "../src/ZoraNFTCreatorV1.sol";
 import {ZoraNFTCreatorProxy} from "../src/ZoraNFTCreatorProxy.sol";
-import {ZoraFeeManager} from "../src/ZoraFeeManager.sol";
 import {IOperatorFilterRegistry} from "../src/interfaces/IOperatorFilterRegistry.sol";
 import {OwnedSubscriptionManager} from "../src/filter/OwnedSubscriptionManager.sol";
 import {FactoryUpgradeGate} from "../src/FactoryUpgradeGate.sol";
@@ -36,7 +35,6 @@ contract DeployNewERC721Drop is Script {
         configFile = vm.readFile(
             string.concat("./addresses/", Strings.toString(chainID), ".json")
         );
-        address zoraFeeManager = _getKey("ZORA_FEE_MANAGER");
         address zoraERC721TransferHelper = _getKey(
             "ZORA_ERC721_TRANSFER_HELPER"
         );
@@ -53,7 +51,6 @@ contract DeployNewERC721Drop is Script {
         console2.log("Setup contracts ---");
 
         ERC721Drop dropImplementation = new ERC721Drop({
-            _zoraFeeManager: IZoraFeeManager(zoraFeeManager),
             _zoraERC721TransferHelper: zoraERC721TransferHelper,
             _factoryUpgradeGate: IFactoryUpgradeGate(factoryUpgradeGate),
             _marketFilterDAOAddress: ownedSubscriptionManager

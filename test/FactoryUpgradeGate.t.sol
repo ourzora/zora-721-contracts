@@ -5,6 +5,7 @@ import {Vm} from "forge-std/Vm.sol";
 import {Test} from "forge-std/Test.sol";
 
 import {FactoryUpgradeGate} from "../src/FactoryUpgradeGate.sol";
+import {IOwnable2Step} from "../src/utils/ownable/IOwnable2Step.sol";
 
 /// @notice Test for factory upgrade gate
 contract FactoryUpgradeGateTest is Test {
@@ -21,7 +22,7 @@ contract FactoryUpgradeGateTest is Test {
     function test_AnyoneNotAllowedUpdate() public {
         address[] memory newPaths = new address[](1);
         newPaths[0] = address(0x1);
-        vm.expectRevert(FactoryUpgradeGate.Access_OnlyOwner.selector);
+        vm.expectRevert(IOwnable2Step.ONLY_OWNER.selector);
         gate.registerNewUpgradePath(address(0x23), newPaths);
     }
 

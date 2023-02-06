@@ -547,13 +547,13 @@ contract ERC721DropTest is Test {
         vm.deal(address(zoraNFTBase), amount);
         vm.prank(DEFAULT_OWNER_ADDRESS);
         vm.expectEmit(true, true, true, true);
-        uint256 leftoverFunds = amount - (amount * 1) / 20;
+        uint256 leftoverFunds = amount;
         emit FundsWithdrawn(
             DEFAULT_OWNER_ADDRESS,
             DEFAULT_FUNDS_RECIPIENT_ADDRESS,
             leftoverFunds,
-            DEFAULT_ZORA_DAO_ADDRESS,
-            (amount * 1) / 20
+            payable(address(0)),
+            0
         );
         zoraNFTBase.withdraw();
 
@@ -581,8 +581,8 @@ contract ERC721DropTest is Test {
     {
         vm.assume(amount > 0.01 ether);
 
-        vm.prank(DEFAULT_ZORA_DAO_ADDRESS);
-        address payable fundsRecipientTarget = payable(address(0x1123));
+        address payable fundsRecipientTarget = payable(address(0x0));
+
         vm.prank(DEFAULT_OWNER_ADDRESS);
         zoraNFTBase.setFundsRecipient(fundsRecipientTarget);
 
@@ -593,7 +593,7 @@ contract ERC721DropTest is Test {
             DEFAULT_OWNER_ADDRESS,
             fundsRecipientTarget,
             amount,
-            DEFAULT_ZORA_DAO_ADDRESS,
+            payable(address(0)),
             0
         );
         zoraNFTBase.withdraw();

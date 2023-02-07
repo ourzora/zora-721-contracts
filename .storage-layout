@@ -45,7 +45,8 @@
 | Name               | Type                                         | Slot | Offset | Bytes | Contract                                      |
 |--------------------|----------------------------------------------|------|--------|-------|-----------------------------------------------|
 | _owner             | address                                      | 0    | 0      | 20    | src/FactoryUpgradeGate.sol:FactoryUpgradeGate |
-| _validUpgradePaths | mapping(address => mapping(address => bool)) | 1    | 0      | 32    | src/FactoryUpgradeGate.sol:FactoryUpgradeGate |
+| _pendingOwner      | address                                      | 1    | 0      | 20    | src/FactoryUpgradeGate.sol:FactoryUpgradeGate |
+| _validUpgradePaths | mapping(address => mapping(address => bool)) | 2    | 0      | 32    | src/FactoryUpgradeGate.sol:FactoryUpgradeGate |
 
 =======================
 ➡ ZoraFeeManager

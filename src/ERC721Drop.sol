@@ -56,7 +56,7 @@ contract ERC721Drop is
     PublicMulticall,
     OwnableSkeleton,
     FundsReceiver,
-    Version(9),
+    Version(10),
     ERC721DropStorageV1
 {
     /// @dev This is the max mint batch size for the optimized ERC721A mint contract
@@ -647,8 +647,8 @@ contract ERC721Drop is
         uint256 quantity
     ) internal virtual override {
         if (
-            from != msg.sender &&
-            address(operatorFilterRegistry).code.length > 0
+            from != address(0) && // skip on mints
+            from != msg.sender    // skip on transfers from sender
         ) {
             if (
                 !operatorFilterRegistry.isOperatorAllowed(

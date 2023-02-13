@@ -16,6 +16,7 @@ import {DropMetadataRenderer} from "../src/metadata/DropMetadataRenderer.sol";
 import {EditionMetadataRenderer} from "../src/metadata/EditionMetadataRenderer.sol";
 import {IZoraFeeManager} from "../src/interfaces/IZoraFeeManager.sol";
 import {IFactoryUpgradeGate} from "../src/interfaces/IFactoryUpgradeGate.sol";
+import {ERC721DropProxy} from "../src/ERC721DropProxy.sol";
 
 contract DeployNewERC721Drop is Script {
     using Strings for uint256;
@@ -69,6 +70,14 @@ contract DeployNewERC721Drop is Script {
 
         console2.log("Factory/Creator IMPL: ");
         console2.log(address(zoraNFTCreator));
+
+        // make new proxy for verification purposes
+        // new ERC721DropProxy(address(dropImplementation), "");
+
+        // Next steps:
+        // 1. Setup upgrade path
+        // 2. Upgrade creator to new contract
+        // 3. Update addresses folder
 
         vm.stopBroadcast();
     }

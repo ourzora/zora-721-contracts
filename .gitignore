@@ -11,3 +11,4 @@ scripts/gen.json
 .env.*
 dist/
 .idea
+_lcov/

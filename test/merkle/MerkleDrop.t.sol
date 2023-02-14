@@ -34,7 +34,9 @@ contract ZoraNFTBaseTest is Test {
             _royaltyBPS: 800,
             _setupCalls: setupCalls,
             _metadataRenderer: dummyRenderer,
-            _metadataRendererInit: ""
+            _metadataRendererInit: "",
+            _tokenGateToken: address(0),
+            _tokenGateAmount: 0
         });
 
         _;
@@ -262,7 +264,9 @@ contract ZoraNFTBaseTest is Test {
             _royaltyBPS: 800,
             _setupCalls: setupCalls,
             _metadataRenderer: dummyRenderer,
-            _metadataRendererInit: ""
+            _metadataRendererInit: "",
+            _tokenGateToken: address(0),
+            _tokenGateAmount: 0
         });
 
         vm.startPrank(DEFAULT_OWNER_ADDRESS);

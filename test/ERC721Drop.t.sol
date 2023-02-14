@@ -3,6 +3,9 @@ pragma solidity ^0.8.10;
 
 import {Test} from "forge-std/Test.sol";
 import {IERC721AUpgradeable} from "erc721a-upgradeable/IERC721AUpgradeable.sol";
+import {ERC20PresetMinterPauser} from "@openzeppelin/contracts/token/ERC20/presets/ERC20PresetMinterPauser.sol";
+import {ERC721PresetMinterPauserAutoId} from "@openzeppelin/contracts/token/ERC721/presets/ERC721PresetMinterPauserAutoId.sol";
+
 
 import {ERC721Drop} from "../src/ERC721Drop.sol";
 import {ZoraFeeManager} from "../src/ZoraFeeManager.sol";
@@ -65,7 +68,9 @@ contract ERC721DropTest is Test {
             _royaltyBPS: 800,
             _setupCalls: setupCalls,
             _metadataRenderer: dummyRenderer,
-            _metadataRendererInit: ""
+            _metadataRendererInit: "",
+            _tokenGateToken: address(0),
+            _tokenGateAmount: 0
         });
 
         _;
@@ -155,7 +160,9 @@ contract ERC721DropTest is Test {
             _royaltyBPS: 800,
             _setupCalls: setupCalls,
             _metadataRenderer: dummyRenderer,
-            _metadataRendererInit: ""
+            _metadataRendererInit: "",
+            _tokenGateToken: address(0),
+            _tokenGateAmount: 0
         });
     }
 
@@ -174,7 +181,9 @@ contract ERC721DropTest is Test {
     //         _royaltyBPS: 8000,
     //         _setupCalls: setupCalls,
     //         _metadataRenderer: dummyRenderer,
-    //         _metadataRendererInit: ""
+    //         _metadataRendererInit: "",
+    //         _tokenGateToken: address(0),
+    //         _tokenGateAmount: 0
     //     });
     // }
 
@@ -216,6 +225,143 @@ contract ERC721DropTest is Test {
         zoraNFTBase.manageMarketFilterDAOSubscription(false);
         vm.prank(address(0xcafeea3));
         zoraNFTBase.transferFrom(DEFAULT_OWNER_ADDRESS, address(0x123456), 1);
+    }
+
+    function test_PurchaseWithERC20TokenGate() public {
+        ERC20PresetMinterPauser dummyToken = new ERC20PresetMinterPauser("Dummy", "DUM");
+        dummyToken.mint(address(0x1234), 99);
+        bytes[] memory setupCalls = new bytes[](0);
+        zoraNFTBase.initialize({
+            _contractName: "Test NFT",
+            _contractSymbol: "TNFT",
+            _initialOwner: DEFAULT_OWNER_ADDRESS,
+            _fundsRecipient: payable(DEFAULT_FUNDS_RECIPIENT_ADDRESS),
+            _editionSize: 10,
+            _royaltyBPS: 0,
+            _setupCalls: setupCalls,
+            _metadataRenderer: dummyRenderer,
+            _metadataRendererInit: "",
+            _tokenGateToken: address(dummyToken),
+            _tokenGateAmount: 100
+        });
+        vm.prank(DEFAULT_OWNER_ADDRESS);
+        zoraNFTBase.setSaleConfiguration({
+            publicSaleStart: 0,
+            publicSaleEnd: type(uint64).max,
+            presaleStart: 0,
+            presaleEnd: 0,
+            publicSalePrice: 0 ether,
+            maxSalePurchasePerAddress: 2,
+            presaleMerkleRoot: bytes32(0)
+        });
+
+        vm.prank(address(0x1234));
+        vm.expectRevert(abi.encodeWithSelector(
+            IERC721Drop.Mint_TokenGateNotMet.selector
+        ));
+        zoraNFTBase.purchase(2);
+        
+        dummyToken.mint(address(0x1234), 1);
+
+        vm.prank(address(0x1234));
+        zoraNFTBase.purchase(2);
+        assertEq(
+            zoraNFTBase.balanceOf(address(0x1234)),
+            2,
+            "Balance should be 2"
+        );
+    }
+
+    function test_PurchaseWithERC721TokenGate() public {
+        ERC721PresetMinterPauserAutoId dummyToken = new ERC721PresetMinterPauserAutoId("Dummy", "DUM", "");
+        dummyToken.mint(address(0x1234));
+        bytes[] memory setupCalls = new bytes[](0);
+        zoraNFTBase.initialize({
+            _contractName: "Test NFT",
+            _contractSymbol: "TNFT",
+            _initialOwner: DEFAULT_OWNER_ADDRESS,
+            _fundsRecipient: payable(DEFAULT_FUNDS_RECIPIENT_ADDRESS),
+            _editionSize: 10,
+            _royaltyBPS: 0,
+            _setupCalls: setupCalls,
+            _metadataRenderer: dummyRenderer,
+            _metadataRendererInit: "",
+            _tokenGateToken: address(dummyToken),
+            _tokenGateAmount: 2
+        });
+        vm.prank(DEFAULT_OWNER_ADDRESS);
+        zoraNFTBase.setSaleConfiguration({
+            publicSaleStart: 0,
+            publicSaleEnd: type(uint64).max,
+            presaleStart: 0,
+            presaleEnd: 0,
+            publicSalePrice: 0 ether,
+            maxSalePurchasePerAddress: 2,
+            presaleMerkleRoot: bytes32(0)
+        });
+
+        vm.prank(address(0x1234));
+        vm.expectRevert(abi.encodeWithSelector(
+            IERC721Drop.Mint_TokenGateNotMet.selector
+        ));
+        zoraNFTBase.purchase(2);
+        
+        dummyToken.mint(address(0x1234));
+
+        vm.prank(address(0x1234));
+        zoraNFTBase.purchase(2);
+        assertEq(
+            zoraNFTBase.balanceOf(address(0x1234)),
+            2,
+            "Balance should be 2"
+        );
+    }
+
+    function test_SetTokenGate() public setupZoraNFTBase(10) {
+        vm.prank(DEFAULT_OWNER_ADDRESS);
+        zoraNFTBase.setSaleConfiguration({
+            publicSaleStart: 0,
+            publicSaleEnd: type(uint64).max,
+            presaleStart: 0,
+            presaleEnd: 0,
+            publicSalePrice: 0 ether,
+            maxSalePurchasePerAddress: 2,
+            presaleMerkleRoot: bytes32(0)
+        });
+
+        (address tokenGateToken, uint256 tokenGateAmount) = zoraNFTBase.tokenGate();
+        assertEq(tokenGateToken, address(0));
+        assertEq(tokenGateAmount, 0);
+
+        vm.prank(address(0x1));
+        zoraNFTBase.purchase(2);
+        assertEq(
+            zoraNFTBase.balanceOf(address(0x1)),
+            2
+        );
+
+        ERC20PresetMinterPauser dummyToken = new ERC20PresetMinterPauser("Dummy", "DUM");
+        dummyToken.mint(address(0x1234), 100);
+        vm.prank(DEFAULT_OWNER_ADDRESS);
+        zoraNFTBase.setTokenGate(address(dummyToken), 100);
+    
+        (tokenGateToken, tokenGateAmount) = zoraNFTBase.tokenGate();
+        assertEq(tokenGateToken, address(dummyToken));
+        assertEq(tokenGateAmount, 100);
+
+        vm.prank(address(0x1234));
+        zoraNFTBase.purchase(2);
+        assertEq(
+            zoraNFTBase.balanceOf(address(0x1234)),
+            2
+        );
+    }
+
+    function test_OnlyAdminSetTokenGate() public setupZoraNFTBase(10) {
+        vm.startPrank(address(0xcafecafe));
+        vm.expectRevert(IERC721Drop.Access_OnlyAdmin.selector);
+        zoraNFTBase.setTokenGate(address(0x1234), 100);
+        vm.stopPrank();
     }
 
     function test_OnlyAdminEnableSubscription()

@@ -56,6 +56,8 @@ interface IERC721Drop {
     error Purchase_WrongPrice(uint256 correctPrice);
     /// @notice NFT sold out
     error Mint_SoldOut();
+    /// @notice Token gate not met
+    error Mint_TokenGateNotMet();
     /// @notice Too many purchase for address
     error Purchase_TooManyForAddress();
     /// @notice Too many presale for address
@@ -68,6 +70,8 @@ interface IERC721Drop {
     error Admin_InvalidUpgradeAddress(address proposedAddress);
     /// @notice Unable to finalize an edition not marked as open (size set to uint64_max_value)
     error Admin_UnableToFinalizeNotOpenEdition();
+    /// @notice Invalid token gate
+    error Admin_InvalidTokenGate();
 
     /// @notice Event emitted for each sale
     /// @param to address sale was made to
@@ -168,6 +172,11 @@ interface IERC721Drop {
         uint64 presaleEnd;
         /// @notice Presale merkle root
         bytes32 presaleMerkleRoot;
+    }
+
+    struct TokenGate {
+        address token;
+        uint256 amount;
     }
 
     /// @notice Return value for sales details to use with front-ends

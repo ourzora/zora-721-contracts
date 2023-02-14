@@ -36,6 +36,9 @@ import {FundsReceiver} from "./utils/FundsReceiver.sol";
 import {Version} from "./utils/Version.sol";
 import {PublicMulticall} from "./utils/PublicMulticall.sol";
 import {ERC721DropStorageV1} from "./storage/ERC721DropStorageV1.sol";
+import {ERC721DropStorageV2} from "./storage/ERC721DropStorageV2.sol";
+import {ITokenBalance} from "./interfaces/ITokenBalance.sol";
+
 
 /**
  * @notice ZORA NFT Base contract for Drops and Editions
@@ -56,8 +59,9 @@ contract ERC721Drop is
     PublicMulticall,
     OwnableSkeleton,
     FundsReceiver,
-    Version(10),
-    ERC721DropStorageV1
+    Version(11),
+    ERC721DropStorageV1,
+    ERC721DropStorageV2
 {
     /// @dev This is the max mint batch size for the optimized ERC721A mint contract
     uint256 internal immutable MAX_MINT_BATCH_SIZE = 8;
@@ -112,6 +116,14 @@ contract ERC721Drop is
     modifier canMintTokens(uint256 quantity) {
         if (quantity + _totalMinted() > config.editionSize) {
             revert Mint_SoldOut();
+        }
+
+        _;
+    }
+
+    modifier passesTokenGate() {
+        if (tokenGate.token != address(0) && ITokenBalance(tokenGate.token).balanceOf(_msgSender()) < tokenGate.amount) {
+            revert Mint_TokenGateNotMet();
         }
 
         _;
@@ -192,7 +204,9 @@ contract ERC721Drop is
         uint16 _royaltyBPS,
         bytes[] calldata _setupCalls,
         IMetadataRenderer _metadataRenderer,
-        bytes memory _metadataRendererInit
+        bytes memory _metadataRendererInit,
+        address _tokenGateToken,
+        uint256 _tokenGateAmount
     ) public initializer {
         // Setup ERC721A
         __ERC721A_init(_contractName, _contractSymbol);
@@ -218,12 +232,28 @@ contract ERC721Drop is
             revert Setup_RoyaltyPercentageTooHigh(MAX_ROYALTY_BPS);
         }
 
+        _setTokenGate(_tokenGateToken, _tokenGateAmount);
+
         // Setup config variables
         config.editionSize = _editionSize;
         config.metadataRenderer = _metadataRenderer;
         config.royaltyBPS = _royaltyBPS;
         config.fundsRecipient = _fundsRecipient;
         _metadataRenderer.initializeWithData(_metadataRendererInit);
+    }
+
+    function _setTokenGate(address _tokenGateToken, uint256 _tokenGateAmount) internal {
+        if ((_tokenGateToken != address(0) && _tokenGateAmount == 0) || (_tokenGateToken == address(0) && _tokenGateAmount != 0)) {
+            revert Admin_InvalidTokenGate();
+        }
+        tokenGate = TokenGate({
+            token: _tokenGateToken,
+            amount: _tokenGateAmount
+        });
+    }
+
+    function setTokenGate(address _tokenGateToken, uint256 _tokenGateAmount) external onlyAdmin {
+        _setTokenGate(_tokenGateToken, _tokenGateAmount);
     }
 
     /// @dev Getter for admin role associated with the contract to handle metadata
@@ -427,6 +457,7 @@ contract ERC721Drop is
         payable
         nonReentrant
         canMintTokens(quantity)
+        passesTokenGate
         onlyPublicSaleActive
         returns (uint256)
     {
@@ -551,6 +582,7 @@ contract ERC721Drop is
         payable
         nonReentrant
         canMintTokens(quantity)
+        passesTokenGate
         onlyPresaleActive
         returns (uint256)
     {

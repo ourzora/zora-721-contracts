@@ -13,7 +13,7 @@ import {IMetadataRenderer} from "./interfaces/IMetadataRenderer.sol";
 import {ERC721Drop} from "./ERC721Drop.sol";
 
 /// @notice Zora NFT Creator V1
-contract ZoraNFTCreatorV1 is OwnableUpgradeable, UUPSUpgradeable, Version(6) {
+contract ZoraNFTCreatorV1 is OwnableUpgradeable, UUPSUpgradeable, Version(7) {
     string private constant CANNOT_BE_ZERO = "Cannot be 0 address";
 
     /// @notice Emitted when a edition is created reserving the corresponding token IDs.
@@ -76,7 +76,9 @@ contract ZoraNFTCreatorV1 is OwnableUpgradeable, UUPSUpgradeable, Version(6) {
         address payable fundsRecipient,
         bytes[] memory setupCalls,
         IMetadataRenderer metadataRenderer,
-        bytes memory metadataInitializer
+        bytes memory metadataInitializer,
+        address tokenGateToken,
+        uint256 tokenGateAmount
     ) public returns (address payable newDropAddress) {
         ERC721DropProxy newDrop = new ERC721DropProxy(implementation, "");
 
@@ -90,7 +92,9 @@ contract ZoraNFTCreatorV1 is OwnableUpgradeable, UUPSUpgradeable, Version(6) {
             _royaltyBPS: royaltyBPS,
             _setupCalls: setupCalls,
             _metadataRenderer: metadataRenderer,
-            _metadataRendererInit: metadataInitializer
+            _metadataRendererInit: metadataInitializer,
+            _tokenGateToken: tokenGateToken,
+            _tokenGateAmount: tokenGateAmount
         });
     }
 
@@ -165,7 +169,9 @@ contract ZoraNFTCreatorV1 is OwnableUpgradeable, UUPSUpgradeable, Version(6) {
             royaltyBPS: royaltyBPS,
             setupCalls: setupData,
             metadataRenderer: metadataRenderer,
-            metadataInitializer: metadataInitializer
+            metadataInitializer: metadataInitializer,
+            tokenGateToken: address(0),
+            tokenGateAmount: 0
         });
 
         emit CreatedDrop({

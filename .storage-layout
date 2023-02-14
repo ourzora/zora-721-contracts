@@ -30,6 +30,7 @@
 | config                | struct IERC721Drop.Configuration                              | 352  | 0      | 64    | src/ERC721Drop.sol:ERC721Drop |
 | salesConfig           | struct IERC721Drop.SalesConfiguration                         | 354  | 0      | 96    | src/ERC721Drop.sol:ERC721Drop |
 | presaleMintsByAddress | mapping(address => uint256)                                   | 357  | 0      | 32    | src/ERC721Drop.sol:ERC721Drop |
+| tokenGate             | struct IERC721Drop.TokenGate                                  | 358  | 0      | 64    | src/ERC721Drop.sol:ERC721Drop |
 
 =======================
 ➡ ERC721DropProxy

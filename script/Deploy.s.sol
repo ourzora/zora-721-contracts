@@ -9,7 +9,6 @@ import {ERC721Drop} from "../src/ERC721Drop.sol";
 import {ERC721DropProxy} from "../src/ERC721DropProxy.sol";
 import {ZoraNFTCreatorV1} from "../src/ZoraNFTCreatorV1.sol";
 import {ZoraNFTCreatorProxy} from "../src/ZoraNFTCreatorProxy.sol";
-import {ZoraFeeManager} from "../src/ZoraFeeManager.sol";
 import {IOperatorFilterRegistry} from "../src/interfaces/IOperatorFilterRegistry.sol";
 import {OwnedSubscriptionManager} from "../src/filter/OwnedSubscriptionManager.sol";
 import {FactoryUpgradeGate} from "../src/FactoryUpgradeGate.sol";
@@ -33,7 +32,6 @@ contract Deploy is Script {
         console2.log("Setup operators ---");
 
         console2.log("Setup contracts ---");
-        ZoraFeeManager feeManager = new ZoraFeeManager(500, managementOwner);
         DropMetadataRenderer dropMetadata = new DropMetadataRenderer();
         EditionMetadataRenderer editionMetadata = new EditionMetadataRenderer();
         FactoryUpgradeGate factoryUpgradeGate = new FactoryUpgradeGate(
@@ -41,7 +39,6 @@ contract Deploy is Script {
         );
 
         ERC721Drop dropImplementation = new ERC721Drop({
-            _zoraFeeManager: feeManager,
             _zoraERC721TransferHelper: address(0x0),
             _factoryUpgradeGate: factoryUpgradeGate,
             _marketFilterDAOAddress: address(daoFilterMarketAddress)

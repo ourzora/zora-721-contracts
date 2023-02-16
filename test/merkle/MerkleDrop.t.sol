@@ -4,7 +4,6 @@ pragma solidity ^0.8.10;
 import {Test} from "forge-std/Test.sol";
 import {IERC721Drop} from "../../src/interfaces/IERC721Drop.sol";
 import {ERC721Drop} from "../../src/ERC721Drop.sol";
-import {ZoraFeeManager} from "../../src/ZoraFeeManager.sol";
 import {DummyMetadataRenderer} from "../utils/DummyMetadataRenderer.sol";
 import {FactoryUpgradeGate} from "../../src/FactoryUpgradeGate.sol";
 import {ERC721DropProxy} from "../../src/ERC721DropProxy.sol";
@@ -14,7 +13,6 @@ import {MerkleData} from "./MerkleData.sol";
 contract ZoraNFTBaseTest is Test {
     ERC721Drop zoraNFTBase;
     DummyMetadataRenderer public dummyRenderer = new DummyMetadataRenderer();
-    ZoraFeeManager public feeManager;
     MerkleData public merkleData;
     address public constant DEFAULT_OWNER_ADDRESS = address(0x23499);
     address payable public constant DEFAULT_FUNDS_RECIPIENT_ADDRESS =
@@ -42,12 +40,9 @@ contract ZoraNFTBaseTest is Test {
 
     function setUp() public {
         vm.prank(DEFAULT_ZORA_DAO_ADDRESS);
-        feeManager = new ZoraFeeManager(250, DEFAULT_ZORA_DAO_ADDRESS);
-        vm.prank(DEFAULT_ZORA_DAO_ADDRESS);
 
         address impl = address(
             new ERC721Drop(
-                feeManager,
                 address(1234),
                 FactoryUpgradeGate(address(0)),
                 address(0)

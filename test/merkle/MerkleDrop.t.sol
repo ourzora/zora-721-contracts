@@ -77,10 +77,11 @@ contract ZoraNFTBaseTest is Test {
         MerkleData.MerkleEntry memory item;
 
         item = merkleData.getTestSetByName("test-3-addresses").entries[0];
+        (, uint256 fee) = zoraNFTBase.zoraFeeForAmount(1);
         vm.deal(address(item.user), 1 ether);
         vm.startPrank(address(item.user));
 
-        zoraNFTBase.purchasePresale{value: item.mintPrice}(
+        zoraNFTBase.purchasePresale{value: item.mintPrice + fee}(
             1,
             item.maxMint,
             item.mintPrice,
@@ -97,7 +98,7 @@ contract ZoraNFTBaseTest is Test {
         item = merkleData.getTestSetByName("test-3-addresses").entries[1];
         vm.deal(address(item.user), 1 ether);
         vm.startPrank(address(item.user));
-        zoraNFTBase.purchasePresale{value: item.mintPrice * 2}(
+        zoraNFTBase.purchasePresale{value: (item.mintPrice + fee) * 2}(
             2,
             item.maxMint,
             item.mintPrice,
@@ -130,13 +131,14 @@ contract ZoraNFTBaseTest is Test {
         MerkleData.MerkleEntry memory item;
 
         item = merkleData.getTestSetByName("test-3-addresses").entries[0];
+        (, uint256 fee) = zoraNFTBase.zoraFeeForAmount(1);
         vm.deal(address(item.user), 1 ether);
         vm.startPrank(address(item.user));
 
         vm.expectRevert(
             abi.encodeWithSelector(
                 IERC721Drop.Purchase_WrongPrice.selector,
-                item.mintPrice
+                item.mintPrice + fee
             )
         );
         zoraNFTBase.purchasePresale{value: item.mintPrice - 1}(
@@ -200,6 +202,8 @@ contract ZoraNFTBaseTest is Test {
         });
         vm.stopPrank();
 
+        (, uint256 fee) = zoraNFTBase.zoraFeeForAmount(1);
+
         MerkleData.MerkleEntry memory item;
 
         item = merkleData.getTestSetByName("test-2-prices").entries[0];
@@ -207,20 +211,20 @@ contract ZoraNFTBaseTest is Test {
         vm.startPrank(address(item.user));
 
         vm.expectRevert(IERC721Drop.Presale_TooManyForAddress.selector);
-        zoraNFTBase.purchasePresale{value: item.mintPrice * 3}(
+        zoraNFTBase.purchasePresale{value: (item.mintPrice + fee) * 3}(
             3,
             item.maxMint,
             item.mintPrice,
             item.proof
         );
 
-        zoraNFTBase.purchasePresale{value: item.mintPrice * 1}(
+        zoraNFTBase.purchasePresale{value: (item.mintPrice + fee) * 1}(
             1,
             item.maxMint,
             item.mintPrice,
             item.proof
         );
-        zoraNFTBase.purchasePresale{value: item.mintPrice * 1}(
+        zoraNFTBase.purchasePresale{value: (item.mintPrice + fee) * 1}(
             1,
             item.maxMint,
             item.mintPrice,
@@ -233,20 +237,20 @@ contract ZoraNFTBaseTest is Test {
         );
 
         vm.expectRevert(IERC721Drop.Presale_TooManyForAddress.selector);
-        zoraNFTBase.purchasePresale{value: item.mintPrice * 1}(
+        zoraNFTBase.purchasePresale{value: (item.mintPrice + fee) * 1}(
             1,
             item.maxMint,
             item.mintPrice,
             item.proof
         );
 
-        zoraNFTBase.purchase{value: 0.1 ether}(1);
+        zoraNFTBase.purchase{value: 0.1 ether + fee}(1);
         require(
             zoraNFTBase.ownerOf(3) == address(item.user),
             "owner is wrong for new minted token"
         );
         vm.expectRevert(IERC721Drop.Purchase_TooManyForAddress.selector);
-        zoraNFTBase.purchase{value: 0.1 ether}(1);
+        zoraNFTBase.purchase{value: 0.1 ether + fee}(1);
         vm.stopPrank();
     }
 

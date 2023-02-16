@@ -70,9 +70,10 @@ contract ZoraNFTCreatorV1Test is Test {
             "image"
         );
         ERC721Drop drop = ERC721Drop(payable(deployedEdition));
+        (, uint256 fee) = drop.zoraFeeForAmount(10);
         vm.startPrank(DEFAULT_FUNDS_RECIPIENT_ADDRESS);
-        vm.deal(DEFAULT_FUNDS_RECIPIENT_ADDRESS, 10 ether);
-        drop.purchase{value: 1 ether}(10);
+        vm.deal(DEFAULT_FUNDS_RECIPIENT_ADDRESS, 10 ether + fee);
+        drop.purchase{value: 1 ether + fee}(10);
         assertEq(drop.totalSupply(), 10);
     }
 
@@ -97,7 +98,8 @@ contract ZoraNFTCreatorV1Test is Test {
             "metadata_contract_uri"
         );
         ERC721Drop drop = ERC721Drop(payable(deployedDrop));
-        drop.purchase(10);
+        (, uint256 fee) = drop.zoraFeeForAmount(10);
+        drop.purchase{value: fee}(10);
         assertEq(drop.totalSupply(), 10);
     }
 
@@ -132,7 +134,8 @@ contract ZoraNFTCreatorV1Test is Test {
         );
         drop.tokenURI(1);
         assertEq(drop.contractURI(), "DEMO");
-        drop.purchase(1);
+        (, uint256 fee) = drop.zoraFeeForAmount(1);
+        drop.purchase{value: fee}(1);
         assertEq(drop.tokenURI(1), "DEMO");
     }
 }

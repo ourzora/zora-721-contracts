@@ -438,8 +438,8 @@ contract ERC721Drop is
     {
         uint256 salePrice = salesConfig.publicSalePrice;
 
-        if (msg.value != salePrice * quantity) {
-            revert Purchase_WrongPrice(salePrice * quantity);
+        if (msg.value != (salePrice + ZORA_MINT_FEE) * quantity) {
+            revert Purchase_WrongPrice((salePrice + ZORA_MINT_FEE) * quantity);
         }
 
         // If max purchase per address == 0 there is no limit.
@@ -456,6 +456,8 @@ contract ERC721Drop is
 
         _mintNFTs(_msgSender(), quantity);
         uint256 firstMintedTokenId = _lastMintedTokenId() - quantity;
+
+        _payoutZoraFee(quantity);
 
         emit IERC721Drop.Sale({
             to: _msgSender(),
@@ -573,8 +575,10 @@ contract ERC721Drop is
             revert Presale_MerkleNotApproved();
         }
 
-        if (msg.value != pricePerToken * quantity) {
-            revert Purchase_WrongPrice(pricePerToken * quantity);
+        if (msg.value != (pricePerToken + ZORA_MINT_FEE) * quantity) {
+            revert Purchase_WrongPrice(
+                (pricePerToken + ZORA_MINT_FEE) * quantity
+            );
         }
 
         presaleMintsByAddress[_msgSender()] += quantity;
@@ -584,6 +588,8 @@ contract ERC721Drop is
 
         _mintNFTs(_msgSender(), quantity);
         uint256 firstMintedTokenId = _lastMintedTokenId() - quantity;
+
+        _payoutZoraFee(quantity);
 
         emit IERC721Drop.Sale({
             to: _msgSender(),
@@ -1172,6 +1178,14 @@ contract ERC721Drop is
                 totalMinted + _startTokenId()
             );
         }
+    }
+
+    function _payoutZoraFee(uint256 quantity) internal {
+        // Transfer ZORA fee to recipient
+        (, uint256 zoraFee) = zoraFeeForAmount(quantity);
+        ZORA_MINT_FEE_RECIPIENT.call{value: zoraFee, gas: FUNDS_SEND_GAS_LIMIT}(
+            ""
+        );
     }
 
     /// @notice ERC165 supports interface

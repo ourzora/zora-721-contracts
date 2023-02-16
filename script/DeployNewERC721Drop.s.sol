@@ -43,6 +43,9 @@ contract DeployNewERC721Drop is Script {
         address ownedSubscriptionManager = _getKey(
             "OWNED_SUBSCRIPTION_MANAGER"
         );
+        console2.log("OWNED_SUB_MANAGER");
+        console2.log(ownedSubscriptionManager);
+        console2.log("FACTORY_UPGRADE_GATE", factoryUpgradeGate);
 
         address editionMetadataRenderer = _getKey("EDITION_METADATA_RENDERER");
         address dropMetadataRenderer = _getKey("DROP_METADATA_RENDERER");
@@ -67,12 +70,10 @@ contract DeployNewERC721Drop is Script {
             ),
             _dropMetadataRenderer: DropMetadataRenderer(dropMetadataRenderer)
         });
+        // zoraNFTCreator.initialize();
 
         console2.log("Factory/Creator IMPL: ");
         console2.log(address(zoraNFTCreator));
-
-        // make new proxy for verification purposes
-        // new ERC721DropProxy(address(dropImplementation), "");
 
         // Next steps:
         // 1. Setup upgrade path

@@ -165,6 +165,8 @@ contract ERC721Drop is
     /// @param _zoraERC721TransferHelper Transfer helper
     /// @param _factoryUpgradeGate Factory upgrade gate address
     /// @param _marketFilterDAOAddress Market filter DAO address
+    /// @param _factoryUpgradeGate Factory upgrade gate address
+    /// @param _marketFilterDAOAddress Market filter DAO address
     constructor(
         address _zoraERC721TransferHelper,
         IFactoryUpgradeGate _factoryUpgradeGate,

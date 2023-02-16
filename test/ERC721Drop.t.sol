@@ -490,7 +490,7 @@ contract ERC721DropTest is Test {
             );
         assertTrue(!saleActive);
         assertTrue(!presaleActive);
-        assertEq(publicSalePrice, 0);
+        assertEq(publicSalePrice, mintFee);
         uint256 firstMintedId = abi.decode(results[0], (uint256));
         uint256 secondMintedId = abi.decode(results[1], (uint256));
         assertEq(firstMintedId, 5);
@@ -526,7 +526,7 @@ contract ERC721DropTest is Test {
 
         assertTrue(saleDetails.publicSaleActive);
         assertTrue(!saleDetails.presaleActive);
-        assertEq(saleDetails.publicSalePrice, 0.1 ether);
+        assertEq(saleDetails.publicSalePrice, 0.1 ether + mintFee);
         uint256 firstMintedId = abi.decode(results[1], (uint256));
         uint256 secondMintedId = abi.decode(results[2], (uint256));
         assertEq(firstMintedId, 3);
@@ -567,9 +567,10 @@ contract ERC721DropTest is Test {
     function test_Withdraw(uint128 amount) public setupZoraNFTBase(10) {
         vm.assume(amount > 0.01 ether);
         vm.deal(address(zoraNFTBase), amount);
+        uint256 leftoverFunds = amount;
+
         vm.prank(DEFAULT_OWNER_ADDRESS);
         vm.expectEmit(true, true, true, true);
-        uint256 leftoverFunds = amount;
         emit FundsWithdrawn(
             DEFAULT_OWNER_ADDRESS,
             DEFAULT_FUNDS_RECIPIENT_ADDRESS,
@@ -579,22 +580,7 @@ contract ERC721DropTest is Test {
         );
         zoraNFTBase.withdraw();
 
-        (address recipient, uint256 fee) = zoraNFTBase.zoraFeeForAmount(amount);
-        assertEq(fee, 0);
-        assertEq(recipient, payable(address(0)));
-
-        assertTrue(
-            DEFAULT_ZORA_DAO_ADDRESS.balance <
-                ((uint256(amount) * 1_000 * 5) / 100000) + 2 ||
-                DEFAULT_ZORA_DAO_ADDRESS.balance >
-                ((uint256(amount) * 1_000 * 5) / 100000) + 2
-        );
-        assertTrue(
-            DEFAULT_FUNDS_RECIPIENT_ADDRESS.balance >
-                ((uint256(amount) * 1_000 * 95) / 100000) - 2 ||
-                DEFAULT_FUNDS_RECIPIENT_ADDRESS.balance <
-                ((uint256(amount) * 1_000 * 95) / 100000) + 2
-        );
+        assertEq(DEFAULT_FUNDS_RECIPIENT_ADDRESS.balance, amount);
     }
 
     function test_WithdrawNoZoraFee(

@@ -1185,9 +1185,10 @@ contract ERC721Drop is
     function _payoutZoraFee(uint256 quantity) internal {
         // Transfer ZORA fee to recipient
         (, uint256 zoraFee) = zoraFeeForAmount(quantity);
-        ZORA_MINT_FEE_RECIPIENT.call{value: zoraFee, gas: FUNDS_SEND_GAS_LIMIT}(
+        (bool success, ) = ZORA_MINT_FEE_RECIPIENT.call{value: zoraFee, gas: FUNDS_SEND_GAS_LIMIT}(
             ""
         );
+        emit MintFeePayout(zoraFee, ZORA_MINT_FEE_RECIPIENT, success);
     }
 
     /// @notice ERC165 supports interface

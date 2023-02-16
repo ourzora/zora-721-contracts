@@ -71,6 +71,12 @@ interface IERC721Drop {
     /// @notice Unable to finalize an edition not marked as open (size set to uint64_max_value)
     error Admin_UnableToFinalizeNotOpenEdition();
 
+    /// @notice Event emitted for mint fee payout
+    /// @param mintFeeAmount amount of the mint fee
+    /// @param mintFeeRecipient recipient of the mint fee
+    /// @param success if the payout succeeded
+    event MintFeePayout(uint256 mintFeeAmount, address mintFeeRecipient, bool success);
+
     /// @notice Event emitted for each sale
     /// @param to address sale was made to
     /// @param quantity quantity of the minted nfts

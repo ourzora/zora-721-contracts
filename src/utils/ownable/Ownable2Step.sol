@@ -66,7 +66,11 @@ abstract contract Ownable2Step is IOwnable2Step {
 
     /// @notice Forces an ownership transfer from the last owner
     /// @param _newOwner The new owner address
-    function transferOwnership(address _newOwner) public notZeroAddress(_newOwner) onlyOwner {
+    function transferOwnership(address _newOwner)
+        public
+        notZeroAddress(_newOwner)
+        onlyOwner
+    {
         _transferOwnership(_newOwner);
     }
 
@@ -85,7 +89,11 @@ abstract contract Ownable2Step is IOwnable2Step {
 
     /// @notice Initiates a two-step ownership transfer
     /// @param _newOwner The new owner address
-    function safeTransferOwnership(address _newOwner) public notZeroAddress(_newOwner) onlyOwner {
+    function safeTransferOwnership(address _newOwner)
+        public
+        notZeroAddress(_newOwner)
+        onlyOwner
+    {
         _pendingOwner = _newOwner;
 
         emit OwnerPending(_owner, _newOwner);

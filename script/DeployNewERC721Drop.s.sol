@@ -46,6 +46,10 @@ contract DeployNewERC721Drop is Script {
 
         address editionMetadataRenderer = _getKey("EDITION_METADATA_RENDERER");
         address dropMetadataRenderer = _getKey("DROP_METADATA_RENDERER");
+        uint256 mintFeeAmount = vm.envUint("MINT_FEE_AMOUNT");
+        address payable mintFeeRecipient = payable(
+            vm.envAddress("MINT_FEE_RECIPIENT")
+        );
 
         vm.startBroadcast();
 
@@ -54,7 +58,9 @@ contract DeployNewERC721Drop is Script {
         ERC721Drop dropImplementation = new ERC721Drop({
             _zoraERC721TransferHelper: zoraERC721TransferHelper,
             _factoryUpgradeGate: IFactoryUpgradeGate(factoryUpgradeGate),
-            _marketFilterDAOAddress: ownedSubscriptionManager
+            _marketFilterDAOAddress: ownedSubscriptionManager,
+            _mintFeeAmount: mintFeeAmount,
+            _mintFeeRecipient: mintFeeRecipient
         });
 
         console2.log("Drop IMPL: ");

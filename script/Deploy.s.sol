@@ -33,6 +33,11 @@ contract Deploy is Script {
             "FACTORY_UPGRADE_GATE_OWNER"
         );
 
+        uint256 mintFeeAmount = vm.envUint("MINT_FEE_AMOUNT");
+        address payable mintFeeRecipient = payable(
+            vm.envAddress("MINT_FEE_RECIPIENT")
+        );
+
         console2.log("Setup contracts ---");
         DropMetadataRenderer dropMetadata = new DropMetadataRenderer();
         EditionMetadataRenderer editionMetadata = new EditionMetadataRenderer();
@@ -43,7 +48,9 @@ contract Deploy is Script {
         ERC721Drop dropImplementation = new ERC721Drop({
             _zoraERC721TransferHelper: address(0x0),
             _factoryUpgradeGate: factoryUpgradeGate,
-            _marketFilterDAOAddress: address(daoFilterMarketAddress)
+            _marketFilterDAOAddress: address(daoFilterMarketAddress),
+            _mintFeeAmount: mintFeeAmount,
+            _mintFeeRecipient: mintFeeRecipient
         });
 
         ZoraNFTCreatorV1 factoryImpl = new ZoraNFTCreatorV1(

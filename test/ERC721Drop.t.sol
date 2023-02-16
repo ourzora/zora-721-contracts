@@ -44,6 +44,8 @@ contract ERC721DropTest is Test {
     address public constant mediaContract = address(0x123456);
     address public impl;
     address public ownedSubscriptionManager;
+    address payable public constant mintFeeRecipient = payable(address(0x11));
+    uint256 public constant mintFee = 777000000000000; // 0.000777 ETH
 
     struct Configuration {
         IMetadataRenderer metadataRenderer;
@@ -82,7 +84,13 @@ contract ERC721DropTest is Test {
 
         vm.prank(DEFAULT_ZORA_DAO_ADDRESS);
         impl = address(
-            new ERC721Drop(address(0x1234), factoryUpgradeGate, address(0x0))
+            new ERC721Drop(
+                address(0x1234),
+                factoryUpgradeGate,
+                address(0x0),
+                mintFee,
+                mintFeeRecipient
+            )
         );
         address payable newDrop = payable(
             address(new ERC721DropProxy(impl, ""))
@@ -96,7 +104,9 @@ contract ERC721DropTest is Test {
             new ERC721Drop(
                 address(0x1234),
                 factoryUpgradeGate,
-                address(subscriptionAddress)
+                address(subscriptionAddress),
+                mintFee,
+                mintFeeRecipient
             )
         );
         address payable newDrop = payable(
@@ -297,7 +307,13 @@ contract ERC721DropTest is Test {
 
     function test_UpgradeApproved() public setupZoraNFTBase(10) {
         address newImpl = address(
-            new ERC721Drop(address(0x3333), factoryUpgradeGate, address(0x0))
+            new ERC721Drop(
+                address(0x3333),
+                factoryUpgradeGate,
+                address(0x0),
+                mintFee,
+                mintFeeRecipient
+            )
         );
 
         address[] memory lastImpls = new address[](1);
@@ -313,7 +329,13 @@ contract ERC721DropTest is Test {
 
     function test_UpgradeFailsNotApproved() public setupZoraNFTBase(10) {
         address newImpl = address(
-            new ERC721Drop(address(0x3333), factoryUpgradeGate, address(0x0))
+            new ERC721Drop(
+                address(0x3333),
+                factoryUpgradeGate,
+                address(0x0),
+                mintFee,
+                mintFeeRecipient
+            )
         );
 
         vm.prank(DEFAULT_OWNER_ADDRESS);
@@ -575,10 +597,9 @@ contract ERC721DropTest is Test {
         );
     }
 
-    function test_WithdrawNoZoraFee(uint128 amount)
-        public
-        setupZoraNFTBase(10)
-    {
+    function test_WithdrawNoZoraFee(
+        uint128 amount
+    ) public setupZoraNFTBase(10) {
         vm.assume(amount > 0.01 ether);
 
         address payable fundsRecipientTarget = payable(address(0x0));
@@ -676,10 +697,9 @@ contract ERC721DropTest is Test {
         assertEq(presaleStartLookup2, 100);
     }
 
-    function test_GlobalLimit(uint16 limit)
-        public
-        setupZoraNFTBase(uint64(limit))
-    {
+    function test_GlobalLimit(
+        uint16 limit
+    ) public setupZoraNFTBase(uint64(limit)) {
         vm.assume(limit > 0);
         vm.startPrank(DEFAULT_OWNER_ADDRESS);
         zoraNFTBase.adminMint(DEFAULT_OWNER_ADDRESS, limit);

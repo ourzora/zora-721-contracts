@@ -15,6 +15,8 @@ contract ZoraNFTCreatorV1Test is Test {
         payable(address(0x21303));
     address payable public constant DEFAULT_ZORA_DAO_ADDRESS =
         payable(address(0x999));
+    address payable public constant mintFeeRecipient = payable(address(0x1234));
+    uint256 public constant mintFee = 0.000777 ether;
     ERC721Drop public dropImpl;
     ZoraNFTCreatorV1 public creator;
     EditionMetadataRenderer public editionMetadataRenderer;
@@ -25,7 +27,9 @@ contract ZoraNFTCreatorV1Test is Test {
         dropImpl = new ERC721Drop(
             address(1234),
             FactoryUpgradeGate(address(0)),
-            address(0)
+            address(0),
+            mintFee,
+            mintFeeRecipient
         );
         editionMetadataRenderer = new EditionMetadataRenderer();
         dropMetadataRenderer = new DropMetadataRenderer();

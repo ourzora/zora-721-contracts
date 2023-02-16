@@ -20,6 +20,8 @@ contract ZoraNFTBaseTest is Test {
     address payable public constant DEFAULT_ZORA_DAO_ADDRESS =
         payable(address(0x999));
     address public constant mediaContract = address(0x123456);
+    address payable public constant mintFeeRecipient = payable(address(0x1234));
+    uint256 public constant mintFee = 0.000777 ether;
 
     modifier setupZoraNFTBase() {
         bytes[] memory setupCalls = new bytes[](0);
@@ -45,7 +47,9 @@ contract ZoraNFTBaseTest is Test {
             new ERC721Drop(
                 address(1234),
                 FactoryUpgradeGate(address(0)),
-                address(0)
+                address(0),
+                mintFee,
+                mintFeeRecipient
             )
         );
         address payable newDrop = payable(

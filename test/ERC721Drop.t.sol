@@ -605,8 +605,6 @@ contract ERC721DropTest is Test {
 
         address payable fundsRecipientTarget = payable(address(0x0));
 
-        address payable fundsRecipientTarget = payable(address(0x0));
-
         vm.prank(DEFAULT_OWNER_ADDRESS);
         zoraNFTBase.setFundsRecipient(fundsRecipientTarget);
 
@@ -617,7 +615,6 @@ contract ERC721DropTest is Test {
             DEFAULT_OWNER_ADDRESS,
             fundsRecipientTarget,
             amount,
-            payable(address(0)),
             payable(address(0)),
             0
         );

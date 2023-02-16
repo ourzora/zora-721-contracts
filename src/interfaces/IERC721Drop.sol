@@ -29,6 +29,8 @@ interface IERC721Drop {
     error Access_WithdrawNotAllowed();
     /// @notice Cannot withdraw funds due to ETH send failure.
     error Withdraw_FundsSendFailure();
+    /// @notice Mint fee send failure
+    error MintFee_FundsSendFailure();
 
     /// @notice Call to external metadata renderer failed.
     error ExternalMetadataRenderer_CallFailed();

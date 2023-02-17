@@ -75,10 +75,10 @@ contract ERC721Drop is
     IFactoryUpgradeGate public immutable factoryUpgradeGate;
 
     /// @notice Zora Mint Fee
-    uint256 public immutable ZORA_MINT_FEE;
+    uint256 private immutable ZORA_MINT_FEE;
 
     /// @notice Mint Fee Recipient
-    address payable public immutable ZORA_MINT_FEE_RECIPIENT;
+    address payable private immutable ZORA_MINT_FEE_RECIPIENT;
 
     /// @notice Max royalty BPS
     uint16 constant MAX_ROYALTY_BPS = 50_00;
@@ -310,7 +310,7 @@ contract ERC721Drop is
             IERC721Drop.SaleDetails({
                 publicSaleActive: _publicSaleActive(),
                 presaleActive: _presaleActive(),
-                publicSalePrice: salesConfig.publicSalePrice + ZORA_MINT_FEE,
+                publicSalePrice: salesConfig.publicSalePrice,
                 publicSaleStart: salesConfig.publicSaleStart,
                 publicSaleEnd: salesConfig.publicSaleEnd,
                 presaleStart: salesConfig.presaleStart,
@@ -1015,7 +1015,7 @@ contract ERC721Drop is
     //                       |                    |                        |             !~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~!
     //                       |                    |                        |             !~[noop]~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~!
     //                       |                    |                        |                            |
-    //                       |                    |                        | send remaining funds amount|
+    //                       |                    |   foundry.toml                     | send remaining funds amount|
     //                       |                    |                        | <---------------------------
     //                       |                    |                        |                            |
     //                       |                    |                        |                            |

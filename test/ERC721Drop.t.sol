@@ -504,7 +504,7 @@ contract ERC721DropTest is Test {
             );
         assertTrue(!saleActive);
         assertTrue(!presaleActive);
-        assertEq(publicSalePrice, mintFee);
+        assertEq(publicSalePrice, 0);
         uint256 firstMintedId = abi.decode(results[0], (uint256));
         uint256 secondMintedId = abi.decode(results[1], (uint256));
         assertEq(firstMintedId, 5);
@@ -540,7 +540,7 @@ contract ERC721DropTest is Test {
 
         assertTrue(saleDetails.publicSaleActive);
         assertTrue(!saleDetails.presaleActive);
-        assertEq(saleDetails.publicSalePrice, 0.1 ether + mintFee);
+        assertEq(saleDetails.publicSalePrice, 0.1 ether);
         uint256 firstMintedId = abi.decode(results[1], (uint256));
         uint256 secondMintedId = abi.decode(results[2], (uint256));
         assertEq(firstMintedId, 3);

@@ -55,7 +55,7 @@ contract ERC721Drop is
     PublicMulticall,
     OwnableSkeleton,
     FundsReceiver,
-    Version(10),
+    Version(11),
     ERC721DropStorageV1
 {
     /// @dev This is the max mint batch size for the optimized ERC721A mint contract
@@ -73,6 +73,12 @@ contract ERC721Drop is
 
     /// @dev Factory upgrade gate
     IFactoryUpgradeGate public immutable factoryUpgradeGate;
+
+    /// @notice Zora Mint Fee
+    uint256 private immutable ZORA_MINT_FEE;
+
+    /// @notice Mint Fee Recipient
+    address payable private immutable ZORA_MINT_FEE_RECIPIENT;
 
     /// @notice Max royalty BPS
     uint16 constant MAX_ROYALTY_BPS = 50_00;
@@ -159,14 +165,20 @@ contract ERC721Drop is
     /// @param _zoraERC721TransferHelper Transfer helper
     /// @param _factoryUpgradeGate Factory upgrade gate address
     /// @param _marketFilterDAOAddress Market filter DAO address
+    /// @param _factoryUpgradeGate Factory upgrade gate address
+    /// @param _marketFilterDAOAddress Market filter DAO address
     constructor(
         address _zoraERC721TransferHelper,
         IFactoryUpgradeGate _factoryUpgradeGate,
-        address _marketFilterDAOAddress
+        address _marketFilterDAOAddress,
+        uint256 _mintFeeAmount,
+        address payable _mintFeeRecipient
     ) initializer {
         zoraERC721TransferHelper = _zoraERC721TransferHelper;
         factoryUpgradeGate = _factoryUpgradeGate;
         marketFilterDAOAddress = _marketFilterDAOAddress;
+        ZORA_MINT_FEE = _mintFeeAmount;
+        ZORA_MINT_FEE_RECIPIENT = _mintFeeRecipient;
     }
 
     ///  @dev Create a new drop contract
@@ -343,15 +355,15 @@ contract ERC721Drop is
         return super.isApprovedForAll(nftOwner, operator);
     }
 
-    /// @notice Deprecated: no withdraw fees
+    /// @notice ZORA fee is fixed now per mint
     /// @dev Gets the zora fee for amount of withdraw
-    function zoraFeeForAmount(uint256)
+    function zoraFeeForAmount(uint256 quantity)
         public
-        pure
+        view
         returns (address payable recipient, uint256 fee)
     {
-        recipient = payable(address(0));
-        fee = 0;
+        recipient = ZORA_MINT_FEE_RECIPIENT;
+        fee = ZORA_MINT_FEE * quantity;
     }
 
     /**
@@ -428,8 +440,8 @@ contract ERC721Drop is
     {
         uint256 salePrice = salesConfig.publicSalePrice;
 
-        if (msg.value != salePrice * quantity) {
-            revert Purchase_WrongPrice(salePrice * quantity);
+        if (msg.value != (salePrice + ZORA_MINT_FEE) * quantity) {
+            revert Purchase_WrongPrice((salePrice + ZORA_MINT_FEE) * quantity);
         }
 
         // If max purchase per address == 0 there is no limit.
@@ -446,6 +458,8 @@ contract ERC721Drop is
 
         _mintNFTs(_msgSender(), quantity);
         uint256 firstMintedTokenId = _lastMintedTokenId() - quantity;
+
+        _payoutZoraFee(quantity);
 
         emit IERC721Drop.Sale({
             to: _msgSender(),
@@ -563,8 +577,10 @@ contract ERC721Drop is
             revert Presale_MerkleNotApproved();
         }
 
-        if (msg.value != pricePerToken * quantity) {
-            revert Purchase_WrongPrice(pricePerToken * quantity);
+        if (msg.value != (pricePerToken + ZORA_MINT_FEE) * quantity) {
+            revert Purchase_WrongPrice(
+                (pricePerToken + ZORA_MINT_FEE) * quantity
+            );
         }
 
         presaleMintsByAddress[_msgSender()] += quantity;
@@ -574,6 +590,8 @@ contract ERC721Drop is
 
         _mintNFTs(_msgSender(), quantity);
         uint256 firstMintedTokenId = _lastMintedTokenId() - quantity;
+
+        _payoutZoraFee(quantity);
 
         emit IERC721Drop.Sale({
             to: _msgSender(),
@@ -644,7 +662,7 @@ contract ERC721Drop is
     ) internal virtual override {
         if (
             from != address(0) && // skip on mints
-            from != msg.sender    // skip on transfers from sender
+            from != msg.sender // skip on transfers from sender
         ) {
             if (
                 !operatorFilterRegistry.isOperatorAllowed(
@@ -997,7 +1015,7 @@ contract ERC721Drop is
     //                       |                    |                        |             !~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~!
     //                       |                    |                        |             !~[noop]~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~!
     //                       |                    |                        |                            |
-    //                       |                    |                        | send remaining funds amount|
+    //                       |                    |   foundry.toml                     | send remaining funds amount|
     //                       |                    |                        | <---------------------------
     //                       |                    |                        |                            |
     //                       |                    |                        |                            |
@@ -1162,6 +1180,15 @@ contract ERC721Drop is
                 totalMinted + _startTokenId()
             );
         }
+    }
+
+    function _payoutZoraFee(uint256 quantity) internal {
+        // Transfer ZORA fee to recipient
+        (, uint256 zoraFee) = zoraFeeForAmount(quantity);
+        (bool success, ) = ZORA_MINT_FEE_RECIPIENT.call{value: zoraFee, gas: FUNDS_SEND_GAS_LIMIT}(
+            ""
+        );
+        emit MintFeePayout(zoraFee, ZORA_MINT_FEE_RECIPIENT, success);
     }
 
     /// @notice ERC165 supports interface

@@ -53,10 +53,10 @@ contract DropMetadataRenderer is IMetadataRenderer, MetadataRenderAdminCheck {
     /// @notice Update the provenance hash (optional) for a given nft
     /// @param target target address to update
     /// @param provenanceHash provenance hash to set
-    function updateProvenanceHash(address target, bytes32 provenanceHash)
-        external
-        requireSenderAdmin(target)
-    {
+    function updateProvenanceHash(
+        address target,
+        bytes32 provenanceHash
+    ) external requireSenderAdmin(target) {
         provenanceHashes[target] = provenanceHash;
         emit ProvenanceHashUpdated(target, provenanceHash);
     }
@@ -135,12 +135,9 @@ contract DropMetadataRenderer is IMetadataRenderer, MetadataRenderAdminCheck {
     /// @notice A token URI for the given drops contract
     /// @dev reverts if a contract uri is not set
     /// @return token URI for the given token ID and contract (set by msg.sender)
-    function tokenURI(uint256 tokenId)
-        external
-        view
-        override
-        returns (string memory)
-    {
+    function tokenURI(
+        uint256 tokenId
+    ) external view override returns (string memory) {
         MetadataURIInfo memory info = metadataBaseByContract[msg.sender];
 
         if (bytes(info.base).length == 0) revert();

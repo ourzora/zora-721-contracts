@@ -15,6 +15,8 @@ contract ZoraNFTCreatorV1Test is Test {
         payable(address(0x21303));
     address payable public constant DEFAULT_ZORA_DAO_ADDRESS =
         payable(address(0x999));
+    address payable public constant mintFeeRecipient = payable(address(0x1234));
+    uint256 public constant mintFee = 0.000777 ether;
     ERC721Drop public dropImpl;
     ZoraNFTCreatorV1 public creator;
     EditionMetadataRenderer public editionMetadataRenderer;
@@ -25,7 +27,9 @@ contract ZoraNFTCreatorV1Test is Test {
         dropImpl = new ERC721Drop(
             address(1234),
             FactoryUpgradeGate(address(0)),
-            address(0)
+            address(0),
+            mintFee,
+            mintFeeRecipient
         );
         editionMetadataRenderer = new EditionMetadataRenderer();
         dropMetadataRenderer = new DropMetadataRenderer();
@@ -66,9 +70,10 @@ contract ZoraNFTCreatorV1Test is Test {
             "image"
         );
         ERC721Drop drop = ERC721Drop(payable(deployedEdition));
+        (, uint256 fee) = drop.zoraFeeForAmount(10);
         vm.startPrank(DEFAULT_FUNDS_RECIPIENT_ADDRESS);
-        vm.deal(DEFAULT_FUNDS_RECIPIENT_ADDRESS, 10 ether);
-        drop.purchase{value: 1 ether}(10);
+        vm.deal(DEFAULT_FUNDS_RECIPIENT_ADDRESS, 10 ether + fee);
+        drop.purchase{value: 1 ether + fee}(10);
         assertEq(drop.totalSupply(), 10);
     }
 
@@ -93,7 +98,8 @@ contract ZoraNFTCreatorV1Test is Test {
             "metadata_contract_uri"
         );
         ERC721Drop drop = ERC721Drop(payable(deployedDrop));
-        drop.purchase(10);
+        (, uint256 fee) = drop.zoraFeeForAmount(10);
+        drop.purchase{value: fee}(10);
         assertEq(drop.totalSupply(), 10);
     }
 
@@ -128,7 +134,8 @@ contract ZoraNFTCreatorV1Test is Test {
         );
         drop.tokenURI(1);
         assertEq(drop.contractURI(), "DEMO");
-        drop.purchase(1);
+        (, uint256 fee) = drop.zoraFeeForAmount(1);
+        drop.purchase{value: fee}(1);
         assertEq(drop.tokenURI(1), "DEMO");
     }
 }

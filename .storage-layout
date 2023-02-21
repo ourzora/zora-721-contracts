@@ -49,15 +49,6 @@
 | _validUpgradePaths | mapping(address => mapping(address => bool)) | 2    | 0      | 32    | src/FactoryUpgradeGate.sol:FactoryUpgradeGate |
 
 =======================
-➡ ZoraFeeManager
-=======================
-
-| Name        | Type                        | Slot | Offset | Bytes | Contract                              |
-|-------------|-----------------------------|------|--------|-------|---------------------------------------|
-| _owner      | address                     | 0    | 0      | 20    | src/ZoraFeeManager.sol:ZoraFeeManager |
-| feeOverride | mapping(address => uint256) | 1    | 0      | 32    | src/ZoraFeeManager.sol:ZoraFeeManager |
-
-=======================
 ➡ ZoraNFTCreatorProxy
 =======================
 

@@ -9,7 +9,6 @@ import {ERC721Drop} from "../src/ERC721Drop.sol";
 import {ERC721DropProxy} from "../src/ERC721DropProxy.sol";
 import {ZoraNFTCreatorV1} from "../src/ZoraNFTCreatorV1.sol";
 import {ZoraNFTCreatorProxy} from "../src/ZoraNFTCreatorProxy.sol";
-import {ZoraFeeManager} from "../src/ZoraFeeManager.sol";
 import {IOperatorFilterRegistry} from "../src/interfaces/IOperatorFilterRegistry.sol";
 import {OwnedSubscriptionManager} from "../src/filter/OwnedSubscriptionManager.sol";
 import {FactoryUpgradeGate} from "../src/FactoryUpgradeGate.sol";
@@ -29,22 +28,29 @@ contract Deploy is Script {
         address daoFilterMarketAddress = vm.envAddress(
             "SUBSCRIPTION_MARKET_FILTER_ADDRESS"
         );
-        address managementOwner = vm.envAddress("MANAGAMENT_OWNER_ADDRESS");
-        console2.log("Setup operators ---");
+
+        address factoryUpgradeGateOwner = vm.envAddress(
+            "FACTORY_UPGRADE_GATE_OWNER"
+        );
+
+        uint256 mintFeeAmount = vm.envUint("MINT_FEE_AMOUNT");
+        address payable mintFeeRecipient = payable(
+            vm.envAddress("MINT_FEE_RECIPIENT")
+        );
 
         console2.log("Setup contracts ---");
-        ZoraFeeManager feeManager = new ZoraFeeManager(500, managementOwner);
         DropMetadataRenderer dropMetadata = new DropMetadataRenderer();
         EditionMetadataRenderer editionMetadata = new EditionMetadataRenderer();
         FactoryUpgradeGate factoryUpgradeGate = new FactoryUpgradeGate(
-            managementOwner
+            factoryUpgradeGateOwner
         );
 
         ERC721Drop dropImplementation = new ERC721Drop({
-            _zoraFeeManager: feeManager,
             _zoraERC721TransferHelper: address(0x0),
             _factoryUpgradeGate: factoryUpgradeGate,
-            _marketFilterDAOAddress: address(daoFilterMarketAddress)
+            _marketFilterDAOAddress: address(daoFilterMarketAddress),
+            _mintFeeAmount: mintFeeAmount,
+            _mintFeeRecipient: mintFeeRecipient
         });
 
         ZoraNFTCreatorV1 factoryImpl = new ZoraNFTCreatorV1(

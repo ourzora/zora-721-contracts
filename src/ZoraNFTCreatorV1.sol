@@ -40,7 +40,7 @@ contract ZoraNFTCreatorV1 is OwnableUpgradeable, UUPSUpgradeable, Version(6) {
         address _implementation,
         EditionMetadataRenderer _editionMetadataRenderer,
         DropMetadataRenderer _dropMetadataRenderer
-    ) {
+    ) initializer {
         require(_implementation != address(0), CANNOT_BE_ZERO);
         require(
             address(_editionMetadataRenderer) != address(0),

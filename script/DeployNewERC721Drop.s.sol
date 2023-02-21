@@ -9,7 +9,6 @@ import {ERC721Drop} from "../src/ERC721Drop.sol";
 import {ERC721DropProxy} from "../src/ERC721DropProxy.sol";
 import {ZoraNFTCreatorV1} from "../src/ZoraNFTCreatorV1.sol";
 import {ZoraNFTCreatorProxy} from "../src/ZoraNFTCreatorProxy.sol";
-import {ZoraFeeManager} from "../src/ZoraFeeManager.sol";
 import {IOperatorFilterRegistry} from "../src/interfaces/IOperatorFilterRegistry.sol";
 import {OwnedSubscriptionManager} from "../src/filter/OwnedSubscriptionManager.sol";
 import {FactoryUpgradeGate} from "../src/FactoryUpgradeGate.sol";
@@ -37,7 +36,6 @@ contract DeployNewERC721Drop is Script {
         configFile = vm.readFile(
             string.concat("./addresses/", Strings.toString(chainID), ".json")
         );
-        address zoraFeeManager = _getKey("ZORA_FEE_MANAGER");
         address zoraERC721TransferHelper = _getKey(
             "ZORA_ERC721_TRANSFER_HELPER"
         );
@@ -45,19 +43,35 @@ contract DeployNewERC721Drop is Script {
         address ownedSubscriptionManager = _getKey(
             "OWNED_SUBSCRIPTION_MANAGER"
         );
+        console2.log("OWNED_SUB_MANAGER");
+        console2.log(ownedSubscriptionManager);
+        console2.log("FACTORY_UPGRADE_GATE", factoryUpgradeGate);
 
         address editionMetadataRenderer = _getKey("EDITION_METADATA_RENDERER");
         address dropMetadataRenderer = _getKey("DROP_METADATA_RENDERER");
+
+        console2.log("EDITION_METADATA_RENDERER", editionMetadataRenderer);
+        console2.log("DROP_METADATA_RENDERER", dropMetadataRenderer);
+
+        uint256 mintFeeAmount = vm.parseJsonUint(configFile, "MINT_FEE_AMOUNT");
+
+        address payable mintFeeRecipient = payable(
+            _getKey("MINT_FEE_RECIPIENT")
+        );
+
+        console2.log("MINT_FEE_RECIPIENT", mintFeeRecipient);
+        console2.log("MINT_FEE_AMOUNT", mintFeeAmount);
 
         vm.startBroadcast();
 
         console2.log("Setup contracts ---");
 
         ERC721Drop dropImplementation = new ERC721Drop({
-            _zoraFeeManager: IZoraFeeManager(zoraFeeManager),
             _zoraERC721TransferHelper: zoraERC721TransferHelper,
             _factoryUpgradeGate: IFactoryUpgradeGate(factoryUpgradeGate),
-            _marketFilterDAOAddress: ownedSubscriptionManager
+            _marketFilterDAOAddress: ownedSubscriptionManager,
+            _mintFeeAmount: mintFeeAmount,
+            _mintFeeRecipient: mintFeeRecipient
         });
 
         console2.log("Drop IMPL: ");
@@ -70,12 +84,10 @@ contract DeployNewERC721Drop is Script {
             ),
             _dropMetadataRenderer: DropMetadataRenderer(dropMetadataRenderer)
         });
+        // zoraNFTCreator.initialize();
 
         console2.log("Factory/Creator IMPL: ");
         console2.log(address(zoraNFTCreator));
-
-        // make new proxy for verification purposes
-        // new ERC721DropProxy(address(dropImplementation), "");
 
         // Next steps:
         // 1. Setup upgrade path

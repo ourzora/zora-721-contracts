@@ -11,13 +11,11 @@ import {ZoraNFTCreatorV1} from "../src/ZoraNFTCreatorV1.sol";
 import {IERC721Drop} from "../src/interfaces/IERC721Drop.sol";
 
 import {ZoraNFTCreatorProxy} from "../src/ZoraNFTCreatorProxy.sol";
-import {ZoraFeeManager} from "../src/ZoraFeeManager.sol";
 import {IOperatorFilterRegistry} from "../src/interfaces/IOperatorFilterRegistry.sol";
 import {OwnedSubscriptionManager} from "../src/filter/OwnedSubscriptionManager.sol";
 import {FactoryUpgradeGate} from "../src/FactoryUpgradeGate.sol";
 import {DropMetadataRenderer} from "../src/metadata/DropMetadataRenderer.sol";
 import {EditionMetadataRenderer} from "../src/metadata/EditionMetadataRenderer.sol";
-import {IZoraFeeManager} from "../src/interfaces/IZoraFeeManager.sol";
 import {IFactoryUpgradeGate} from "../src/interfaces/IFactoryUpgradeGate.sol";
 import {ERC721DropProxy} from "../src/ERC721DropProxy.sol";
 
@@ -78,7 +76,7 @@ contract DeployNewERC721Drop is Script {
 
         vm.stopPrank();
 
-        FactoryUpgradeGate gate = FactoryUpgradeGate(address(0x97f589D427c4DFA48e3F3F50Ff0C5b49334DdE22));
+        FactoryUpgradeGate gate = FactoryUpgradeGate(_getKey("FACTORY_UPGRADE_GATE"));
         address[] memory _supportedPrevImpls = new address[](1);
         _supportedPrevImpls[0] = zoraNFTCreator.implementation();
         vm.prank(gate.owner());
@@ -89,6 +87,16 @@ contract DeployNewERC721Drop is Script {
 
         drop.adminMint(sender, 4);
         assert(drop.balanceOf(sender) == 8);
+
+        address recipient2 = address(0x9992);
+        vm.deal(recipient2, 1 ether);
+        vm.stopPrank();
+        vm.prank(recipient2);
+        drop.purchase{value: 0.1 ether + 0.000777 ether}(1);
+        assert(drop.balanceOf(recipient2) == 1);
+
+        vm.prank(zoraNFTCreator.owner());
+        zoraNFTCreator.upgradeTo(_getKey("ZORA_NFT_CREATOR_V1_IMPL"));
 
         ERC721Drop drop2 = ERC721Drop(payable(zoraNFTCreator.createEdition(
             "name",
@@ -111,6 +119,14 @@ contract DeployNewERC721Drop is Script {
             "image"
         )));
         assert(drop2.balanceOf(sender) == 0);
+
+
+        address recipient3 = address(0x9992);
+        vm.deal(recipient3, 1 ether);
+        vm.stopPrank();
+        vm.prank(recipient3);
+        drop2.purchase{value: 0.1 ether + 0.000777 ether}(1);
+        assert(drop2.balanceOf(recipient3) == 1);
 
         // Next steps:
         // 1. Setup upgrade path

@@ -49,10 +49,18 @@ contract DeployNewERC721Drop is Script {
 
         address editionMetadataRenderer = _getKey("EDITION_METADATA_RENDERER");
         address dropMetadataRenderer = _getKey("DROP_METADATA_RENDERER");
-        uint256 mintFeeAmount = vm.envUint("MINT_FEE_AMOUNT");
+
+        console2.log("EDITION_METADATA_RENDERER", editionMetadataRenderer);
+        console2.log("DROP_METADATA_RENDERER", dropMetadataRenderer);
+
+        uint256 mintFeeAmount = vm.parseJsonUint(configFile, "MINT_FEE_AMOUNT");
+
         address payable mintFeeRecipient = payable(
-            vm.envAddress("MINT_FEE_RECIPIENT")
+            _getKey("MINT_FEE_RECIPIENT")
         );
+
+        console2.log("MINT_FEE_RECIPIENT", mintFeeRecipient);
+        console2.log("MINT_FEE_AMOUNT", mintFeeAmount);
 
         vm.startBroadcast();
 

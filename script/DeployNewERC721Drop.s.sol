@@ -51,7 +51,7 @@ contract DeployNewERC721Drop is Script {
         address dropMetadataRenderer = _getKey("DROP_METADATA_RENDERER");
 
         uint256 mintFeeAmount = abi.decode(
-            vm.parseJson(configFile, "MINT_FEE_AMOUNT"),
+            vm.parseJsonUint(configFile, "MINT_FEE_AMOUNT"),
             (uint256)
         );
 

@@ -322,10 +322,10 @@ contract ERC721Drop is
         fee = ZORA_MINT_FEE * quantity;
     }
 
-    /// @notice Proxy to purchase
-    /// @param quantity
-    function claimTokens(uint256 quantity) external {
-        purchase(quantity);
+    /// @notice Claim number of NFTs
+    /// @param quantity quantity to claim
+    function claim(uint256 quantity) external payable {
+        _claim(quantity);
     }
 
     /**
@@ -391,8 +391,13 @@ contract ERC721Drop is
     /**
       @dev This allows the user to purchase a edition edition
            at the given price in the contract.
+      @notice Preferred to use claim method now
      */
-    function purchase(uint256 quantity) public payable nonReentrant canMintTokens(quantity) onlyPublicSaleActive returns (uint256) {
+    function purchase(uint256 quantity) external payable returns (uint256) {
+        return _claim(quantity);
+    }
+
+    function _claim(uint256 quantity) internal nonReentrant canMintTokens(quantity) onlyPublicSaleActive returns (uint256) {
         uint256 salePrice = salesConfig.publicSalePrice;
 
         if (msg.value != (salePrice + ZORA_MINT_FEE) * quantity) {

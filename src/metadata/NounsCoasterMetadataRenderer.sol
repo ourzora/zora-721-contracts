@@ -7,7 +7,7 @@ import {IERC721MetadataUpgradeable} from "@openzeppelin/contracts-upgradeable/in
 import {IERC2981Upgradeable} from "@openzeppelin/contracts-upgradeable/interfaces/IERC2981Upgradeable.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-import {UriEncode} from "sol-uriencode/src/UriEncode.sol";
+import {UriEncode} from "sol-uriencode/UriEncode.sol";
 import {MetadataBuilder} from "micro-onchain-metadata-utils/MetadataBuilder.sol";
 import {MetadataJSONKeys} from "micro-onchain-metadata-utils/MetadataJSONKeys.sol";
 import {NFTMetadataRenderer} from "../utils/NFTMetadataRenderer.sol";
@@ -214,9 +214,11 @@ contract NounsCoasterMetadataRenderer is IMetadataRenderer, INounsCoasterMetadat
     ///                     ATTRIBUTE GENERATION                 ///
     ///                                                          ///
 
-    function _getAttributesForTokenId(uint256 _tokenId) internal view returns (mapping(uint256 => uint16[16]) attributes) {
+    function _getAttributesForTokenId(uint256 _tokenId) internal view returns (uint16[16] memory) {
         // Get the number of properties
         uint256 numProperties = properties.length;
+
+        uint16[16] memory attributes;
 
         attributes[0] = uint16(numProperties);
 
@@ -235,6 +237,8 @@ contract NounsCoasterMetadataRenderer is IMetadataRenderer, INounsCoasterMetadat
                 seed >>= 16;
             }
         }
+
+        return attributes;
     }
 
     /// @notice The properties and query string for a generated token
@@ -357,6 +361,12 @@ contract NounsCoasterMetadataRenderer is IMetadataRenderer, INounsCoasterMetadat
     /// @notice The collection description
     function projectURI() external view returns (string memory) {
         return settings.projectURI;
+    }
+
+    /// @notice Default initializer for edition data from a specific contract
+    /// @param data data to init with
+    function initializeWithData(bytes memory data) external {
+        // noop
     }
 
     ///                                                          ///

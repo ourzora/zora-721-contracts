@@ -4,3 +4,4 @@ erc721a-upgradeable=lib/ERC721A-Upgradeable/contracts/
 base64/=lib/base64/
 forge-std/=lib/forge-std/src/
 micro-onchain-metadata-utils/=lib/micro-onchain-metadata-utils/src
+sol-uriencode/=lib/sol-uriencode/src

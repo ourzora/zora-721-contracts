@@ -14,3 +14,6 @@
 [submodule "lib/micro-onchain-metadata-utils"]
 	path = lib/micro-onchain-metadata-utils
 	url = https://github.com/iainnash/micro-onchain-metadata-utils
+[submodule "lib/sol-uriencode"]
+	path = lib/sol-uriencode
+	url = https://github.com/iainnash/sol-uriencode

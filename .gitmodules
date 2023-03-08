@@ -11,3 +11,6 @@
 	path = lib/forge-std
 	url = https://github.com/foundry-rs/forge-std
 	branch = v1.4.0
+[submodule "lib/micro-onchain-metadata-utils"]
+	path = lib/micro-onchain-metadata-utils
+	url = https://github.com/iainnash/micro-onchain-metadata-utils

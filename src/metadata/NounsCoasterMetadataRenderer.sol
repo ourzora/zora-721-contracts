@@ -5,6 +5,9 @@ import {IMetadataRenderer} from "../interfaces/IMetadataRenderer.sol";
 import {IERC721Drop} from "../interfaces/IERC721Drop.sol";
 import {IERC721MetadataUpgradeable} from "@openzeppelin/contracts-upgradeable/interfaces/IERC721MetadataUpgradeable.sol";
 import {IERC2981Upgradeable} from "@openzeppelin/contracts-upgradeable/interfaces/IERC2981Upgradeable.sol";
+import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
+import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import {UriEncode} from "sol-uriencode/src/UriEncode.sol";
 import {MetadataBuilder} from "micro-onchain-metadata-utils/MetadataBuilder.sol";
 import {MetadataJSONKeys} from "micro-onchain-metadata-utils/MetadataJSONKeys.sol";
 import {NFTMetadataRenderer} from "../utils/NFTMetadataRenderer.sol";
@@ -354,11 +357,6 @@ contract NounsCoasterMetadataRenderer is IMetadataRenderer, INounsCoasterMetadat
     /// @notice The collection description
     function projectURI() external view returns (string memory) {
         return settings.projectURI;
-    }
-
-    /// @notice Get the owner of the metadata (here delegated to the token owner)
-    function owner() public view returns (address) {
-        return IOwnable(settings.token).owner();
     }
 
     ///                                                          ///

@@ -88,6 +88,9 @@ contract NounsCoasterMetadataRenderer is IMetadataRenderer, INounsCoasterMetadat
     ///
     error TOO_MANY_PROPERTIES();
 
+    ///
+    error PREVIOUS_PROPERITIES_REQUIRED();
+
     constructor(bytes memory _initStrings, address _token, address _owner) Ownable2Step(_owner) {
         // Decode the token initialization strings
         (, , string memory _description, string memory _contractImage, string memory _projectURI, string memory _rendererBase) = abi.decode(
@@ -168,7 +171,7 @@ contract NounsCoasterMetadataRenderer is IMetadataRenderer, INounsCoasterMetadat
                 }
 
                 // Ensure the item is for a valid property
-                if (_propertyId >= properties.length) {
+                if (_propertyId >= properties.length) {                    
                     revert INVALID_PROPERTY_SELECTED(_propertyId);
                 }
 
@@ -191,6 +194,39 @@ contract NounsCoasterMetadataRenderer is IMetadataRenderer, INounsCoasterMetadat
             }
         }
     }
+
+
+    // function addMoreProperties(uint16 nounId, string[] calldata _names, ItemParam[] calldata _items, IPFSGroup calldata _ipfsGroup) external onlyOwner {
+    //     // Cache the noun property
+    //     Property[] storage _properties = nounProperties[_nounId];
+
+    //     // Cache the number of existing properties
+    //     uint256 numStoredProperties = _properties.length;
+
+    //     // revert of no properties have been stored before calling this function
+    //     if (numStoredProperties == 0) {
+    //         revert PREVIOUS_PROPERITIES_REQUIRED();
+    //     }        
+
+    //     // Cache the number of new properties
+    //     uint256 numNewProperties = _names.length;
+
+    //     // Cache the number of new items
+    //     uint256 numNewItems = _items.length;
+
+    //     // Ensure at least one property and one item are included
+    //     if (numNewProperties == 0 || numNewItems == 0) {
+    //         revert ONE_PROPERTY_AND_ITEM_REQUIRED();
+    //     }
+
+
+    //     unchecked {
+    //         // Check if not too many items are stored
+    //         if (numStoredProperties + numNewProperties > 15) {
+    //             revert TOO_MANY_PROPERTIES();
+    //         }
+    //     }
+    // }
 
     function addNounProperties(uint16 _nounId, string[] calldata _names, ItemParam[] calldata _items, IPFSGroup calldata _ipfsGroup) external onlyOwner {
         _addNounProperties(_nounId, _names, _items, _ipfsGroup);
@@ -215,6 +251,10 @@ contract NounsCoasterMetadataRenderer is IMetadataRenderer, INounsCoasterMetadat
         // Cache the number of new items
         uint256 numNewItems = _items.length;
 
+        // console.log("num new properties", numNewProperties);
+        // console.log("num new items", _items.length);
+
+
         // If this is the first time adding metadata:
         if (numStoredProperties == 0) {
             // Ensure at least one property and one item are included
@@ -237,6 +277,8 @@ contract NounsCoasterMetadataRenderer is IMetadataRenderer, INounsCoasterMetadat
                 // Get the new property id
                 uint256 propertyId = numStoredProperties + i;
 
+                // console.log("whats the propertyid", propertyId);
+
                 // Store the property name
                 _properties[propertyId].name = _names[i];
 
@@ -248,11 +290,12 @@ contract NounsCoasterMetadataRenderer is IMetadataRenderer, INounsCoasterMetadat
                 // Cache the id of the associated property
                 uint256 _propertyId = _items[i].propertyId;
 
-                // Offset the id if the item is for a new property
-                // Note: Property ids under the hood are offset by 1
-                if (_items[i].isNewProperty) {
-                    _propertyId += numStoredProperties;
-                }
+
+                // // Offset the id if the item is for a new property
+                // // Note: Property ids under the hood are offset by 1
+                // if (_items[i].isNewProperty) {
+                //     _propertyId += numStoredProperties;
+                // }
 
                 // Ensure the item is for a valid property
                 if (_propertyId >= _properties.length) {
@@ -299,7 +342,7 @@ contract NounsCoasterMetadataRenderer is IMetadataRenderer, INounsCoasterMetadat
                 // Use the token's seed to select an item
                 attributes[i] = uint16(seed % numItems);
 
-                console.log("layer - index - numItems: ", i, attributes[i], numItems);
+                // console.log("layer - index - numItems: ", i, attributes[i], numItems);
 
                 // Adjust the seed
                 seed >>= 16;
@@ -314,7 +357,7 @@ contract NounsCoasterMetadataRenderer is IMetadataRenderer, INounsCoasterMetadat
         // Get the token's query string
         queryString = string.concat("?contractAddress=", Strings.toHexString(uint256(uint160(address(this))), 20), "&tokenId=", Strings.toString(_tokenId));
 
-        console.log("token qs", queryString);
+        // console.log("token qs", queryString);
 
         // Get the token's generated attributes
         uint16[16] memory tokenAttributes = _getAttributeIndicesForTokenId(_tokenId);
@@ -333,7 +376,7 @@ contract NounsCoasterMetadataRenderer is IMetadataRenderer, INounsCoasterMetadat
 
                 // Get the associated item data
                 Item memory item = property.items[attribute];
-                console.log(property.name, ":", item.name);
+                // console.log(property.name, ":", item.name);
 
                 // Store the encoded attributes and query string
                 MetadataBuilder.JSONItem memory itemJSON = arrayAttributesItems[i];
@@ -345,7 +388,7 @@ contract NounsCoasterMetadataRenderer is IMetadataRenderer, INounsCoasterMetadat
                 queryString = string.concat(queryString, "&images=", _getItemImage(item, property.name));
             }
 
-            console.log("bg qs", queryString);
+            // console.log("bg qs", queryString);
 
             // Next, select the attributes for each noun
             uint256 seed = _tokenId;
@@ -357,19 +400,19 @@ contract NounsCoasterMetadataRenderer is IMetadataRenderer, INounsCoasterMetadat
                 uint16 variant = uint16(seed % 4);
                 seed >>= 16;
 
-                console.log("noun-variant", i, variant);
+                // console.log("noun-variant", i, variant);
 
                 // we know that for each noun, there are 5 total properties that need to be added
                 // properties 1 and 2 are variant dependant, and 3,4,5 are independent
                 uint256 numBodyProperties = _properties[0 + variant].items.length;
                 uint16 bodyIndex = uint16(seed % numBodyProperties);
 
-                console.log("numBodyProps-index", numBodyProperties, bodyIndex);
+                // console.log("numBodyProps-index", numBodyProperties, bodyIndex);
 
                 // Get the associated itemData
                 Item memory item = _properties[0 + variant].items[bodyIndex];
 
-                console.log("item.name", item.name);
+                // console.log("item.name", item.name);
 
                 // Store the encoded attributes and query string
                 MetadataBuilder.JSONItem memory itemJSON = arrayAttributesItems[4 + (i * 5)];
@@ -412,7 +455,7 @@ contract NounsCoasterMetadataRenderer is IMetadataRenderer, INounsCoasterMetadat
                 }
             }
 
-            console.log("FINAL", queryString);
+            // console.log("FINAL", queryString);
 
             resultAttributes = MetadataBuilder.generateJSON(arrayAttributesItems);
         }

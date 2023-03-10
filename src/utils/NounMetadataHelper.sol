@@ -6,6 +6,8 @@ import {INounsCoasterMetadataRendererTypes} from "../../src/interfaces/INounsCoa
 import "forge-std/console.sol";
 
 abstract contract NounMetadataHelper {
+    error INVALID_RANGE();
+
     function getBackgroundNames() public pure returns (string[] memory) {
         string[] memory names = new string[](4);
         names[0] = "1 Back ground";
@@ -44,6 +46,23 @@ abstract contract NounMetadataHelper {
             revert("NounMetadataHelper: Invalid noun id");
         }
     }
+
+    // end is not inclusive, so make end 1 higher than you want to include
+    function nameSlicer(string[] memory names, uint256 start, uint256 end) public view returns (string[] memory) {
+        
+        if (end < start) {
+            revert INVALID_RANGE();
+        }
+
+        string[] memory slicedArray = new string[](end - start + 1);    
+
+        for (uint256 i = 0; i < end - start + 1; ++i) {
+            slicedArray[i] = names[i + start];
+        }
+
+        return slicedArray;            
+    }
+
 
     function _getNoun1Names() internal pure returns (string[] memory) {
         string[] memory noun1Names = new string[](11);
@@ -123,6 +142,9 @@ abstract contract NounMetadataHelper {
         itemsToCopy[5] = getBodyVariant2Items();
         itemsToCopy[6] = getBodyVariant3Items();
         itemsToCopy[7] = getBodyVariant4Items();
+        /*
+        * gas is erroring out during getHeadItems() based on console.log
+        */
         itemsToCopy[8] = getHeadItems();
         itemsToCopy[9] = getExpressionItems();
         itemsToCopy[10] = getGlassesItems();
@@ -135,17 +157,125 @@ abstract contract NounMetadataHelper {
 
         console.log("total", totalNumItems);
 
+
         NounsCoasterMetadataRenderer.ItemParam[] memory items = new NounsCoasterMetadataRenderer.ItemParam[](totalNumItems);
 
         for (uint256 i = 0; i < itemsToCopy.length; i++) {
             for (uint256 j = 0; j < itemsToCopy[i].length; j++) {
-                console.log(itemsToCopy[i][j].name);
+                // console.log(itemsToCopy[i][j].name);
                 items[(j * i) + j] = itemsToCopy[i][j];
             }
         }
 
         return items;
     }
+
+    function getNounItems_0_3() public view returns (NounsCoasterMetadataRenderer.ItemParam[] memory) {
+        NounsCoasterMetadataRenderer.ItemParam[][] memory itemsToCopy = new NounsCoasterMetadataRenderer.ItemParam[][](4);
+        itemsToCopy[0] = getBodyVariant1Items();
+        itemsToCopy[1] = getBodyVariant2Items();
+        itemsToCopy[2] = getBodyVariant3Items();
+        itemsToCopy[3] = getBodyVariant4Items();
+
+        uint256 totalNumItems = 0;
+
+        for (uint256 i = 0; i < itemsToCopy.length; i++) {
+            totalNumItems += itemsToCopy[i].length;
+        }
+
+        console.log("total", totalNumItems);
+
+
+        NounsCoasterMetadataRenderer.ItemParam[] memory items = new NounsCoasterMetadataRenderer.ItemParam[](totalNumItems);
+
+        for (uint256 i = 0; i < itemsToCopy.length; i++) {
+            for (uint256 j = 0; j < itemsToCopy[i].length; j++) {
+                // console.log(itemsToCopy[i][j].name);
+                items[(j * i) + j] = itemsToCopy[i][j];
+            }
+        }
+
+        return items;
+    }
+
+    function getNounItems_4() public view returns (NounsCoasterMetadataRenderer.ItemParam[] memory) {
+        NounsCoasterMetadataRenderer.ItemParam[][] memory itemsToCopy = new NounsCoasterMetadataRenderer.ItemParam[][](1);
+        itemsToCopy[0] = getAccessoriesVariant1Items();
+
+        uint256 totalNumItems = 0;
+
+        for (uint256 i = 0; i < itemsToCopy.length ; i++) {
+            totalNumItems += itemsToCopy[i].length;
+        }
+
+        // console.log("total", totalNumItems);
+
+        NounsCoasterMetadataRenderer.ItemParam[] memory items = new NounsCoasterMetadataRenderer.ItemParam[](totalNumItems);
+
+        for (uint256 i = 0; i < itemsToCopy.length; i++) {
+            for (uint256 j = 0; j < itemsToCopy[i].length; j++) {
+                // console.log(itemsToCopy[i][j].name);
+                items[(j * i) + j] = itemsToCopy[i][j];
+            }
+        }
+
+        return items;
+    }
+
+    function getNounItems_5_7() public view returns (NounsCoasterMetadataRenderer.ItemParam[] memory) {
+        NounsCoasterMetadataRenderer.ItemParam[][] memory itemsToCopy = new NounsCoasterMetadataRenderer.ItemParam[][](3);
+        itemsToCopy[0] = getBodyVariant2Items();
+        itemsToCopy[1] = getBodyVariant3Items();
+        itemsToCopy[2] = getBodyVariant4Items();
+
+        uint256 totalNumItems = 0;
+
+        for (uint256 i = 0; i < itemsToCopy.length; i++) {
+            totalNumItems += itemsToCopy[i].length;
+        }
+
+        console.log("total", totalNumItems);
+
+
+        NounsCoasterMetadataRenderer.ItemParam[] memory items = new NounsCoasterMetadataRenderer.ItemParam[](totalNumItems);
+
+        for (uint256 i = 0; i < itemsToCopy.length; i++) {
+            for (uint256 j = 0; j < itemsToCopy[i].length; j++) {
+                // console.log(itemsToCopy[i][j].name);
+                items[(j * i) + j] = itemsToCopy[i][j];
+            }
+        }
+
+        return items;
+    }    
+
+    function getNounItems_8_10() public view returns (NounsCoasterMetadataRenderer.ItemParam[] memory) {
+        NounsCoasterMetadataRenderer.ItemParam[][] memory itemsToCopy = new NounsCoasterMetadataRenderer.ItemParam[][](3);
+        itemsToCopy[0] = getHeadItems();
+        itemsToCopy[1] = getExpressionItems();
+        itemsToCopy[2] = getGlassesItems();
+
+        uint256 totalNumItems = 0;
+
+        for (uint256 i = 0; i < itemsToCopy.length; i++) {
+            totalNumItems += itemsToCopy[i].length;
+        }
+
+        console.log("total", totalNumItems);
+
+
+        NounsCoasterMetadataRenderer.ItemParam[] memory items = new NounsCoasterMetadataRenderer.ItemParam[](totalNumItems);
+
+        for (uint256 i = 0; i < itemsToCopy.length; i++) {
+            for (uint256 j = 0; j < itemsToCopy[i].length; j++) {
+                // console.log(itemsToCopy[i][j].name);
+                items[(j * i) + j] = itemsToCopy[i][j];
+            }
+        }
+
+        return items;
+    }        
+
 
     function getBodyVariant1Items() public pure returns (NounsCoasterMetadataRenderer.ItemParam[] memory) {
         NounsCoasterMetadataRenderer.ItemParam[] memory items = new NounsCoasterMetadataRenderer.ItemParam[](30);

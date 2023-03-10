@@ -15,6 +15,8 @@ import {MetadataRenderAdminCheck} from "./MetadataRenderAdminCheck.sol";
 import {INounsCoasterMetadataRendererTypes} from "../interfaces/INounsCoasterMetadataRendererTypes.sol";
 import {Ownable2Step} from "../utils/ownable/Ownable2Step.sol";
 
+import "forge-std/console.sol";
+
 /// @notice NounsCoasterMetadataRenderer
 contract NounsCoasterMetadataRenderer is IMetadataRenderer, INounsCoasterMetadataRendererTypes, Ownable2Step, MetadataRenderAdminCheck {
     /// @notice The metadata renderer settings
@@ -190,6 +192,93 @@ contract NounsCoasterMetadataRenderer is IMetadataRenderer, INounsCoasterMetadat
         }
     }
 
+    function addNounProperties(uint16 _nounId, string[] calldata _names, ItemParam[] calldata _items, IPFSGroup calldata _ipfsGroup) external onlyOwner {
+        _addNounProperties(_nounId, _names, _items, _ipfsGroup);
+    }
+
+    function _addNounProperties(uint16 _nounId, string[] calldata _names, ItemParam[] calldata _items, IPFSGroup calldata _ipfsGroup) internal {
+        // Cache the existing amount of IPFS data stored
+        uint256 dataLength = ipfsData.length;
+
+        // Add the IPFS group information
+        ipfsData.push(_ipfsGroup);
+
+        // Cache the noun property
+        Property[] storage _properties = nounProperties[_nounId];
+
+        // Cache the number of existing properties
+        uint256 numStoredProperties = _properties.length;
+
+        // Cache the number of new properties
+        uint256 numNewProperties = _names.length;
+
+        // Cache the number of new items
+        uint256 numNewItems = _items.length;
+
+        // If this is the first time adding metadata:
+        if (numStoredProperties == 0) {
+            // Ensure at least one property and one item are included
+            if (numNewProperties == 0 || numNewItems == 0) {
+                revert ONE_PROPERTY_AND_ITEM_REQUIRED();
+            }
+        }
+
+        unchecked {
+            // Check if not too many items are stored
+            if (numStoredProperties + numNewProperties > 15) {
+                revert TOO_MANY_PROPERTIES();
+            }
+
+            // For each new property:
+            for (uint256 i = 0; i < numNewProperties; ++i) {
+                // Append storage space
+                _properties.push();
+
+                // Get the new property id
+                uint256 propertyId = numStoredProperties + i;
+
+                // Store the property name
+                _properties[propertyId].name = _names[i];
+
+                emit PropertyAdded(propertyId, _names[i]);
+            }
+
+            // For each new item:
+            for (uint256 i = 0; i < numNewItems; ++i) {
+                // Cache the id of the associated property
+                uint256 _propertyId = _items[i].propertyId;
+
+                // Offset the id if the item is for a new property
+                // Note: Property ids under the hood are offset by 1
+                if (_items[i].isNewProperty) {
+                    _propertyId += numStoredProperties;
+                }
+
+                // Ensure the item is for a valid property
+                if (_propertyId >= _properties.length) {
+                    revert INVALID_PROPERTY_SELECTED(_propertyId);
+                }
+
+                // Get the pointer to the other items for the property
+                Item[] storage items = _properties[_propertyId].items;
+
+                // Append storage space
+                items.push();
+
+                // Get the index of the new item
+                // Cannot underflow as the items array length is ensured to be at least 1
+                uint256 newItemIndex = items.length - 1;
+
+                // Store the new item
+                Item storage newItem = items[newItemIndex];
+
+                // Store the new item's name and reference slot
+                newItem.name = _items[i].name;
+                newItem.referenceSlot = uint16(dataLength);
+            }
+        }
+    }
+
     ///                                                          ///
     ///                     ATTRIBUTE GENERATION                 ///
     ///                                                          ///
@@ -200,15 +289,17 @@ contract NounsCoasterMetadataRenderer is IMetadataRenderer, INounsCoasterMetadat
         uint256 seed = _tokenId;
 
         // First, add the background properties
-        // Note: Background properties are always the first 5 properties
+        // Note: Background properties are always the first 4 properties
         unchecked {
             // For each bg property:
-            for (uint256 i = 0; i < 5; ++i) {
+            for (uint256 i = 0; i < 4; ++i) {
                 // Get the number of items to choose from
                 uint256 numItems = properties[i].items.length;
 
                 // Use the token's seed to select an item
                 attributes[i] = uint16(seed % numItems);
+
+                console.log("layer - index - numItems: ", i, attributes[i], numItems);
 
                 // Adjust the seed
                 seed >>= 16;
@@ -223,6 +314,8 @@ contract NounsCoasterMetadataRenderer is IMetadataRenderer, INounsCoasterMetadat
         // Get the token's query string
         queryString = string.concat("?contractAddress=", Strings.toHexString(uint256(uint160(address(this))), 20), "&tokenId=", Strings.toString(_tokenId));
 
+        console.log("token qs", queryString);
+
         // Get the token's generated attributes
         uint16[16] memory tokenAttributes = _getAttributeIndicesForTokenId(_tokenId);
 
@@ -231,7 +324,7 @@ contract NounsCoasterMetadataRenderer is IMetadataRenderer, INounsCoasterMetadat
 
         unchecked {
             // For each of the token's background properties:
-            for (uint256 i = 0; i < 5; ++i) {
+            for (uint256 i = 0; i < 4; ++i) {
                 // Get its name and list of associated items
                 Property memory property = properties[i];
 
@@ -240,6 +333,7 @@ contract NounsCoasterMetadataRenderer is IMetadataRenderer, INounsCoasterMetadat
 
                 // Get the associated item data
                 Item memory item = property.items[attribute];
+                console.log(property.name, ":", item.name);
 
                 // Store the encoded attributes and query string
                 MetadataBuilder.JSONItem memory itemJSON = arrayAttributesItems[i];
@@ -251,6 +345,8 @@ contract NounsCoasterMetadataRenderer is IMetadataRenderer, INounsCoasterMetadat
                 queryString = string.concat(queryString, "&images=", _getItemImage(item, property.name));
             }
 
+            console.log("bg qs", queryString);
+
             // Next, select the attributes for each noun
             uint256 seed = _tokenId;
 
@@ -261,13 +357,19 @@ contract NounsCoasterMetadataRenderer is IMetadataRenderer, INounsCoasterMetadat
                 uint16 variant = uint16(seed % 4);
                 seed >>= 16;
 
+                console.log("noun-variant", i, variant);
+
                 // we know that for each noun, there are 5 total properties that need to be added
                 // properties 1 and 2 are variant dependant, and 3,4,5 are independent
                 uint256 numBodyProperties = _properties[0 + variant].items.length;
                 uint16 bodyIndex = uint16(seed % numBodyProperties);
 
+                console.log("numBodyProps-index", numBodyProperties, bodyIndex);
+
                 // Get the associated itemData
                 Item memory item = _properties[0 + variant].items[bodyIndex];
+
+                console.log("item.name", item.name);
 
                 // Store the encoded attributes and query string
                 MetadataBuilder.JSONItem memory itemJSON = arrayAttributesItems[4 + (i * 5)];
@@ -309,6 +411,8 @@ contract NounsCoasterMetadataRenderer is IMetadataRenderer, INounsCoasterMetadat
                     queryString = string.concat(queryString, "&images=", _getItemImage(item, _properties[8 + j].name));
                 }
             }
+
+            console.log("FINAL", queryString);
 
             resultAttributes = MetadataBuilder.generateJSON(arrayAttributesItems);
         }

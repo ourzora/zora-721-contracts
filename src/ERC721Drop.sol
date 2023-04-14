@@ -438,6 +438,21 @@ contract ERC721Drop is
         onlyPublicSaleActive
         returns (uint256)
     {
+        return _handlePurchase(quantity, "");
+    }
+
+    function purchaseWithComment(uint256 quantity, string calldata comment)
+        external
+        payable
+        nonReentrant
+        canMintTokens(quantity)
+        onlyPublicSaleActive
+        returns (uint256)
+    {
+        return _handlePurchase(quantity, comment);
+    }
+
+    function _handlePurchase(uint256 quantity, string memory comment) internal returns (uint256) {
         uint256 salePrice = salesConfig.publicSalePrice;
 
         if (msg.value != (salePrice + ZORA_MINT_FEE) * quantity) {
@@ -465,7 +480,8 @@ contract ERC721Drop is
             to: _msgSender(),
             quantity: quantity,
             pricePerToken: salePrice,
-            firstPurchasedTokenId: firstMintedTokenId
+            firstPurchasedTokenId: firstMintedTokenId,
+            comment: comment
         });
         return firstMintedTokenId;
     }
@@ -564,6 +580,33 @@ contract ERC721Drop is
         onlyPresaleActive
         returns (uint256)
     {
+        return _handlePurchasePresale(quantity, maxQuantity, pricePerToken, merkleProof, "");
+    }
+
+    function purchasePresaleWithComment(
+        uint256 quantity,
+        uint256 maxQuantity,
+        uint256 pricePerToken,
+        bytes32[] calldata merkleProof,
+        string calldata comment
+    )
+        external
+        payable
+        nonReentrant
+        canMintTokens(quantity)
+        onlyPresaleActive
+        returns (uint256)
+    {
+        return _handlePurchasePresale(quantity, maxQuantity, pricePerToken, merkleProof, comment);
+    }
+
+    function _handlePurchasePresale(
+        uint256 quantity,
+        uint256 maxQuantity,
+        uint256 pricePerToken,
+        bytes32[] calldata merkleProof,
+        string memory comment
+    ) internal returns (uint256) {
         if (
             !MerkleProofUpgradeable.verify(
                 merkleProof,
@@ -597,7 +640,8 @@ contract ERC721Drop is
             to: _msgSender(),
             quantity: quantity,
             pricePerToken: pricePerToken,
-            firstPurchasedTokenId: firstMintedTokenId
+            firstPurchasedTokenId: firstMintedTokenId,
+            comment: comment
         });
 
         return firstMintedTokenId;

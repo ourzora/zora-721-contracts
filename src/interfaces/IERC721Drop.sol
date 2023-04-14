@@ -86,7 +86,8 @@ interface IERC721Drop {
         address indexed to,
         uint256 indexed quantity,
         uint256 indexed pricePerToken,
-        uint256 firstPurchasedTokenId
+        uint256 firstPurchasedTokenId,
+        string comment
     );
 
     /// @notice Sales configuration has been changed

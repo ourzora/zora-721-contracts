@@ -86,7 +86,18 @@ interface IERC721Drop {
         address indexed to,
         uint256 indexed quantity,
         uint256 indexed pricePerToken,
-        uint256 firstPurchasedTokenId,
+        uint256 firstPurchasedTokenId
+    );
+
+    /// @notice Event emitted for each sale
+    /// @param to address sale was made to
+    /// @param quantity quantity of the minted nfts
+    /// @param firstPurchasedTokenId first purchased token ID (to get range add to quantity for max)
+    /// @param comment caller provided comment
+    event MintComment(
+        address indexed to,
+        uint256 indexed quantity,
+        uint256 indexed firstPurchasedTokenId,
         string comment
     );
 

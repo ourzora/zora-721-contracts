@@ -35,7 +35,13 @@ contract ERC721DropTest is Test {
         address indexed to,
         uint256 indexed quantity,
         uint256 indexed pricePerToken,
-        uint256 firstPurchasedTokenId,
+        uint256 firstPurchasedTokenId
+    );
+
+    event MintComment(
+        address indexed to,
+        uint256 indexed quantity,
+        uint256 indexed firstPurchasedTokenId,
         string comment
     );
 
@@ -313,8 +319,7 @@ contract ERC721DropTest is Test {
             address(456),
             purchaseQuantity,
             salePrice,
-            0,
-            ""
+            0
         );
         zoraNFTBase.purchase{value: paymentAmount}(purchaseQuantity);
 
@@ -349,10 +354,9 @@ contract ERC721DropTest is Test {
         vm.deal(address(456), paymentAmount);
         vm.prank(address(456));
         vm.expectEmit(true, true, true, true);
-        emit Sale(
+        emit MintComment(
             address(456),
             purchaseQuantity,
-            salePrice,
             0,
             "test comment"
         );

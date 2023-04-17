@@ -490,9 +490,16 @@ contract ERC721Drop is
             to: _msgSender(),
             quantity: quantity,
             pricePerToken: salePrice,
-            firstPurchasedTokenId: firstMintedTokenId,
-            comment: comment
+            firstPurchasedTokenId: firstMintedTokenId
         });
+        if(bytes(comment).length > 0) {
+            emit IERC721Drop.MintComment({
+                to: _msgSender(),
+                quantity: quantity,
+                firstPurchasedTokenId: firstMintedTokenId,
+                comment: comment
+            });
+        }
         return firstMintedTokenId;
     }
 
@@ -656,9 +663,16 @@ contract ERC721Drop is
             to: _msgSender(),
             quantity: quantity,
             pricePerToken: pricePerToken,
-            firstPurchasedTokenId: firstMintedTokenId,
-            comment: comment
+            firstPurchasedTokenId: firstMintedTokenId
         });
+        if(bytes(comment).length > 0) {
+            emit IERC721Drop.MintComment({
+                to: _msgSender(),
+                quantity: quantity,
+                firstPurchasedTokenId: firstMintedTokenId,
+                comment: comment
+            });
+        }
 
         return firstMintedTokenId;
     }

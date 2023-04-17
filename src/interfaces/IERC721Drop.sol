@@ -91,13 +91,13 @@ interface IERC721Drop {
 
     /// @notice Event emitted for each sale
     /// @param to address sale was made to
+    /// @param tokenId first purchased token ID (to get range add to quantity for max)
     /// @param quantity quantity of the minted nfts
-    /// @param firstPurchasedTokenId first purchased token ID (to get range add to quantity for max)
     /// @param comment caller provided comment
     event MintComment(
         address indexed to,
+        uint256 indexed tokenId,
         uint256 indexed quantity,
-        uint256 indexed firstPurchasedTokenId,
         string comment
     );
 

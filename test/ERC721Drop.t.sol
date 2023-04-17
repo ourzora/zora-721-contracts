@@ -40,8 +40,8 @@ contract ERC721DropTest is Test {
 
     event MintComment(
         address indexed to,
+        uint256 indexed tokenId,
         uint256 indexed quantity,
-        uint256 indexed firstPurchasedTokenId,
         string comment
     );
 
@@ -356,8 +356,8 @@ contract ERC721DropTest is Test {
         vm.expectEmit(true, true, true, true);
         emit MintComment(
             address(456),
-            purchaseQuantity,
             0,
+            purchaseQuantity,
             "test comment"
         );
         zoraNFTBase.purchaseWithComment{value: paymentAmount}(purchaseQuantity, "test comment");

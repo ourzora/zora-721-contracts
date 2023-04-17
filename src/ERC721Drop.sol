@@ -83,6 +83,9 @@ contract ERC721Drop is
     /// @notice Max royalty BPS
     uint16 constant MAX_ROYALTY_BPS = 50_00;
 
+    /// @notice Empty string for blank comments
+    string constant EMPTY_STRING = "";
+
     /// @notice Market filter DAO address for opensea filter registry
     address public immutable marketFilterDAOAddress;
 
@@ -430,6 +433,9 @@ contract ERC721Drop is
       @dev This allows the user to purchase a edition edition
            at the given price in the contract.
      */
+    /// @notice Purchase a quantity of tokens
+    /// @param quantity quantity to purchase
+    /// @return tokenId of the first token minted
     function purchase(uint256 quantity)
         external
         payable
@@ -438,9 +444,13 @@ contract ERC721Drop is
         onlyPublicSaleActive
         returns (uint256)
     {
-        return _handlePurchase(quantity, "");
+        return _handlePurchase(quantity, EMPTY_STRING);
     }
 
+    /// @notice Purchase a quantity of tokens with a comment
+    /// @param quantity quantity to purchase
+    /// @param comment comment to include in the IERC721Drop.Sale event
+    /// @return tokenId of the first token minted
     function purchaseWithComment(uint256 quantity, string calldata comment)
         external
         payable
@@ -580,9 +590,15 @@ contract ERC721Drop is
         onlyPresaleActive
         returns (uint256)
     {
-        return _handlePurchasePresale(quantity, maxQuantity, pricePerToken, merkleProof, "");
+        return _handlePurchasePresale(quantity, maxQuantity, pricePerToken, merkleProof, EMPTY_STRING);
     }
 
+    /// @notice Merkle-tree based presale purchase function with a comment
+    /// @param quantity quantity to purchase
+    /// @param maxQuantity max quantity that can be purchased via merkle proof #
+    /// @param pricePerToken price that each token is purchased at
+    /// @param merkleProof proof for presale mint
+    /// @param comment comment to include in the IERC721Drop.Sale event
     function purchasePresaleWithComment(
         uint256 quantity,
         uint256 maxQuantity,

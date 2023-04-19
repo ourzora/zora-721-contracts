@@ -55,7 +55,7 @@ contract ERC721Drop is
     PublicMulticall,
     OwnableSkeleton,
     FundsReceiver,
-    Version(11),
+    Version(12),
     ERC721DropStorageV1
 {
     /// @dev This is the max mint batch size for the optimized ERC721A mint contract
@@ -168,8 +168,8 @@ contract ERC721Drop is
     /// @param _zoraERC721TransferHelper Transfer helper
     /// @param _factoryUpgradeGate Factory upgrade gate address
     /// @param _marketFilterDAOAddress Market filter DAO address
-    /// @param _factoryUpgradeGate Factory upgrade gate address
-    /// @param _marketFilterDAOAddress Market filter DAO address
+    /// @param _mintFeeAmount Mint fee amount in wei
+    /// @param _mintFeeRecipient Mint fee recipient address
     constructor(
         address _zoraERC721TransferHelper,
         IFactoryUpgradeGate _factoryUpgradeGate,

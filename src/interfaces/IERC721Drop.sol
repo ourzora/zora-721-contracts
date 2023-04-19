@@ -97,7 +97,7 @@ interface IERC721Drop {
     event MintComment(
         address indexed to,
         uint256 indexed tokenId,
-        uint256 indexed quantity,
+        uint256 quantity,
         string comment
     );
 

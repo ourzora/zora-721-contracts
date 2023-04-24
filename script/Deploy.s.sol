@@ -59,24 +59,31 @@ contract Deploy is Script {
             dropMetadata
         );
 
+        console2.log("factoryimpl", address(factoryImpl));
+        console2.log("factoryimpllen", address(factoryImpl).code.length);
+        console2.log("dropimpl", address(dropImplementation));
+        console2.log("dropimpllen", address(dropImplementation).code.length);
+
         // Sets owner as deployer - then the deployer address can transfer ownership
         ZoraNFTCreatorProxy factory = new ZoraNFTCreatorProxy(
             address(factoryImpl),
             abi.encodeWithSelector(ZoraNFTCreatorV1.initialize.selector)
         );
 
+        ZoraNFTCreatorV1(address(factory)).transferOwnership(factoryUpgradeGateOwner);
+
         console2.log("Factory: ");
         console2.log(address(factory));
 
         vm.stopBroadcast();
 
-        string memory filePath = string(
-            abi.encodePacked(
-                "deploys/",
-                chainID.toString(),
-                ".upgradeMetadata.txt"
-            )
-        );
+        // string memory filePath = string(
+        //     abi.encodePacked(
+        //         "deploys/",
+        //         chainID.toString(),
+        //         ".upgradeMetadata.txt"
+        //     )
+        // );
         // vm.writeFile(filePath, "");
         // vm.writeLine(
         //     filePath,

@@ -83,8 +83,8 @@ contract ERC721Drop is
     /// @notice Max royalty BPS
     uint16 constant MAX_ROYALTY_BPS = 50_00;
 
-    /// @notice Empty string for blank comments
-    string constant EMPTY_STRING = "";
+    // /// @notice Empty string for blank comments
+    // string constant EMPTY_STRING = "";
 
     /// @notice Market filter DAO address for opensea filter registry
     address public immutable marketFilterDAOAddress;
@@ -444,7 +444,7 @@ contract ERC721Drop is
         onlyPublicSaleActive
         returns (uint256)
     {
-        return _handlePurchase(quantity, EMPTY_STRING);
+        return _handlePurchase(quantity, "");
     }
 
     /// @notice Purchase a quantity of tokens with a comment
@@ -598,7 +598,7 @@ contract ERC721Drop is
         onlyPresaleActive
         returns (uint256)
     {
-        return _handlePurchasePresale(quantity, maxQuantity, pricePerToken, merkleProof, EMPTY_STRING);
+        return _handlePurchasePresale(quantity, maxQuantity, pricePerToken, merkleProof, "");
     }
 
     /// @notice Merkle-tree based presale purchase function with a comment
@@ -666,7 +666,7 @@ contract ERC721Drop is
             pricePerToken: pricePerToken,
             firstPurchasedTokenId: firstMintedTokenId
         });
-        if(bytes(comment).length > 0) {
+        if (bytes(comment).length > 0) {
             emit IERC721Drop.MintComment({
                 sender: _msgSender(),
                 tokenContract: address(this),

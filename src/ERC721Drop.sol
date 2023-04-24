@@ -581,21 +581,21 @@ contract ERC721Drop is
     /// @param to Transfer to user
     /// @param startTokenId Token ID to start with
     /// @param quantity Quantity of token being transferred
-    function _beforeTokenTransfers(
-        address from,
-        address to,
-        uint256 startTokenId,
-        uint256 quantity
-    ) internal virtual override {
-        if (
-            from != address(0) && // skip on mints
-            from != msg.sender // skip on transfers from sender
-        ) {
-            if (!operatorFilterRegistry.isOperatorAllowed(address(this), msg.sender)) {
-                revert OperatorNotAllowed(msg.sender);
-            }
-        }
-    }
+    // function _beforeTokenTransfers(
+    //     address from,
+    //     address to,
+    //     uint256 startTokenId,
+    //     uint256 quantity
+    // ) internal virtual override {
+    //     if (
+    //         from != address(0) && // skip on mints
+    //         from != msg.sender // skip on transfers from sender
+    //     ) {
+    //         if (!operatorFilterRegistry.isOperatorAllowed(address(this), msg.sender)) {
+    //             revert OperatorNotAllowed(msg.sender);
+    //         }
+    //     }
+    // }
 
     /**
      *** ---------------------------------- ***

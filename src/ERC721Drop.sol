@@ -494,7 +494,8 @@ contract ERC721Drop is
         });
         if(bytes(comment).length > 0) {
             emit IERC721Drop.MintComment({
-                to: _msgSender(),
+                sender: _msgSender(),
+                tokenContract: address(this),
                 tokenId: firstMintedTokenId,
                 quantity: quantity,
                 comment: comment
@@ -667,7 +668,8 @@ contract ERC721Drop is
         });
         if(bytes(comment).length > 0) {
             emit IERC721Drop.MintComment({
-                to: _msgSender(),
+                sender: _msgSender(),
+                tokenContract: address(this),
                 tokenId: firstMintedTokenId,
                 quantity: quantity,
                 comment: comment

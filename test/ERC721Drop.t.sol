@@ -39,7 +39,8 @@ contract ERC721DropTest is Test {
     );
 
     event MintComment(
-        address indexed to,
+        address indexed sender,
+        address indexed tokenContract,
         uint256 indexed tokenId,
         uint256 quantity,
         string comment
@@ -356,6 +357,7 @@ contract ERC721DropTest is Test {
         vm.expectEmit(true, true, true, true);
         emit MintComment(
             address(456),
+            address(zoraNFTBase),
             0,
             purchaseQuantity,
             "test comment"

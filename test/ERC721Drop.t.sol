@@ -31,6 +31,21 @@ contract ERC721DropTest is Test {
         uint256 feeAmount
     );
 
+    event Sale(
+        address indexed to,
+        uint256 indexed quantity,
+        uint256 indexed pricePerToken,
+        uint256 firstPurchasedTokenId
+    );
+
+    event MintComment(
+        address indexed sender,
+        address indexed tokenContract,
+        uint256 indexed tokenId,
+        uint256 quantity,
+        string comment
+    );
+
     ERC721Drop zoraNFTBase;
     MockUser mockUser;
     DummyMetadataRenderer public dummyRenderer = new DummyMetadataRenderer();
@@ -300,6 +315,13 @@ contract ERC721DropTest is Test {
         uint256 paymentAmount = uint256(salePrice) * purchaseQuantity + zoraFee;
         vm.deal(address(456), paymentAmount);
         vm.prank(address(456));
+        vm.expectEmit(true, true, true, true);
+        emit Sale(
+            address(456),
+            purchaseQuantity,
+            salePrice,
+            0
+        );
         zoraNFTBase.purchase{value: paymentAmount}(purchaseQuantity);
 
         assertEq(zoraNFTBase.saleDetails().maxSupply, purchaseQuantity);
@@ -310,6 +332,37 @@ contract ERC721DropTest is Test {
         );
         assertEq(address(zoraNFTBase).balance, paymentAmount - zoraFee);
         assertEq(mintFeeRecipient.balance, zoraFee);
+    }
+
+    function test_PurchaseWithComment(
+        uint64 salePrice,
+        uint32 purchaseQuantity
+    ) public setupZoraNFTBase(purchaseQuantity) {
+        vm.assume(purchaseQuantity < 100 && purchaseQuantity > 0);
+        vm.prank(DEFAULT_OWNER_ADDRESS);
+        zoraNFTBase.setSaleConfiguration({
+            publicSaleStart: 0,
+            publicSaleEnd: type(uint64).max,
+            presaleStart: 0,
+            presaleEnd: 0,
+            publicSalePrice: salePrice,
+            maxSalePurchasePerAddress: purchaseQuantity + 1,
+            presaleMerkleRoot: bytes32(0)
+        });
+
+        (, uint256 zoraFee) = zoraNFTBase.zoraFeeForAmount(purchaseQuantity);
+        uint256 paymentAmount = uint256(salePrice) * purchaseQuantity + zoraFee;
+        vm.deal(address(456), paymentAmount);
+        vm.prank(address(456));
+        vm.expectEmit(true, true, true, true);
+        emit MintComment(
+            address(456),
+            address(zoraNFTBase),
+            0,
+            purchaseQuantity,
+            "test comment"
+        );
+        zoraNFTBase.purchaseWithComment{value: paymentAmount}(purchaseQuantity, "test comment");
     }
 
     function test_UpgradeApproved() public setupZoraNFTBase(10) {

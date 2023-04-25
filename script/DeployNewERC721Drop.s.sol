@@ -20,12 +20,9 @@ import {ERC721DropProxy} from "../src/ERC721DropProxy.sol";
 
 contract DeployNewERC721Drop is Script {
     using Strings for uint256;
+    using stdJson for string;
 
     string configFile;
-
-    function _getKey(string memory key) internal returns (address result) {
-        (result) = abi.decode(vm.parseJson(configFile, key), (address));
-    }
 
     function run() public {
         uint256 chainID = vm.envUint("CHAIN_ID");
@@ -36,27 +33,23 @@ contract DeployNewERC721Drop is Script {
         configFile = vm.readFile(
             string.concat("./addresses/", Strings.toString(chainID), ".json")
         );
-        address zoraERC721TransferHelper = _getKey(
-            "ZORA_ERC721_TRANSFER_HELPER"
-        );
-        address factoryUpgradeGate = _getKey("FACTORY_UPGRADE_GATE");
-        address ownedSubscriptionManager = _getKey(
-            "OWNED_SUBSCRIPTION_MANAGER"
-        );
+        address zoraERC721TransferHelper = configFile.readAddress(".ZORA_ERC721_TRANSFER_HELPER");
+        address factoryUpgradeGate = configFile.readAddress(".FACTORY_UPGRADE_GATE");
+        address ownedSubscriptionManager = configFile.readAddress(".OWNED_SUBSCRIPTION_MANAGER");
         console2.log("OWNED_SUB_MANAGER");
         console2.log(ownedSubscriptionManager);
         console2.log("FACTORY_UPGRADE_GATE", factoryUpgradeGate);
 
-        address editionMetadataRenderer = _getKey("EDITION_METADATA_RENDERER");
-        address dropMetadataRenderer = _getKey("DROP_METADATA_RENDERER");
+        address editionMetadataRenderer = configFile.readAddress(".EDITION_METADATA_RENDERER");
+        address dropMetadataRenderer = configFile.readAddress(".DROP_METADATA_RENDERER");
 
         console2.log("EDITION_METADATA_RENDERER", editionMetadataRenderer);
         console2.log("DROP_METADATA_RENDERER", dropMetadataRenderer);
 
-        uint256 mintFeeAmount = vm.parseJsonUint(configFile, "MINT_FEE_AMOUNT");
+        uint256 mintFeeAmount = vm.parseJsonUint(configFile, ".MINT_FEE_AMOUNT");
 
         address payable mintFeeRecipient = payable(
-            _getKey("MINT_FEE_RECIPIENT")
+            configFile.readAddress(".MINT_FEE_RECIPIENT")
         );
 
         console2.log("MINT_FEE_RECIPIENT", mintFeeRecipient);

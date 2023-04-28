@@ -17,6 +17,7 @@ import {EditionMetadataRenderer} from "../src/metadata/EditionMetadataRenderer.s
 import {IZoraFeeManager} from "../src/interfaces/IZoraFeeManager.sol";
 import {IFactoryUpgradeGate} from "../src/interfaces/IFactoryUpgradeGate.sol";
 import {ERC721DropProxy} from "../src/ERC721DropProxy.sol";
+import {IERC721Drop} from "../src//interfaces/IERC721Drop.sol";
 
 contract DeployNewERC721Drop is Script {
     using Strings for uint256;
@@ -33,6 +34,9 @@ contract DeployNewERC721Drop is Script {
         configFile = vm.readFile(
             string.concat("./addresses/", Strings.toString(chainID), ".json")
         );
+
+        address zoraNFTCreatorAddress = configFile.readAddress(".ZORA_NFT_CREATOR_PROXY");
+        ZoraNFTCreatorV1 zoraNFTCreator = ZoraNFTCreatorV1(zoraNFTCreatorAddress);
         address zoraERC721TransferHelper = configFile.readAddress(".ZORA_ERC721_TRANSFER_HELPER");
         address factoryUpgradeGate = configFile.readAddress(".FACTORY_UPGRADE_GATE");
         address ownedSubscriptionManager = configFile.readAddress(".OWNED_SUBSCRIPTION_MANAGER");
@@ -70,17 +74,31 @@ contract DeployNewERC721Drop is Script {
         console2.log("Drop IMPL: ");
         console2.log(address(dropImplementation));
 
-        ZoraNFTCreatorV1 zoraNFTCreator = new ZoraNFTCreatorV1({
+        ZoraNFTCreatorV1 newZoraNFTCreatorImpl = new ZoraNFTCreatorV1({
             _implementation: address(dropImplementation),
             _editionMetadataRenderer: EditionMetadataRenderer(
                 editionMetadataRenderer
             ),
             _dropMetadataRenderer: DropMetadataRenderer(dropMetadataRenderer)
         });
-        // zoraNFTCreator.initialize();
 
         console2.log("Factory/Creator IMPL: ");
-        console2.log(address(zoraNFTCreator));
+        console2.log(address(newZoraNFTCreatorImpl));
+
+        IERC721Drop.SalesConfiguration memory saleConfig;
+        address newContract = address(zoraNFTCreator.createEdition(
+            unicode"☾*☽",
+            "~",
+            0,
+            0,
+            payable(address(0)),
+            address(0),
+            saleConfig,
+            "",
+            "ipfs://bafkreigu544g6wjvqcysurpzy5pcskbt45a5f33m6wgythpgb3rfqi3lzi",
+            "ipfs://bafkreigu544g6wjvqcysurpzy5pcskbt45a5f33m6wgythpgb3rfqi3lzi"
+        ));
+        console2.log("Deploying new contract for verification purposes", newContract);
 
         // Next steps:
         // 1. Setup upgrade path

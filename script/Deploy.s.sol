@@ -14,6 +14,7 @@ import {OwnedSubscriptionManager} from "../src/filter/OwnedSubscriptionManager.s
 import {FactoryUpgradeGate} from "../src/FactoryUpgradeGate.sol";
 import {DropMetadataRenderer} from "../src/metadata/DropMetadataRenderer.sol";
 import {EditionMetadataRenderer} from "../src/metadata/EditionMetadataRenderer.sol";
+import {IERC721Drop} from "../src//interfaces/IERC721Drop.sol";
 
 contract Deploy is Script {
     using Strings for uint256;
@@ -60,13 +61,28 @@ contract Deploy is Script {
         );
 
         // Sets owner as deployer - then the deployer address can transfer ownership
-        ZoraNFTCreatorProxy factory = new ZoraNFTCreatorProxy(
+        ZoraNFTCreatorV1 factory = ZoraNFTCreatorV1(address(new ZoraNFTCreatorProxy(
             address(factoryImpl),
             abi.encodeWithSelector(ZoraNFTCreatorV1.initialize.selector)
-        );
+        )));
 
         console2.log("Factory: ");
         console2.log(address(factory));
+
+        IERC721Drop.SalesConfiguration memory saleConfig;
+        address newContract = address(factory.createEdition(
+            unicode"☾*☽",
+            "~",
+            0,
+            0,
+            payable(address(0)),
+            address(0),
+            saleConfig,
+            "",
+            "ipfs://bafkreigu544g6wjvqcysurpzy5pcskbt45a5f33m6wgythpgb3rfqi3lzi",
+            "ipfs://bafkreigu544g6wjvqcysurpzy5pcskbt45a5f33m6wgythpgb3rfqi3lzi"
+        ));
+        console2.log("Deploying new contract for verification purposes", newContract);
 
         vm.stopBroadcast();
 

@@ -1,71 +1,100 @@
-i// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: MIT
 pragma solidity >=0.8.0;
 
 library LibString {
-    function replace(
-        string memory subject,
-        string memory search, 
-        string memory replacement
-    ) internal pure returns (string memory result) {
+    /// @dev Returns `subject` all occurrences of `search` replaced with `replacement`.
+    function replace(string memory subject, string memory search, string memory replacement) internal pure returns (string memory result) {
+        /// @solidity memory-safe-assembly
         assembly {
             let subjectLength := mload(subject)
             let searchLength := mload(search)
             let replacementLength := mload(replacement)
-
-            // Store the mask for sub-word comparisons in the scratch space.
-            mstore(0x00, not(0))
-            mstore(0x20, 0)
 
             subject := add(subject, 0x20)
             search := add(search, 0x20)
             replacement := add(replacement, 0x20)
             result := add(mload(0x40), 0x20)
 
-            let k := 0
-
             let subjectEnd := add(subject, subjectLength)
             if iszero(gt(searchLength, subjectLength)) {
                 let subjectSearchEnd := add(sub(subjectEnd, searchLength), 1)
-                for {} lt(subject, subjectSearchEnd) {} {
-                    let o := and(searchLength, 31)
-                    // Whether the first `searchLength % 32` bytes of 
+                let h := 0
+                if iszero(lt(searchLength, 32)) {
+                    h := keccak256(search, searchLength)
+                }
+                let m := shl(3, sub(32, and(searchLength, 31)))
+                let s := mload(search)
+                for {
+
+                } 1 {
+
+                } {
+                    let t := mload(subject)
+                    // Whether the first `searchLength % 32` bytes of
                     // `subject` and `search` matches.
-                    let l := iszero(and(xor(mload(subject), mload(search)), mload(sub(0x20, o))))
-                    // Iterate through the rest of `search` and check if any word mismatch.
-                    // If any mismatch is detected, `l` is set to 0.
-                    for {} and(lt(o, searchLength), l) {} {
-                        l := eq(mload(add(subject, o)), mload(add(search, o)))
-                        o := add(o, 0x20)
-                    }
-                    // If `l` is one, there is a match, and we have to copy the `replacement`.
-                    if l {
-                        // Copy the `replacement` one word at a time.
-                        for { o := 0 } lt(o, replacementLength) { o := add(o, 0x20) } {
-                            mstore(add(result, add(k, o)), mload(add(replacement, o)))
+                    if iszero(shr(m, xor(t, s))) {
+                        if h {
+                            if iszero(eq(keccak256(subject, searchLength), h)) {
+                                mstore(result, t)
+                                result := add(result, 1)
+                                subject := add(subject, 1)
+                                if iszero(lt(subject, subjectSearchEnd)) {
+                                    break
+                                }
+                                continue
+                            }
                         }
-                        k := add(k, replacementLength)
+                        // Copy the `replacement` one word at a time.
+                        for {
+                            let o := 0
+                        } 1 {
+
+                        } {
+                            mstore(add(result, o), mload(add(replacement, o)))
+                            o := add(o, 0x20)
+                            if iszero(lt(o, replacementLength)) {
+                                break
+                            }
+                        }
+                        result := add(result, replacementLength)
                         subject := add(subject, searchLength)
+                        if searchLength {
+                            if iszero(lt(subject, subjectSearchEnd)) {
+                                break
+                            }
+                            continue
+                        }
                     }
-                    // If `l` or `searchLength` is zero.
-                    if iszero(mul(l, searchLength)) {
-                        mstore(add(result, k), mload(subject))
-                        k := add(k, 1)
-                        subject := add(subject, 1)
+                    mstore(result, t)
+                    result := add(result, 1)
+                    subject := add(subject, 1)
+                    if iszero(lt(subject, subjectSearchEnd)) {
+                        break
                     }
                 }
             }
 
-            let resultRemainder := add(result, k)
-            k := add(k, sub(subjectEnd, subject))
+            let resultRemainder := result
+            result := add(mload(0x40), 0x20)
+            let k := add(sub(resultRemainder, result), sub(subjectEnd, subject))
             // Copy the rest of the string one word at a time.
-            for {} lt(subject, subjectEnd) {} {    
+            for {
+
+            } lt(subject, subjectEnd) {
+
+            } {
                 mstore(resultRemainder, mload(subject))
                 resultRemainder := add(resultRemainder, 0x20)
                 subject := add(subject, 0x20)
             }
-            // Allocate memory for the length and the bytes, rounded up to a multiple of 32.
-            mstore(0x40, add(result, and(add(k, 64), not(31))))
             result := sub(result, 0x20)
+            // Zeroize the slot after the string.
+            let last := add(add(result, 0x20), k)
+            mstore(last, 0)
+            // Allocate memory for the length and the bytes,
+            // rounded up to a multiple of 32.
+            mstore(0x40, and(add(last, 31), not(31)))
+            // Store the length of the result.
             mstore(result, k)
         }
     }

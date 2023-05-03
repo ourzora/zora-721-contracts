@@ -8,123 +8,70 @@ import {IERC2981Upgradeable} from "@openzeppelin/contracts-upgradeable/interface
 import {NFTMetadataRenderer} from "../utils/NFTMetadataRenderer.sol";
 import {MetadataRenderAdminCheck} from "./MetadataRenderAdminCheck.sol";
 import {BytecodeStorage} from "../utils/metadata/BytecodeStorage.sol";
+import {LibString} from "../utils/metadata/LibString.sol";
+import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 
 interface DropConfigGetter {
-    function config()
-        external
-        view
-        returns (IERC721Drop.Configuration memory config);
+    function config() external view returns (IERC721Drop.Configuration memory config);
 }
 
-/// @notice EditionMetadataRenderer for editions support
-contract EditionMetadataRenderer is
-    IMetadataRenderer,
-    MetadataRenderAdminCheck
-{
-  event SetMetadataTemplate(
-    address target,
-    address sender,
-    string template
-  );
+/// @notice ImmutableEditionMetadataRenderer for editions support with contract storage optimization
+contract ImmutableEditionMetadataRenderer is IMetadataRenderer, MetadataRenderAdminCheck {
+    event SetMetadataTemplate(address target, address sender, string template);
 
     /// @notice Token information mapping storage
     mapping(address => address) public tokenData;
 
-    /// @notice Update media URIs
+    /// @notice Update template
     /// @param target target for contract to update metadata for
-    /// @param imageURI new image uri address
-    /// @param animationURI new animation uri address
-    function updateTemplate(
-        address target,
-        string calldata template
-    ) external requireSenderAdmin(target) {
-      BytecodeStorage.purgeBytecode(tokenData[target]);
-      BytecodeStorage.writeToBytecode(template);
-      emit SetMetadataTemplate({
-        target: target,
-        sender: msg.sender, 
-        template: template
-      });
+    /// @param template new template to update
+    function updateTemplate(address target, string calldata template) external requireSenderAdmin(target) {
+        BytecodeStorage.purgeBytecode(tokenData[target]);
+        tokenData[target] = BytecodeStorage.writeToBytecode(template);
+        emit SetMetadataTemplate({target: target, sender: msg.sender, template: template});
     }
 
     /// @notice Default initializer for edition data from a specific contract
     /// @param data data to init with
     function initializeWithData(bytes memory data) external {
         // data format: description, imageURI, animationURI
-        (
-            string memory template,
-            string memory imageURI,
-            string memory animationURI
-        ) = abi.decode(data, (string, string, string));
+        string memory template = abi.decode(data, (string));
 
-        emit SetMetadataTemplate({
-          target: target,
-          wender: msg.sender,
-          template: template
-        });
+        address target = msg.sender;
 
-        tokenInfos[msg.sender] = TokenEditionInfo({
-            description: description,
-            imageURI: imageURI,
-            animationURI: animationURI
-        });
-        emit EditionInitialized({
-            target: msg.sender,
-            description: description,
-            imageURI: imageURI,
-            animationURI: animationURI
-        });
+        tokenData[target] = BytecodeStorage.writeToBytecode(template);
+
+        emit SetMetadataTemplate({target: target, sender: msg.sender, template: template});
+    }
+
+    function tokenDataWithIdReplaced(address target, string memory idReplacement) public view returns (string memory) {
+        string memory data = BytecodeStorage.readFromBytecode(tokenData[target]);
+
+        return LibString.replace(data, "__TOKEN_ID__", idReplacement);
     }
 
     /// @notice Contract URI information getter
     /// @return contract uri (if set)
     function contractURI() external view override returns (string memory) {
-        address target = msg.sender;
-        TokenEditionInfo storage editionInfo = tokenInfos[target];
-        IERC721Drop.Configuration memory config = DropConfigGetter(target)
-            .config();
-
-        return
-            NFTMetadataRenderer.encodeContractURIJSON({
-                name: IERC721MetadataUpgradeable(target).name(),
-                description: editionInfo.description,
-                imageURI: editionInfo.imageURI,
-                animationURI: editionInfo.animationURI,
-                royaltyBPS: uint256(config.royaltyBPS),
-                royaltyRecipient: config.fundsRecipient
-            });
+        return NFTMetadataRenderer.encodeMetadataJSON(bytes(tokenDataWithIdReplaced(msg.sender, "")));
     }
 
     /// @notice Token URI information getter
     /// @param tokenId to get uri for
     /// @return contract uri (if set)
-    function tokenURI(uint256 tokenId)
-        external
-        view
-        override
-        returns (string memory)
-    {
+    function tokenURI(uint256 tokenId) external view override returns (string memory) {
         address target = msg.sender;
 
-        TokenEditionInfo memory info = tokenInfos[target];
         IERC721Drop media = IERC721Drop(target);
 
         uint256 maxSupply = media.saleDetails().maxSupply;
 
-        // For open editions, set max supply to 0 for renderer to remove the edition max number
-        // This will be added back on once the open edition is "finalized"
-        if (maxSupply == type(uint64).max) {
-            maxSupply = 0;
+        string memory numberString = string.concat(Strings.toString(tokenId));
+
+        if (maxSupply != type(uint64).max) {
+            numberString = string.concat(Strings.toString(tokenId), "/", Strings.toString(maxSupply));
         }
 
-        return
-            NFTMetadataRenderer.createMetadataEdition({
-                name: IERC721MetadataUpgradeable(target).name(),
-                description: info.description,
-                imageURI: info.imageURI,
-                animationURI: info.animationURI,
-                tokenOfEdition: tokenId,
-                editionSize: maxSupply
-            });
+        return NFTMetadataRenderer.encodeMetadataJSON(bytes(tokenDataWithIdReplaced(msg.sender, numberString)));
     }
 }

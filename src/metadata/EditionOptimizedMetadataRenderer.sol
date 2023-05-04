@@ -9,43 +9,67 @@ import {NFTMetadataRenderer} from "../utils/NFTMetadataRenderer.sol";
 import {MetadataRenderAdminCheck} from "./MetadataRenderAdminCheck.sol";
 import {BytecodeStorage} from "../utils/metadata/BytecodeStorage.sol";
 import {LibString} from "../utils/metadata/LibString.sol";
+import {InflateLib} from "../utils/metadata/InflateLib.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 
 interface DropConfigGetter {
     function config() external view returns (IERC721Drop.Configuration memory config);
 }
 
-/// @notice ImmutableEditionMetadataRenderer for editions support with contract storage optimization
-contract ImmutableEditionMetadataRenderer is IMetadataRenderer, MetadataRenderAdminCheck {
-    event SetMetadataTemplate(address target, address sender, string template);
+/// @notice EditionOptimizedMetadataRenderer for editions support with contract storage optimization
+contract EditionOptimizedMetadataRenderer is IMetadataRenderer, MetadataRenderAdminCheck {
+    struct DataInfo {
+        uint256 compressedSize;
+        address store;
+    }
+    event SetMetadataTemplate(address indexed target, address indexed sender, string template, uint256 compressedSize);
+    event PurgedTemplate(address indexed target, address indexed sender);
 
     /// @notice Token information mapping storage
-    mapping(address => address) public tokenData;
+    mapping(address => DataInfo) public tokenData;
 
     /// @notice Update template
     /// @param target target for contract to update metadata for
     /// @param template new template to update
     function updateTemplate(address target, string calldata template) external requireSenderAdmin(target) {
-        BytecodeStorage.purgeBytecode(tokenData[target]);
-        tokenData[target] = BytecodeStorage.writeToBytecode(template);
-        emit SetMetadataTemplate({target: target, sender: msg.sender, template: template});
+        BytecodeStorage.purgeBytecode(tokenData[target].store);
+        tokenData[target] = DataInfo({store: BytecodeStorage.writeToBytecode(template), compressedSize: 0});
+        emit SetMetadataTemplate({target: target, sender: msg.sender, template: template, compressedSize: 0});
+    }
+
+    function updateCompressedTemplate(address target, bytes calldata compressedTemplate, uint256 compressedSize) external requireSenderAdmin(target) {
+        BytecodeStorage.purgeBytecode(tokenData[target].store);
+        tokenData[target] = DataInfo({compressedSize: compressedSize, store: BytecodeStorage.writeToBytecode(string(compressedTemplate))});
+        emit SetMetadataTemplate({target: target, sender: msg.sender, template: string(compressedTemplate), compressedSize: compressedSize});
+    }
+
+    function clearTemplate(address target) external requireSenderAdmin(target) {
+        BytecodeStorage.purgeBytecode(tokenData[target].store);
+        tokenData[target] = DataInfo({store: address(0), compressedSize: 0});
+        emit PurgedTemplate(target, msg.sender);
     }
 
     /// @notice Default initializer for edition data from a specific contract
     /// @param data data to init with
     function initializeWithData(bytes memory data) external {
-        // data format: description, imageURI, animationURI
-        string memory template = abi.decode(data, (string));
+        // data format: compressedSize (0 if uncompressed), template data.
+        (uint256 compressedSize, string memory template) = abi.decode(data, (uint256, string));
 
         address target = msg.sender;
 
-        tokenData[target] = BytecodeStorage.writeToBytecode(template);
+        tokenData[target] = DataInfo({compressedSize: compressedSize, store: BytecodeStorage.writeToBytecode(template)});
 
-        emit SetMetadataTemplate({target: target, sender: msg.sender, template: template});
+        emit SetMetadataTemplate({target: target, sender: msg.sender, template: template, compressedSize: compressedSize});
     }
 
     function tokenDataWithIdReplaced(address target, string memory idReplacement) public view returns (string memory) {
-        string memory data = BytecodeStorage.readFromBytecode(tokenData[target]);
+        DataInfo memory dataInfo = tokenData[target];
+        string memory data = BytecodeStorage.readFromBytecode(dataInfo.store);
+
+        if (dataInfo.compressedSize > 0) {
+            (, bytes memory decompressed) = InflateLib.puff(bytes(data), dataInfo.compressedSize);
+            data = string(decompressed);
+        }
 
         return LibString.replace(data, "__TOKEN_ID__", idReplacement);
     }

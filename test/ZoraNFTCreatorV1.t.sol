@@ -48,6 +48,14 @@ contract ZoraNFTCreatorV1Test is Test {
         );
     }
 
+    function test_ContractName() public {
+        assertEq(creator.contractName(), "Zora NFT Creator");
+    }
+
+    function test_ContractURI() public {
+        assertEq(creator.contractURI(), "https://github.com/ourzora/zora-drops-contracts");
+    }
+
     function test_CreateEdition() public {
         address deployedEdition = creator.createEdition(
             "name",

@@ -49,7 +49,7 @@ contract ZoraNFTCreatorV1Test is Test {
     }
 
     function test_ContractName() public {
-        assertEq(creator.contractName(), "Zora NFT Creator");
+        assertEq(creator.contractName(), "ZORA NFT Creator");
     }
 
     function test_ContractURI() public {

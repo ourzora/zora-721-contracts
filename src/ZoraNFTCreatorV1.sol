@@ -61,7 +61,7 @@ contract ZoraNFTCreatorV1 is OwnableUpgradeable, UUPSUpgradeable, IContractMetad
     }
 
     function contractName() external pure override returns (string memory) {
-        return "Zora NFT Creator";
+        return "ZORA NFT Creator";
     }
 
     function contractURI() external pure override returns (string memory) {

@@ -152,7 +152,7 @@ contract ZoraNFTCreatorV1Test is Test {
         MockContractMetadata mockMetadata = new MockContractMetadata("uri", "name");
         address owner = creator.owner();
         vm.prank(owner);
-        vm.expectRevert(abi.encodeWithSignature("UpgradeToMismatchedContractName(string,string)", "Zora NFT Creator", "name"));
+        vm.expectRevert(abi.encodeWithSignature("UpgradeToMismatchedContractName(string,string)", "ZORA NFT Creator", "name"));
         creator.upgradeTo(address(mockMetadata));
     }
 }

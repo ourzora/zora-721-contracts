@@ -77,7 +77,6 @@ contract DeployNewERC721Drop is Script {
             ),
             _dropMetadataRenderer: DropMetadataRenderer(dropMetadataRenderer)
         });
-        // zoraNFTCreator.initialize();
 
         console2.log("Factory/Creator IMPL: ");
         console2.log(address(zoraNFTCreator));

@@ -76,32 +76,5 @@ contract Deploy is Script {
         console2.log(address(factory));
 
         vm.stopBroadcast();
-
-        // string memory filePath = string(
-        //     abi.encodePacked(
-        //         "deploys/",
-        //         chainID.toString(),
-        //         ".upgradeMetadata.txt"
-        //     )
-        // );
-        // vm.writeFile(filePath, "");
-        // vm.writeLine(
-        //     filePath,
-        //     string(
-        //         abi.encodePacked(
-        //             "Metadata Renderer implementation: ",
-        //             Strings.toHexString(metadataRendererImpl)
-        //         )
-        //     )
-        // );
-        // vm.writeLine(
-        //     filePath,
-        //     string(
-        //         abi.encodePacked(
-        //             "Manager implementation: ",
-        //             Strings.toHexString(managerImpl)
-        //         )
-        //     )
-        // );
     }
 }

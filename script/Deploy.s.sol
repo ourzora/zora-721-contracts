@@ -59,10 +59,10 @@ contract Deploy is Script {
             dropMetadata
         );
 
-        console2.log("factoryimpl", address(factoryImpl));
-        console2.log("factoryimpllen", address(factoryImpl).code.length);
-        console2.log("dropimpl", address(dropImplementation));
-        console2.log("dropimpllen", address(dropImplementation).code.length);
+        console2.log("[debug] Factory Implementation:", address(factoryImpl));
+        console2.log("[debug] Factory Implementation Length:", address(factoryImpl).code.length);
+        console2.log("[debug] Drop Implementation:", address(dropImplementation));
+        console2.log("[debug] Drop Implementation Length:", address(dropImplementation).code.length);
 
         // Sets owner as deployer - then the deployer address can transfer ownership
         ZoraNFTCreatorProxy factory = new ZoraNFTCreatorProxy(

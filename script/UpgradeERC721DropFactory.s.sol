@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: UNLICENSED
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.13;
 
 import "forge-std/console2.sol";
@@ -23,18 +23,32 @@ contract UpgradeERC721DropFactory is ZoraDropsDeployBase {
         DropDeployment memory deployment = getDeployment();
         ChainConfig memory chainConfig = getChainConfig();
 
-        // bytes32 dropRendererCodehash = keccak256(deployment.dropMetadata.code);
-        // bytes32 editionRendererCodehash = keccak256(deployment.editionMetadata.code);
+        bytes32 dropRendererCodehash = keccak256(deployment.dropMetadata.code);
+        // it is important for this to be _outside_ startBroadcast since this does a null deployment to 
+        // read the latest contract code to compare versions
+        bytes32 newDropRendererCodehash = keccak256(address(new DropMetadataRenderer()).code);
 
-        // bytes32 newDropRendererCodehash = keccak256(address(new DropMetadataRenderer()).code);
-        // bytes32 newEditionRendererCodehash = keccak256(address(new EditionMetadataRenderer()).code);
+        bytes32 editionRendererCodehash = keccak256(deployment.editionMetadata.code);
+        // it is important for this to be _outside_ startBroadcast since this does a null deployment to 
+        // read the latest contract code to compare versions
+        bytes32 newEditionRendererCodehash = keccak256(address(new EditionMetadataRenderer()).code);
 
-        // bool deployNewDropRenderer = dropRendererCodehash != newDropRendererCodehash;
-        // bool deployNewEditionRenderer = dropRendererCodehash != newDropRendererCodehash;
+        bool deployNewDropRenderer = dropRendererCodehash != newDropRendererCodehash;
+        bool deployNewEditionRenderer = editionRendererCodehash != newEditionRendererCodehash;
 
         vm.startBroadcast();
 
         console2.log("Setup contracts ---");
+
+        if (deployNewDropRenderer) {
+            deployment.dropMetadata = address(new DropMetadataRenderer());
+            console2.log("Deployed new drop renderer to ", deployment.dropMetadata);
+        }
+
+        if (deployNewEditionRenderer) {
+            deployment.editionMetadata = address(new EditionMetadataRenderer());
+            console2.log("Deployed new edition renderer to ", deployment.editionMetadata);
+        }
 
         ERC721Drop dropImplementation = new ERC721Drop({
             _zoraERC721TransferHelper: chainConfig.zoraERC721TransferHelper,
@@ -51,9 +65,7 @@ contract UpgradeERC721DropFactory is ZoraDropsDeployBase {
 
         ZoraNFTCreatorV1 newZoraNFTCreatorImpl = new ZoraNFTCreatorV1({
             _implementation: address(deployment.dropImplementation),
-            _editionMetadataRenderer: EditionMetadataRenderer(
-                deployment.editionMetadata
-            ),
+            _editionMetadataRenderer: EditionMetadataRenderer(deployment.editionMetadata),
             _dropMetadataRenderer: DropMetadataRenderer(deployment.dropMetadata)
         });
 
@@ -63,18 +75,20 @@ contract UpgradeERC721DropFactory is ZoraDropsDeployBase {
         console2.log(address(newZoraNFTCreatorImpl));
 
         IERC721Drop.SalesConfiguration memory saleConfig;
-        address newContract = address(ZoraNFTCreatorV1(deployment.factoryImpl).createEdition(
-            unicode"☾*☽",
-            "~",
-            0,
-            0,
-            payable(address(0)),
-            address(0),
-            saleConfig,
-            "",
-            "ipfs://bafkreigu544g6wjvqcysurpzy5pcskbt45a5f33m6wgythpgb3rfqi3lzi",
-            "ipfs://bafkreigu544g6wjvqcysurpzy5pcskbt45a5f33m6wgythpgb3rfqi3lzi"
-        ));
+        address newContract = address(
+            ZoraNFTCreatorV1(deployment.factoryImpl).createEdition(
+                unicode"☾*☽",
+                "~",
+                0,
+                0,
+                payable(address(0)),
+                address(0),
+                saleConfig,
+                "",
+                "ipfs://bafkreigu544g6wjvqcysurpzy5pcskbt45a5f33m6wgythpgb3rfqi3lzi",
+                "ipfs://bafkreigu544g6wjvqcysurpzy5pcskbt45a5f33m6wgythpgb3rfqi3lzi"
+            )
+        );
 
         console2.log("Deploying new contract for verification purposes", newContract);
 

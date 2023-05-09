@@ -27,7 +27,11 @@ Use `1.json` for reference. We are ordering keys alphabetically.
 ### 2. Deploy forge script
 
     forge script script/Deploy.s.sol --broadcast --verify --rpc-url $ETH_RPC
-    
+  
+For example, to deploy on optimism goerli, this is the forge command:
+
+    forge script script/Deploy.s.sol --rpc-url https://goerli.optimism.io --verify --etherscan-api-key ${ETHERSCAN_OPTISM_API_KEY} --broadcast --interactives 1
+
 Use your own RPC configuration variables
 
 ### 3. Copy new chain configuration for deployment

@@ -19,7 +19,7 @@ import {ERC721DropProxy} from "../src/ERC721DropProxy.sol";
 import {IERC721Drop} from "../src//interfaces/IERC721Drop.sol";
 
 contract UpgradeERC721DropFactory is ZoraDropsDeployBase {
-    function run() public {
+    function run() public returns (string memory) {
         DropDeployment memory deployment = getDeployment();
         ChainConfig memory chainConfig = getChainConfig();
 
@@ -78,6 +78,6 @@ contract UpgradeERC721DropFactory is ZoraDropsDeployBase {
 
         vm.stopBroadcast();
 
-        writeDeployment(deployment);
+        return getDeploymentJSON(deployment);
     }
 }

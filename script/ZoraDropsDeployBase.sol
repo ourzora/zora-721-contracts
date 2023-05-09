@@ -74,17 +74,15 @@ abstract contract ZoraDropsDeployBase is Script {
         dropDeployment.factoryImpl = json.readAddress(getKeyPrefix(ZORA_NFT_CREATOR_V1_IMPL));
     }
 
-    function writeDeployment(DropDeployment memory deployment) internal {
-        string memory deploymentJson = "{}";
-        deploymentJson = vm.serializeAddress(deploymentJson, DROP_METADATA_RENDERER, deployment.dropMetadata);
-        deploymentJson = vm.serializeAddress(deploymentJson, EDITION_METADATA_RENDERER, deployment.editionMetadata);
-        deploymentJson = vm.serializeAddress(deploymentJson, ERC721DROP_IMPL, deployment.dropImplementation);
-        deploymentJson = vm.serializeAddress(deploymentJson, FACTORY_UPGRADE_GATE, deployment.factoryUpgradeGate);
-        deploymentJson = vm.serializeAddress(deploymentJson, ZORA_NFT_CREATOR_PROXY, deployment.factory);
-        deploymentJson = vm.serializeAddress(deploymentJson, ZORA_NFT_CREATOR_V1_IMPL, deployment.factoryImpl);
-
-        string memory deploymentDataPath = string.concat("addresses/", Strings.toString(chainId()), ".json");
-        vm.writeJson(deploymentJson, deploymentDataPath);
+    function getDeploymentJSON(DropDeployment memory deployment) internal returns (string memory deploymentJson) {
+        string memory deploymentJsonKey = "deployment_json_file_key";
+        vm.serializeAddress(deploymentJsonKey, DROP_METADATA_RENDERER, deployment.dropMetadata);
+        vm.serializeAddress(deploymentJsonKey, EDITION_METADATA_RENDERER, deployment.editionMetadata);
+        vm.serializeAddress(deploymentJsonKey, ERC721DROP_IMPL, deployment.dropImplementation);
+        vm.serializeAddress(deploymentJsonKey, FACTORY_UPGRADE_GATE, deployment.factoryUpgradeGate);
+        vm.serializeAddress(deploymentJsonKey, ZORA_NFT_CREATOR_PROXY, deployment.factory);
+        deploymentJson = vm.serializeAddress(deploymentJsonKey, ZORA_NFT_CREATOR_V1_IMPL, deployment.factoryImpl);
+        console2.log(deploymentJson);
     }
 
     function deployTestContractForVerification(ZoraNFTCreatorV1 factory) internal {

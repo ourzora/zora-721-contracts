@@ -17,7 +17,7 @@ import {IERC721Drop} from "../src//interfaces/IERC721Drop.sol";
 import {ZoraDropsDeployBase, ChainConfig, DropDeployment} from "./ZoraDropsDeployBase.sol";
 
 contract Deploy is ZoraDropsDeployBase {
-    function run() public {
+    function run() public returns (string memory) {
         console2.log("Starting --- chainId", chainId());
         ChainConfig memory chainConfig = getChainConfig();
         console2.log("Setup contracts ---");
@@ -52,15 +52,16 @@ contract Deploy is ZoraDropsDeployBase {
 
         vm.stopBroadcast();
 
-        writeDeployment(
-            DropDeployment({
-                dropMetadata: address(dropMetadata),
-                editionMetadata: address(editionMetadata),
-                dropImplementation: address(dropImplementation),
-                factoryUpgradeGate: address(factoryUpgradeGate),
-                factory: address(factory),
-                factoryImpl: address(factoryImpl)
-            })
-        );
+        return
+            getDeploymentJSON(
+                DropDeployment({
+                    dropMetadata: address(dropMetadata),
+                    editionMetadata: address(editionMetadata),
+                    dropImplementation: address(dropImplementation),
+                    factoryUpgradeGate: address(factoryUpgradeGate),
+                    factory: address(factory),
+                    factoryImpl: address(factoryImpl)
+                })
+            );
     }
 }

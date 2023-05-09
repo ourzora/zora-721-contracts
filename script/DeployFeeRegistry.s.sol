@@ -17,13 +17,10 @@ contract DeployFeeRegistry is ZoraDropsDeployBase {
     }
 
     function run() public {
-        console2.log("Starting ---");
-
-        
-
-        vm.startBroadcast();
         address subscriptionOwner = getChainConfig().subscriptionMarketFilterOwner;
         console2.log("Setup operators ---");
+
+        vm.startBroadcast();
 
         // Add opensea contracts to test
         OwnedSubscriptionManager ownedSubscriptionManager = setupFeeRegistry(subscriptionOwner);

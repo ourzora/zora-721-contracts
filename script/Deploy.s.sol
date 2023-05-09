@@ -19,12 +19,11 @@ import {ZoraDropsDeployBase, ChainConfig, DropDeployment} from "./ZoraDropsDeplo
 contract Deploy is ZoraDropsDeployBase {
     function run() public {
         console2.log("Starting --- chainId", chainId());
+        ChainConfig memory chainConfig = getChainConfig();
+        console2.log("Setup contracts ---");
 
         vm.startBroadcast();
 
-        ChainConfig memory chainConfig = getChainConfig();
-
-        console2.log("Setup contracts ---");
         DropMetadataRenderer dropMetadata = new DropMetadataRenderer();
         EditionMetadataRenderer editionMetadata = new EditionMetadataRenderer();
         FactoryUpgradeGate factoryUpgradeGate = new FactoryUpgradeGate(chainConfig.factoryUpgradeGateOwner);
@@ -66,15 +65,17 @@ contract Deploy is ZoraDropsDeployBase {
         );
         console2.log("Deploying new contract for verification purposes", newContract);
 
-        writeDeployment(DropDeployment({
-            dropMetadata: address(dropMetadata),
-            editionMetadata: address(editionMetadata),
-            dropImplementation: address(dropImplementation),
-            factoryUpgradeGate: address(factoryUpgradeGate),
-            factory: address(factory),
-            factoryImpl: address(factoryImpl)
-        }));
-
         vm.stopBroadcast();
+
+        writeDeployment(
+            DropDeployment({
+                dropMetadata: address(dropMetadata),
+                editionMetadata: address(editionMetadata),
+                dropImplementation: address(dropImplementation),
+                factoryUpgradeGate: address(factoryUpgradeGate),
+                factory: address(factory),
+                factoryImpl: address(factoryImpl)
+            })
+        );
     }
 }

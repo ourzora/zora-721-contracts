@@ -3,6 +3,8 @@ pragma solidity ^0.8.13;
 
 import "forge-std/Script.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
+import {ZoraNFTCreatorV1} from "../src/ZoraNFTCreatorV1.sol";
+import {IERC721Drop} from "../src/interfaces/IERC721Drop.sol";
 
 struct ChainConfig {
     address factoryOwner;
@@ -31,6 +33,8 @@ abstract contract ZoraDropsDeployBase is Script {
             id := chainid()
         }
     }
+
+    string constant DEMO_IPFS_METADATA_FILE = "ipfs://bafkreigu544g6wjvqcysurpzy5pcskbt45a5f33m6wgythpgb3rfqi3lzi";
 
     string constant FACTORY_OWNER = "FACTORY_OWNER";
     string constant FACTORY_UPGRADE_GATE_OWNER = "FACTORY_OWNER";
@@ -81,5 +85,13 @@ abstract contract ZoraDropsDeployBase is Script {
 
         string memory deploymentDataPath = string.concat("addresses/", Strings.toString(chainId()), ".json");
         vm.writeJson(deploymentJson, deploymentDataPath);
+    }
+
+    function deployTestContractForVerification(ZoraNFTCreatorV1 factory) internal {
+        IERC721Drop.SalesConfiguration memory saleConfig;
+        address newContract = address(
+            factory.createEdition(unicode"☾*☽", "~", 0, 0, payable(address(0)), address(0), saleConfig, "", DEMO_IPFS_METADATA_FILE, DEMO_IPFS_METADATA_FILE)
+        );
+        console2.log("Deployed new contract for verification purposes", newContract);
     }
 }

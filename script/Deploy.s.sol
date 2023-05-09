@@ -48,22 +48,7 @@ contract Deploy is ZoraDropsDeployBase {
         console2.log("Factory: ");
         console2.log(address(factory));
 
-        IERC721Drop.SalesConfiguration memory saleConfig;
-        address newContract = address(
-            factory.createEdition(
-                unicode"☾*☽",
-                "~",
-                0,
-                0,
-                payable(address(0)),
-                address(0),
-                saleConfig,
-                "",
-                "ipfs://bafkreigu544g6wjvqcysurpzy5pcskbt45a5f33m6wgythpgb3rfqi3lzi",
-                "ipfs://bafkreigu544g6wjvqcysurpzy5pcskbt45a5f33m6wgythpgb3rfqi3lzi"
-            )
-        );
-        console2.log("Deploying new contract for verification purposes", newContract);
+        deployTestContractForVerification(factory);
 
         vm.stopBroadcast();
 

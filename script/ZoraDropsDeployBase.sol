@@ -39,6 +39,7 @@ abstract contract ZoraDropsDeployBase is Script {
     string constant FACTORY_OWNER = "FACTORY_OWNER";
     string constant FACTORY_UPGRADE_GATE_OWNER = "FACTORY_OWNER";
     string constant MINT_FEE_AMOUNT = "MINT_FEE_AMOUNT";
+    string constant MINT_FEE_RECIPIENT = "MINT_FEE_RECIPIENT";
     string constant SUBSCRIPTION_MARKET_FILTER_ADDRESS = "SUBSCRIPTION_MARKET_FILTER_ADDRESS";
     string constant SUBSCRIPTION_MARKET_FILTER_OWNER = "SUBSCRIPTION_MARKET_FILTER_OWNER";
     string constant ZORA_ERC721_TRANSFER_HELPER = "ZORA_ERC721_TRANSFER_HELPER";
@@ -59,6 +60,7 @@ abstract contract ZoraDropsDeployBase is Script {
         chainConfig.factoryOwner = json.readAddress(getKeyPrefix(FACTORY_OWNER));
         chainConfig.factoryUpgradeGateOwner = json.readAddress(getKeyPrefix(FACTORY_UPGRADE_GATE_OWNER));
         chainConfig.mintFeeAmount = json.readUint(getKeyPrefix(MINT_FEE_AMOUNT));
+        chainConfig.mintFeeRecipient = json.readAddress(getKeyPrefix(MINT_FEE_RECIPIENT));
         chainConfig.subscriptionMarketFilterAddress = json.readAddress(getKeyPrefix(SUBSCRIPTION_MARKET_FILTER_ADDRESS));
         chainConfig.subscriptionMarketFilterOwner = json.readAddress(getKeyPrefix(SUBSCRIPTION_MARKET_FILTER_OWNER));
         chainConfig.zoraERC721TransferHelper = json.readAddress(getKeyPrefix(ZORA_ERC721_TRANSFER_HELPER));

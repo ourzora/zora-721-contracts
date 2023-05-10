@@ -36,6 +36,9 @@ contract UpgradeERC721DropFactory is ZoraDropsDeployBase {
         bool deployNewDropRenderer = dropRendererCodehash != newDropRendererCodehash;
         bool deployNewEditionRenderer = editionRendererCodehash != newEditionRendererCodehash;
 
+        console2.log("Mint Fee Amount: ", chainConfig.mintFeeAmount);
+        console2.log("Mint Fee Recipient: ", chainConfig.mintFeeRecipient);
+
         vm.startBroadcast();
 
         console2.log("Setup contracts ---");

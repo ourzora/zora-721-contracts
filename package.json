@@ -12,12 +12,19 @@
     "addresses",
     "dist/artifacts/*"
   ],
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "scripts": {
     "test": "forge test",
     "generate-merkle-test-file": "node scripts/merkle-test.mjs",
     "clean": "rm -rf ./dist/",
+    "prepack": "node js-scripts/copy-latest-deployment-addresses.mjs && yarn run wagmi && yarn build-ts && yarn copy-addresses",
+    "deploy": "node scripts/deploy.mjs",
     "coverage": "forge coverage --report lcov",
     "build": "forge build",
+    "build-ts": "tsup index.ts --format cjs --dts --sourcemap",
+    "copy-addresses": "cp -r addresses/ dist/addresses",
+    "wagmi": "wagmi generate",
     "storage-inspect:check": "./script/storage-check.sh check ERC721Drop ERC721DropProxy FactoryUpgradeGate ZoraNFTCreatorProxy ZoraNFTCreatorV1",
     "storage-inspect:generate": "./script/storage-check.sh generate ERC721Drop ERC721DropProxy FactoryUpgradeGate ZoraNFTCreatorProxy ZoraNFTCreatorV1"
   },
@@ -26,12 +33,15 @@
     "@ethersproject/address": "^5.7.0",
     "@ethersproject/bytes": "^5.7.0",
     "@ethersproject/units": "^5.7.0",
+    "@wagmi/cli": "^1.0.1",
     "dotenv": "^10.0.0",
     "ejs": "^3.1.7",
     "es-main": "^1.0.2",
-    "glob": "^10.2.2",
+    "glob": "^10.2.3",
     "keccak256": "^1.0.6",
-    "merkletreejs": "0.2.31"
+    "merkletreejs": "0.2.31",
+    "tsup": "^6.7.0",
+    "typescript": "^5.0.4"
   },
   "dependencies": {
     "@dotenv/cli": "^2.2.2"

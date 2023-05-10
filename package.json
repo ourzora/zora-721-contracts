@@ -7,26 +7,25 @@
   "private": false,
   "type": "module",
   "files": [
-    "typechain",
     "contracts",
     "deployments",
     "addresses",
-    "dist/artifacts/*",
-    "dist/typechain/*"
+    "dist/artifacts/*"
   ],
   "scripts": {
     "test": "forge test",
     "generate-merkle-test-file": "node scripts/merkle-test.mjs",
     "clean": "rm -rf ./dist/",
-    "typechain": "yarn run clean && yarn run build && typechain --target=ethers-v5 'dist/artifacts/*/*[!.metadata].json' --out-dir dist/typechain-src && tsc",
-    "prepack": "yarn run node js-scripts/copy-latest-deployment-addresses.mjs && yarn run typechain",
-    "deploy": "node scripts/deploy.mjs",
     "coverage": "forge coverage --report lcov",
     "build": "forge build",
     "storage-inspect:check": "./script/storage-check.sh check ERC721Drop ERC721DropProxy FactoryUpgradeGate ZoraNFTCreatorProxy ZoraNFTCreatorV1",
     "storage-inspect:generate": "./script/storage-check.sh generate ERC721Drop ERC721DropProxy FactoryUpgradeGate ZoraNFTCreatorProxy ZoraNFTCreatorV1"
   },
   "devDependencies": {
+    "@ethersproject/abi": "^5.7.0",
+    "@ethersproject/address": "^5.7.0",
+    "@ethersproject/bytes": "^5.7.0",
+    "@ethersproject/units": "^5.7.0",
     "dotenv": "^10.0.0",
     "ejs": "^3.1.7",
     "es-main": "^1.0.2",
@@ -35,10 +34,6 @@
     "merkletreejs": "0.2.31"
   },
   "dependencies": {
-    "@dotenv/cli": "^2.2.2",
-    "@typechain/ethers-v5": "10.0.0",
-    "ethers": "^5.6.8",
-    "typechain": "8.0.0",
-    "typescript": "4.6.3"
+    "@dotenv/cli": "^2.2.2"
   }
 }

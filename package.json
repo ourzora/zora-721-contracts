@@ -39,7 +39,6 @@
     "es-main": "^1.0.2",
     "glob": "^10.2.3",
     "keccak256": "^1.0.6",
-    "merkletreejs": "0.2.31",
     "tsup": "^6.7.0",
     "typescript": "^5.0.4"
   },

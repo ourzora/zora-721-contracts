@@ -22,6 +22,7 @@
   },
   "exclude": ["node_modules/**", "dist/**"],
   "include": [
-    "index.ts"
+    "package/**/*.ts",
+    "js-scripts/**/*.mjs"
   ]
 }

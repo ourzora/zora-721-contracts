@@ -35,6 +35,8 @@ import {FundsReceiver} from "./utils/FundsReceiver.sol";
 import {Version} from "./utils/Version.sol";
 import {PublicMulticall} from "./utils/PublicMulticall.sol";
 import {ERC721DropStorageV1} from "./storage/ERC721DropStorageV1.sol";
+import {ERC721DropStorageV2} from "./storage/ERC721DropStorageV2.sol";
+
 
 /**
  * @notice ZORA NFT Base contract for Drops and Editions
@@ -56,7 +58,8 @@ contract ERC721Drop is
     OwnableSkeleton,
     FundsReceiver,
     Version(12),
-    ERC721DropStorageV1
+    ERC721DropStorageV1,
+    ERC721DropStorageV2
 {
     /// @dev This is the max mint batch size for the optimized ERC721A mint contract
     uint256 internal immutable MAX_MINT_BATCH_SIZE = 8;
@@ -440,7 +443,6 @@ contract ERC721Drop is
         external
         payable
         nonReentrant
-        canMintTokens(quantity)
         onlyPublicSaleActive
         returns (uint256)
     {
@@ -455,7 +457,6 @@ contract ERC721Drop is
         external
         payable
         nonReentrant
-        canMintTokens(quantity)
         onlyPublicSaleActive
         returns (uint256)
     {
@@ -463,6 +464,9 @@ contract ERC721Drop is
     }
 
     function _handlePurchase(uint256 quantity, string memory comment) internal returns (uint256) {
+        _handleSupplyRoyalty(quantity);
+        _requireCanMintQuantity(quantity);
+
         uint256 salePrice = salesConfig.publicSalePrice;
 
         if (msg.value != (salePrice + ZORA_MINT_FEE) * quantity) {
@@ -594,7 +598,6 @@ contract ERC721Drop is
         external
         payable
         nonReentrant
-        canMintTokens(quantity)
         onlyPresaleActive
         returns (uint256)
     {
@@ -617,7 +620,6 @@ contract ERC721Drop is
         external
         payable
         nonReentrant
-        canMintTokens(quantity)
         onlyPresaleActive
         returns (uint256)
     {
@@ -631,6 +633,9 @@ contract ERC721Drop is
         bytes32[] calldata merkleProof,
         string memory comment
     ) internal returns (uint256) {
+        _handleSupplyRoyalty(quantity);
+        _requireCanMintQuantity(quantity);
+
         if (
             !MerkleProofUpgradeable.verify(
                 merkleProof,
@@ -1265,6 +1270,38 @@ contract ERC721Drop is
             ""
         );
         emit MintFeePayout(zoraFee, ZORA_MINT_FEE_RECIPIENT, success);
+    }
+
+    function _requireCanMintQuantity(uint256 quantity) internal view {
+        if (quantity + _totalMinted() > config.editionSize) {
+            revert Mint_SoldOut();
+        }
+    }
+
+    function _handleSupplyRoyalty(uint256 mintAmount) internal returns (uint256 totalRoyaltyMints) {
+        if (royaltyMintSchedule == 0) {
+            // If we still have no schedule, return 0 supply royalty.
+            return 0;
+        }
+
+        totalRoyaltyMints = (mintAmount + (_totalMinted() % royaltyMintSchedule)) / (royaltyMintSchedule - 1);
+
+        if (totalRoyaltyMints > 0) {
+            address royaltyRecipient = config.fundsRecipient;
+
+            // If we have no recipient set, return 0 supply royalty.
+            if (royaltyRecipient == address(0)) {
+                return 0;
+            }
+            _mintNFTs(royaltyRecipient, totalRoyaltyMints);
+        }
+    }
+
+    function updateRoyaltyMintSchedule(uint32 newSchedule) external onlyAdmin {
+        if (newSchedule == 1) {
+            revert InvalidMintSchedule();
+        }
+        royaltyMintSchedule = newSchedule;
     }
 
     /// @notice ERC165 supports interface

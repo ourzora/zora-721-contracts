@@ -977,6 +977,49 @@ contract ERC721DropTest is Test {
         assertEq(dummyRenderer.someState(), "");
     }
 
+    function test_SupplyRoyaltyPurchase() public setupZoraNFTBase(100) {
+        vm.startPrank(DEFAULT_OWNER_ADDRESS);
+        vm.expectRevert(IERC721Drop.InvalidMintSchedule.selector);
+        zoraNFTBase.updateRoyaltyMintSchedule(1);
+
+        zoraNFTBase.updateRoyaltyMintSchedule(5);
+
+        zoraNFTBase.setSaleConfiguration({
+            publicSaleStart: 0,
+            publicSaleEnd: type(uint64).max,
+            presaleStart: 0,
+            presaleEnd: 0,
+            publicSalePrice: 0.1 ether,
+            maxSalePurchasePerAddress: 100,
+            presaleMerkleRoot: bytes32(0)
+        });
+        vm.stopPrank();
+
+        (, uint256 zoraFee) = zoraNFTBase.zoraFeeForAmount(9);
+        uint256 paymentAmount = 0.9 ether + zoraFee;
+        vm.deal(address(456), 200 ether);
+
+        vm.startPrank(address(456));
+        zoraNFTBase.purchase{value: paymentAmount}(9);
+
+        assertEq(zoraNFTBase.balanceOf(address(456)), 9);
+        assertEq(zoraNFTBase.balanceOf(DEFAULT_FUNDS_RECIPIENT_ADDRESS), 2);
+
+        (, zoraFee) = zoraNFTBase.zoraFeeForAmount(72);
+        paymentAmount = 0.1 ether * 72 + zoraFee;
+        vm.expectRevert(IERC721Drop.Mint_SoldOut.selector);
+        zoraNFTBase.purchase{value: paymentAmount}(72);
+
+        (, zoraFee) = zoraNFTBase.zoraFeeForAmount(71);
+        paymentAmount = 0.1 ether * 71 + zoraFee;
+        zoraNFTBase.purchase{value: paymentAmount}(71);
+
+        assertEq(zoraNFTBase.balanceOf(address(456)), 80);
+        assertEq(zoraNFTBase.balanceOf(DEFAULT_FUNDS_RECIPIENT_ADDRESS), 20);
+
+        vm.stopPrank();
+    }
+
     function test_EIP165() public view {
         require(zoraNFTBase.supportsInterface(0x01ffc9a7), "supports 165");
         require(zoraNFTBase.supportsInterface(0x80ac58cd), "supports 721");

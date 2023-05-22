@@ -1,2 +1,4 @@
 export * from './wagmiGenerated';
-export { chainConfigs } from './chainConfigs';
+import { chainConfigs } from './chainConfigs';
+
+export { chainConfigs as chainConfigs };

@@ -24,7 +24,7 @@
     "coverage": "forge coverage --report lcov",
     "build": "forge build",
     "build-ts": "tsup package/index.ts --format cjs --dts --sourcemap",
-    "bundle-configs": "node js-scripts/bundle-chainConfigs.mjs && yarn format",
+    "bundle-configs": "node js-scripts/bundle-chainConfigs.mjs",
     "prettier": "npx prettier \"js-scripts/**/*.mjs\" \"package/**/*.ts\" \"wagmi.config.ts\" --check",
     "prettier:fix": "npm run prettier -- --write",
     "wagmi": "wagmi generate",
@@ -32,6 +32,7 @@
     "storage-inspect:generate": "./script/storage-check.sh generate ERC721Drop ERC721DropProxy FactoryUpgradeGate ZoraNFTCreatorProxy ZoraNFTCreatorV1"
   },
   "devDependencies": {
+    "@changesets/cli": "^2.26.1",
     "@ethersproject/abi": "^5.7.0",
     "@ethersproject/address": "^5.7.0",
     "@ethersproject/bytes": "^5.7.0",

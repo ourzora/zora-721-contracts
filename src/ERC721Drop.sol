@@ -86,6 +86,8 @@ contract ERC721Drop is
     /// @notice Max royalty BPS
     uint16 constant MAX_ROYALTY_BPS = 50_00;
 
+    uint8 constant SUPPLY_ROYALTY_FOR_EVERY_MINT = 1;
+
     // /// @notice Empty string for blank comments
     // string constant EMPTY_STRING = "";
 
@@ -464,7 +466,7 @@ contract ERC721Drop is
     }
 
     function _handlePurchase(uint256 quantity, string memory comment) internal returns (uint256) {
-        _handleSupplyRoyalty(quantity);
+        _mintSupplyRoyalty(quantity);
         _requireCanMintQuantity(quantity);
 
         uint256 salePrice = salesConfig.publicSalePrice;
@@ -633,7 +635,7 @@ contract ERC721Drop is
         bytes32[] calldata merkleProof,
         string memory comment
     ) internal returns (uint256) {
-        _handleSupplyRoyalty(quantity);
+        _mintSupplyRoyalty(quantity);
         _requireCanMintQuantity(quantity);
 
         if (
@@ -1278,27 +1280,25 @@ contract ERC721Drop is
         }
     }
 
-    function _handleSupplyRoyalty(uint256 mintAmount) internal returns (uint256 totalRoyaltyMints) {
+    function _mintSupplyRoyalty(uint256 mintQuantity) internal {
         if (royaltyMintSchedule == 0) {
-            // If we still have no schedule, return 0 supply royalty.
-            return 0;
+            return;
         }
 
-        totalRoyaltyMints = (mintAmount + (_totalMinted() % royaltyMintSchedule)) / (royaltyMintSchedule - 1);
+        address royaltyRecipient = config.fundsRecipient;            
+        if (royaltyRecipient == address(0)) {
+            return;
+        }
+
+        uint256 totalRoyaltyMints = (mintQuantity + (_totalMinted() % royaltyMintSchedule)) / (royaltyMintSchedule - 1);
 
         if (totalRoyaltyMints > 0) {
-            address royaltyRecipient = config.fundsRecipient;
-
-            // If we have no recipient set, return 0 supply royalty.
-            if (royaltyRecipient == address(0)) {
-                return 0;
-            }
             _mintNFTs(royaltyRecipient, totalRoyaltyMints);
         }
     }
 
     function updateRoyaltyMintSchedule(uint32 newSchedule) external onlyAdmin {
-        if (newSchedule == 1) {
+        if (newSchedule == SUPPLY_ROYALTY_FOR_EVERY_MINT) {
             revert InvalidMintSchedule();
         }
         royaltyMintSchedule = newSchedule;

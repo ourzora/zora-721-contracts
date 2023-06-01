@@ -1,7 +1,7 @@
 [profile.default]
 solc_version = '0.8.17'
 optimizer = true
-optimizer_runs = 3200
+optimizer_runs = 3000
 via_ir = true
 out = 'dist/artifacts'
 test = 'test'

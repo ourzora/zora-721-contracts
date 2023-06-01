@@ -3,6 +3,7 @@ pragma solidity ^0.8.10;
 
 import {Test} from "forge-std/Test.sol";
 import {IERC721AUpgradeable} from "erc721a-upgradeable/IERC721AUpgradeable.sol";
+import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
 
 import {ERC721Drop} from "../src/ERC721Drop.sol";
 import {DummyMetadataRenderer} from "./utils/DummyMetadataRenderer.sol";
@@ -983,10 +984,8 @@ contract ERC721DropTest is Test {
         zoraNFTBase.updateRoyaltyMintSchedule(1);
     }
 
-    function test_SupplyRoyaltyPurchase(uint32 royaltyMintSchedule, uint32 editionSize, uint256 firstMintAmount) public setupZoraNFTBase(editionSize) {
-        vm.assume(royaltyMintSchedule > 1 && royaltyMintSchedule <= editionSize && editionSize < 20000 && firstMintAmount > 0 && firstMintAmount < editionSize);
-        uint256 totalRoyaltyMintsForEdition = editionSize / royaltyMintSchedule;
-        vm.assume(firstMintAmount < editionSize - totalRoyaltyMintsForEdition);
+    function test_SupplyRoyaltyPurchase(uint32 royaltyMintSchedule, uint32 editionSize, uint256 mintQuantity) public setupZoraNFTBase(editionSize) {
+        vm.assume(royaltyMintSchedule > 1 && royaltyMintSchedule <= editionSize && editionSize < 20000 && mintQuantity > 0 && mintQuantity <= editionSize);
 
         vm.startPrank(DEFAULT_OWNER_ADDRESS);
     
@@ -1003,17 +1002,76 @@ contract ERC721DropTest is Test {
         });
         vm.stopPrank();
 
-        uint256 totalRoyaltyMintsForFirstPurchase = firstMintAmount / (royaltyMintSchedule - 1);
-        (, uint256 zoraFee) = zoraNFTBase.zoraFeeForAmount(firstMintAmount);
+        uint256 totalRoyaltyMintsForPurchase = mintQuantity / (royaltyMintSchedule - 1);
+        totalRoyaltyMintsForPurchase = Math.min(totalRoyaltyMintsForPurchase, editionSize - mintQuantity);
+        (, uint256 zoraFee) = zoraNFTBase.zoraFeeForAmount(mintQuantity);
 
-        uint256 paymentAmount = 0.1 ether * firstMintAmount + zoraFee;
+        uint256 paymentAmount = 0.1 ether * mintQuantity + zoraFee;
         vm.deal(address(456), paymentAmount);
 
         vm.startPrank(address(456));
-        zoraNFTBase.purchase{value: paymentAmount}(firstMintAmount);
+        zoraNFTBase.purchase{value: paymentAmount}(mintQuantity);
 
-        assertEq(zoraNFTBase.balanceOf(address(456)), firstMintAmount);
-        assertEq(zoraNFTBase.balanceOf(DEFAULT_FUNDS_RECIPIENT_ADDRESS), totalRoyaltyMintsForFirstPurchase);
+        assertEq(zoraNFTBase.balanceOf(address(456)), mintQuantity);
+        assertEq(zoraNFTBase.balanceOf(DEFAULT_FUNDS_RECIPIENT_ADDRESS), totalRoyaltyMintsForPurchase);
+
+        vm.stopPrank();
+    }
+
+    function test_SupplyRoyaltyCleanNumbers() public setupZoraNFTBase(100) {
+        vm.startPrank(DEFAULT_OWNER_ADDRESS);
+
+        zoraNFTBase.updateRoyaltyMintSchedule(5);
+
+        zoraNFTBase.setSaleConfiguration({
+            publicSaleStart: 0,
+            publicSaleEnd: type(uint64).max,
+            presaleStart: 0,
+            presaleEnd: 0,
+            publicSalePrice: 0.1 ether,
+            maxSalePurchasePerAddress: 100,
+            presaleMerkleRoot: bytes32(0)
+        });
+        vm.stopPrank();
+
+        (, uint256 zoraFee) = zoraNFTBase.zoraFeeForAmount(80);
+        uint256 paymentAmount = 0.1 ether * 80 + zoraFee;
+        vm.deal(address(456), paymentAmount);
+
+        vm.startPrank(address(456));
+        zoraNFTBase.purchase{value: paymentAmount}(80);
+
+        assertEq(zoraNFTBase.balanceOf(address(456)), 80);
+        assertEq(zoraNFTBase.balanceOf(DEFAULT_FUNDS_RECIPIENT_ADDRESS), 20);
+
+        vm.stopPrank();
+    }
+
+    function test_SupplyRoyaltyEdgeCaseNumbers() public setupZoraNFTBase(137) {
+        vm.startPrank(DEFAULT_OWNER_ADDRESS);
+
+        zoraNFTBase.updateRoyaltyMintSchedule(3);
+
+        zoraNFTBase.setSaleConfiguration({
+            publicSaleStart: 0,
+            publicSaleEnd: type(uint64).max,
+            presaleStart: 0,
+            presaleEnd: 0,
+            publicSalePrice: 0.1 ether,
+            maxSalePurchasePerAddress: 92,
+            presaleMerkleRoot: bytes32(0)
+        });
+        vm.stopPrank();
+
+        (, uint256 zoraFee) = zoraNFTBase.zoraFeeForAmount(92);
+        uint256 paymentAmount = 0.1 ether * 92 + zoraFee;
+        vm.deal(address(456), paymentAmount);
+
+        vm.startPrank(address(456));
+        zoraNFTBase.purchase{value: paymentAmount}(92);
+
+        assertEq(zoraNFTBase.balanceOf(address(456)), 92);
+        assertEq(zoraNFTBase.balanceOf(DEFAULT_FUNDS_RECIPIENT_ADDRESS), 45);
 
         vm.stopPrank();
     }

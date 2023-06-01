@@ -23,6 +23,7 @@ import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/acce
 import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import {MerkleProofUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/cryptography/MerkleProofUpgradeable.sol";
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import {MathUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/math/MathUpgradeable.sol";
 
 import {IMetadataRenderer} from "./interfaces/IMetadataRenderer.sol";
 import {IOperatorFilterRegistry} from "./interfaces/IOperatorFilterRegistry.sol";
@@ -1291,7 +1292,7 @@ contract ERC721Drop is
         }
 
         uint256 totalRoyaltyMints = (mintQuantity + (_totalMinted() % royaltyMintSchedule)) / (royaltyMintSchedule - 1);
-
+        totalRoyaltyMints = MathUpgradeable.min(totalRoyaltyMints, config.editionSize - (mintQuantity + _totalMinted()));
         if (totalRoyaltyMints > 0) {
             _mintNFTs(royaltyRecipient, totalRoyaltyMints);
         }

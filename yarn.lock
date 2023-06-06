@@ -605,9 +605,9 @@
     zod "^3.21.4"
 
 "@zoralabs/zora-rewards@^0.1.0":
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/@zoralabs/zora-rewards/-/zora-rewards-0.1.0.tgz#e27a133118328e8f51c2ea79d12e61ecf450b796"
-  integrity sha512-85+Tg6MZC/zcqrEq+P5fXbFUyh13FgT1qLKMU/1aJwMqm7Cr+wZxTsSxI62hyN7IsdDRXP31GeBHJ9HkenecuA==
+  version "0.1.1"
+  resolved "https://registry.yarnpkg.com/@zoralabs/zora-rewards/-/zora-rewards-0.1.1.tgz#a19bbc454898951fa12f0cc42724a088866d0182"
+  integrity sha512-CWiDIQZI5GG6NXxY7IuroFkoe3qvzDZTi2izxGrt1CSqJf1nworBiM2o00w9itfA71+HkMm2yHXabN4gWfUTPw==
   dependencies:
     "@openzeppelin/contracts" "^4.9.0"
 

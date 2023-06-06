@@ -528,6 +528,11 @@
     widest-line "^3.1.0"
     wrap-ansi "^6.2.0"
 
+"@openzeppelin/contracts@^4.9.0":
+  version "4.9.0"
+  resolved "https://registry.yarnpkg.com/@openzeppelin/contracts/-/contracts-4.9.0.tgz#683f33b6598970051bc5f0806fd8660da9e018dd"
+  integrity sha512-DUP74AFGKlic2sQb/CmgrN2aUPMFGxRrmCTUxLHsiU2RzwWqVuMPZBxiAyvlff6Pea77uylAX6B5x9W6evEbhA==
+
 "@pkgjs/parseargs@^0.11.0":
   version "0.11.0"
   resolved "https://registry.yarnpkg.com/@pkgjs/parseargs/-/parseargs-0.11.0.tgz#a77ea742fab25775145434eb1d2328cf5013ac33"
@@ -598,6 +603,13 @@
     prettier "^2.8.1"
     viem "~0.3.18"
     zod "^3.21.4"
+
+"@zoralabs/zora-rewards@^0.1.0":
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/@zoralabs/zora-rewards/-/zora-rewards-0.1.0.tgz#e27a133118328e8f51c2ea79d12e61ecf450b796"
+  integrity sha512-85+Tg6MZC/zcqrEq+P5fXbFUyh13FgT1qLKMU/1aJwMqm7Cr+wZxTsSxI62hyN7IsdDRXP31GeBHJ9HkenecuA==
+  dependencies:
+    "@openzeppelin/contracts" "^4.9.0"
 
 abitype@0.8.1:
   version "0.8.1"

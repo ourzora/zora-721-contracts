@@ -48,6 +48,7 @@
     "typescript": "^5.0.4"
   },
   "dependencies": {
-    "@dotenv/cli": "^2.2.2"
+    "@dotenv/cli": "^2.2.2",
+    "@zoralabs/zora-rewards": "^0.1.0"
   }
 }

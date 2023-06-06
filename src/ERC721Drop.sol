@@ -23,6 +23,7 @@ import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/acce
 import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import {MerkleProofUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/cryptography/MerkleProofUpgradeable.sol";
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import {ERC721Rewards} from "@zoralabs/zora-rewards/ERC721/ERC721Rewards.sol";
 
 import {IMetadataRenderer} from "./interfaces/IMetadataRenderer.sol";
 import {IOperatorFilterRegistry} from "./interfaces/IOperatorFilterRegistry.sol";
@@ -56,7 +57,8 @@ contract ERC721Drop is
     OwnableSkeleton,
     FundsReceiver,
     Version(12),
-    ERC721DropStorageV1
+    ERC721DropStorageV1,
+    ERC721Rewards
 {
     /// @dev This is the max mint batch size for the optimized ERC721A mint contract
     uint256 internal immutable MAX_MINT_BATCH_SIZE = 8;
@@ -175,8 +177,9 @@ contract ERC721Drop is
         IFactoryUpgradeGate _factoryUpgradeGate,
         address _marketFilterDAOAddress,
         uint256 _mintFeeAmount,
-        address payable _mintFeeRecipient
-    ) initializer {
+        address payable _mintFeeRecipient,
+        address _zoraRewards
+    ) initializer ERC721Rewards(_zoraRewards, _mintFeeRecipient) {
         zoraERC721TransferHelper = _zoraERC721TransferHelper;
         factoryUpgradeGate = _factoryUpgradeGate;
         marketFilterDAOAddress = _marketFilterDAOAddress;

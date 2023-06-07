@@ -465,6 +465,60 @@ contract ERC721Drop is
         return _handlePurchase(quantity, comment);
     }
 
+    /// @notice Purchase a quantity of tokens with a comment that will pay out rewards
+    /// @param quantity quantity to purchase
+    /// @param comment comment to include in the IERC721Drop.Sale event
+    /// @return tokenId of the first token minted
+    function purchaseWithRewards(uint256 quantity, string calldata comment)    
+        external
+        payable
+        nonReentrant
+        canMintTokens(quantity)
+        onlyPublicSaleActive
+        returns (uint256) 
+    {
+        return _handlePurchaseWithRewards(quantity, comment, address(0), address(0));
+    }
+    
+    function _handlePurchaseWithRewards(uint256 quantity, string memory comment, address finder, address lister) internal returns (uint256) {
+        // If max purchase per address == 0 there is no limit.
+        // Any other number, the per address mint limit is that.
+        if (
+            salesConfig.maxSalePurchasePerAddress != 0
+                && _numberMinted(_msgSender()) + quantity - presaleMintsByAddress[_msgSender()]
+                    > salesConfig.maxSalePurchasePerAddress
+        ) {
+            revert Purchase_TooManyForAddress();
+        }
+
+        uint256 salePrice = salesConfig.publicSalePrice;
+
+        _handleRewards(msg.value, quantity, salePrice, config.fundsRecipient, finder, lister);
+
+        _mintNFTs(_msgSender(), quantity);
+
+        uint256 firstMintedTokenId = _lastMintedTokenId() - quantity;
+
+        emit IERC721Drop.Sale({
+            to: _msgSender(),
+            quantity: quantity,
+            pricePerToken: salePrice,
+            firstPurchasedTokenId: firstMintedTokenId
+        });
+
+        if (bytes(comment).length > 0) {
+            emit IERC721Drop.MintComment({
+                sender: _msgSender(),
+                tokenContract: address(this),
+                tokenId: firstMintedTokenId,
+                quantity: quantity,
+                comment: comment
+            });
+        }
+
+        return firstMintedTokenId;
+    }
+
     function _handlePurchase(uint256 quantity, string memory comment) internal returns (uint256) {
         uint256 salePrice = salesConfig.publicSalePrice;
 

@@ -63,6 +63,7 @@ contract ERC721DropTest is Test {
     address public ownedSubscriptionManager;
     address payable public constant mintFeeRecipient = payable(address(0x11));
     uint256 public constant mintFee = 777000000000000; // 0.000777 ETH
+    uint256 public constant TOTAL_REWARD_PER_MINT = 0.000999 ether;
 
     struct Configuration {
         IMetadataRenderer metadataRenderer;
@@ -369,6 +370,248 @@ contract ERC721DropTest is Test {
             "test comment"
         );
         zoraNFTBase.purchaseWithComment{value: paymentAmount}(purchaseQuantity, "test comment");
+    }
+
+    function test_FreeMintRewards(uint32 purchaseQuantity) public setupZoraNFTBase(purchaseQuantity) {
+        vm.assume(purchaseQuantity < 100 && purchaseQuantity > 0);
+
+        vm.prank(DEFAULT_OWNER_ADDRESS);
+        zoraNFTBase.setSaleConfiguration({
+            publicSaleStart: 0,
+            publicSaleEnd: type(uint64).max,
+            presaleStart: 0,
+            presaleEnd: 0,
+            publicSalePrice: 0,
+            maxSalePurchasePerAddress: purchaseQuantity + 1,
+            presaleMerkleRoot: bytes32(0)
+        });
+
+        (uint256 totalReward, uint256 creatorReward, uint256 zoraReward, uint256 finderReward, uint256 listerReward) =
+            zoraNFTBase.computeFreeMintRewards(purchaseQuantity);
+
+        vm.deal(address(456), totalReward);
+        vm.prank(address(456));
+        zoraNFTBase.purchaseWithRewards{value: totalReward}(purchaseQuantity, "test comment", address(0), address(0));
+
+        assertEq(DEFAULT_FUNDS_RECIPIENT_ADDRESS.balance, creatorReward);
+        assertEq(zoraRewards.balanceOf(mintFeeRecipient), zoraReward + finderReward + listerReward);
+    }
+
+    function test_FreeMintRewardsWithFinder(uint32 purchaseQuantity) public setupZoraNFTBase(purchaseQuantity) {
+        vm.assume(purchaseQuantity < 100 && purchaseQuantity > 0);
+
+        vm.prank(DEFAULT_OWNER_ADDRESS);
+        zoraNFTBase.setSaleConfiguration({
+            publicSaleStart: 0,
+            publicSaleEnd: type(uint64).max,
+            presaleStart: 0,
+            presaleEnd: 0,
+            publicSalePrice: 0,
+            maxSalePurchasePerAddress: purchaseQuantity + 1,
+            presaleMerkleRoot: bytes32(0)
+        });
+
+        (uint256 totalReward, uint256 creatorReward, uint256 zoraReward, uint256 finderReward, uint256 listerReward) =
+            zoraNFTBase.computeFreeMintRewards(purchaseQuantity);
+
+        address finder = makeAddr("finder");
+
+        vm.deal(address(456), totalReward);
+        vm.prank(address(456));
+        zoraNFTBase.purchaseWithRewards{value: totalReward}(purchaseQuantity, "test comment", finder, address(0));
+
+        assertEq(DEFAULT_FUNDS_RECIPIENT_ADDRESS.balance, creatorReward);
+        assertEq(zoraRewards.balanceOf(mintFeeRecipient), zoraReward + listerReward);
+        assertEq(zoraRewards.balanceOf(finder), finderReward);
+    }
+
+    function test_FreeMintRewardsWithLister(uint32 purchaseQuantity) public setupZoraNFTBase(purchaseQuantity) {
+        vm.assume(purchaseQuantity < 100 && purchaseQuantity > 0);
+
+        vm.prank(DEFAULT_OWNER_ADDRESS);
+        zoraNFTBase.setSaleConfiguration({
+            publicSaleStart: 0,
+            publicSaleEnd: type(uint64).max,
+            presaleStart: 0,
+            presaleEnd: 0,
+            publicSalePrice: 0,
+            maxSalePurchasePerAddress: purchaseQuantity + 1,
+            presaleMerkleRoot: bytes32(0)
+        });
+
+        (uint256 totalReward, uint256 creatorReward, uint256 zoraReward, uint256 finderReward, uint256 listerReward) =
+            zoraNFTBase.computeFreeMintRewards(purchaseQuantity);
+
+        address lister = makeAddr("lister");
+
+        vm.deal(address(456), totalReward);
+        vm.prank(address(456));
+        zoraNFTBase.purchaseWithRewards{value: totalReward}(purchaseQuantity, "test comment", address(0), lister);
+
+        assertEq(DEFAULT_FUNDS_RECIPIENT_ADDRESS.balance, creatorReward);
+        assertEq(zoraRewards.balanceOf(mintFeeRecipient), zoraReward + finderReward);
+        assertEq(zoraRewards.balanceOf(lister), listerReward);
+    }
+
+    function test_FreeMintRewardsWithFinderAndLister(uint32 purchaseQuantity) public setupZoraNFTBase(purchaseQuantity) {
+        vm.assume(purchaseQuantity < 100 && purchaseQuantity > 0);
+
+        vm.prank(DEFAULT_OWNER_ADDRESS);
+        zoraNFTBase.setSaleConfiguration({
+            publicSaleStart: 0,
+            publicSaleEnd: type(uint64).max,
+            presaleStart: 0,
+            presaleEnd: 0,
+            publicSalePrice: 0,
+            maxSalePurchasePerAddress: purchaseQuantity + 1,
+            presaleMerkleRoot: bytes32(0)
+        });
+
+        (uint256 totalReward, uint256 creatorReward, uint256 zoraReward, uint256 finderReward, uint256 listerReward) =
+            zoraNFTBase.computeFreeMintRewards(purchaseQuantity);
+
+        address finder = makeAddr("finder");
+        address lister = makeAddr("lister");
+
+        vm.deal(address(456), totalReward);
+        vm.prank(address(456));
+        zoraNFTBase.purchaseWithRewards{value: totalReward}(purchaseQuantity, "test comment", finder, lister);
+
+        assertEq(DEFAULT_FUNDS_RECIPIENT_ADDRESS.balance, creatorReward);
+        assertEq(zoraRewards.balanceOf(mintFeeRecipient), zoraReward);
+        assertEq(zoraRewards.balanceOf(finder), finderReward);
+        assertEq(zoraRewards.balanceOf(lister), listerReward);
+    }
+
+    function test_PaidMintRewards(uint64 salePrice, uint32 purchaseQuantity) public setupZoraNFTBase(purchaseQuantity) {
+        vm.assume(salePrice > 0);
+        vm.assume(purchaseQuantity < 100 && purchaseQuantity > 0);
+
+        vm.prank(DEFAULT_OWNER_ADDRESS);
+        zoraNFTBase.setSaleConfiguration({
+            publicSaleStart: 0,
+            publicSaleEnd: type(uint64).max,
+            presaleStart: 0,
+            presaleEnd: 0,
+            publicSalePrice: salePrice,
+            maxSalePurchasePerAddress: purchaseQuantity + 1,
+            presaleMerkleRoot: bytes32(0)
+        });
+
+        uint256 totalSales = uint256(salePrice) * purchaseQuantity;
+
+        (uint256 totalReward, uint256 zoraReward, uint256 finderReward, uint256 listerReward) =
+            zoraNFTBase.computePaidMintRewards(purchaseQuantity);
+
+        uint256 totalPayment = totalSales + totalReward;
+
+        vm.deal(address(456), totalPayment);
+        vm.prank(address(456));
+        zoraNFTBase.purchaseWithRewards{value: totalPayment}(purchaseQuantity, "test comment", address(0), address(0));
+
+        assertEq(address(zoraNFTBase).balance, totalSales);
+        assertEq(zoraRewards.balanceOf(mintFeeRecipient), zoraReward + finderReward + listerReward);
+    }
+
+    function test_PaidMintRewardsWithFinder(uint64 salePrice, uint32 purchaseQuantity) public setupZoraNFTBase(purchaseQuantity) {
+        vm.assume(salePrice > 0);
+        vm.assume(purchaseQuantity < 100 && purchaseQuantity > 0);
+
+        vm.prank(DEFAULT_OWNER_ADDRESS);
+        zoraNFTBase.setSaleConfiguration({
+            publicSaleStart: 0,
+            publicSaleEnd: type(uint64).max,
+            presaleStart: 0,
+            presaleEnd: 0,
+            publicSalePrice: salePrice,
+            maxSalePurchasePerAddress: purchaseQuantity + 1,
+            presaleMerkleRoot: bytes32(0)
+        });
+
+        uint256 totalSales = uint256(salePrice) * purchaseQuantity;
+
+        (uint256 totalReward, uint256 zoraReward, uint256 finderReward, uint256 listerReward) =
+            zoraNFTBase.computePaidMintRewards(purchaseQuantity);
+        
+        uint256 totalPayment = totalSales + totalReward;
+
+        address finder = makeAddr("finder");
+
+        vm.deal(address(456), totalPayment);
+        vm.prank(address(456));
+        zoraNFTBase.purchaseWithRewards{value: totalPayment}(purchaseQuantity, "test comment", finder, address(0));
+
+        assertEq(address(zoraNFTBase).balance, totalSales);
+        assertEq(zoraRewards.balanceOf(mintFeeRecipient), zoraReward + listerReward);
+        assertEq(zoraRewards.balanceOf(finder), finderReward);
+    }
+
+    function test_PaidMintRewardsWithLister(uint64 salePrice, uint32 purchaseQuantity) public setupZoraNFTBase(purchaseQuantity) {
+        vm.assume(salePrice > 0);
+        vm.assume(purchaseQuantity < 100 && purchaseQuantity > 0);
+
+        vm.prank(DEFAULT_OWNER_ADDRESS);
+        zoraNFTBase.setSaleConfiguration({
+            publicSaleStart: 0,
+            publicSaleEnd: type(uint64).max,
+            presaleStart: 0,
+            presaleEnd: 0,
+            publicSalePrice: salePrice,
+            maxSalePurchasePerAddress: purchaseQuantity + 1,
+            presaleMerkleRoot: bytes32(0)
+        });
+
+        uint256 totalSales = uint256(salePrice) * purchaseQuantity;
+
+        (uint256 totalReward, uint256 zoraReward, uint256 finderReward, uint256 listerReward) =
+            zoraNFTBase.computePaidMintRewards(purchaseQuantity);
+        
+        uint256 totalPayment = totalSales + totalReward;
+
+        address lister = makeAddr("lister");
+
+        vm.deal(address(456), totalPayment);
+        vm.prank(address(456));
+        zoraNFTBase.purchaseWithRewards{value: totalPayment}(purchaseQuantity, "test comment", address(0), lister);
+
+        assertEq(address(zoraNFTBase).balance, totalSales);
+        assertEq(zoraRewards.balanceOf(mintFeeRecipient), zoraReward + finderReward);
+        assertEq(zoraRewards.balanceOf(lister), listerReward);
+    }
+
+    function test_PaidMintRewardsWithFinderAndLister(uint64 salePrice, uint32 purchaseQuantity) public setupZoraNFTBase(purchaseQuantity) {
+        vm.assume(salePrice > 0);
+        vm.assume(purchaseQuantity < 100 && purchaseQuantity > 0);
+
+        vm.prank(DEFAULT_OWNER_ADDRESS);
+        zoraNFTBase.setSaleConfiguration({
+            publicSaleStart: 0,
+            publicSaleEnd: type(uint64).max,
+            presaleStart: 0,
+            presaleEnd: 0,
+            publicSalePrice: salePrice,
+            maxSalePurchasePerAddress: purchaseQuantity + 1,
+            presaleMerkleRoot: bytes32(0)
+        });
+
+        uint256 totalSales = uint256(salePrice) * purchaseQuantity;
+
+        (uint256 totalReward, uint256 zoraReward, uint256 finderReward, uint256 listerReward) =
+            zoraNFTBase.computePaidMintRewards(purchaseQuantity);
+        
+        uint256 totalPayment = totalSales + totalReward;
+
+        address finder = makeAddr("finder");
+        address lister = makeAddr("lister");
+
+        vm.deal(address(456), totalPayment);
+        vm.prank(address(456));
+        zoraNFTBase.purchaseWithRewards{value: totalPayment}(purchaseQuantity, "test comment", finder, lister);
+
+        assertEq(address(zoraNFTBase).balance, totalSales);
+        assertEq(zoraRewards.balanceOf(mintFeeRecipient), zoraReward);
+        assertEq(zoraRewards.balanceOf(finder), finderReward);
+        assertEq(zoraRewards.balanceOf(lister), listerReward);
     }
 
     function test_UpgradeApproved() public setupZoraNFTBase(10) {

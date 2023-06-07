@@ -2,12 +2,14 @@
 pragma solidity ^0.8.10;
 
 import {Test} from "forge-std/Test.sol";
+import {IERC721AUpgradeable} from "erc721a-upgradeable/IERC721AUpgradeable.sol";
+import {ZoraRewards} from "@zoralabs/zora-rewards/ZoraRewards.sol";
+
 import {IMetadataRenderer} from "../src/interfaces/IMetadataRenderer.sol";
 import "../src/ZoraNFTCreatorV1.sol";
 import "../src/ZoraNFTCreatorProxy.sol";
 import {MockMetadataRenderer} from "./metadata/MockMetadataRenderer.sol";
 import {FactoryUpgradeGate} from "../src/FactoryUpgradeGate.sol";
-import {IERC721AUpgradeable} from "erc721a-upgradeable/IERC721AUpgradeable.sol";
 
 contract ZoraNFTCreatorV1Test is Test {
     address public constant DEFAULT_OWNER_ADDRESS = address(0x23499);
@@ -21,15 +23,19 @@ contract ZoraNFTCreatorV1Test is Test {
     ZoraNFTCreatorV1 public creator;
     EditionMetadataRenderer public editionMetadataRenderer;
     DropMetadataRenderer public dropMetadataRenderer;
+    ZoraRewards internal zoraRewards;
 
     function setUp() public {
+        zoraRewards = new ZoraRewards("Zora Rewards", "ZEWARDS");
+
         vm.prank(DEFAULT_ZORA_DAO_ADDRESS);
         dropImpl = new ERC721Drop(
             address(1234),
             FactoryUpgradeGate(address(0)),
             address(0),
             mintFee,
-            mintFeeRecipient
+            mintFeeRecipient,
+            address(zoraRewards)
         );
         editionMetadataRenderer = new EditionMetadataRenderer();
         dropMetadataRenderer = new DropMetadataRenderer();

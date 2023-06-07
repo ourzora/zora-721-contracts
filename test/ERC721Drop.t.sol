@@ -3,6 +3,7 @@ pragma solidity ^0.8.10;
 
 import {Test} from "forge-std/Test.sol";
 import {IERC721AUpgradeable} from "erc721a-upgradeable/IERC721AUpgradeable.sol";
+import {ZoraRewards} from "@zoralabs/zora-rewards/ZoraRewards.sol";
 
 import {ERC721Drop} from "../src/ERC721Drop.sol";
 import {DummyMetadataRenderer} from "./utils/DummyMetadataRenderer.sol";
@@ -46,6 +47,7 @@ contract ERC721DropTest is Test {
         string comment
     );
 
+    ZoraRewards zoraRewards;
     ERC721Drop zoraNFTBase;
     MockUser mockUser;
     DummyMetadataRenderer public dummyRenderer = new DummyMetadataRenderer();
@@ -87,6 +89,8 @@ contract ERC721DropTest is Test {
     }
 
     function setUp() public {
+        zoraRewards = new ZoraRewards("Zora Rewards", "ZEWARDS");
+
         vm.prank(DEFAULT_ZORA_DAO_ADDRESS);
         factoryUpgradeGate = new FactoryUpgradeGate(UPGRADE_GATE_ADMIN_ADDRESS);
         vm.etch(
@@ -104,7 +108,8 @@ contract ERC721DropTest is Test {
                 factoryUpgradeGate,
                 address(0x0),
                 mintFee,
-                mintFeeRecipient
+                mintFeeRecipient,
+                address(zoraRewards)
             )
         );
         address payable newDrop = payable(
@@ -121,7 +126,8 @@ contract ERC721DropTest is Test {
                 factoryUpgradeGate,
                 address(subscriptionAddress),
                 mintFee,
-                mintFeeRecipient
+                mintFeeRecipient,
+                address(zoraRewards)
             )
         );
         address payable newDrop = payable(
@@ -372,7 +378,8 @@ contract ERC721DropTest is Test {
                 factoryUpgradeGate,
                 address(0x0),
                 mintFee,
-                mintFeeRecipient
+                mintFeeRecipient,
+                address(zoraRewards)
             )
         );
 
@@ -394,7 +401,8 @@ contract ERC721DropTest is Test {
                 factoryUpgradeGate,
                 address(0x0),
                 mintFee,
-                mintFeeRecipient
+                mintFeeRecipient,
+                address(zoraRewards)
             )
         );
 

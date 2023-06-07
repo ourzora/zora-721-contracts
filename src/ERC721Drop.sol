@@ -469,7 +469,7 @@ contract ERC721Drop is
     /// @param quantity quantity to purchase
     /// @param comment comment to include in the IERC721Drop.Sale event
     /// @return tokenId of the first token minted
-    function purchaseWithRewards(uint256 quantity, string calldata comment)    
+    function purchaseWithRewards(uint256 quantity, string calldata comment, address finder, address lister)    
         external
         payable
         nonReentrant
@@ -477,7 +477,7 @@ contract ERC721Drop is
         onlyPublicSaleActive
         returns (uint256) 
     {
-        return _handlePurchaseWithRewards(quantity, comment, address(0), address(0));
+        return _handlePurchaseWithRewards(quantity, comment, finder, lister);
     }
     
     function _handlePurchaseWithRewards(uint256 quantity, string memory comment, address finder, address lister) internal returns (uint256) {

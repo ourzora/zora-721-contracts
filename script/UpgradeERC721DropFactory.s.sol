@@ -2,6 +2,9 @@
 pragma solidity ^0.8.13;
 
 import "forge-std/console2.sol";
+
+import {ZoraRewards} from "@zoralabs/zora-rewards/ZoraRewards.sol";
+
 import {ZoraDropsDeployBase, ChainConfig, DropDeployment} from "./ZoraDropsDeployBase.sol";
 
 import {ERC721Drop} from "../src/ERC721Drop.sol";
@@ -58,7 +61,8 @@ contract UpgradeERC721DropFactory is ZoraDropsDeployBase {
             _factoryUpgradeGate: IFactoryUpgradeGate(deployment.factoryUpgradeGate),
             _marketFilterDAOAddress: chainConfig.subscriptionMarketFilterAddress,
             _mintFeeAmount: chainConfig.mintFeeAmount,
-            _mintFeeRecipient: payable(chainConfig.mintFeeRecipient)
+            _mintFeeRecipient: payable(chainConfig.mintFeeRecipient),
+            _zoraRewards: chainConfig.zoraRewards
         });
 
         deployment.dropImplementation = address(dropImplementation);

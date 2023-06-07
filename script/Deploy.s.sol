@@ -4,6 +4,8 @@ pragma solidity ^0.8.13;
 import "forge-std/Script.sol";
 import "forge-std/console2.sol";
 
+import {ZoraRewards} from "@zoralabs/zora-rewards/ZoraRewards.sol";
+
 import {ERC721Drop} from "../src/ERC721Drop.sol";
 import {ERC721DropProxy} from "../src/ERC721DropProxy.sol";
 import {ZoraNFTCreatorV1} from "../src/ZoraNFTCreatorV1.sol";
@@ -33,7 +35,8 @@ contract Deploy is ZoraDropsDeployBase {
             _factoryUpgradeGate: factoryUpgradeGate,
             _marketFilterDAOAddress: address(chainConfig.subscriptionMarketFilterAddress),
             _mintFeeAmount: chainConfig.mintFeeAmount,
-            _mintFeeRecipient: payable(chainConfig.mintFeeRecipient)
+            _mintFeeRecipient: payable(chainConfig.mintFeeRecipient),
+            _zoraRewards: address(chainConfig.zoraRewards)
         });
 
         ZoraNFTCreatorV1 factoryImpl = new ZoraNFTCreatorV1(address(dropImplementation), editionMetadata, dropMetadata);

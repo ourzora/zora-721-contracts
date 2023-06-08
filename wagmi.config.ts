@@ -71,7 +71,7 @@ const getAddresses = () => {
     // addAddress("ERC721Drop", chainId, jsonAddress.ERC721DROP_IMPL);
     // addAddress("FactoryUpgradeGate", chainId, jsonAddress.FACTORY_UPGRADE_GATE);
     addAddress(
-      'ZoraNFTCreatorProxy',
+      'ZoraNFTCreatorV1',
       chainId,
       jsonAddress.ZORA_NFT_CREATOR_PROXY
     );

@@ -1,18 +1,17 @@
 {
   "name": "@zoralabs/nft-drop-contracts",
-  "version": "1.12.0",
+  "version": "1.12.3",
   "description": "ZORA NFT Drops Contracts",
   "author": "ZORA",
   "license": "MIT",
   "private": false,
   "type": "module",
   "files": [
-    "contracts",
-    "deployments",
-    "addresses",
-    "dist/artifacts/*"
+    "dist/chainConfigs/*",
+    "dist/addresses/*",
+    "dist/index*"
   ],
-  "main": "./dist/index.js",
+  "main": "./dist/index.cjs",
   "types": "./dist/index.d.ts",
   "scripts": {
     "test": "forge test",

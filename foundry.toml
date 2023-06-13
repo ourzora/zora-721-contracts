@@ -2,10 +2,11 @@
 solc_version = '0.8.17'
 optimizer = true
 optimizer_runs = 5000
+via_ir = true
 out = 'dist/artifacts'
 test = 'test'
 src = 'src'
 libs = ['lib']
 gas_reports = ['*']
 
-fs_permissions = [{ access = "read", path = "./addresses"}]
+fs_permissions = [{ access = "read", path = "./addresses"}, { access = "read", path = "./chainConfigs"}, { access = "read", path = "./package.json" }]

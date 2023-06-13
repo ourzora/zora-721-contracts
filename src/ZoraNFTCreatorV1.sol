@@ -11,9 +11,10 @@ import {IERC721Drop} from "./interfaces/IERC721Drop.sol";
 import {DropMetadataRenderer} from "./metadata/DropMetadataRenderer.sol";
 import {IMetadataRenderer} from "./interfaces/IMetadataRenderer.sol";
 import {ERC721Drop} from "./ERC721Drop.sol";
+import {IContractMetadata} from "./interfaces/IContractMetadata.sol";
 
 /// @notice Zora NFT Creator V1
-contract ZoraNFTCreatorV1 is OwnableUpgradeable, UUPSUpgradeable, Version(6) {
+contract ZoraNFTCreatorV1 is OwnableUpgradeable, UUPSUpgradeable, IContractMetadata, Version(6) {
     string private constant CANNOT_BE_ZERO = "Cannot be 0 address";
 
     /// @notice Emitted when a edition is created reserving the corresponding token IDs.
@@ -57,6 +58,14 @@ contract ZoraNFTCreatorV1 is OwnableUpgradeable, UUPSUpgradeable, Version(6) {
     function initialize() external initializer {
         __Ownable_init();
         __UUPSUpgradeable_init();
+    }
+
+    function contractName() external pure override returns (string memory) {
+        return "ZORA NFT Creator";
+    }
+
+    function contractURI() external pure override returns (string memory) {
+        return "https://github.com/ourzora/zora-drops-contracts";
     }
 
     /// @dev Function to determine who is allowed to upgrade this contract.

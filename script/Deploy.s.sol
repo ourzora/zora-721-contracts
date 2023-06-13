@@ -3,98 +3,65 @@ pragma solidity ^0.8.13;
 
 import "forge-std/Script.sol";
 import "forge-std/console2.sol";
-import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 
 import {ERC721Drop} from "../src/ERC721Drop.sol";
 import {ERC721DropProxy} from "../src/ERC721DropProxy.sol";
 import {ZoraNFTCreatorV1} from "../src/ZoraNFTCreatorV1.sol";
 import {ZoraNFTCreatorProxy} from "../src/ZoraNFTCreatorProxy.sol";
 import {IOperatorFilterRegistry} from "../src/interfaces/IOperatorFilterRegistry.sol";
-import {OwnedSubscriptionManager} from "../src/filter/OwnedSubscriptionManager.sol";
 import {FactoryUpgradeGate} from "../src/FactoryUpgradeGate.sol";
 import {DropMetadataRenderer} from "../src/metadata/DropMetadataRenderer.sol";
 import {EditionMetadataRenderer} from "../src/metadata/EditionMetadataRenderer.sol";
+import {IERC721Drop} from "../src//interfaces/IERC721Drop.sol";
 
-contract Deploy is Script {
-    using Strings for uint256;
+import {ZoraDropsDeployBase, ChainConfig, DropDeployment} from "./ZoraDropsDeployBase.sol";
 
-    function run() public {
-        uint256 chainID = vm.envUint("CHAIN_ID");
-        console.log("CHAIN_ID", chainID);
-
-        console2.log("Starting ---");
+contract Deploy is ZoraDropsDeployBase {
+    function run() public returns (string memory) {
+        console2.log("Starting --- chainId", chainId());
+        ChainConfig memory chainConfig = getChainConfig();
+        console2.log("Setup contracts ---");
 
         vm.startBroadcast();
-        address daoFilterMarketAddress = vm.envAddress(
-            "SUBSCRIPTION_MARKET_FILTER_ADDRESS"
-        );
 
-        address factoryUpgradeGateOwner = vm.envAddress(
-            "FACTORY_UPGRADE_GATE_OWNER"
-        );
-
-        uint256 mintFeeAmount = vm.envUint("MINT_FEE_AMOUNT");
-        address payable mintFeeRecipient = payable(
-            vm.envAddress("MINT_FEE_RECIPIENT")
-        );
-
-        console2.log("Setup contracts ---");
         DropMetadataRenderer dropMetadata = new DropMetadataRenderer();
         EditionMetadataRenderer editionMetadata = new EditionMetadataRenderer();
-        FactoryUpgradeGate factoryUpgradeGate = new FactoryUpgradeGate(
-            factoryUpgradeGateOwner
-        );
+        FactoryUpgradeGate factoryUpgradeGate = new FactoryUpgradeGate(chainConfig.factoryUpgradeGateOwner);
 
         ERC721Drop dropImplementation = new ERC721Drop({
             _zoraERC721TransferHelper: address(0x0),
             _factoryUpgradeGate: factoryUpgradeGate,
-            _marketFilterDAOAddress: address(daoFilterMarketAddress),
-            _mintFeeAmount: mintFeeAmount,
-            _mintFeeRecipient: mintFeeRecipient
+            _marketFilterDAOAddress: address(chainConfig.subscriptionMarketFilterAddress),
+            _mintFeeAmount: chainConfig.mintFeeAmount,
+            _mintFeeRecipient: payable(chainConfig.mintFeeRecipient)
         });
 
-        ZoraNFTCreatorV1 factoryImpl = new ZoraNFTCreatorV1(
-            address(dropImplementation),
-            editionMetadata,
-            dropMetadata
-        );
+        ZoraNFTCreatorV1 factoryImpl = new ZoraNFTCreatorV1(address(dropImplementation), editionMetadata, dropMetadata);
 
         // Sets owner as deployer - then the deployer address can transfer ownership
-        ZoraNFTCreatorProxy factory = new ZoraNFTCreatorProxy(
-            address(factoryImpl),
-            abi.encodeWithSelector(ZoraNFTCreatorV1.initialize.selector)
+        ZoraNFTCreatorV1 factory = ZoraNFTCreatorV1(
+            address(new ZoraNFTCreatorProxy(address(factoryImpl), abi.encodeWithSelector(ZoraNFTCreatorV1.initialize.selector)))
         );
+
+        ZoraNFTCreatorV1(address(factory)).transferOwnership(chainConfig.factoryOwner);
 
         console2.log("Factory: ");
         console2.log(address(factory));
 
+        deployTestContractForVerification(factory);
+
         vm.stopBroadcast();
 
-        string memory filePath = string(
-            abi.encodePacked(
-                "deploys/",
-                chainID.toString(),
-                ".upgradeMetadata.txt"
-            )
-        );
-        // vm.writeFile(filePath, "");
-        // vm.writeLine(
-        //     filePath,
-        //     string(
-        //         abi.encodePacked(
-        //             "Metadata Renderer implementation: ",
-        //             Strings.toHexString(metadataRendererImpl)
-        //         )
-        //     )
-        // );
-        // vm.writeLine(
-        //     filePath,
-        //     string(
-        //         abi.encodePacked(
-        //             "Manager implementation: ",
-        //             Strings.toHexString(managerImpl)
-        //         )
-        //     )
-        // );
+        return
+            getDeploymentJSON(
+                DropDeployment({
+                    dropMetadata: address(dropMetadata),
+                    editionMetadata: address(editionMetadata),
+                    dropImplementation: address(dropImplementation),
+                    factoryUpgradeGate: address(factoryUpgradeGate),
+                    factory: address(factory),
+                    factoryImpl: address(factoryImpl)
+                })
+            );
     }
 }

@@ -1,28 +1,28 @@
 {
   "compilerOptions": {
-    "strict": true,
-    "outDir": "./dist/typechain",
-    "target": "es2018",
-    "module": "commonjs",
-    "moduleResolution": "node",
-    "allowSyntheticDefaultImports": true,
-    "preserveConstEnums": true,
-    "forceConsistentCasingInFileNames": true,
-    "importHelpers": true,
-    "esModuleInterop": true,
-    "declaration": true,
+    "allowJs": true,
     "baseUrl": ".",
+    "downlevelIteration": true,
+    "esModuleInterop": true,
+    "isolatedModules": true,
+    "lib": ["es2021"],
+    "module": "esnext",
+    "moduleResolution": "node",
+    "noEmit": true,
     "noImplicitAny": true,
-    "strictNullChecks": true,
-    "strictFunctionTypes": true,
-    "strictPropertyInitialization": true,
-    "noImplicitThis": true,
-    "alwaysStrict": true,
+    "noUncheckedIndexedAccess": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "strictNullChecks": true,
+    "target": "es2021",
+    "types": ["node"]
   },
-  "include": ["dist/typechain-src"],
+  "exclude": ["node_modules/**", "dist/**"],
+  "include": [
+    "package/**/*.ts",
+    "js-scripts/**/*.mjs"
+  ]
 }

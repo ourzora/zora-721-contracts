@@ -55,7 +55,7 @@ contract ERC721Drop is
     PublicMulticall,
     OwnableSkeleton,
     FundsReceiver,
-    Version(11),
+    Version(12),
     ERC721DropStorageV1
 {
     /// @dev This is the max mint batch size for the optimized ERC721A mint contract
@@ -82,6 +82,9 @@ contract ERC721Drop is
 
     /// @notice Max royalty BPS
     uint16 constant MAX_ROYALTY_BPS = 50_00;
+
+    // /// @notice Empty string for blank comments
+    // string constant EMPTY_STRING = "";
 
     /// @notice Market filter DAO address for opensea filter registry
     address public immutable marketFilterDAOAddress;
@@ -165,8 +168,8 @@ contract ERC721Drop is
     /// @param _zoraERC721TransferHelper Transfer helper
     /// @param _factoryUpgradeGate Factory upgrade gate address
     /// @param _marketFilterDAOAddress Market filter DAO address
-    /// @param _factoryUpgradeGate Factory upgrade gate address
-    /// @param _marketFilterDAOAddress Market filter DAO address
+    /// @param _mintFeeAmount Mint fee amount in wei
+    /// @param _mintFeeRecipient Mint fee recipient address
     constructor(
         address _zoraERC721TransferHelper,
         IFactoryUpgradeGate _factoryUpgradeGate,
@@ -430,6 +433,9 @@ contract ERC721Drop is
       @dev This allows the user to purchase a edition edition
            at the given price in the contract.
      */
+    /// @notice Purchase a quantity of tokens
+    /// @param quantity quantity to purchase
+    /// @return tokenId of the first token minted
     function purchase(uint256 quantity)
         external
         payable
@@ -438,6 +444,25 @@ contract ERC721Drop is
         onlyPublicSaleActive
         returns (uint256)
     {
+        return _handlePurchase(quantity, "");
+    }
+
+    /// @notice Purchase a quantity of tokens with a comment
+    /// @param quantity quantity to purchase
+    /// @param comment comment to include in the IERC721Drop.Sale event
+    /// @return tokenId of the first token minted
+    function purchaseWithComment(uint256 quantity, string calldata comment)
+        external
+        payable
+        nonReentrant
+        canMintTokens(quantity)
+        onlyPublicSaleActive
+        returns (uint256)
+    {
+        return _handlePurchase(quantity, comment);
+    }
+
+    function _handlePurchase(uint256 quantity, string memory comment) internal returns (uint256) {
         uint256 salePrice = salesConfig.publicSalePrice;
 
         if (msg.value != (salePrice + ZORA_MINT_FEE) * quantity) {
@@ -467,6 +492,15 @@ contract ERC721Drop is
             pricePerToken: salePrice,
             firstPurchasedTokenId: firstMintedTokenId
         });
+        if(bytes(comment).length > 0) {
+            emit IERC721Drop.MintComment({
+                sender: _msgSender(),
+                tokenContract: address(this),
+                tokenId: firstMintedTokenId,
+                quantity: quantity,
+                comment: comment
+            });
+        }
         return firstMintedTokenId;
     }
 
@@ -564,6 +598,39 @@ contract ERC721Drop is
         onlyPresaleActive
         returns (uint256)
     {
+        return _handlePurchasePresale(quantity, maxQuantity, pricePerToken, merkleProof, "");
+    }
+
+    /// @notice Merkle-tree based presale purchase function with a comment
+    /// @param quantity quantity to purchase
+    /// @param maxQuantity max quantity that can be purchased via merkle proof #
+    /// @param pricePerToken price that each token is purchased at
+    /// @param merkleProof proof for presale mint
+    /// @param comment comment to include in the IERC721Drop.Sale event
+    function purchasePresaleWithComment(
+        uint256 quantity,
+        uint256 maxQuantity,
+        uint256 pricePerToken,
+        bytes32[] calldata merkleProof,
+        string calldata comment
+    )
+        external
+        payable
+        nonReentrant
+        canMintTokens(quantity)
+        onlyPresaleActive
+        returns (uint256)
+    {
+        return _handlePurchasePresale(quantity, maxQuantity, pricePerToken, merkleProof, comment);
+    }
+
+    function _handlePurchasePresale(
+        uint256 quantity,
+        uint256 maxQuantity,
+        uint256 pricePerToken,
+        bytes32[] calldata merkleProof,
+        string memory comment
+    ) internal returns (uint256) {
         if (
             !MerkleProofUpgradeable.verify(
                 merkleProof,
@@ -599,6 +666,15 @@ contract ERC721Drop is
             pricePerToken: pricePerToken,
             firstPurchasedTokenId: firstMintedTokenId
         });
+        if (bytes(comment).length > 0) {
+            emit IERC721Drop.MintComment({
+                sender: _msgSender(),
+                tokenContract: address(this),
+                tokenId: firstMintedTokenId,
+                quantity: quantity,
+                comment: comment
+            });
+        }
 
         return firstMintedTokenId;
     }

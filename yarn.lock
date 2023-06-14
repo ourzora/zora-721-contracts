@@ -604,10 +604,10 @@
     viem "~0.3.18"
     zod "^3.21.4"
 
-"@zoralabs/zora-rewards@^0.1.2":
-  version "0.1.2"
-  resolved "https://registry.yarnpkg.com/@zoralabs/zora-rewards/-/zora-rewards-0.1.2.tgz#a76dac799bce6744b3a136ff4b11e4ef2119cbdc"
-  integrity sha512-RFSODP4t4+owYWzEYKa3RkBuCFwudgUHR+63753wZIMIhpcLHN8LzAYVKkavSdFdU4dkTcfS6x50hds+OvR5Fg==
+"@zoralabs/zora-rewards@^0.1.4":
+  version "0.1.4"
+  resolved "https://registry.yarnpkg.com/@zoralabs/zora-rewards/-/zora-rewards-0.1.4.tgz#fc3ccf924b2ee05231af4fec7aa06e572585eb5d"
+  integrity sha512-3ZTDZ+1zTsjmd+wbQkzifhiHrlkYq268a0C+ZmixXsEBeBWEzxZwIXVoUCTZxTPguWlddN16rRrg2bumyvsQQA==
   dependencies:
     "@openzeppelin/contracts" "^4.9.0"
 

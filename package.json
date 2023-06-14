@@ -49,6 +49,6 @@
   },
   "dependencies": {
     "@dotenv/cli": "^2.2.2",
-    "@zoralabs/zora-rewards": "^0.1.2"
+    "@zoralabs/zora-rewards": "^0.1.4"
   }
 }

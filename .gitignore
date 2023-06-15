@@ -9,4 +9,4 @@ cache
 .env.*
 dist/
 .idea
-broadcast
+broadcast/

@@ -70,6 +70,8 @@ interface IERC721Drop {
     error Admin_InvalidUpgradeAddress(address proposedAddress);
     /// @notice Unable to finalize an edition not marked as open (size set to uint64_max_value)
     error Admin_UnableToFinalizeNotOpenEdition();
+    /// @notice Cannot reserve every mint for admin
+    error InvalidMintSchedule();
 
     /// @notice Event emitted for mint fee payout
     /// @param mintFeeAmount amount of the mint fee

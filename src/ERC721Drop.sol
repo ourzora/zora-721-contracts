@@ -485,6 +485,8 @@ contract ERC721Drop is
     }
     
     function _handlePurchaseWithRewards(uint256 quantity, string memory comment, address finder, address lister) internal returns (uint256) {
+        _mintSupplyRoyalty(quantity);
+
         // If max purchase per address == 0 there is no limit.
         // Any other number, the per address mint limit is that.
         if (

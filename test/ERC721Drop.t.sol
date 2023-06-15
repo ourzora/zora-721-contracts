@@ -484,6 +484,24 @@ contract ERC721DropTest is Test {
         assertEq(zoraRewards.balanceOf(lister), listerReward);
     }
 
+    function testRevert_FreeMintRewardsInsufficientEth(uint32 purchaseQuantity) public setupZoraNFTBase(purchaseQuantity) {
+        vm.assume(purchaseQuantity < 100 && purchaseQuantity > 0);
+
+        vm.prank(DEFAULT_OWNER_ADDRESS);
+        zoraNFTBase.setSaleConfiguration({
+            publicSaleStart: 0,
+            publicSaleEnd: type(uint64).max,
+            presaleStart: 0,
+            presaleEnd: 0,
+            publicSalePrice: 0,
+            maxSalePurchasePerAddress: purchaseQuantity + 1,
+            presaleMerkleRoot: bytes32(0)
+        });
+
+        vm.expectRevert(abi.encodeWithSignature("INSUFFICIENT_ETH_FOR_REWARDS()"));
+        zoraNFTBase.purchaseWithRewards(purchaseQuantity, "test comment", address(0), address(0));
+    }
+
     function test_PaidMintRewards(uint64 salePrice, uint32 purchaseQuantity) public setupZoraNFTBase(purchaseQuantity) {
         vm.assume(salePrice > 0);
         vm.assume(purchaseQuantity < 100 && purchaseQuantity > 0);
@@ -613,6 +631,32 @@ contract ERC721DropTest is Test {
         assertEq(zoraRewards.balanceOf(mintFeeRecipient), zoraReward);
         assertEq(zoraRewards.balanceOf(finder), finderReward);
         assertEq(zoraRewards.balanceOf(lister), listerReward);
+    }
+
+    function testRevert_PaidMintRewardsInsufficientEth(uint64 salePrice, uint32 purchaseQuantity) public setupZoraNFTBase(purchaseQuantity) {
+        vm.assume(salePrice > 0);
+        vm.assume(purchaseQuantity < 100 && purchaseQuantity > 0);
+
+        vm.prank(DEFAULT_OWNER_ADDRESS);
+        zoraNFTBase.setSaleConfiguration({
+            publicSaleStart: 0,
+            publicSaleEnd: type(uint64).max,
+            presaleStart: 0,
+            presaleEnd: 0,
+            publicSalePrice: salePrice,
+            maxSalePurchasePerAddress: purchaseQuantity + 1,
+            presaleMerkleRoot: bytes32(0)
+        });
+
+        uint256 totalSales = uint256(salePrice) * purchaseQuantity;
+
+        (uint256 totalReward, uint256 zoraReward, uint256 finderReward, uint256 listerReward) =
+            zoraNFTBase.computePaidMintRewards(purchaseQuantity);
+        
+        uint256 totalPayment = totalSales + totalReward;
+
+        vm.expectRevert(abi.encodeWithSignature("INSUFFICIENT_ETH_FOR_REWARDS()"));
+        zoraNFTBase.purchaseWithRewards(purchaseQuantity, "test comment", address(0), address(0));
     }
 
     function test_UpgradeApproved() public setupZoraNFTBase(10) {

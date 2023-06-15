@@ -9,4 +9,4 @@ src = 'src'
 libs = ['lib']
 gas_reports = ['*']
 
-fs_permissions = [{ access = "read", path = "./addresses"}]
+fs_permissions = [{ access = "read", path = "./addresses"}, { access = "read", path = "./chainConfigs"}, { access = "read", path = "./package.json" }]

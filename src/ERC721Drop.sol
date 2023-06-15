@@ -1282,7 +1282,8 @@ contract ERC721Drop is
     }
 
     function _mintSupplyRoyalty(uint256 mintQuantity) internal {
-        if (royaltyMintSchedule == 0) {
+        uint32 royaltySchedule = royaltyMintSchedule;
+        if (royaltySchedule == 0) {
             return;
         }
 
@@ -1291,7 +1292,7 @@ contract ERC721Drop is
             return;
         }
 
-        uint256 totalRoyaltyMints = (mintQuantity + (_totalMinted() % royaltyMintSchedule)) / (royaltyMintSchedule - 1);
+        uint256 totalRoyaltyMints = (mintQuantity + (_totalMinted() % royaltySchedule)) / (royaltySchedule - 1);
         totalRoyaltyMints = MathUpgradeable.min(totalRoyaltyMints, config.editionSize - (mintQuantity + _totalMinted()));
         if (totalRoyaltyMints > 0) {
             _mintNFTs(royaltyRecipient, totalRoyaltyMints);

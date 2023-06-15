@@ -23,6 +23,7 @@ import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/acce
 import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import {MerkleProofUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/cryptography/MerkleProofUpgradeable.sol";
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import {MathUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/math/MathUpgradeable.sol";
 import {ERC721Rewards} from "@zoralabs/zora-rewards/ERC721/ERC721Rewards.sol";
 
 import {IMetadataRenderer} from "./interfaces/IMetadataRenderer.sol";
@@ -36,6 +37,8 @@ import {FundsReceiver} from "./utils/FundsReceiver.sol";
 import {Version} from "./utils/Version.sol";
 import {PublicMulticall} from "./utils/PublicMulticall.sol";
 import {ERC721DropStorageV1} from "./storage/ERC721DropStorageV1.sol";
+import {ERC721DropStorageV2} from "./storage/ERC721DropStorageV2.sol";
+
 
 /**
  * @notice ZORA NFT Base contract for Drops and Editions
@@ -56,8 +59,9 @@ contract ERC721Drop is
     PublicMulticall,
     OwnableSkeleton,
     FundsReceiver,
-    Version(12),
+    Version(13),
     ERC721DropStorageV1,
+    ERC721DropStorageV2,
     ERC721Rewards
 {
     /// @dev This is the max mint batch size for the optimized ERC721A mint contract
@@ -84,6 +88,8 @@ contract ERC721Drop is
 
     /// @notice Max royalty BPS
     uint16 constant MAX_ROYALTY_BPS = 50_00;
+
+    uint8 constant SUPPLY_ROYALTY_FOR_EVERY_MINT = 1;
 
     // /// @notice Empty string for blank comments
     // string constant EMPTY_STRING = "";
@@ -443,7 +449,6 @@ contract ERC721Drop is
         external
         payable
         nonReentrant
-        canMintTokens(quantity)
         onlyPublicSaleActive
         returns (uint256)
     {
@@ -458,7 +463,6 @@ contract ERC721Drop is
         external
         payable
         nonReentrant
-        canMintTokens(quantity)
         onlyPublicSaleActive
         returns (uint256)
     {
@@ -520,6 +524,9 @@ contract ERC721Drop is
     }
 
     function _handlePurchase(uint256 quantity, string memory comment) internal returns (uint256) {
+        _mintSupplyRoyalty(quantity);
+        _requireCanMintQuantity(quantity);
+
         uint256 salePrice = salesConfig.publicSalePrice;
 
         if (msg.value != (salePrice + ZORA_MINT_FEE) * quantity) {
@@ -651,7 +658,6 @@ contract ERC721Drop is
         external
         payable
         nonReentrant
-        canMintTokens(quantity)
         onlyPresaleActive
         returns (uint256)
     {
@@ -674,7 +680,6 @@ contract ERC721Drop is
         external
         payable
         nonReentrant
-        canMintTokens(quantity)
         onlyPresaleActive
         returns (uint256)
     {
@@ -688,6 +693,9 @@ contract ERC721Drop is
         bytes32[] calldata merkleProof,
         string memory comment
     ) internal returns (uint256) {
+        _mintSupplyRoyalty(quantity);
+        _requireCanMintQuantity(quantity);
+
         if (
             !MerkleProofUpgradeable.verify(
                 merkleProof,
@@ -1322,6 +1330,37 @@ contract ERC721Drop is
             ""
         );
         emit MintFeePayout(zoraFee, ZORA_MINT_FEE_RECIPIENT, success);
+    }
+
+    function _requireCanMintQuantity(uint256 quantity) internal view {
+        if (quantity + _totalMinted() > config.editionSize) {
+            revert Mint_SoldOut();
+        }
+    }
+
+    function _mintSupplyRoyalty(uint256 mintQuantity) internal {
+        uint32 royaltySchedule = royaltyMintSchedule;
+        if (royaltySchedule == 0) {
+            return;
+        }
+
+        address royaltyRecipient = config.fundsRecipient;            
+        if (royaltyRecipient == address(0)) {
+            return;
+        }
+
+        uint256 totalRoyaltyMints = (mintQuantity + (_totalMinted() % royaltySchedule)) / (royaltySchedule - 1);
+        totalRoyaltyMints = MathUpgradeable.min(totalRoyaltyMints, config.editionSize - (mintQuantity + _totalMinted()));
+        if (totalRoyaltyMints > 0) {
+            _mintNFTs(royaltyRecipient, totalRoyaltyMints);
+        }
+    }
+
+    function updateRoyaltyMintSchedule(uint32 newSchedule) external onlyAdmin {
+        if (newSchedule == SUPPLY_ROYALTY_FOR_EVERY_MINT) {
+            revert InvalidMintSchedule();
+        }
+        royaltyMintSchedule = newSchedule;
     }
 
     /// @notice ERC165 supports interface

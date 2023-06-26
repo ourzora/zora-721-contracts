@@ -471,7 +471,13 @@ contract ERC721Drop is
     /// @param quantity quantity to purchase
     /// @param comment comment to include in the IERC721Drop.Sale event
     /// @return tokenId of the first token minted
-    function purchaseWithRecipient(address recipient, uint256 quantity, string calldata comment) external payable nonReentrant onlyPublicSaleActive returns (uint256) {
+    function purchaseWithRecipient(address recipient, uint256 quantity, string calldata comment) 
+        external 
+        payable 
+        nonReentrant 
+        onlyPublicSaleActive 
+        returns (uint256) 
+    {
         return _handlePurchase(recipient, quantity, comment);
     }
 

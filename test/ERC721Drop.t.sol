@@ -387,14 +387,15 @@ contract ERC721DropTest is Test {
             presaleMerkleRoot: bytes32(0)
         });
 
-        (uint256 totalReward, uint256 creatorReward, uint256 zoraReward, uint256 finderReward, uint256 listerReward) =
+        (uint256 totalReward, uint256 creatorReward, uint256 finderReward, uint256 listerReward, uint256 zoraReward) =
             zoraNFTBase.computeFreeMintRewards(purchaseQuantity);
 
         vm.deal(address(456), totalReward);
         vm.prank(address(456));
         zoraNFTBase.purchaseWithRewards{value: totalReward}(purchaseQuantity, "test comment", address(0), address(0));
 
-        assertEq(DEFAULT_FUNDS_RECIPIENT_ADDRESS.balance, creatorReward);
+        // assertEq(DEFAULT_FUNDS_RECIPIENT_ADDRESS.balance, creatorReward);
+        assertEq(zoraRewards.balanceOf(DEFAULT_FUNDS_RECIPIENT_ADDRESS), creatorReward);
         assertEq(zoraRewards.balanceOf(mintFeeRecipient), zoraReward + finderReward + listerReward);
     }
 
@@ -412,7 +413,7 @@ contract ERC721DropTest is Test {
             presaleMerkleRoot: bytes32(0)
         });
 
-        (uint256 totalReward, uint256 creatorReward, uint256 zoraReward, uint256 finderReward, uint256 listerReward) =
+        (uint256 totalReward, uint256 creatorReward, uint256 finderReward, uint256 listerReward, uint256 zoraReward) =
             zoraNFTBase.computeFreeMintRewards(purchaseQuantity);
 
         address finder = makeAddr("finder");
@@ -421,7 +422,8 @@ contract ERC721DropTest is Test {
         vm.prank(address(456));
         zoraNFTBase.purchaseWithRewards{value: totalReward}(purchaseQuantity, "test comment", finder, address(0));
 
-        assertEq(DEFAULT_FUNDS_RECIPIENT_ADDRESS.balance, creatorReward);
+        // assertEq(DEFAULT_FUNDS_RECIPIENT_ADDRESS.balance, creatorReward);
+        assertEq(zoraRewards.balanceOf(DEFAULT_FUNDS_RECIPIENT_ADDRESS), creatorReward);
         assertEq(zoraRewards.balanceOf(mintFeeRecipient), zoraReward + listerReward);
         assertEq(zoraRewards.balanceOf(finder), finderReward);
     }
@@ -440,7 +442,7 @@ contract ERC721DropTest is Test {
             presaleMerkleRoot: bytes32(0)
         });
 
-        (uint256 totalReward, uint256 creatorReward, uint256 zoraReward, uint256 finderReward, uint256 listerReward) =
+        (uint256 totalReward, uint256 creatorReward, uint256 finderReward, uint256 listerReward, uint256 zoraReward) =
             zoraNFTBase.computeFreeMintRewards(purchaseQuantity);
 
         address lister = makeAddr("lister");
@@ -449,7 +451,8 @@ contract ERC721DropTest is Test {
         vm.prank(address(456));
         zoraNFTBase.purchaseWithRewards{value: totalReward}(purchaseQuantity, "test comment", address(0), lister);
 
-        assertEq(DEFAULT_FUNDS_RECIPIENT_ADDRESS.balance, creatorReward);
+        // assertEq(DEFAULT_FUNDS_RECIPIENT_ADDRESS.balance, creatorReward);
+        assertEq(zoraRewards.balanceOf(DEFAULT_FUNDS_RECIPIENT_ADDRESS), creatorReward);
         assertEq(zoraRewards.balanceOf(mintFeeRecipient), zoraReward + finderReward);
         assertEq(zoraRewards.balanceOf(lister), listerReward);
     }
@@ -468,7 +471,7 @@ contract ERC721DropTest is Test {
             presaleMerkleRoot: bytes32(0)
         });
 
-        (uint256 totalReward, uint256 creatorReward, uint256 zoraReward, uint256 finderReward, uint256 listerReward) =
+        (uint256 totalReward, uint256 creatorReward, uint256 finderReward, uint256 listerReward, uint256 zoraReward) =
             zoraNFTBase.computeFreeMintRewards(purchaseQuantity);
 
         address finder = makeAddr("finder");
@@ -478,7 +481,8 @@ contract ERC721DropTest is Test {
         vm.prank(address(456));
         zoraNFTBase.purchaseWithRewards{value: totalReward}(purchaseQuantity, "test comment", finder, lister);
 
-        assertEq(DEFAULT_FUNDS_RECIPIENT_ADDRESS.balance, creatorReward);
+        // assertEq(DEFAULT_FUNDS_RECIPIENT_ADDRESS.balance, creatorReward);
+        assertEq(zoraRewards.balanceOf(DEFAULT_FUNDS_RECIPIENT_ADDRESS), creatorReward);
         assertEq(zoraRewards.balanceOf(mintFeeRecipient), zoraReward);
         assertEq(zoraRewards.balanceOf(finder), finderReward);
         assertEq(zoraRewards.balanceOf(lister), listerReward);
@@ -519,7 +523,7 @@ contract ERC721DropTest is Test {
 
         uint256 totalSales = uint256(salePrice) * purchaseQuantity;
 
-        (uint256 totalReward, uint256 zoraReward, uint256 finderReward, uint256 listerReward) =
+        (uint256 totalReward, uint256 finderReward, uint256 listerReward, uint256 zoraReward) =
             zoraNFTBase.computePaidMintRewards(purchaseQuantity);
 
         uint256 totalPayment = totalSales + totalReward;
@@ -549,7 +553,7 @@ contract ERC721DropTest is Test {
 
         uint256 totalSales = uint256(salePrice) * purchaseQuantity;
 
-        (uint256 totalReward, uint256 zoraReward, uint256 finderReward, uint256 listerReward) =
+        (uint256 totalReward, uint256 finderReward, uint256 listerReward, uint256 zoraReward) =
             zoraNFTBase.computePaidMintRewards(purchaseQuantity);
         
         uint256 totalPayment = totalSales + totalReward;
@@ -582,7 +586,7 @@ contract ERC721DropTest is Test {
 
         uint256 totalSales = uint256(salePrice) * purchaseQuantity;
 
-        (uint256 totalReward, uint256 zoraReward, uint256 finderReward, uint256 listerReward) =
+        (uint256 totalReward, uint256 finderReward, uint256 listerReward, uint256 zoraReward) =
             zoraNFTBase.computePaidMintRewards(purchaseQuantity);
         
         uint256 totalPayment = totalSales + totalReward;
@@ -615,7 +619,7 @@ contract ERC721DropTest is Test {
 
         uint256 totalSales = uint256(salePrice) * purchaseQuantity;
 
-        (uint256 totalReward, uint256 zoraReward, uint256 finderReward, uint256 listerReward) =
+        (uint256 totalReward, uint256 finderReward, uint256 listerReward, uint256 zoraReward) =
             zoraNFTBase.computePaidMintRewards(purchaseQuantity);
         
         uint256 totalPayment = totalSales + totalReward;
@@ -650,7 +654,7 @@ contract ERC721DropTest is Test {
 
         uint256 totalSales = uint256(salePrice) * purchaseQuantity;
 
-        (uint256 totalReward, uint256 zoraReward, uint256 finderReward, uint256 listerReward) =
+        (uint256 totalReward, uint256 finderReward, uint256 listerReward, uint256 zoraReward) =
             zoraNFTBase.computePaidMintRewards(purchaseQuantity);
         
         uint256 totalPayment = totalSales + totalReward;

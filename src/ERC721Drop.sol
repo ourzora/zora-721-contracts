@@ -466,10 +466,10 @@ contract ERC721Drop is
         return _handlePurchase(msg.sender, quantity, comment);
     }
 
-    /// @notice Purchase a quantity of tokens to a specified recipient, with a comment
+    /// @notice Purchase a quantity of tokens to a specified recipient, with an optional comment
     /// @param recipient recipient of the tokens
     /// @param quantity quantity to purchase
-    /// @param comment comment to include in the IERC721Drop.Sale event
+    /// @param comment optional comment to include in the IERC721Drop.Sale event (leave blank for no comment)
     /// @return tokenId of the first token minted
     function purchaseWithRecipient(address recipient, uint256 quantity, string calldata comment) 
         external 

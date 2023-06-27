@@ -394,6 +394,66 @@ contract ERC721DropTest is Test {
         }
     }
 
+    function test_PurchaseWithRecipientAndComment(uint64 salePrice, uint32 purchaseQuantity) public setupZoraNFTBase(purchaseQuantity) {
+        vm.assume(purchaseQuantity < 100 && purchaseQuantity > 0);
+        vm.prank(DEFAULT_OWNER_ADDRESS);
+        zoraNFTBase.setSaleConfiguration({
+            publicSaleStart: 0,
+            publicSaleEnd: type(uint64).max,
+            presaleStart: 0,
+            presaleEnd: 0,
+            publicSalePrice: salePrice,
+            maxSalePurchasePerAddress: purchaseQuantity + 1,
+            presaleMerkleRoot: bytes32(0)
+        });
+
+        (, uint256 zoraFee) = zoraNFTBase.zoraFeeForAmount(purchaseQuantity);
+        uint256 paymentAmount = uint256(salePrice) * purchaseQuantity + zoraFee;
+
+        address minter = makeAddr("minter");
+        address recipient = makeAddr("recipient");
+
+        vm.deal(minter, paymentAmount);
+
+        vm.expectEmit(true, true, true, true);
+        emit MintComment(
+            minter,
+            address(zoraNFTBase),
+            0,
+            purchaseQuantity,
+            "test comment"
+        );
+        vm.prank(minter);
+        zoraNFTBase.purchaseWithRecipient{value: paymentAmount}(recipient, purchaseQuantity, "test comment");
+    }
+
+    function testRevert_PurchaseWithInvalidRecipient(uint64 salePrice, uint32 purchaseQuantity) public setupZoraNFTBase(purchaseQuantity) {
+        vm.assume(purchaseQuantity < 100 && purchaseQuantity > 0);
+        vm.prank(DEFAULT_OWNER_ADDRESS);
+        zoraNFTBase.setSaleConfiguration({
+            publicSaleStart: 0,
+            publicSaleEnd: type(uint64).max,
+            presaleStart: 0,
+            presaleEnd: 0,
+            publicSalePrice: salePrice,
+            maxSalePurchasePerAddress: purchaseQuantity + 1,
+            presaleMerkleRoot: bytes32(0)
+        });
+
+        (, uint256 zoraFee) = zoraNFTBase.zoraFeeForAmount(purchaseQuantity);
+        uint256 paymentAmount = uint256(salePrice) * purchaseQuantity + zoraFee;
+
+
+        address minter = makeAddr("minter");
+        address recipient = address(0);
+
+        vm.deal(minter, paymentAmount);
+
+        vm.expectRevert(abi.encodeWithSignature("MintToZeroAddress()"));
+        vm.prank(minter);
+        zoraNFTBase.purchaseWithRecipient{value: paymentAmount}(recipient, purchaseQuantity, "");
+    } 
+
     function test_UpgradeApproved() public setupZoraNFTBase(10) {
         address newImpl = address(
             new ERC721Drop(

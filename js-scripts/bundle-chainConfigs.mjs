@@ -1,12 +1,7 @@
 import { readdirSync, readFileSync, writeFileSync } from 'fs';
 
 // Reads all the chain configs in ./chainConfigs folder, and bundles them into a typescript 
-// definition that looks like:
-// export const chainConfigs = {
-//  [chainId]: {
-//    ...chainConfig
-//  }
-//}
+// definition
 function makeConfig() {
   // read all files in the chainConfigs folder
   const files = readdirSync('chainConfigs');

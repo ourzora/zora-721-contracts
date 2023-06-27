@@ -528,10 +528,10 @@
     widest-line "^3.1.0"
     wrap-ansi "^6.2.0"
 
-"@openzeppelin/contracts@^4.9.0":
-  version "4.9.0"
-  resolved "https://registry.yarnpkg.com/@openzeppelin/contracts/-/contracts-4.9.0.tgz#683f33b6598970051bc5f0806fd8660da9e018dd"
-  integrity sha512-DUP74AFGKlic2sQb/CmgrN2aUPMFGxRrmCTUxLHsiU2RzwWqVuMPZBxiAyvlff6Pea77uylAX6B5x9W6evEbhA==
+"@openzeppelin/contracts@^4.9.2":
+  version "4.9.2"
+  resolved "https://registry.yarnpkg.com/@openzeppelin/contracts/-/contracts-4.9.2.tgz#1cb2d5e4d3360141a17dbc45094a8cad6aac16c1"
+  integrity sha512-mO+y6JaqXjWeMh9glYVzVu8HYPGknAAnWyxTRhGeckOruyXQMNnlcW6w/Dx9ftLeIQk6N+ZJFuVmTwF7lEIFrg==
 
 "@pkgjs/parseargs@^0.11.0":
   version "0.11.0"
@@ -604,12 +604,12 @@
     viem "~0.3.18"
     zod "^3.21.4"
 
-"@zoralabs/zora-rewards@^0.1.4":
-  version "0.1.4"
-  resolved "https://registry.yarnpkg.com/@zoralabs/zora-rewards/-/zora-rewards-0.1.4.tgz#fc3ccf924b2ee05231af4fec7aa06e572585eb5d"
-  integrity sha512-3ZTDZ+1zTsjmd+wbQkzifhiHrlkYq268a0C+ZmixXsEBeBWEzxZwIXVoUCTZxTPguWlddN16rRrg2bumyvsQQA==
+"@zoralabs/zora-rewards@^0.1.5":
+  version "0.1.5"
+  resolved "https://registry.yarnpkg.com/@zoralabs/zora-rewards/-/zora-rewards-0.1.5.tgz#af3c7e4b99f1f56907bb666b68388c6ff80b2e73"
+  integrity sha512-sM3tjVKEF2nDGxGGejOdNvSNGMCt2toFw9iaPmU4hNHBcRVueS7/lzb4Qi142oMiiv8VqinTcsdZfTbk4KDs7g==
   dependencies:
-    "@openzeppelin/contracts" "^4.9.0"
+    "@openzeppelin/contracts" "^4.9.2"
 
 abitype@0.8.1:
   version "0.8.1"

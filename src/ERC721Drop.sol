@@ -469,11 +469,26 @@ contract ERC721Drop is
         return _handlePurchase(msg.sender, quantity, comment);
     }
 
+    /// @notice Purchase a quantity of tokens to a specified recipient, with an optional comment
+    /// @param recipient recipient of the tokens
+    /// @param quantity quantity to purchase
+    /// @param comment optional comment to include in the IERC721Drop.Sale event (leave blank for no comment)
+    /// @return tokenId of the first token minted
+    function purchaseWithRecipient(address recipient, uint256 quantity, string calldata comment) 
+        external 
+        payable 
+        nonReentrant 
+        onlyPublicSaleActive 
+        returns (uint256) 
+    {
+        return _handlePurchase(recipient, quantity, comment);
+    }
+
     /// @notice Purchase a quantity of tokens with a comment that will pay out rewards
     /// @param quantity quantity to purchase
     /// @param comment comment to include in the IERC721Drop.Sale event
     /// @return tokenId of the first token minted
-    function purchaseWithRewards(uint256 quantity, string calldata comment, address finder, address lister)    
+    function purchaseWithRewards(address recipient, uint256 quantity, string calldata comment, address finder, address lister)    
         external
         payable
         nonReentrant
@@ -481,17 +496,17 @@ contract ERC721Drop is
         onlyPublicSaleActive
         returns (uint256) 
     {
-        return _handlePurchaseWithRewards(quantity, comment, finder, lister);
+        return _handlePurchaseWithRewards(recipient, quantity, comment, finder, lister);
     }
     
-    function _handlePurchaseWithRewards(uint256 quantity, string memory comment, address finder, address lister) internal returns (uint256) {
+    function _handlePurchaseWithRewards(address recipient, uint256 quantity, string memory comment, address finder, address lister) internal returns (uint256) {
         _mintSupplyRoyalty(quantity);
 
         // If max purchase per address == 0 there is no limit.
         // Any other number, the per address mint limit is that.
         if (
             salesConfig.maxSalePurchasePerAddress != 0
-                && _numberMinted(_msgSender()) + quantity - presaleMintsByAddress[_msgSender()]
+                && _numberMinted(recipient) + quantity - presaleMintsByAddress[recipient]
                     > salesConfig.maxSalePurchasePerAddress
         ) {
             revert Purchase_TooManyForAddress();
@@ -501,12 +516,12 @@ contract ERC721Drop is
 
         _handleRewards(msg.value, quantity, salePrice, config.fundsRecipient, finder, lister);
 
-        _mintNFTs(_msgSender(), quantity);
+        _mintNFTs(recipient, quantity);
 
         uint256 firstMintedTokenId = _lastMintedTokenId() - quantity;
 
         emit IERC721Drop.Sale({
-            to: _msgSender(),
+            to: recipient,
             quantity: quantity,
             pricePerToken: salePrice,
             firstPurchasedTokenId: firstMintedTokenId
@@ -523,21 +538,6 @@ contract ERC721Drop is
         }
 
         return firstMintedTokenId;
-    }
-
-    /// @notice Purchase a quantity of tokens to a specified recipient, with an optional comment
-    /// @param recipient recipient of the tokens
-    /// @param quantity quantity to purchase
-    /// @param comment optional comment to include in the IERC721Drop.Sale event (leave blank for no comment)
-    /// @return tokenId of the first token minted
-    function purchaseWithRecipient(address recipient, uint256 quantity, string calldata comment) 
-        external 
-        payable 
-        nonReentrant 
-        onlyPublicSaleActive 
-        returns (uint256) 
-    {
-        return _handlePurchase(recipient, quantity, comment);
     }
 
     function _handlePurchase(address recipient, uint256 quantity, string memory comment) internal returns (uint256) {

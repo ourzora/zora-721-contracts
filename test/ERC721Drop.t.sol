@@ -475,16 +475,17 @@ contract ERC721DropTest is Test {
             presaleMerkleRoot: bytes32(0)
         });
 
-        (uint256 totalReward, uint256 creatorReward, uint256 finderReward, uint256 listerReward, uint256 zoraReward) =
+        (uint256 totalReward, uint256 creatorReward, uint256 finderReward, uint256 originReward, uint256 zoraReward) =
             zoraNFTBase.computeFreeMintRewards(purchaseQuantity);
 
-        vm.deal(address(456), totalReward);
-        vm.prank(address(456));
-        zoraNFTBase.purchaseWithRewards{value: totalReward}(purchaseQuantity, "test comment", address(0), address(0));
+        address buyer = makeAddr("buyer");  
 
-        // assertEq(DEFAULT_FUNDS_RECIPIENT_ADDRESS.balance, creatorReward);
+        vm.deal(buyer, totalReward);
+        vm.prank(buyer);
+        zoraNFTBase.purchaseWithRewards{value: totalReward}(buyer, purchaseQuantity, "test comment", address(0), address(0));
+
         assertEq(zoraRewards.balanceOf(DEFAULT_FUNDS_RECIPIENT_ADDRESS), creatorReward);
-        assertEq(zoraRewards.balanceOf(mintFeeRecipient), zoraReward + finderReward + listerReward);
+        assertEq(zoraRewards.balanceOf(mintFeeRecipient), zoraReward + finderReward + originReward);
     }
 
     function test_FreeMintRewardsWithFinder(uint32 purchaseQuantity) public setupZoraNFTBase(purchaseQuantity) {
@@ -501,18 +502,18 @@ contract ERC721DropTest is Test {
             presaleMerkleRoot: bytes32(0)
         });
 
-        (uint256 totalReward, uint256 creatorReward, uint256 finderReward, uint256 listerReward, uint256 zoraReward) =
+        (uint256 totalReward, uint256 creatorReward, uint256 finderReward, uint256 originReward, uint256 zoraReward) =
             zoraNFTBase.computeFreeMintRewards(purchaseQuantity);
 
+        address buyer = makeAddr("buyer");
         address finder = makeAddr("finder");
 
-        vm.deal(address(456), totalReward);
-        vm.prank(address(456));
-        zoraNFTBase.purchaseWithRewards{value: totalReward}(purchaseQuantity, "test comment", finder, address(0));
+        vm.deal(buyer, totalReward);
+        vm.prank(buyer);
+        zoraNFTBase.purchaseWithRewards{value: totalReward}(buyer, purchaseQuantity, "test comment", finder, address(0));
 
-        // assertEq(DEFAULT_FUNDS_RECIPIENT_ADDRESS.balance, creatorReward);
         assertEq(zoraRewards.balanceOf(DEFAULT_FUNDS_RECIPIENT_ADDRESS), creatorReward);
-        assertEq(zoraRewards.balanceOf(mintFeeRecipient), zoraReward + listerReward);
+        assertEq(zoraRewards.balanceOf(mintFeeRecipient), zoraReward + originReward);
         assertEq(zoraRewards.balanceOf(finder), finderReward);
     }
 
@@ -530,19 +531,19 @@ contract ERC721DropTest is Test {
             presaleMerkleRoot: bytes32(0)
         });
 
-        (uint256 totalReward, uint256 creatorReward, uint256 finderReward, uint256 listerReward, uint256 zoraReward) =
+        (uint256 totalReward, uint256 creatorReward, uint256 finderReward, uint256 originReward, uint256 zoraReward) =
             zoraNFTBase.computeFreeMintRewards(purchaseQuantity);
 
-        address lister = makeAddr("lister");
+        address buyer = makeAddr("buyer");
+        address origin = makeAddr("origin");
 
-        vm.deal(address(456), totalReward);
-        vm.prank(address(456));
-        zoraNFTBase.purchaseWithRewards{value: totalReward}(purchaseQuantity, "test comment", address(0), lister);
+        vm.deal(buyer, totalReward);
+        vm.prank(buyer);
+        zoraNFTBase.purchaseWithRewards{value: totalReward}(buyer, purchaseQuantity, "test comment", address(0), origin);
 
-        // assertEq(DEFAULT_FUNDS_RECIPIENT_ADDRESS.balance, creatorReward);
         assertEq(zoraRewards.balanceOf(DEFAULT_FUNDS_RECIPIENT_ADDRESS), creatorReward);
         assertEq(zoraRewards.balanceOf(mintFeeRecipient), zoraReward + finderReward);
-        assertEq(zoraRewards.balanceOf(lister), listerReward);
+        assertEq(zoraRewards.balanceOf(origin), originReward);
     }
 
     function test_FreeMintRewardsWithFinderAndLister(uint32 purchaseQuantity) public setupZoraNFTBase(purchaseQuantity) {
@@ -559,21 +560,21 @@ contract ERC721DropTest is Test {
             presaleMerkleRoot: bytes32(0)
         });
 
-        (uint256 totalReward, uint256 creatorReward, uint256 finderReward, uint256 listerReward, uint256 zoraReward) =
+        (uint256 totalReward, uint256 creatorReward, uint256 finderReward, uint256 originReward, uint256 zoraReward) =
             zoraNFTBase.computeFreeMintRewards(purchaseQuantity);
 
+        address buyer = makeAddr("buyer");
         address finder = makeAddr("finder");
-        address lister = makeAddr("lister");
+        address origin = makeAddr("origin");
 
-        vm.deal(address(456), totalReward);
-        vm.prank(address(456));
-        zoraNFTBase.purchaseWithRewards{value: totalReward}(purchaseQuantity, "test comment", finder, lister);
+        vm.deal(buyer, totalReward);
+        vm.prank(buyer);
+        zoraNFTBase.purchaseWithRewards{value: totalReward}(buyer, purchaseQuantity, "test comment", finder, origin);
 
-        // assertEq(DEFAULT_FUNDS_RECIPIENT_ADDRESS.balance, creatorReward);
         assertEq(zoraRewards.balanceOf(DEFAULT_FUNDS_RECIPIENT_ADDRESS), creatorReward);
         assertEq(zoraRewards.balanceOf(mintFeeRecipient), zoraReward);
         assertEq(zoraRewards.balanceOf(finder), finderReward);
-        assertEq(zoraRewards.balanceOf(lister), listerReward);
+        assertEq(zoraRewards.balanceOf(origin), originReward);
     }
 
     function testRevert_FreeMintRewardsInsufficientEth(uint32 purchaseQuantity) public setupZoraNFTBase(purchaseQuantity) {
@@ -590,8 +591,10 @@ contract ERC721DropTest is Test {
             presaleMerkleRoot: bytes32(0)
         });
 
+        address buyer = makeAddr("buyer");
+
         vm.expectRevert(abi.encodeWithSignature("INSUFFICIENT_ETH_FOR_REWARDS()"));
-        zoraNFTBase.purchaseWithRewards(purchaseQuantity, "test comment", address(0), address(0));
+        zoraNFTBase.purchaseWithRewards(buyer, purchaseQuantity, "test comment", address(0), address(0));
     }
 
     function test_PaidMintRewards(uint64 salePrice, uint32 purchaseQuantity) public setupZoraNFTBase(purchaseQuantity) {
@@ -611,17 +614,19 @@ contract ERC721DropTest is Test {
 
         uint256 totalSales = uint256(salePrice) * purchaseQuantity;
 
-        (uint256 totalReward, uint256 finderReward, uint256 listerReward, uint256 zoraReward) =
+        (uint256 totalReward, uint256 finderReward, uint256 originReward, uint256 zoraReward) =
             zoraNFTBase.computePaidMintRewards(purchaseQuantity);
 
         uint256 totalPayment = totalSales + totalReward;
 
-        vm.deal(address(456), totalPayment);
-        vm.prank(address(456));
-        zoraNFTBase.purchaseWithRewards{value: totalPayment}(purchaseQuantity, "test comment", address(0), address(0));
+        address buyer = makeAddr("buyer");
+
+        vm.deal(buyer, totalPayment);
+        vm.prank(buyer);
+        zoraNFTBase.purchaseWithRewards{value: totalPayment}(buyer, purchaseQuantity, "test comment", address(0), address(0));
 
         assertEq(address(zoraNFTBase).balance, totalSales);
-        assertEq(zoraRewards.balanceOf(mintFeeRecipient), zoraReward + finderReward + listerReward);
+        assertEq(zoraRewards.balanceOf(mintFeeRecipient), zoraReward + finderReward + originReward);
     }
 
     function test_PaidMintRewardsWithFinder(uint64 salePrice, uint32 purchaseQuantity) public setupZoraNFTBase(purchaseQuantity) {
@@ -641,19 +646,20 @@ contract ERC721DropTest is Test {
 
         uint256 totalSales = uint256(salePrice) * purchaseQuantity;
 
-        (uint256 totalReward, uint256 finderReward, uint256 listerReward, uint256 zoraReward) =
+        (uint256 totalReward, uint256 finderReward, uint256 originReward, uint256 zoraReward) =
             zoraNFTBase.computePaidMintRewards(purchaseQuantity);
         
         uint256 totalPayment = totalSales + totalReward;
 
+        address buyer = makeAddr("buyer");
         address finder = makeAddr("finder");
 
-        vm.deal(address(456), totalPayment);
-        vm.prank(address(456));
-        zoraNFTBase.purchaseWithRewards{value: totalPayment}(purchaseQuantity, "test comment", finder, address(0));
+        vm.deal(buyer, totalPayment);
+        vm.prank(buyer);
+        zoraNFTBase.purchaseWithRewards{value: totalPayment}(buyer, purchaseQuantity, "test comment", finder, address(0));
 
         assertEq(address(zoraNFTBase).balance, totalSales);
-        assertEq(zoraRewards.balanceOf(mintFeeRecipient), zoraReward + listerReward);
+        assertEq(zoraRewards.balanceOf(mintFeeRecipient), zoraReward + originReward);
         assertEq(zoraRewards.balanceOf(finder), finderReward);
     }
 
@@ -674,20 +680,21 @@ contract ERC721DropTest is Test {
 
         uint256 totalSales = uint256(salePrice) * purchaseQuantity;
 
-        (uint256 totalReward, uint256 finderReward, uint256 listerReward, uint256 zoraReward) =
+        (uint256 totalReward, uint256 finderReward, uint256 originReward, uint256 zoraReward) =
             zoraNFTBase.computePaidMintRewards(purchaseQuantity);
         
         uint256 totalPayment = totalSales + totalReward;
 
-        address lister = makeAddr("lister");
+        address buyer = makeAddr("buyer");
+        address origin = makeAddr("origin");
 
-        vm.deal(address(456), totalPayment);
-        vm.prank(address(456));
-        zoraNFTBase.purchaseWithRewards{value: totalPayment}(purchaseQuantity, "test comment", address(0), lister);
+        vm.deal(buyer, totalPayment);
+        vm.prank(buyer);
+        zoraNFTBase.purchaseWithRewards{value: totalPayment}(buyer, purchaseQuantity, "test comment", address(0), origin);
 
         assertEq(address(zoraNFTBase).balance, totalSales);
         assertEq(zoraRewards.balanceOf(mintFeeRecipient), zoraReward + finderReward);
-        assertEq(zoraRewards.balanceOf(lister), listerReward);
+        assertEq(zoraRewards.balanceOf(origin), originReward);
     }
 
     function test_PaidMintRewardsWithFinderAndLister(uint64 salePrice, uint32 purchaseQuantity) public setupZoraNFTBase(purchaseQuantity) {
@@ -707,22 +714,23 @@ contract ERC721DropTest is Test {
 
         uint256 totalSales = uint256(salePrice) * purchaseQuantity;
 
-        (uint256 totalReward, uint256 finderReward, uint256 listerReward, uint256 zoraReward) =
+        (uint256 totalReward, uint256 finderReward, uint256 originReward, uint256 zoraReward) =
             zoraNFTBase.computePaidMintRewards(purchaseQuantity);
         
         uint256 totalPayment = totalSales + totalReward;
 
+        address buyer = makeAddr("buyer");
         address finder = makeAddr("finder");
-        address lister = makeAddr("lister");
+        address origin = makeAddr("origin");
 
-        vm.deal(address(456), totalPayment);
-        vm.prank(address(456));
-        zoraNFTBase.purchaseWithRewards{value: totalPayment}(purchaseQuantity, "test comment", finder, lister);
+        vm.deal(buyer, totalPayment);
+        vm.prank(buyer);
+        zoraNFTBase.purchaseWithRewards{value: totalPayment}(buyer, purchaseQuantity, "test comment", finder, origin);
 
         assertEq(address(zoraNFTBase).balance, totalSales);
         assertEq(zoraRewards.balanceOf(mintFeeRecipient), zoraReward);
         assertEq(zoraRewards.balanceOf(finder), finderReward);
-        assertEq(zoraRewards.balanceOf(lister), listerReward);
+        assertEq(zoraRewards.balanceOf(origin), originReward);
     }
 
     function testRevert_PaidMintRewardsInsufficientEth(uint64 salePrice, uint32 purchaseQuantity) public setupZoraNFTBase(purchaseQuantity) {
@@ -742,13 +750,15 @@ contract ERC721DropTest is Test {
 
         uint256 totalSales = uint256(salePrice) * purchaseQuantity;
 
-        (uint256 totalReward, uint256 finderReward, uint256 listerReward, uint256 zoraReward) =
+        (uint256 totalReward, uint256 finderReward, uint256 originReward, uint256 zoraReward) =
             zoraNFTBase.computePaidMintRewards(purchaseQuantity);
         
         uint256 totalPayment = totalSales + totalReward;
 
+        address buyer = makeAddr("buyer");
+
         vm.expectRevert(abi.encodeWithSignature("INSUFFICIENT_ETH_FOR_REWARDS()"));
-        zoraNFTBase.purchaseWithRewards(purchaseQuantity, "test comment", address(0), address(0));
+        zoraNFTBase.purchaseWithRewards(buyer, purchaseQuantity, "test comment", address(0), address(0));
     }
 
     function test_UpgradeApproved() public setupZoraNFTBase(10) {

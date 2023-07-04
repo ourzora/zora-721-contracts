@@ -452,7 +452,7 @@ contract ERC721Drop is
         onlyPublicSaleActive
         returns (uint256)
     {
-        return _handlePurchase(quantity, "");
+        return _handlePurchase(msg.sender, quantity, "");
     }
 
     /// @notice Purchase a quantity of tokens with a comment
@@ -466,7 +466,7 @@ contract ERC721Drop is
         onlyPublicSaleActive
         returns (uint256)
     {
-        return _handlePurchase(quantity, comment);
+        return _handlePurchase(msg.sender, quantity, comment);
     }
 
     /// @notice Purchase a quantity of tokens with a comment that will pay out rewards
@@ -525,7 +525,22 @@ contract ERC721Drop is
         return firstMintedTokenId;
     }
 
-    function _handlePurchase(uint256 quantity, string memory comment) internal returns (uint256) {
+    /// @notice Purchase a quantity of tokens to a specified recipient, with an optional comment
+    /// @param recipient recipient of the tokens
+    /// @param quantity quantity to purchase
+    /// @param comment optional comment to include in the IERC721Drop.Sale event (leave blank for no comment)
+    /// @return tokenId of the first token minted
+    function purchaseWithRecipient(address recipient, uint256 quantity, string calldata comment) 
+        external 
+        payable 
+        nonReentrant 
+        onlyPublicSaleActive 
+        returns (uint256) 
+    {
+        return _handlePurchase(recipient, quantity, comment);
+    }
+
+    function _handlePurchase(address recipient, uint256 quantity, string memory comment) internal returns (uint256) {
         _mintSupplyRoyalty(quantity);
         _requireCanMintQuantity(quantity);
 
@@ -539,21 +554,21 @@ contract ERC721Drop is
         // Any other number, the per address mint limit is that.
         if (
             salesConfig.maxSalePurchasePerAddress != 0 &&
-            _numberMinted(_msgSender()) +
+            _numberMinted(recipient) +
                 quantity -
-                presaleMintsByAddress[_msgSender()] >
+                presaleMintsByAddress[recipient] >
             salesConfig.maxSalePurchasePerAddress
         ) {
             revert Purchase_TooManyForAddress();
         }
 
-        _mintNFTs(_msgSender(), quantity);
+        _mintNFTs(recipient, quantity);
         uint256 firstMintedTokenId = _lastMintedTokenId() - quantity;
 
         _payoutZoraFee(quantity);
 
         emit IERC721Drop.Sale({
-            to: _msgSender(),
+            to: recipient,
             quantity: quantity,
             pricePerToken: salePrice,
             firstPurchasedTokenId: firstMintedTokenId

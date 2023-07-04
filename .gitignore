@@ -8,5 +8,8 @@ cache
 .pkey
 .env.*
 dist/
+out/
 .idea
 broadcast/
+package/wagmiGenerated.ts
+package/chainConfigs.ts

@@ -482,7 +482,7 @@ contract ERC721DropTest is Test {
 
         vm.deal(buyer, totalReward);
         vm.prank(buyer);
-        zoraNFTBase.purchaseWithRewards{value: totalReward}(buyer, purchaseQuantity, "test comment", address(0), address(0));
+        zoraNFTBase.mintWithRewards{value: totalReward}(buyer, purchaseQuantity, "test comment", address(0), address(0));
 
         assertEq(zoraRewards.balanceOf(DEFAULT_FUNDS_RECIPIENT_ADDRESS), creatorReward);
         assertEq(zoraRewards.balanceOf(mintFeeRecipient), zoraReward + finderReward + originReward);
@@ -510,7 +510,7 @@ contract ERC721DropTest is Test {
 
         vm.deal(buyer, totalReward);
         vm.prank(buyer);
-        zoraNFTBase.purchaseWithRewards{value: totalReward}(buyer, purchaseQuantity, "test comment", finder, address(0));
+        zoraNFTBase.mintWithRewards{value: totalReward}(buyer, purchaseQuantity, "test comment", finder, address(0));
 
         assertEq(zoraRewards.balanceOf(DEFAULT_FUNDS_RECIPIENT_ADDRESS), creatorReward);
         assertEq(zoraRewards.balanceOf(mintFeeRecipient), zoraReward + originReward);
@@ -539,7 +539,7 @@ contract ERC721DropTest is Test {
 
         vm.deal(buyer, totalReward);
         vm.prank(buyer);
-        zoraNFTBase.purchaseWithRewards{value: totalReward}(buyer, purchaseQuantity, "test comment", address(0), origin);
+        zoraNFTBase.mintWithRewards{value: totalReward}(buyer, purchaseQuantity, "test comment", address(0), origin);
 
         assertEq(zoraRewards.balanceOf(DEFAULT_FUNDS_RECIPIENT_ADDRESS), creatorReward);
         assertEq(zoraRewards.balanceOf(mintFeeRecipient), zoraReward + finderReward);
@@ -569,7 +569,7 @@ contract ERC721DropTest is Test {
 
         vm.deal(buyer, totalReward);
         vm.prank(buyer);
-        zoraNFTBase.purchaseWithRewards{value: totalReward}(buyer, purchaseQuantity, "test comment", finder, origin);
+        zoraNFTBase.mintWithRewards{value: totalReward}(buyer, purchaseQuantity, "test comment", finder, origin);
 
         assertEq(zoraRewards.balanceOf(DEFAULT_FUNDS_RECIPIENT_ADDRESS), creatorReward);
         assertEq(zoraRewards.balanceOf(mintFeeRecipient), zoraReward);
@@ -594,7 +594,7 @@ contract ERC721DropTest is Test {
         address buyer = makeAddr("buyer");
 
         vm.expectRevert(abi.encodeWithSignature("INSUFFICIENT_ETH_FOR_REWARDS()"));
-        zoraNFTBase.purchaseWithRewards(buyer, purchaseQuantity, "test comment", address(0), address(0));
+        zoraNFTBase.mintWithRewards(buyer, purchaseQuantity, "test comment", address(0), address(0));
     }
 
     function test_PaidMintRewards(uint64 salePrice, uint32 purchaseQuantity) public setupZoraNFTBase(purchaseQuantity) {
@@ -623,7 +623,7 @@ contract ERC721DropTest is Test {
 
         vm.deal(buyer, totalPayment);
         vm.prank(buyer);
-        zoraNFTBase.purchaseWithRewards{value: totalPayment}(buyer, purchaseQuantity, "test comment", address(0), address(0));
+        zoraNFTBase.mintWithRewards{value: totalPayment}(buyer, purchaseQuantity, "test comment", address(0), address(0));
 
         assertEq(address(zoraNFTBase).balance, totalSales);
         assertEq(zoraRewards.balanceOf(mintFeeRecipient), zoraReward + finderReward + originReward);
@@ -656,7 +656,7 @@ contract ERC721DropTest is Test {
 
         vm.deal(buyer, totalPayment);
         vm.prank(buyer);
-        zoraNFTBase.purchaseWithRewards{value: totalPayment}(buyer, purchaseQuantity, "test comment", finder, address(0));
+        zoraNFTBase.mintWithRewards{value: totalPayment}(buyer, purchaseQuantity, "test comment", finder, address(0));
 
         assertEq(address(zoraNFTBase).balance, totalSales);
         assertEq(zoraRewards.balanceOf(mintFeeRecipient), zoraReward + originReward);
@@ -690,7 +690,7 @@ contract ERC721DropTest is Test {
 
         vm.deal(buyer, totalPayment);
         vm.prank(buyer);
-        zoraNFTBase.purchaseWithRewards{value: totalPayment}(buyer, purchaseQuantity, "test comment", address(0), origin);
+        zoraNFTBase.mintWithRewards{value: totalPayment}(buyer, purchaseQuantity, "test comment", address(0), origin);
 
         assertEq(address(zoraNFTBase).balance, totalSales);
         assertEq(zoraRewards.balanceOf(mintFeeRecipient), zoraReward + finderReward);
@@ -725,7 +725,7 @@ contract ERC721DropTest is Test {
 
         vm.deal(buyer, totalPayment);
         vm.prank(buyer);
-        zoraNFTBase.purchaseWithRewards{value: totalPayment}(buyer, purchaseQuantity, "test comment", finder, origin);
+        zoraNFTBase.mintWithRewards{value: totalPayment}(buyer, purchaseQuantity, "test comment", finder, origin);
 
         assertEq(address(zoraNFTBase).balance, totalSales);
         assertEq(zoraRewards.balanceOf(mintFeeRecipient), zoraReward);
@@ -758,7 +758,7 @@ contract ERC721DropTest is Test {
         address buyer = makeAddr("buyer");
 
         vm.expectRevert(abi.encodeWithSignature("INSUFFICIENT_ETH_FOR_REWARDS()"));
-        zoraNFTBase.purchaseWithRewards(buyer, purchaseQuantity, "test comment", address(0), address(0));
+        zoraNFTBase.mintWithRewards(buyer, purchaseQuantity, "test comment", address(0), address(0));
     }
 
     function test_UpgradeApproved() public setupZoraNFTBase(10) {

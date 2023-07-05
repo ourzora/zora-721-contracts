@@ -484,14 +484,14 @@ contract ERC721Drop is
         return _handlePurchase(recipient, quantity, comment);
     }
 
-    /// @notice Purchase a quantity of tokens with a comment that will pay out rewards
+    /// @notice Mint a quantity of tokens with a comment that will pay out rewards
     /// @param recipient recipient of the tokens
     /// @param quantity quantity to purchase
     /// @param comment comment to include in the IERC721Drop.Sale event
     /// @param finder The finder of the mint
     /// @param origin The origin of the collection
     /// @return tokenId of the first token minted
-    function purchaseWithRewards(address recipient, uint256 quantity, string calldata comment, address finder, address origin)    
+    function mintWithRewards(address recipient, uint256 quantity, string calldata comment, address finder, address origin)    
         external
         payable
         nonReentrant
@@ -499,10 +499,10 @@ contract ERC721Drop is
         onlyPublicSaleActive
         returns (uint256) 
     {
-        return _handlePurchaseWithRewards(recipient, quantity, comment, finder, origin);
+        return _handleMintWithRewards(recipient, quantity, comment, finder, origin);
     }
     
-    function _handlePurchaseWithRewards(address recipient, uint256 quantity, string memory comment, address finder, address origin) internal returns (uint256) {
+    function _handleMintWithRewards(address recipient, uint256 quantity, string memory comment, address finder, address origin) internal returns (uint256) {
         _mintSupplyRoyalty(quantity);
 
         // If max purchase per address == 0 there is no limit.

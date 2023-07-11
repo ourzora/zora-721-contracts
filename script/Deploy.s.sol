@@ -20,6 +20,13 @@ contract Deploy is ZoraDropsDeployBase {
     function run() public returns (string memory) {
         console2.log("Starting --- chainId", chainId());
         ChainConfig memory chainConfig = getChainConfig();
+        console2.log(" --- chain config --- ");
+        console2.log("Factory Owner", chainConfig.factoryOwner);
+        console2.log("Fee Recipient", chainConfig.mintFeeRecipient);
+        console2.log("Fee Amount", chainConfig.mintFeeAmount);
+        console2.log("Filterer Registry", chainConfig.subscriptionMarketFilterAddress);
+        console2.log("Filterer Subscription", chainConfig.subscriptionMarketFilterOwner);
+
         console2.log("Setup contracts ---");
 
         vm.startBroadcast();
@@ -50,7 +57,7 @@ contract Deploy is ZoraDropsDeployBase {
 
         deployTestContractForVerification(factory);
 
-        vm.stopBroadcast();
+        // vm.stopBroadcast();
 
         return
             getDeploymentJSON(

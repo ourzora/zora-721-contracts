@@ -6,17 +6,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Use Node.js
+
+      - name: Install Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: "16.13.2"
-      - run: npm install
+          node-version: 16
+          cache: "yarn"
+
+      - name: Install project dependencies
+        run: yarn
 
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
         with:
           version: nightly
-  
+
       - name: "Inspect Storage Layout"
         continue-on-error: false
         id: storage-inspect-check

@@ -1,7 +1,7 @@
 [profile.default]
 solc_version = '0.8.17'
 optimizer = true
-optimizer_runs = 3000
+optimizer_runs = 2383
 via_ir = true
 out = 'out'
 test = 'test'

@@ -44,11 +44,13 @@ Use `1.json` for reference. We are ordering keys alphabetically.
 
 ### 2. Deploy forge script
 
-    forge script script/Deploy.s.sol --broadcast --verify --rpc-url $ETH_RPC
+    forge script script/Deploy.s.sol --broadcast --verify --rpc-url $ETH_RPC --sender $SENDER_WALLET
   
 For example, to deploy on optimism goerli, this is the forge command:
 
-    forge script script/Deploy.s.sol --rpc-url https://goerli.optimism.io --verify --etherscan-api-key ${ETHERSCAN_OPTISM_API_KEY} --broadcast --interactives 1
+    forge script script/Deploy.s.sol --rpc-url $RPC --verify --etherscan-api-key $API_KEY --broadcast --interactives 1 --sender $SENDER_WALLET
+
+*Important*: Sender is required to have the simulation succeed. Without it, the drops contract is not deployed.
 
 Use your own RPC configuration variables
 

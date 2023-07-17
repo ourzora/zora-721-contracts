@@ -1,0 +1,46 @@
+name: fork tests
+
+on:
+  push:
+    branches:
+      - main
+      - fork-tests
+      - changeset
+      - adding_base_testnet
+
+env:
+  FOUNDRY_PROFILE: ci
+
+jobs:
+  check:
+    strategy:
+      fail-fast: true
+
+    name: Foundry project
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+          cache: "yarn"
+
+      - name: Install project dependencies
+        run: yarn
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly
+
+      - name: Run fork tests
+        run: |
+          forge test -vvv --match-test fork
+        env:
+          FORK_TEST_CHAINS: mainnet,goerli,optimism,optimism_goerli,zora,zora_goerli,base_goerli,base
+          ALCHEMY_KEY: ${{ secrets.ALCHEMY_KEY }}
+        id: test

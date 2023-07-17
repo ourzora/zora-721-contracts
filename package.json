@@ -19,7 +19,7 @@
     "test": "forge test",
     "generate-merkle-test-file": "node scripts/merkle-test.mjs",
     "clean": "rm -rf ./dist/",
-    "prepack": "yarn clean && node js-scripts/copy-latest-deployment-addresses.mjs && yarn wagmi && yarn bundle-configs && yarn build-ts",
+    "prepack": "yarn clean && yarn wagmi && yarn bundle-configs && yarn build-ts",
     "deploy": "node scripts/deploy.mjs",
     "coverage": "forge coverage --report lcov",
     "build": "forge build",
@@ -29,7 +29,8 @@
     "prettier:fix": "npm run prettier -- --write",
     "wagmi": "wagmi generate",
     "storage-inspect:check": "./script/storage-check.sh check ERC721Drop ERC721DropProxy FactoryUpgradeGate ZoraNFTCreatorProxy ZoraNFTCreatorV1",
-    "storage-inspect:generate": "./script/storage-check.sh generate ERC721Drop ERC721DropProxy FactoryUpgradeGate ZoraNFTCreatorProxy ZoraNFTCreatorV1"
+    "storage-inspect:generate": "./script/storage-check.sh generate ERC721Drop ERC721DropProxy FactoryUpgradeGate ZoraNFTCreatorProxy ZoraNFTCreatorV1",
+    "release": "yarn run prepack && changeset publish"
   },
   "devDependencies": {
     "@changesets/cli": "^2.26.1",

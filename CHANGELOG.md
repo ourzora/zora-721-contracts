@@ -1,5 +1,11 @@
 # @zoralabs/nft-drop-contracts
 
+## 1.13.1
+
+### Patch Changes
+
+- ad6c0a9: update drop & creator impl addresses on base goerli
+
 ## 1.13.0
 
 ### Minor Changes

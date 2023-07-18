@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.10;
 
+import {console2} from "forge-std/console2.sol";
 import {Test} from "forge-std/Test.sol";
 import {IMetadataRenderer} from "../src/interfaces/IMetadataRenderer.sol";
 import "../src/ZoraNFTCreatorV1.sol";
@@ -8,14 +9,13 @@ import "../src/ZoraNFTCreatorProxy.sol";
 import {MockMetadataRenderer} from "./metadata/MockMetadataRenderer.sol";
 import {FactoryUpgradeGate} from "../src/FactoryUpgradeGate.sol";
 import {IERC721AUpgradeable} from "erc721a-upgradeable/IERC721AUpgradeable.sol";
-import {DropDeployment , ChainConfig} from "../src/DeploymentConfig.sol";
+import {ForkHelper} from "./utils/ForkHelper.sol";
+import {DropDeployment, ChainConfig} from "../src/DeploymentConfig.sol";
 
-contract ZoraNFTCreatorV1Test is Test {
+contract ZoraNFTCreatorV1Test is Test, ForkHelper {
     address public constant DEFAULT_OWNER_ADDRESS = address(0x23499);
-    address payable public constant DEFAULT_FUNDS_RECIPIENT_ADDRESS =
-        payable(address(0x21303));
-    address payable public constant DEFAULT_ZORA_DAO_ADDRESS =
-        payable(address(0x999));
+    address payable public constant DEFAULT_FUNDS_RECIPIENT_ADDRESS = payable(address(0x21303));
+    address payable public constant DEFAULT_ZORA_DAO_ADDRESS = payable(address(0x999));
     address payable public constant mintFeeRecipient = payable(address(0x1234));
     uint256 public constant mintFee = 0.000777 ether;
     ERC721Drop public dropImpl;
@@ -23,41 +23,59 @@ contract ZoraNFTCreatorV1Test is Test {
     EditionMetadataRenderer public editionMetadataRenderer;
     DropMetadataRenderer public dropMetadataRenderer;
 
-    function setUp() public {
-        vm.prank(DEFAULT_ZORA_DAO_ADDRESS);
-        dropImpl = new ERC721Drop(
-            address(1234),
-            FactoryUpgradeGate(address(0)),
-            address(0),
-            mintFee,
-            mintFeeRecipient
-        );
-        editionMetadataRenderer = new EditionMetadataRenderer();
-        dropMetadataRenderer = new DropMetadataRenderer();
-        ZoraNFTCreatorV1 impl = new ZoraNFTCreatorV1(
-            address(dropImpl),
-            editionMetadataRenderer,
-            dropMetadataRenderer
-        );
-        creator = ZoraNFTCreatorV1(
-            address(
-                new ZoraNFTCreatorProxy(
-                    address(impl),
-                    abi.encodeWithSelector(ZoraNFTCreatorV1.initialize.selector)
-                )
-            )
-        );
+    function test_fork_create() external {
+        string[] memory forkTestChains = getForkTestChains();
+
+        for (uint256 i = 0; i < forkTestChains.length; i++) {
+            string memory chainName = forkTestChains[i];
+
+            vm.createSelectFork(vm.rpcUrl(chainName));
+            creator = ZoraNFTCreatorV1(getDeployment().factory);
+            verifyAddressesFork(chainName);
+            forkEdition();
+            forkDrop();
+            forkDropGeneric();
+        }
     }
 
-    function test_ContractName() public {
-        assertEq(creator.contractName(), "ZORA NFT Creator");
+    function verifyAddressesFork(string memory chainName) internal {
+        ChainConfig memory chainConfig = getChainConfig();
+        DropDeployment memory deployment = getDeployment();
+
+        assertEq(chainConfig.factoryOwner, OwnableUpgradeable(deployment.factory).owner(), string.concat("configured owner incorrect on: ", chainName));
+
+        bytes32 slot = UUPSUpgradeable(deployment.factoryImpl).proxiableUUID();
+        address factoryImpl = address(uint160(uint256(vm.load(deployment.factory, slot))));
+        if (factoryImpl != deployment.factoryImpl) {
+
+            console2.log("===========");
+            console2.log("===========");
+            console2.log("FACTORY IMPL NOT SAME AS CHAIN: SIMULATING UPGRADE STEP");
+            console2.log("to save changes: call upgradeTo(", deployment.factoryImpl, ")");
+            console2.log("on ", deployment.factory);
+            console2.log("chain: ", chainName);
+            console2.log("===========");
+            console2.log("===========");
+
+            creator = ZoraNFTCreatorV1(deployment.factory);
+            vm.prank(creator.owner());
+            creator.upgradeTo(deployment.factoryImpl);
+        }
+
+        assertEq(
+            deployment.dropMetadata,
+            address(creator.dropMetadataRenderer()),
+            string.concat("configured drop metadata renderer incorrect on: ", chainName)
+        );
+        assertEq(
+            deployment.editionMetadata,
+            address(creator.editionMetadataRenderer()),
+            string.concat("configured edition metadata renderer incorrect on: ", chainName)
+        );
+        assertEq(deployment.dropImplementation, address(creator.implementation()), string.concat("configured metadata renderer incorrect on: ", chainName));
     }
 
-    function test_ContractURI() public {
-        assertEq(creator.contractURI(), "https://github.com/ourzora/zora-drops-contracts");
-    }
-
-    function test_CreateEdition() public {
+    function forkEdition() internal {
         address deployedEdition = creator.createEdition(
             "name",
             "symbol",
@@ -86,7 +104,7 @@ contract ZoraNFTCreatorV1Test is Test {
         assertEq(drop.totalSupply(), 10);
     }
 
-    function test_CreateDrop() public {
+    function forkDrop() internal {
         address deployedDrop = creator.createDrop(
             "name",
             "symbol",
@@ -112,7 +130,7 @@ contract ZoraNFTCreatorV1Test is Test {
         assertEq(drop.totalSupply(), 10);
     }
 
-    function test_CreateGenericDrop() public {
+    function forkDropGeneric() internal {
         MockMetadataRenderer mockRenderer = new MockMetadataRenderer();
         address deployedDrop = creator.setupDropsContract(
             "name",
@@ -138,15 +156,11 @@ contract ZoraNFTCreatorV1Test is Test {
         assertEq(saleDetails.publicSaleStart, 0);
         assertEq(saleDetails.publicSaleEnd, type(uint64).max);
 
-        vm.expectRevert(
-            IERC721AUpgradeable.URIQueryForNonexistentToken.selector
-        );
+        vm.expectRevert(IERC721AUpgradeable.URIQueryForNonexistentToken.selector);
         drop.tokenURI(1);
         assertEq(drop.contractURI(), "DEMO");
         (, uint256 fee) = drop.zoraFeeForAmount(1);
         drop.purchase{value: fee}(1);
         assertEq(drop.tokenURI(1), "DEMO");
     }
-
-
 }

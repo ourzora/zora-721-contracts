@@ -1,5 +1,11 @@
 # @zoralabs/nft-drop-contracts
 
+## 1.14.0
+
+### Minor Changes
+
+- c3725e4: add new base mainnet addresses
+
 ## 1.13.1
 
 ### Patch Changes

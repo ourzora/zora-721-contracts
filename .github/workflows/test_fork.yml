@@ -1,12 +1,6 @@
 name: fork tests
 
-on:
-  push:
-    branches:
-      - main
-      - fork-tests
-      - changeset
-      - adding_base_testnet
+on: push
 
 env:
   FOUNDRY_PROFILE: ci
@@ -27,7 +21,7 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 16
-          cache: "yarn"
+          cache: 'yarn'
 
       - name: Install project dependencies
         run: yarn

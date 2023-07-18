@@ -6,7 +6,7 @@ via_ir = true
 out = 'out'
 test = 'test'
 src = 'src'
-libs = ['lib']
+libs = ['lib', 'node_modules']
 gas_reports = ['*']
 
 fs_permissions = [{ access = "read", path = "./addresses"}, { access = "read", path = "./chainConfigs"}, { access = "read", path = "./package.json" }]

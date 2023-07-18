@@ -14,7 +14,8 @@ import {DropMetadataRenderer} from "../src/metadata/DropMetadataRenderer.sol";
 import {EditionMetadataRenderer} from "../src/metadata/EditionMetadataRenderer.sol";
 import {IERC721Drop} from "../src//interfaces/IERC721Drop.sol";
 
-import {ZoraDropsDeployBase, ChainConfig, DropDeployment} from "./ZoraDropsDeployBase.sol";
+import {ZoraDropsDeployBase} from "./ZoraDropsDeployBase.sol";
+import {ChainConfig, DropDeployment} from '../src/DeploymentConfig.sol';
 
 contract Deploy is ZoraDropsDeployBase {
     function run() public returns (string memory) {

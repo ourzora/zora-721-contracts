@@ -1428,6 +1428,10 @@ dotenv@^9.0.0:
   resolved "https://registry.yarnpkg.com/dotenv/-/dotenv-9.0.2.tgz#dacc20160935a37dea6364aa1bef819fb9b6ab05"
   integrity sha512-I9OvvrHp4pIARv4+x9iuewrWycX6CcZtoAu1XrzPxc5UygMJXJZYmBsynku8IkrJwgypE5DGNjDPmPRhDCptUg==
 
+"ds-test@https://github.com/dapphub/ds-test#cd98eff28324bfac652e63a239a60632a761790b":
+  version "1.0.0"
+  resolved "https://github.com/dapphub/ds-test#cd98eff28324bfac652e63a239a60632a761790b"
+
 eastasianwidth@^0.2.0:
   version "0.2.0"
   resolved "https://registry.yarnpkg.com/eastasianwidth/-/eastasianwidth-0.2.0.tgz#696ce2ec0aa0e6ea93a397ffcf24aa7840c827cb"
@@ -1877,6 +1881,10 @@ foreground-child@^3.1.0:
   dependencies:
     cross-spawn "^7.0.0"
     signal-exit "^4.0.1"
+
+"forge-std@https://github.com/foundry-rs/forge-std#cd7d533f9a0ee0ec02ad81e0a8f262bc4203c653":
+  version "1.1.1"
+  resolved "https://github.com/foundry-rs/forge-std#cd7d533f9a0ee0ec02ad81e0a8f262bc4203c653"
 
 formdata-polyfill@^4.0.10:
   version "4.0.10"

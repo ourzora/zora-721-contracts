@@ -6,7 +6,19 @@ via_ir = true
 out = 'out'
 test = 'test'
 src = 'src'
-libs = ['lib']
+libs = ['lib', 'node_modules']
 gas_reports = ['*']
 
 fs_permissions = [{ access = "read", path = "./addresses"}, { access = "read", path = "./chainConfigs"}, { access = "read", path = "./package.json" }]
+
+[rpc_endpoints]
+mainnet = "https://eth-mainnet.g.alchemy.com/v2/${ALCHEMY_KEY}"
+goerli = "https://eth-goerli.g.alchemy.com/v2/${ALCHEMY_KEY}"
+# for optimism, since we are just using this for deployment/fork testing,
+# we can use these since they're lower volume.
+optimism = "https://mainnet.optimism.io"
+optimism_goerli = "https://goerli.optimism.io"
+zora = "https://rpc.zora.energy"
+zora_goerli = "https://testnet.rpc.zora.energy"
+base_goerli = "https://goerli.base.org"
+base = "https://developer-access-mainnet.base.org"

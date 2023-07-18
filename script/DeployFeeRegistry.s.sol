@@ -3,9 +3,10 @@ pragma solidity ^0.8.13;
 
 import "forge-std/console2.sol";
 
-import {ZoraDropsDeployBase, ChainConfig} from "./ZoraDropsDeployBase.sol";
+import {ZoraDropsDeployBase} from "./ZoraDropsDeployBase.sol";
 import {IOperatorFilterRegistry} from "../src/interfaces/IOperatorFilterRegistry.sol";
 import {OwnedSubscriptionManager} from "../src/filter/OwnedSubscriptionManager.sol";
+import {ChainConfig} from '../src/DeploymentConfig.sol';
 
 contract DeployFeeRegistry is ZoraDropsDeployBase {
     address constant IMMUTABLE_OPENSEA_FEE_REGISTRY = address(0x000000000000AAeB6D7670E522A718067333cd4E);

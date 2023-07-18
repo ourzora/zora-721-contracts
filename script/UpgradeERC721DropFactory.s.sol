@@ -27,6 +27,7 @@ contract UpgradeERC721DropFactory is ZoraDropsDeployBase {
         bytes32 dropRendererCodehash = keccak256(deployment.dropMetadata.code);
         // it is important for this to be _outside_ startBroadcast since this does a null deployment to
         // read the latest contract code to compare versions
+        address dropRendererOld = address(new DropMetadataRenderer());
         bytes32 newDropRendererCodehash = keccak256(address(new DropMetadataRenderer()).code);
 
         bytes32 editionRendererCodehash = keccak256(deployment.editionMetadata.code);
@@ -37,6 +38,9 @@ contract UpgradeERC721DropFactory is ZoraDropsDeployBase {
         bool deployNewDropRenderer = dropRendererCodehash != newDropRendererCodehash;
         bool deployNewEditionRenderer = editionRendererCodehash != newEditionRendererCodehash;
 
+        console2.log(vm.toString(dropRendererCodehash));
+        console2.log(vm.toString(newDropRendererCodehash));
+
         console2.log("Mint Fee Amount: ", chainConfig.mintFeeAmount);
         console2.log("Mint Fee Recipient: ", chainConfig.mintFeeRecipient);
 
@@ -44,15 +48,15 @@ contract UpgradeERC721DropFactory is ZoraDropsDeployBase {
 
         console2.log("Setup contracts ---");
 
-        if (deployNewDropRenderer) {
-            deployment.dropMetadata = address(new DropMetadataRenderer());
-            console2.log("Deployed new drop renderer to ", deployment.dropMetadata);
-        }
+        // if (deployNewDropRenderer) {
+        //     deployment.dropMetadata = address(new DropMetadataRenderer());
+        //     console2.log("Deployed new drop renderer to ", deployment.dropMetadata);
+        // }
 
-        if (deployNewEditionRenderer) {
-            deployment.editionMetadata = address(new EditionMetadataRenderer());
-            console2.log("Deployed new edition renderer to ", deployment.editionMetadata);
-        }
+        // if (deployNewEditionRenderer) {
+        //     deployment.editionMetadata = address(new EditionMetadataRenderer());
+        //     console2.log("Deployed new edition renderer to ", deployment.editionMetadata);
+        // }
 
         ERC721Drop dropImplementation = new ERC721Drop({
             _zoraERC721TransferHelper: chainConfig.zoraERC721TransferHelper,

@@ -8,6 +8,7 @@ import "../src/ZoraNFTCreatorV1.sol";
 import "../src/ZoraNFTCreatorProxy.sol";
 import {MockMetadataRenderer} from "./metadata/MockMetadataRenderer.sol";
 import {FactoryUpgradeGate} from "../src/FactoryUpgradeGate.sol";
+import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import {IERC721AUpgradeable} from "erc721a-upgradeable/IERC721AUpgradeable.sol";
 import {ForkHelper} from "./utils/ForkHelper.sol";
 import {DropDeployment, ChainConfig} from "../src/DeploymentConfig.sol";
@@ -23,7 +24,19 @@ contract ZoraNFTCreatorV1Test is Test, ForkHelper {
     EditionMetadataRenderer public editionMetadataRenderer;
     DropMetadataRenderer public dropMetadataRenderer;
 
-    function test_fork_create() external {
+    function defaultSalesConfiguration() internal returns (IERC721Drop.SalesConfiguration memory) {
+        return IERC721Drop.SalesConfiguration({
+                publicSaleStart: 0,
+                publicSaleEnd: type(uint64).max,
+                presaleStart: 0,
+                presaleEnd: 0,
+                publicSalePrice: 0,
+                maxSalePurchasePerAddress: 0,
+                presaleMerkleRoot: bytes32(0)
+            });
+    }
+
+    function test_create_fork() external {
         string[] memory forkTestChains = getForkTestChains();
 
         for (uint256 i = 0; i < forkTestChains.length; i++) {
@@ -47,11 +60,11 @@ contract ZoraNFTCreatorV1Test is Test, ForkHelper {
         bytes32 slot = UUPSUpgradeable(deployment.factoryImpl).proxiableUUID();
         address factoryImpl = address(uint160(uint256(vm.load(deployment.factory, slot))));
         if (factoryImpl != deployment.factoryImpl) {
-
             console2.log("===========");
             console2.log("===========");
             console2.log("FACTORY IMPL NOT SAME AS CHAIN: SIMULATING UPGRADE STEP");
             console2.log("to save changes: call upgradeTo(", deployment.factoryImpl, ")");
+            console2.log(string.concat("data: ", vm.toString(abi.encodeWithSelector(UUPSUpgradeable.upgradeTo.selector, deployment.factoryImpl)), ")"));
             console2.log("on ", deployment.factory);
             console2.log("chain: ", chainName);
             console2.log("===========");
@@ -83,15 +96,7 @@ contract ZoraNFTCreatorV1Test is Test, ForkHelper {
             500,
             DEFAULT_FUNDS_RECIPIENT_ADDRESS,
             DEFAULT_FUNDS_RECIPIENT_ADDRESS,
-            IERC721Drop.SalesConfiguration({
-                publicSaleStart: 0,
-                publicSaleEnd: type(uint64).max,
-                presaleStart: 0,
-                presaleEnd: 0,
-                publicSalePrice: 0.1 ether,
-                maxSalePurchasePerAddress: 0,
-                presaleMerkleRoot: bytes32(0)
-            }),
+            defaultSalesConfiguration(),
             "desc",
             "animation",
             "image"
@@ -112,15 +117,7 @@ contract ZoraNFTCreatorV1Test is Test, ForkHelper {
             1000,
             100,
             DEFAULT_FUNDS_RECIPIENT_ADDRESS,
-            IERC721Drop.SalesConfiguration({
-                publicSaleStart: 0,
-                publicSaleEnd: type(uint64).max,
-                presaleStart: 0,
-                presaleEnd: 0,
-                publicSalePrice: 0,
-                maxSalePurchasePerAddress: 0,
-                presaleMerkleRoot: bytes32(0)
-            }),
+            defaultSalesConfiguration(),
             "metadata_uri",
             "metadata_contract_uri"
         );
@@ -139,15 +136,7 @@ contract ZoraNFTCreatorV1Test is Test, ForkHelper {
             1000,
             100,
             DEFAULT_FUNDS_RECIPIENT_ADDRESS,
-            IERC721Drop.SalesConfiguration({
-                publicSaleStart: 0,
-                publicSaleEnd: type(uint64).max,
-                presaleStart: 0,
-                presaleEnd: 0,
-                publicSalePrice: 0,
-                maxSalePurchasePerAddress: 0,
-                presaleMerkleRoot: bytes32(0)
-            }),
+            defaultSalesConfiguration(),
             mockRenderer,
             ""
         );

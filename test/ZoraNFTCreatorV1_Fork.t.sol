@@ -24,13 +24,13 @@ contract ZoraNFTCreatorV1Test is Test, ForkHelper {
     EditionMetadataRenderer public editionMetadataRenderer;
     DropMetadataRenderer public dropMetadataRenderer;
 
-    function defaultSalesConfiguration() internal returns (IERC721Drop.SalesConfiguration memory) {
+    function makeDefaultSalesConfiguration(uint104 price) internal returns (IERC721Drop.SalesConfiguration memory) {
         return IERC721Drop.SalesConfiguration({
                 publicSaleStart: 0,
                 publicSaleEnd: type(uint64).max,
                 presaleStart: 0,
                 presaleEnd: 0,
-                publicSalePrice: 0,
+                publicSalePrice: price,
                 maxSalePurchasePerAddress: 0,
                 presaleMerkleRoot: bytes32(0)
             });
@@ -96,7 +96,7 @@ contract ZoraNFTCreatorV1Test is Test, ForkHelper {
             500,
             DEFAULT_FUNDS_RECIPIENT_ADDRESS,
             DEFAULT_FUNDS_RECIPIENT_ADDRESS,
-            defaultSalesConfiguration(),
+            makeDefaultSalesConfiguration(0.1 ether), 
             "desc",
             "animation",
             "image"
@@ -117,7 +117,7 @@ contract ZoraNFTCreatorV1Test is Test, ForkHelper {
             1000,
             100,
             DEFAULT_FUNDS_RECIPIENT_ADDRESS,
-            defaultSalesConfiguration(),
+            makeDefaultSalesConfiguration(0),
             "metadata_uri",
             "metadata_contract_uri"
         );
@@ -136,7 +136,7 @@ contract ZoraNFTCreatorV1Test is Test, ForkHelper {
             1000,
             100,
             DEFAULT_FUNDS_RECIPIENT_ADDRESS,
-            defaultSalesConfiguration(),
+            makeDefaultSalesConfiguration(0),
             mockRenderer,
             ""
         );

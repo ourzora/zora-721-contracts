@@ -1,4 +1,4 @@
-name: test
+name: fork tests
 
 on: push
 
@@ -21,7 +21,7 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 16
-          cache: "yarn"
+          cache: 'yarn'
 
       - name: Install project dependencies
         run: yarn
@@ -31,7 +31,10 @@ jobs:
         with:
           version: nightly
 
-      - name: Run Forge tests
+      - name: Run fork tests
         run: |
-          forge test -vvv
+          forge test -vvv --match-test fork
+        env:
+          FORK_TEST_CHAINS: mainnet,goerli,optimism,optimism_goerli,zora,zora_goerli,base_goerli,base
+          ALCHEMY_KEY: ${{ secrets.ALCHEMY_KEY }}
         id: test

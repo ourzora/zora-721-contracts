@@ -35,8 +35,6 @@ Use `1.json` for reference. We are ordering keys alphabetically.
   # subscription market filter address for operator filter registry.
   # can be set to 0 to disable. see: https://github.com/ProjectOpenSea/operator-filter-registry
   "SUBSCRIPTION_MARKET_FILTER_ADDRESS": "0x3cc6CddA760b79bAfa08dF41ECFA224f810dCeB6",
-  # subscription market filter owner address.
-  "SUBSCRIPTION_MARKET_FILTER_OWNER": "0x9AaC739c133074dB445183A95149880a2156541A",
   # pre-approved transfer helper for ZORA v3, likely should be 0 on new networks
   "ZORA_ERC721_TRANSFER_HELPER": "0x909e9efE4D87d1a6018C2065aE642b6D0447bc91"
 }

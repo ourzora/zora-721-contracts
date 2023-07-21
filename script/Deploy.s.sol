@@ -30,7 +30,9 @@ contract Deploy is ZoraDropsDeployBase {
 
         console2.log("Setup contracts ---");
 
-        vm.startBroadcast();
+        address deployer = vm.envAddress("DEPLOYER");
+
+        vm.startBroadcast(deployer);
 
         DropMetadataRenderer dropMetadata = new DropMetadataRenderer();
         EditionMetadataRenderer editionMetadata = new EditionMetadataRenderer();

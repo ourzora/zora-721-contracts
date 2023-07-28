@@ -4,4 +4,4 @@ erc721a-upgradeable=lib/ERC721A-Upgradeable/contracts/
 base64/=lib/base64/
 ds-test/=node_modules/ds-test/src/
 forge-std/=node_modules/forge-std/src/
-@zoralabs/zora-rewards/=node_modules/@zoralabs/zora-rewards/
+@zoralabs/protocol-rewards/=node_modules/@zoralabs/protocol-rewards/

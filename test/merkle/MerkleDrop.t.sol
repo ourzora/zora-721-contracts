@@ -2,7 +2,7 @@
 pragma solidity ^0.8.10;
 
 import {Test} from "forge-std/Test.sol";
-import {ZoraRewards} from "@zoralabs/zora-rewards/ZoraRewards.sol";
+import {ZoraRewards} from "@zoralabs/zora-rewards/dist/contracts/ZoraRewards.sol";
 
 import {IERC721Drop} from "../../src/interfaces/IERC721Drop.sol";
 import {ERC721Drop} from "../../src/ERC721Drop.sol";
@@ -24,6 +24,7 @@ contract ZoraNFTBaseTest is Test {
     address public constant mediaContract = address(0x123456);
     address payable public constant mintFeeRecipient = payable(address(0x1234));
     uint256 public constant mintFee = 0.000777 ether;
+    address internal constant DEFAULT_CREATE_REFERRAL = address(0);
 
     modifier setupZoraNFTBase() {
         bytes[] memory setupCalls = new bytes[](0);
@@ -36,14 +37,15 @@ contract ZoraNFTBaseTest is Test {
             _royaltyBPS: 800,
             _setupCalls: setupCalls,
             _metadataRenderer: dummyRenderer,
-            _metadataRendererInit: ""
+            _metadataRendererInit: "",
+            _createReferral: DEFAULT_CREATE_REFERRAL
         });
 
         _;
     }
 
     function setUp() public {
-        zoraRewards = new ZoraRewards("Zora Rewards", "ZEWARDS");
+        zoraRewards = new ZoraRewards();
 
         vm.prank(DEFAULT_ZORA_DAO_ADDRESS);
         address impl = address(
@@ -269,7 +271,8 @@ contract ZoraNFTBaseTest is Test {
             _royaltyBPS: 800,
             _setupCalls: setupCalls,
             _metadataRenderer: dummyRenderer,
-            _metadataRendererInit: ""
+            _metadataRendererInit: "",
+            _createReferral: DEFAULT_CREATE_REFERRAL
         });
 
         vm.startPrank(DEFAULT_OWNER_ADDRESS);

@@ -3,7 +3,7 @@ pragma solidity ^0.8.10;
 
 import {Test} from "forge-std/Test.sol";
 import {IERC721AUpgradeable} from "erc721a-upgradeable/IERC721AUpgradeable.sol";
-import {ZoraRewards} from "@zoralabs/zora-rewards/ZoraRewards.sol";
+import {ZoraRewards} from "@zoralabs/zora-rewards/dist/contracts/ZoraRewards.sol";
 
 import {IMetadataRenderer} from "../src/interfaces/IMetadataRenderer.sol";
 import "../src/ZoraNFTCreatorV1.sol";
@@ -27,9 +27,10 @@ contract ZoraNFTCreatorV1Test is Test {
     EditionMetadataRenderer public editionMetadataRenderer;
     DropMetadataRenderer public dropMetadataRenderer;
     ZoraRewards internal zoraRewards;
+    address internal constant DEFAULT_CREATE_REFERRAL = address(0);
 
     function setUp() public {
-        zoraRewards = new ZoraRewards("Zora Rewards", "ZEWARDS");
+        zoraRewards = new ZoraRewards();
 
         vm.prank(DEFAULT_ZORA_DAO_ADDRESS);
         dropImpl = new ERC721Drop(
@@ -84,7 +85,8 @@ contract ZoraNFTCreatorV1Test is Test {
             }),
             "desc",
             "animation",
-            "image"
+            "image",
+            DEFAULT_CREATE_REFERRAL
         );
         ERC721Drop drop = ERC721Drop(payable(deployedEdition));
         (, uint256 fee) = drop.zoraFeeForAmount(10);
@@ -112,7 +114,8 @@ contract ZoraNFTCreatorV1Test is Test {
                 presaleMerkleRoot: bytes32(0)
             }),
             "metadata_uri",
-            "metadata_contract_uri"
+            "metadata_contract_uri",
+            DEFAULT_CREATE_REFERRAL
         );
         ERC721Drop drop = ERC721Drop(payable(deployedDrop));
         (, uint256 fee) = drop.zoraFeeForAmount(10);
@@ -139,7 +142,8 @@ contract ZoraNFTCreatorV1Test is Test {
                 presaleMerkleRoot: bytes32(0)
             }),
             mockRenderer,
-            ""
+            "",
+            DEFAULT_CREATE_REFERRAL
         );
         ERC721Drop drop = ERC721Drop(payable(deployedDrop));
         ERC721Drop.SaleDetails memory saleDetails = drop.saleDetails();

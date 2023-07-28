@@ -85,7 +85,8 @@ contract ZoraNFTCreatorV1 is OwnableUpgradeable, UUPSUpgradeable, IContractMetad
         address payable fundsRecipient,
         bytes[] memory setupCalls,
         IMetadataRenderer metadataRenderer,
-        bytes memory metadataInitializer
+        bytes memory metadataInitializer,
+        address createReferral
     ) public returns (address payable newDropAddress) {
         ERC721DropProxy newDrop = new ERC721DropProxy(implementation, "");
 
@@ -99,7 +100,8 @@ contract ZoraNFTCreatorV1 is OwnableUpgradeable, UUPSUpgradeable, IContractMetad
             _royaltyBPS: royaltyBPS,
             _setupCalls: setupCalls,
             _metadataRenderer: metadataRenderer,
-            _metadataRendererInit: metadataInitializer
+            _metadataRendererInit: metadataInitializer,
+            _createReferral: createReferral
         });
     }
 
@@ -152,7 +154,8 @@ contract ZoraNFTCreatorV1 is OwnableUpgradeable, UUPSUpgradeable, IContractMetad
         address payable fundsRecipient,
         IERC721Drop.SalesConfiguration memory saleConfig,
         IMetadataRenderer metadataRenderer,
-        bytes memory metadataInitializer
+        bytes memory metadataInitializer,
+        address createReferral
     ) public returns (address) {
         bytes[] memory setupData = new bytes[](1);
         setupData[0] = abi.encodeWithSelector(
@@ -174,7 +177,8 @@ contract ZoraNFTCreatorV1 is OwnableUpgradeable, UUPSUpgradeable, IContractMetad
             royaltyBPS: royaltyBPS,
             setupCalls: setupData,
             metadataRenderer: metadataRenderer,
-            metadataInitializer: metadataInitializer
+            metadataInitializer: metadataInitializer,
+            createReferral: createReferral
         });
 
         emit CreatedDrop({
@@ -236,7 +240,8 @@ contract ZoraNFTCreatorV1 is OwnableUpgradeable, UUPSUpgradeable, IContractMetad
         address payable fundsRecipient,
         IERC721Drop.SalesConfiguration memory saleConfig,
         string memory metadataURIBase,
-        string memory metadataContractURI
+        string memory metadataContractURI,
+        address createReferral
     ) external returns (address) {
         bytes memory metadataInitializer = abi.encode(
             metadataURIBase,
@@ -252,7 +257,8 @@ contract ZoraNFTCreatorV1 is OwnableUpgradeable, UUPSUpgradeable, IContractMetad
                 fundsRecipient: fundsRecipient,
                 saleConfig: saleConfig,
                 metadataRenderer: dropMetadataRenderer,
-                metadataInitializer: metadataInitializer
+                metadataInitializer: metadataInitializer,
+                createReferral: createReferral
             });
     }
 
@@ -309,7 +315,8 @@ contract ZoraNFTCreatorV1 is OwnableUpgradeable, UUPSUpgradeable, IContractMetad
         IERC721Drop.SalesConfiguration memory saleConfig,
         string memory description,
         string memory animationURI,
-        string memory imageURI
+        string memory imageURI,
+        address createReferral
     ) external returns (address) {
         bytes memory metadataInitializer = abi.encode(
             description,
@@ -327,7 +334,8 @@ contract ZoraNFTCreatorV1 is OwnableUpgradeable, UUPSUpgradeable, IContractMetad
                 saleConfig: saleConfig,
                 fundsRecipient: fundsRecipient,
                 metadataRenderer: editionMetadataRenderer,
-                metadataInitializer: metadataInitializer
+                metadataInitializer: metadataInitializer,
+                createReferral: createReferral
             });
     }
 }

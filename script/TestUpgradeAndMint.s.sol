@@ -22,6 +22,8 @@ import {ERC721DropProxy} from "../src/ERC721DropProxy.sol";
 contract DeployNewERC721Drop is Script {
     using Strings for uint256;
 
+    address internal DEFAULT_CREATE_REFERRAL = address(0);
+
     string configFile;
 
     function _getKey(string memory key) internal returns (address result) {
@@ -67,7 +69,8 @@ contract DeployNewERC721Drop is Script {
             }),
             "desc",
             "animation",
-            "image"
+            "image",
+            DEFAULT_CREATE_REFERRAL
         )));
 
         drop.adminMint(sender, 4);
@@ -116,7 +119,8 @@ contract DeployNewERC721Drop is Script {
             }),
             "desc",
             "animation",
-            "image"
+            "image",
+            DEFAULT_CREATE_REFERRAL
         )));
         assert(drop2.balanceOf(sender) == 0);
 

@@ -53,6 +53,8 @@ abstract contract DeploymentConfig is StdChains, StdCheatsSafe, StdUtils, Script
     /// @notice File used for demo metadata on verification test mint
     string constant DEMO_IPFS_METADATA_FILE = "ipfs://bafkreigu544g6wjvqcysurpzy5pcskbt45a5f33m6wgythpgb3rfqi3lzi";
 
+    address constant DEFAULT_CREATE_REFERRAL = address(0);
+
     ///
     // These are the JSON key constants to standardize writing and reading configuration
     ///

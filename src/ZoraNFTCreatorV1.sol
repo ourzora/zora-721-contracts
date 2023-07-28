@@ -240,6 +240,36 @@ contract ZoraNFTCreatorV1 is OwnableUpgradeable, UUPSUpgradeable, IContractMetad
         address payable fundsRecipient,
         IERC721Drop.SalesConfiguration memory saleConfig,
         string memory metadataURIBase,
+        string memory metadataContractURI
+    ) external returns (address) {
+        bytes memory metadataInitializer = abi.encode(
+            metadataURIBase,
+            metadataContractURI
+        );
+        return
+            setupDropsContract({
+                defaultAdmin: defaultAdmin,
+                name: name,
+                symbol: symbol,
+                royaltyBPS: royaltyBPS,
+                editionSize: editionSize,
+                fundsRecipient: fundsRecipient,
+                saleConfig: saleConfig,
+                metadataRenderer: dropMetadataRenderer,
+                metadataInitializer: metadataInitializer,
+                createReferral: address(0)
+            });
+    }
+
+    function createDropWithReferral(
+        string memory name,
+        string memory symbol,
+        address defaultAdmin,
+        uint64 editionSize,
+        uint16 royaltyBPS,
+        address payable fundsRecipient,
+        IERC721Drop.SalesConfiguration memory saleConfig,
+        string memory metadataURIBase,
         string memory metadataContractURI,
         address createReferral
     ) external returns (address) {
@@ -306,6 +336,39 @@ contract ZoraNFTCreatorV1 is OwnableUpgradeable, UUPSUpgradeable, IContractMetad
     /// @param animationURI Metadata: Animation url (optional) of the edition entry
     /// @param imageURI Metadata: Image url (semi-required) of the edition entry
     function createEdition(
+        string memory name,
+        string memory symbol,
+        uint64 editionSize,
+        uint16 royaltyBPS,
+        address payable fundsRecipient,
+        address defaultAdmin,
+        IERC721Drop.SalesConfiguration memory saleConfig,
+        string memory description,
+        string memory animationURI,
+        string memory imageURI
+    ) external returns (address) {
+        bytes memory metadataInitializer = abi.encode(
+            description,
+            imageURI,
+            animationURI
+        );
+
+        return
+            setupDropsContract({
+                name: name,
+                symbol: symbol,
+                defaultAdmin: defaultAdmin,
+                editionSize: editionSize,
+                royaltyBPS: royaltyBPS,
+                saleConfig: saleConfig,
+                fundsRecipient: fundsRecipient,
+                metadataRenderer: editionMetadataRenderer,
+                metadataInitializer: metadataInitializer,
+                createReferral: address(0)
+            });
+    }
+
+    function createEditionWithReferral(
         string memory name,
         string memory symbol,
         uint64 editionSize,

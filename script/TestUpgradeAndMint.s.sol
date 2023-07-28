@@ -69,8 +69,7 @@ contract DeployNewERC721Drop is Script {
             }),
             "desc",
             "animation",
-            "image",
-            DEFAULT_CREATE_REFERRAL
+            "image"
         )));
 
         drop.adminMint(sender, 4);
@@ -119,8 +118,7 @@ contract DeployNewERC721Drop is Script {
             }),
             "desc",
             "animation",
-            "image",
-            DEFAULT_CREATE_REFERRAL
+            "image"
         )));
         assert(drop2.balanceOf(sender) == 0);
 

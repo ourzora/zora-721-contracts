@@ -85,8 +85,7 @@ contract ZoraNFTCreatorV1Test is Test {
             }),
             "desc",
             "animation",
-            "image",
-            DEFAULT_CREATE_REFERRAL
+            "image"
         );
         ERC721Drop drop = ERC721Drop(payable(deployedEdition));
         (, uint256 fee) = drop.zoraFeeForAmount(10);
@@ -114,8 +113,7 @@ contract ZoraNFTCreatorV1Test is Test {
                 presaleMerkleRoot: bytes32(0)
             }),
             "metadata_uri",
-            "metadata_contract_uri",
-            DEFAULT_CREATE_REFERRAL
+            "metadata_contract_uri"
         );
         ERC721Drop drop = ERC721Drop(payable(deployedDrop));
         (, uint256 fee) = drop.zoraFeeForAmount(10);

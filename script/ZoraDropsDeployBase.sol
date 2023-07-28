@@ -31,7 +31,7 @@ abstract contract ZoraDropsDeployBase is ScriptDeploymentConfig {
     function deployTestContractForVerification(ZoraNFTCreatorV1 factory) internal {
         IERC721Drop.SalesConfiguration memory saleConfig;
         address newContract = address(
-            factory.createEdition(unicode"☾*☽", "~", 0, 0, payable(address(0)), address(0), saleConfig, "", DEMO_IPFS_METADATA_FILE, DEMO_IPFS_METADATA_FILE, DEFAULT_CREATE_REFERRAL)
+            factory.createEdition(unicode"☾*☽", "~", 0, 0, payable(address(0)), address(0), saleConfig, "", DEMO_IPFS_METADATA_FILE, DEMO_IPFS_METADATA_FILE)
         );
         console2.log("Deployed new contract for verification purposes", newContract);
     }

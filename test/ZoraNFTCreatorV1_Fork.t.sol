@@ -56,8 +56,7 @@ contract ZoraNFTCreatorV1_ForkTests is Test, ForkHelper {
                 }),
                 "desc",
                 "animation",
-                "image",
-                DEFAULT_CREATE_REFERRAL
+                "image"
             );
             ERC721Drop drop = ERC721Drop(payable(deployedEdition));
             (, uint256 fee) = drop.zoraFeeForAmount(10);

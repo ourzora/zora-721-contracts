@@ -24,7 +24,7 @@ import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/se
 import {MerkleProofUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/cryptography/MerkleProofUpgradeable.sol";
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import {MathUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/math/MathUpgradeable.sol";
-import {ERC721Rewards} from "@zoralabs/zora-rewards/dist/contracts/ERC721/ERC721Rewards.sol";
+import {ERC721Rewards, ERC721RewardsStorage} from "@zoralabs/zora-rewards/dist/contracts/abstract/ERC721/ERC721Rewards.sol";
 
 import {IMetadataRenderer} from "./interfaces/IMetadataRenderer.sol";
 import {IOperatorFilterRegistry} from "./interfaces/IOperatorFilterRegistry.sol";
@@ -62,7 +62,8 @@ contract ERC721Drop is
     Version(13),
     ERC721DropStorageV1,
     ERC721DropStorageV2,
-    ERC721Rewards
+    ERC721Rewards,
+    ERC721RewardsStorage
 {
     /// @dev This is the max mint batch size for the optimized ERC721A mint contract
     uint256 internal immutable MAX_MINT_BATCH_SIZE = 8;
@@ -514,7 +515,7 @@ contract ERC721Drop is
 
         uint256 salePrice = salesConfig.publicSalePrice;
 
-        _handleRewards(msg.value, quantity, salePrice, config.fundsRecipient, mintReferral);
+        _handleRewards(msg.value, quantity, salePrice, config.fundsRecipient, mintReferral, createReferral);
 
         _mintNFTs(recipient, quantity);
 
@@ -773,7 +774,7 @@ contract ERC721Drop is
 
         _requireCanPurchasePresale(msgSender, quantity, maxQuantity);
 
-        _handleRewards(msg.value, quantity, pricePerToken, config.fundsRecipient, mintReferral);
+        _handleRewards(msg.value, quantity, pricePerToken, config.fundsRecipient, mintReferral, createReferral);
 
         _mintNFTs(msgSender, quantity);
 
@@ -1460,6 +1461,17 @@ contract ERC721Drop is
         }
         royaltyMintSchedule = newSchedule;
     }
+
+    function updateCreateReferral(address recipient) external {
+        if (msg.sender != createReferral) revert ONLY_CREATE_REFERRAL();
+
+        _setCreateReferral(recipient);
+    }
+
+    function _setCreateReferral(address recipient) internal {
+        createReferral = recipient;
+    }
+
 
     /// @notice ERC165 supports interface
     /// @param interfaceId interface id to check if supported

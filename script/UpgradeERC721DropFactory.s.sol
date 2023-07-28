@@ -60,7 +60,7 @@ contract UpgradeERC721DropFactory is ZoraDropsDeployBase {
             _marketFilterDAOAddress: chainConfig.subscriptionMarketFilterAddress,
             _mintFeeAmount: chainConfig.mintFeeAmount,
             _mintFeeRecipient: payable(chainConfig.mintFeeRecipient),
-            _zoraRewards: chainConfig.zoraRewards
+            _protocolRewards: chainConfig.protocolRewards
         });
 
         deployment.dropImplementation = address(dropImplementation);

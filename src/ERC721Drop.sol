@@ -24,7 +24,7 @@ import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/se
 import {MerkleProofUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/cryptography/MerkleProofUpgradeable.sol";
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import {MathUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/math/MathUpgradeable.sol";
-import {ERC721Rewards} from "@zoralabs/zora-rewards/ERC721/ERC721Rewards.sol";
+import {ERC721Rewards} from "@zoralabs/zora-rewards/dist/contracts/ERC721/ERC721Rewards.sol";
 
 import {IMetadataRenderer} from "./interfaces/IMetadataRenderer.sol";
 import {IOperatorFilterRegistry} from "./interfaces/IOperatorFilterRegistry.sol";
@@ -203,6 +203,7 @@ contract ERC721Drop is
     ///  @param _setupCalls Bytes-encoded list of setup multicalls
     ///  @param _metadataRenderer Renderer contract to use
     ///  @param _metadataRendererInit Renderer data initial contract
+    ///  @param _createReferral The platform where the collection was created
     function initialize(
         string memory _contractName,
         string memory _contractSymbol,
@@ -212,7 +213,8 @@ contract ERC721Drop is
         uint16 _royaltyBPS,
         bytes[] calldata _setupCalls,
         IMetadataRenderer _metadataRenderer,
-        bytes memory _metadataRendererInit
+        bytes memory _metadataRendererInit,
+        address _createReferral
     ) public initializer {
         // Setup ERC721A
         __ERC721A_init(_contractName, _contractSymbol);
@@ -243,6 +245,11 @@ contract ERC721Drop is
         config.metadataRenderer = _metadataRenderer;
         config.royaltyBPS = _royaltyBPS;
         config.fundsRecipient = _fundsRecipient;
+
+        if (_createReferral != address(0)) {
+            _setCreateReferral(_createReferral);
+        }
+
         _metadataRenderer.initializeWithData(_metadataRendererInit);
     }
 
@@ -489,20 +496,19 @@ contract ERC721Drop is
     /// @param quantity quantity to purchase
     /// @param comment comment to include in the IERC721Drop.Sale event
     /// @param mintReferral The finder of the mint
-    /// @param createReferral The origin platform of the collection
     /// @return tokenId of the first token minted
-    function mintWithRewards(address recipient, uint256 quantity, string calldata comment, address mintReferral, address createReferral)    
+    function mintWithRewards(address recipient, uint256 quantity, string calldata comment, address mintReferral)
         external
         payable
         nonReentrant
         canMintTokens(quantity)
         onlyPublicSaleActive
-        returns (uint256) 
+        returns (uint256)
     {
-        return _handleMintWithRewards(recipient, quantity, comment, mintReferral, createReferral);
+        return _handleMintWithRewards(recipient, quantity, comment, mintReferral);
     }
 
-    function _handleMintWithRewards(address recipient, uint256 quantity, string calldata comment, address mintReferral, address createReferral) internal returns (uint256) {
+    function _handleMintWithRewards(address recipient, uint256 quantity, string calldata comment, address mintReferral) internal returns (uint256) {
         _mintSupplyRoyalty(quantity);
 
         // If max purchase per address == 0 there is no limit.
@@ -517,7 +523,7 @@ contract ERC721Drop is
 
         uint256 salePrice = salesConfig.publicSalePrice;
 
-        _handleRewards(msg.value, quantity, salePrice, config.fundsRecipient, mintReferral, createReferral);
+        _handleRewards(msg.value, quantity, salePrice, config.fundsRecipient, mintReferral);
 
         _mintNFTs(recipient, quantity);
 

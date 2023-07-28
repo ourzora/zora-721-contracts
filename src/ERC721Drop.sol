@@ -510,16 +510,7 @@ contract ERC721Drop is
 
     function _handleMintWithRewards(address recipient, uint256 quantity, string calldata comment, address mintReferral) internal returns (uint256) {
         _mintSupplyRoyalty(quantity);
-
-        // If max purchase per address == 0 there is no limit.
-        // Any other number, the per address mint limit is that.
-        if (
-            salesConfig.maxSalePurchasePerAddress != 0
-                && _numberMinted(recipient) + quantity - presaleMintsByAddress[recipient]
-                    > salesConfig.maxSalePurchasePerAddress
-        ) {
-            revert Purchase_TooManyForAddress();
-        }
+        _requireCanPurchaseQuantity(recipient, quantity);
 
         uint256 salePrice = salesConfig.publicSalePrice;
 
@@ -552,24 +543,11 @@ contract ERC721Drop is
     function _handlePurchase(address recipient, uint256 quantity, string memory comment) internal returns (uint256) {
         _mintSupplyRoyalty(quantity);
         _requireCanMintQuantity(quantity);
+        _requireCanPurchaseQuantity(recipient, quantity);
 
         uint256 salePrice = salesConfig.publicSalePrice;
 
-        if (msg.value != (salePrice + ZORA_MINT_FEE) * quantity) {
-            revert Purchase_WrongPrice((salePrice + ZORA_MINT_FEE) * quantity);
-        }
-
-        // If max purchase per address == 0 there is no limit.
-        // Any other number, the per address mint limit is that.
-        if (
-            salesConfig.maxSalePurchasePerAddress != 0 &&
-            _numberMinted(recipient) +
-                quantity -
-                presaleMintsByAddress[recipient] >
-            salesConfig.maxSalePurchasePerAddress
-        ) {
-            revert Purchase_TooManyForAddress();
-        }
+        _requireLegacyFee(msg.value, salePrice, quantity);
 
         _mintNFTs(recipient, quantity);
         uint256 firstMintedTokenId = _lastMintedTokenId() - quantity;
@@ -722,44 +700,95 @@ contract ERC721Drop is
         _mintSupplyRoyalty(quantity);
         _requireCanMintQuantity(quantity);
 
-        if (
-            !MerkleProofUpgradeable.verify(
-                merkleProof,
-                salesConfig.presaleMerkleRoot,
-                keccak256(
-                    // address, uint256, uint256
-                    abi.encode(_msgSender(), maxQuantity, pricePerToken)
-                )
-            )
-        ) {
-            revert Presale_MerkleNotApproved();
-        }
+        address msgSender = _msgSender();
 
-        if (msg.value != (pricePerToken + ZORA_MINT_FEE) * quantity) {
-            revert Purchase_WrongPrice(
-                (pricePerToken + ZORA_MINT_FEE) * quantity
-            );
-        }
+        _requireMerkleApproval(msgSender, maxQuantity, pricePerToken, merkleProof);
 
-        presaleMintsByAddress[_msgSender()] += quantity;
-        if (presaleMintsByAddress[_msgSender()] > maxQuantity) {
-            revert Presale_TooManyForAddress();
-        }
+        _requireLegacyFee(msg.value, pricePerToken, quantity);
 
-        _mintNFTs(_msgSender(), quantity);
+        _requireCanPurchasePresale(msgSender, quantity, maxQuantity);
+
+        _mintNFTs(msgSender, quantity);
         uint256 firstMintedTokenId = _lastMintedTokenId() - quantity;
 
         _payoutZoraFee(quantity);
 
         emit IERC721Drop.Sale({
-            to: _msgSender(),
+            to: msgSender,
             quantity: quantity,
             pricePerToken: pricePerToken,
             firstPurchasedTokenId: firstMintedTokenId
         });
         if (bytes(comment).length > 0) {
             emit IERC721Drop.MintComment({
-                sender: _msgSender(),
+                sender: msgSender,
+                tokenContract: address(this),
+                tokenId: firstMintedTokenId,
+                quantity: quantity,
+                comment: comment
+            });
+        }
+
+        return firstMintedTokenId;
+    }
+
+    /// @notice Merkle-tree based presale purchase function with a comment and protocol rewards
+    /// @param quantity quantity to purchase
+    /// @param maxQuantity max quantity that can be purchased via merkle proof #
+    /// @param pricePerToken price that each token is purchased at
+    /// @param merkleProof proof for presale mint
+    /// @param comment comment to include in the IERC721Drop.Sale event
+    /// @param mintReferral The facilitator of the mint
+    function purchasePresaleWithRewards(
+        uint256 quantity,
+        uint256 maxQuantity,
+        uint256 pricePerToken,
+        bytes32[] calldata merkleProof,
+        string calldata comment,
+        address mintReferral
+    )
+        external
+        payable
+        nonReentrant
+        onlyPresaleActive
+        returns (uint256)
+    {
+        return _handlePurchasePresaleWithRewards(quantity, maxQuantity, pricePerToken, merkleProof, comment, mintReferral);
+    }
+
+    function _handlePurchasePresaleWithRewards(        
+        uint256 quantity,
+        uint256 maxQuantity,
+        uint256 pricePerToken,
+        bytes32[] calldata merkleProof,
+        string calldata comment,
+        address mintReferral
+    ) internal returns (uint256) {
+        _mintSupplyRoyalty(quantity);
+        _requireCanMintQuantity(quantity);
+
+        address msgSender = _msgSender();
+
+        _requireMerkleApproval(msgSender, maxQuantity, pricePerToken, merkleProof);
+
+        _requireCanPurchasePresale(msgSender, quantity, maxQuantity);
+
+        _handleRewards(msg.value, quantity, pricePerToken, config.fundsRecipient, mintReferral);
+
+        _mintNFTs(msgSender, quantity);
+
+        uint256 firstMintedTokenId = _lastMintedTokenId() - quantity;
+
+    
+        emit IERC721Drop.Sale({
+            to: msgSender,
+            quantity: quantity,
+            pricePerToken: pricePerToken,
+            firstPurchasedTokenId: firstMintedTokenId
+        });
+        if (bytes(comment).length > 0) {
+            emit IERC721Drop.MintComment({
+                sender: msgSender,
                 tokenContract: address(this),
                 tokenId: firstMintedTokenId,
                 quantity: quantity,
@@ -818,14 +847,11 @@ contract ERC721Drop is
     /// @notice Hook to filter operators (no-op if no filters are registered)
     /// @dev Part of ERC721A token hooks
     /// @param from Transfer from user
-    /// @param to Transfer to user
-    /// @param startTokenId Token ID to start with
-    /// @param quantity Quantity of token being transferred
     function _beforeTokenTransfers(
         address from,
-        address to,
-        uint256 startTokenId,
-        uint256 quantity
+        address,
+        uint256,
+        uint256 
     ) internal virtual override {
         if (
             from != address(0) && // skip on mints
@@ -1358,9 +1384,55 @@ contract ERC721Drop is
         emit MintFeePayout(zoraFee, ZORA_MINT_FEE_RECIPIENT, success);
     }
 
+    function _requireLegacyFee(uint256 msgValue, uint256 salePrice, uint256 quantity) internal view {
+        if (msgValue != (salePrice + ZORA_MINT_FEE) * quantity) {
+            revert Purchase_WrongPrice((salePrice + ZORA_MINT_FEE) * quantity);
+        }
+    }
+
     function _requireCanMintQuantity(uint256 quantity) internal view {
         if (quantity + _totalMinted() > config.editionSize) {
             revert Mint_SoldOut();
+        }
+    }
+
+    function _requireCanPurchaseQuantity(address recipient, uint256 quantity) internal view {
+        // If max purchase per address == 0 there is no limit.
+        // Any other number, the per address mint limit is that.
+        if (
+            salesConfig.maxSalePurchasePerAddress != 0
+                && _numberMinted(recipient) + quantity - presaleMintsByAddress[recipient]
+                    > salesConfig.maxSalePurchasePerAddress
+        ) {
+            revert Purchase_TooManyForAddress();
+        }
+    }
+
+    function _requireCanPurchasePresale(address recipient, uint256 quantity, uint256 maxQuantity) internal {
+        presaleMintsByAddress[recipient] += quantity;
+
+        if (presaleMintsByAddress[recipient] > maxQuantity) {
+            revert Presale_TooManyForAddress();
+        }
+    }
+
+    function _requireMerkleApproval(
+        address recipient,
+        uint256 maxQuantity,
+        uint256 pricePerToken,
+        bytes32[] calldata merkleProof
+    ) internal view {
+        if (
+            !MerkleProofUpgradeable.verify(
+                merkleProof,
+                salesConfig.presaleMerkleRoot,
+                keccak256(
+                    // address, uint256, uint256
+                    abi.encode(recipient, maxQuantity, pricePerToken)
+                )
+            )
+        ) {
+            revert Presale_MerkleNotApproved();
         }
     }
 

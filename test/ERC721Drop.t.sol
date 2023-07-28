@@ -89,6 +89,24 @@ contract ERC721DropTest is Test {
         _;
     }
 
+    modifier setupZoraNFTBaseWithCreateReferral(uint64 editionSize, address initCreateReferral) {
+        bytes[] memory setupCalls = new bytes[](0);
+        zoraNFTBase.initialize({
+            _contractName: "Test NFT",
+            _contractSymbol: "TNFT",
+            _initialOwner: DEFAULT_OWNER_ADDRESS,
+            _fundsRecipient: payable(DEFAULT_FUNDS_RECIPIENT_ADDRESS),
+            _editionSize: editionSize,
+            _royaltyBPS: 800,
+            _setupCalls: setupCalls,
+            _metadataRenderer: dummyRenderer,
+            _metadataRendererInit: "",
+            _createReferral: initCreateReferral
+        });
+
+        _;
+    }
+
     function setUp() public {
         creator = makeAddr("creator");
         collector = makeAddr("collector");
@@ -475,78 +493,78 @@ contract ERC721DropTest is Test {
         assertEq(zoraRewards.balanceOf(mintReferral), mintReferralReward);
     }
 
-    // function test_FreeMintRewardsWithCreateReferral(uint32 purchaseQuantity)
-    //     public
-    //     setupZoraNFTBase(purchaseQuantity)
-    // {
-    //     vm.assume(purchaseQuantity < 100 && purchaseQuantity > 0);
+    function test_FreeMintRewardsWithCreateReferral(uint32 purchaseQuantity)
+        public
+        setupZoraNFTBaseWithCreateReferral(purchaseQuantity, createReferral)
+    {
+        vm.assume(purchaseQuantity < 100 && purchaseQuantity > 0);
 
-    //     vm.prank(DEFAULT_OWNER_ADDRESS);
-    //     zoraNFTBase.setSaleConfiguration({
-    //         publicSaleStart: 0,
-    //         publicSaleEnd: type(uint64).max,
-    //         presaleStart: 0,
-    //         presaleEnd: 0,
-    //         publicSalePrice: 0,
-    //         maxSalePurchasePerAddress: purchaseQuantity + 1,
-    //         presaleMerkleRoot: bytes32(0)
-    //     });
+        vm.prank(DEFAULT_OWNER_ADDRESS);
+        zoraNFTBase.setSaleConfiguration({
+            publicSaleStart: 0,
+            publicSaleEnd: type(uint64).max,
+            presaleStart: 0,
+            presaleEnd: 0,
+            publicSalePrice: 0,
+            maxSalePurchasePerAddress: purchaseQuantity + 1,
+            presaleMerkleRoot: bytes32(0)
+        });
 
-    //     uint256 totalReward = zoraNFTBase.computeTotalReward(purchaseQuantity);
+        uint256 totalReward = zoraNFTBase.computeTotalReward(purchaseQuantity);
 
-    //     (
-    //         uint256 creatorReward,
-    //         uint256 mintReferralReward,
-    //         uint256 createReferralReward,
-    //         uint256 firstMinterReward,
-    //         uint256 zoraReward
-    //     ) = zoraNFTBase.computeFreeMintRewards(purchaseQuantity);
+        (
+            uint256 creatorReward,
+            uint256 mintReferralReward,
+            uint256 createReferralReward,
+            uint256 firstMinterReward,
+            uint256 zoraReward
+        ) = zoraNFTBase.computeFreeMintRewards(purchaseQuantity);
 
-    //     vm.deal(collector, totalReward);
-    //     vm.prank(collector);
-    //     zoraNFTBase.mintWithRewards{value: totalReward}(collector, purchaseQuantity, "test comment", address(0));
+        vm.deal(collector, totalReward);
+        vm.prank(collector);
+        zoraNFTBase.mintWithRewards{value: totalReward}(collector, purchaseQuantity, "test comment", address(0));
 
-    //     assertEq(zoraRewards.balanceOf(DEFAULT_FUNDS_RECIPIENT_ADDRESS), creatorReward + firstMinterReward);
-    //     assertEq(zoraRewards.balanceOf(mintFeeRecipient), zoraReward + mintReferralReward);
-    //     assertEq(zoraRewards.balanceOf(createReferral), createReferralReward);
-    // }
+        assertEq(zoraRewards.balanceOf(DEFAULT_FUNDS_RECIPIENT_ADDRESS), creatorReward + firstMinterReward);
+        assertEq(zoraRewards.balanceOf(mintFeeRecipient), zoraReward + mintReferralReward);
+        assertEq(zoraRewards.balanceOf(createReferral), createReferralReward);
+    }
 
-    // function test_FreeMintRewardsWithmintReferralAndLister(uint32 purchaseQuantity)
-    //     public
-    //     setupZoraNFTBase(purchaseQuantity)
-    // {
-    //     vm.assume(purchaseQuantity < 100 && purchaseQuantity > 0);
+    function test_FreeMintRewardsWithMintAndCreateReferrals(uint32 purchaseQuantity)
+        public
+        setupZoraNFTBaseWithCreateReferral(purchaseQuantity, createReferral)
+    {
+        vm.assume(purchaseQuantity < 100 && purchaseQuantity > 0);
 
-    //     vm.prank(DEFAULT_OWNER_ADDRESS);
-    //     zoraNFTBase.setSaleConfiguration({
-    //         publicSaleStart: 0,
-    //         publicSaleEnd: type(uint64).max,
-    //         presaleStart: 0,
-    //         presaleEnd: 0,
-    //         publicSalePrice: 0,
-    //         maxSalePurchasePerAddress: purchaseQuantity + 1,
-    //         presaleMerkleRoot: bytes32(0)
-    //     });
+        vm.prank(DEFAULT_OWNER_ADDRESS);
+        zoraNFTBase.setSaleConfiguration({
+            publicSaleStart: 0,
+            publicSaleEnd: type(uint64).max,
+            presaleStart: 0,
+            presaleEnd: 0,
+            publicSalePrice: 0,
+            maxSalePurchasePerAddress: purchaseQuantity + 1,
+            presaleMerkleRoot: bytes32(0)
+        });
 
-    //     uint256 totalReward = zoraNFTBase.computeTotalReward(purchaseQuantity);
+        uint256 totalReward = zoraNFTBase.computeTotalReward(purchaseQuantity);
 
-    //     (
-    //         uint256 creatorReward,
-    //         uint256 mintReferralReward,
-    //         uint256 createReferralReward,
-    //         uint256 firstMinterReward,
-    //         uint256 zoraReward
-    //     ) = zoraNFTBase.computeFreeMintRewards(purchaseQuantity);
+        (
+            uint256 creatorReward,
+            uint256 mintReferralReward,
+            uint256 createReferralReward,
+            uint256 firstMinterReward,
+            uint256 zoraReward
+        ) = zoraNFTBase.computeFreeMintRewards(purchaseQuantity);
 
-    //     vm.deal(collector, totalReward);
-    //     vm.prank(collector);
-    //     zoraNFTBase.mintWithRewards{value: totalReward}(collector, purchaseQuantity, "test comment", mintReferral);
+        vm.deal(collector, totalReward);
+        vm.prank(collector);
+        zoraNFTBase.mintWithRewards{value: totalReward}(collector, purchaseQuantity, "test comment", mintReferral);
 
-    //     assertEq(zoraRewards.balanceOf(DEFAULT_FUNDS_RECIPIENT_ADDRESS), creatorReward);
-    //     assertEq(zoraRewards.balanceOf(mintFeeRecipient), zoraReward);
-    //     assertEq(zoraRewards.balanceOf(mintReferral), mintReferralReward);
-    //     assertEq(zoraRewards.balanceOf(createReferral), createReferralReward);
-    // }
+        assertEq(zoraRewards.balanceOf(DEFAULT_FUNDS_RECIPIENT_ADDRESS), creatorReward + firstMinterReward);
+        assertEq(zoraRewards.balanceOf(mintFeeRecipient), zoraReward);
+        assertEq(zoraRewards.balanceOf(mintReferral), mintReferralReward);
+        assertEq(zoraRewards.balanceOf(createReferral), createReferralReward);
+    }
 
     function testRevert_FreeMintRewardsInsufficientEth(uint32 purchaseQuantity)
         public
@@ -637,74 +655,76 @@ contract ERC721DropTest is Test {
         assertEq(zoraRewards.balanceOf(mintReferral), mintReferralReward);
     }
 
-    // function test_PaidMintRewardsWithLister(uint64 salePrice, uint32 purchaseQuantity)
-    //     public
-    //     setupZoraNFTBase(purchaseQuantity)
-    // {
-    //     vm.assume(salePrice > 0);
-    //     vm.assume(purchaseQuantity < 100 && purchaseQuantity > 0);
+    function test_PaidMintRewardsWithCreateReferral(uint64 salePrice, uint32 purchaseQuantity)
+        public
+        setupZoraNFTBaseWithCreateReferral(purchaseQuantity, createReferral)
+    {
+        vm.assume(salePrice > 0);
+        vm.assume(purchaseQuantity < 100 && purchaseQuantity > 0);
 
-    //     vm.prank(DEFAULT_OWNER_ADDRESS);
-    //     zoraNFTBase.setSaleConfiguration({
-    //         publicSaleStart: 0,
-    //         publicSaleEnd: type(uint64).max,
-    //         presaleStart: 0,
-    //         presaleEnd: 0,
-    //         publicSalePrice: salePrice,
-    //         maxSalePurchasePerAddress: purchaseQuantity + 1,
-    //         presaleMerkleRoot: bytes32(0)
-    //     });
+        vm.prank(DEFAULT_OWNER_ADDRESS);
+        zoraNFTBase.setSaleConfiguration({
+            publicSaleStart: 0,
+            publicSaleEnd: type(uint64).max,
+            presaleStart: 0,
+            presaleEnd: 0,
+            publicSalePrice: salePrice,
+            maxSalePurchasePerAddress: purchaseQuantity + 1,
+            presaleMerkleRoot: bytes32(0)
+        });
 
-    //     (uint256 mintReferralReward, uint256 createReferralReward, uint256 firstMinterReward, uint256 zoraReward) =
-    //         zoraNFTBase.computePaidMintRewards(purchaseQuantity);
+        (uint256 mintReferralReward, uint256 createReferralReward, uint256 firstMinterReward, uint256 zoraReward) =
+            zoraNFTBase.computePaidMintRewards(purchaseQuantity);
 
-    //     uint256 totalReward = zoraNFTBase.computeTotalReward(purchaseQuantity);
-    //     uint256 totalSales = uint256(salePrice) * purchaseQuantity;
-    //     uint256 totalPayment = totalSales + totalReward;
+        uint256 totalReward = zoraNFTBase.computeTotalReward(purchaseQuantity);
+        uint256 totalSales = uint256(salePrice) * purchaseQuantity;
+        uint256 totalPayment = totalSales + totalReward;
 
-    //     vm.deal(collector, totalPayment);
-    //     vm.prank(collector);
-    //     zoraNFTBase.mintWithRewards{value: totalPayment}(collector, purchaseQuantity, "test comment", address(0));
+        vm.deal(collector, totalPayment);
+        vm.prank(collector);
+        zoraNFTBase.mintWithRewards{value: totalPayment}(collector, purchaseQuantity, "test comment", address(0));
 
-    //     assertEq(address(zoraNFTBase).balance, totalSales);
-    //     assertEq(zoraRewards.balanceOf(mintFeeRecipient), zoraReward + mintReferralReward);
-    //     assertEq(zoraRewards.balanceOf(createReferral), createReferralReward);
-    // }
+        assertEq(address(zoraNFTBase).balance, totalSales);
+        assertEq(zoraRewards.balanceOf(DEFAULT_FUNDS_RECIPIENT_ADDRESS), firstMinterReward);
+        assertEq(zoraRewards.balanceOf(mintFeeRecipient), zoraReward + mintReferralReward);
+        assertEq(zoraRewards.balanceOf(createReferral), createReferralReward);
+    }
 
-    // function test_PaidMintRewardsWithmintReferralAndLister(uint64 salePrice, uint32 purchaseQuantity)
-    //     public
-    //     setupZoraNFTBase(purchaseQuantity)
-    // {
-    //     vm.assume(salePrice > 0);
-    //     vm.assume(purchaseQuantity < 100 && purchaseQuantity > 0);
+    function test_PaidMintRewardsWithMintAndCreateReferrals(uint64 salePrice, uint32 purchaseQuantity)
+        public
+        setupZoraNFTBaseWithCreateReferral(purchaseQuantity, createReferral)
+    {
+        vm.assume(salePrice > 0);
+        vm.assume(purchaseQuantity < 100 && purchaseQuantity > 0);
 
-    //     vm.prank(DEFAULT_OWNER_ADDRESS);
-    //     zoraNFTBase.setSaleConfiguration({
-    //         publicSaleStart: 0,
-    //         publicSaleEnd: type(uint64).max,
-    //         presaleStart: 0,
-    //         presaleEnd: 0,
-    //         publicSalePrice: salePrice,
-    //         maxSalePurchasePerAddress: purchaseQuantity + 1,
-    //         presaleMerkleRoot: bytes32(0)
-    //     });
+        vm.prank(DEFAULT_OWNER_ADDRESS);
+        zoraNFTBase.setSaleConfiguration({
+            publicSaleStart: 0,
+            publicSaleEnd: type(uint64).max,
+            presaleStart: 0,
+            presaleEnd: 0,
+            publicSalePrice: salePrice,
+            maxSalePurchasePerAddress: purchaseQuantity + 1,
+            presaleMerkleRoot: bytes32(0)
+        });
 
-    //     (uint256 mintReferralReward, uint256 createReferralReward, uint256 firstMinterReward, uint256 zoraReward) =
-    //         zoraNFTBase.computePaidMintRewards(purchaseQuantity);
+        (uint256 mintReferralReward, uint256 createReferralReward, uint256 firstMinterReward, uint256 zoraReward) =
+            zoraNFTBase.computePaidMintRewards(purchaseQuantity);
 
-    //     uint256 totalReward = zoraNFTBase.computeTotalReward(purchaseQuantity);
-    //     uint256 totalSales = uint256(salePrice) * purchaseQuantity;
-    //     uint256 totalPayment = totalSales + totalReward;
+        uint256 totalReward = zoraNFTBase.computeTotalReward(purchaseQuantity);
+        uint256 totalSales = uint256(salePrice) * purchaseQuantity;
+        uint256 totalPayment = totalSales + totalReward;
 
-    //     vm.deal(collector, totalPayment);
-    //     vm.prank(collector);
-    //     zoraNFTBase.mintWithRewards{value: totalPayment}(collector, purchaseQuantity, "test comment", mintReferral);
+        vm.deal(collector, totalPayment);
+        vm.prank(collector);
+        zoraNFTBase.mintWithRewards{value: totalPayment}(collector, purchaseQuantity, "test comment", mintReferral);
 
-    //     assertEq(address(zoraNFTBase).balance, totalSales);
-    //     assertEq(zoraRewards.balanceOf(mintFeeRecipient), zoraReward);
-    //     assertEq(zoraRewards.balanceOf(mintReferral), mintReferralReward);
-    //     assertEq(zoraRewards.balanceOf(createReferral), createReferralReward);
-    // }
+        assertEq(address(zoraNFTBase).balance, totalSales);
+        assertEq(zoraRewards.balanceOf(DEFAULT_FUNDS_RECIPIENT_ADDRESS), firstMinterReward);
+        assertEq(zoraRewards.balanceOf(mintFeeRecipient), zoraReward);
+        assertEq(zoraRewards.balanceOf(mintReferral), mintReferralReward);
+        assertEq(zoraRewards.balanceOf(createReferral), createReferralReward);
+    }
 
     function testRevert_PaidMintRewardsInsufficientEth(uint64 salePrice, uint32 purchaseQuantity)
         public

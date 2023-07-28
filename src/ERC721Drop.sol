@@ -59,7 +59,7 @@ contract ERC721Drop is
     PublicMulticall,
     OwnableSkeleton,
     FundsReceiver,
-    Version(13),
+    Version(14),
     ERC721DropStorageV1,
     ERC721DropStorageV2,
     ERC721Rewards,

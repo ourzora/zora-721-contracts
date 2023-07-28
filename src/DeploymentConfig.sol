@@ -22,6 +22,8 @@ struct ChainConfig {
     address subscriptionMarketFilterOwner;
     /// @notice Auto-approved hyperstructure on mainnet for enabling ZORA v3 with less gas. Deprecated – safe to set to address(0x)
     address zoraERC721TransferHelper;
+    /// @notice The Zora Rewards contract
+    address zoraRewards;
 }
 
 /// @notice Deployment addresses – set to new deployed addresses by the scripts.
@@ -62,6 +64,7 @@ abstract contract DeploymentConfig is StdChains, StdCheatsSafe, StdUtils, Script
     string constant SUBSCRIPTION_MARKET_FILTER_ADDRESS = "SUBSCRIPTION_MARKET_FILTER_ADDRESS";
     string constant SUBSCRIPTION_MARKET_FILTER_OWNER = "SUBSCRIPTION_MARKET_FILTER_OWNER";
     string constant ZORA_ERC721_TRANSFER_HELPER = "ZORA_ERC721_TRANSFER_HELPER";
+    string constant ZORA_REWARDS = "ZORA_REWARDS";
 
     string constant DROP_METADATA_RENDERER = "DROP_METADATA_RENDERER";
     string constant EDITION_METADATA_RENDERER = "EDITION_METADATA_RENDERER";
@@ -88,6 +91,7 @@ abstract contract DeploymentConfig is StdChains, StdCheatsSafe, StdUtils, Script
         chainConfig.subscriptionMarketFilterAddress = json.readAddress(getKeyPrefix(SUBSCRIPTION_MARKET_FILTER_ADDRESS));
         chainConfig.subscriptionMarketFilterOwner = json.readAddress(getKeyPrefix(SUBSCRIPTION_MARKET_FILTER_OWNER));
         chainConfig.zoraERC721TransferHelper = json.readAddress(getKeyPrefix(ZORA_ERC721_TRANSFER_HELPER));
+        chainConfig.zoraRewards = json.readAddress(getKeyPrefix(ZORA_REWARDS));
     }
 
     /// @notice Get the deployment configuration struct from the JSON configuration file

@@ -2,7 +2,7 @@
 pragma solidity ^0.8.10;
 
 import {Test} from "forge-std/Test.sol";
-import {ZoraRewards} from "@zoralabs/zora-rewards/dist/contracts/ZoraRewards.sol";
+import {ProtocolRewards} from "@zoralabs/protocol-rewards/dist/contracts/ProtocolRewards.sol";
 
 import {IERC721Drop} from "../../src/interfaces/IERC721Drop.sol";
 import {ERC721Drop} from "../../src/ERC721Drop.sol";
@@ -12,7 +12,7 @@ import {ERC721DropProxy} from "../../src/ERC721DropProxy.sol";
 import {MerkleData} from "./MerkleData.sol";
 
 contract ZoraNFTBaseTest is Test {
-    ZoraRewards internal zoraRewards;
+    ProtocolRewards internal protocolRewards;
     ERC721Drop zoraNFTBase;
     DummyMetadataRenderer public dummyRenderer = new DummyMetadataRenderer();
     MerkleData public merkleData;
@@ -45,7 +45,7 @@ contract ZoraNFTBaseTest is Test {
     }
 
     function setUp() public {
-        zoraRewards = new ZoraRewards();
+        protocolRewards = new ProtocolRewards();
 
         vm.prank(DEFAULT_ZORA_DAO_ADDRESS);
         address impl = address(
@@ -55,7 +55,7 @@ contract ZoraNFTBaseTest is Test {
                 address(0),
                 mintFee,
                 mintFeeRecipient,
-                address(zoraRewards)
+                address(protocolRewards)
             )
         );
         address payable newDrop = payable(

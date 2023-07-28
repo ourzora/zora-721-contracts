@@ -3,7 +3,7 @@ pragma solidity ^0.8.10;
 
 import {Test} from "forge-std/Test.sol";
 import {IERC721AUpgradeable} from "erc721a-upgradeable/IERC721AUpgradeable.sol";
-import {ZoraRewards} from "@zoralabs/zora-rewards/dist/contracts/ZoraRewards.sol";
+import {ProtocolRewards} from "@zoralabs/protocol-rewards/dist/contracts/ProtocolRewards.sol";
 
 import {IMetadataRenderer} from "../src/interfaces/IMetadataRenderer.sol";
 import "../src/ZoraNFTCreatorV1.sol";
@@ -26,11 +26,11 @@ contract ZoraNFTCreatorV1Test is Test {
     ZoraNFTCreatorV1 public creator;
     EditionMetadataRenderer public editionMetadataRenderer;
     DropMetadataRenderer public dropMetadataRenderer;
-    ZoraRewards internal zoraRewards;
+    ProtocolRewards internal protocolRewards;
     address internal constant DEFAULT_CREATE_REFERRAL = address(0);
 
     function setUp() public {
-        zoraRewards = new ZoraRewards();
+        protocolRewards = new ProtocolRewards();
 
         vm.prank(DEFAULT_ZORA_DAO_ADDRESS);
         dropImpl = new ERC721Drop(
@@ -39,7 +39,7 @@ contract ZoraNFTCreatorV1Test is Test {
             address(0),
             mintFee,
             mintFeeRecipient,
-            address(zoraRewards)
+            address(protocolRewards)
         );
         editionMetadataRenderer = new EditionMetadataRenderer();
         dropMetadataRenderer = new DropMetadataRenderer();

@@ -4,7 +4,7 @@ pragma solidity ^0.8.10;
 import {Test} from "forge-std/Test.sol";
 import {IERC721AUpgradeable} from "erc721a-upgradeable/IERC721AUpgradeable.sol";
 import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
-import {ZoraRewards} from "@zoralabs/zora-rewards/dist/contracts/ZoraRewards.sol";
+import {ProtocolRewards} from "@zoralabs/protocol-rewards/dist/contracts/ProtocolRewards.sol";
 
 import {ERC721Drop} from "../src/ERC721Drop.sol";
 import {DummyMetadataRenderer} from "./utils/DummyMetadataRenderer.sol";
@@ -47,7 +47,7 @@ contract ERC721DropTest is Test {
     address internal createReferral;
     address internal zora;
 
-    ZoraRewards zoraRewards;
+    ProtocolRewards protocolRewards;
     ERC721Drop zoraNFTBase;
     MockUser mockUser;
     DummyMetadataRenderer public dummyRenderer = new DummyMetadataRenderer();
@@ -114,7 +114,7 @@ contract ERC721DropTest is Test {
         createReferral = makeAddr("createReferral");
         zora = makeAddr("zora");
 
-        zoraRewards = new ZoraRewards();
+        protocolRewards = new ProtocolRewards();
 
         vm.prank(DEFAULT_ZORA_DAO_ADDRESS);
         factoryUpgradeGate = new FactoryUpgradeGate(UPGRADE_GATE_ADMIN_ADDRESS);
@@ -129,7 +129,7 @@ contract ERC721DropTest is Test {
                 address(0x0),
                 mintFee,
                 mintFeeRecipient,
-                address(zoraRewards)
+                address(protocolRewards)
             )
         );
         address payable newDrop = payable(address(new ERC721DropProxy(impl, "")));
@@ -145,7 +145,7 @@ contract ERC721DropTest is Test {
                 address(subscriptionAddress),
                 mintFee,
                 mintFeeRecipient,
-                address(zoraRewards)
+                address(protocolRewards)
             )
         );
         address payable newDrop = payable(address(new ERC721DropProxy(impl, "")));
@@ -456,8 +456,8 @@ contract ERC721DropTest is Test {
         vm.prank(collector);
         zoraNFTBase.mintWithRewards{value: totalReward}(collector, purchaseQuantity, "test comment", address(0));
 
-        assertEq(zoraRewards.balanceOf(DEFAULT_FUNDS_RECIPIENT_ADDRESS), creatorReward + firstMinterReward);
-        assertEq(zoraRewards.balanceOf(mintFeeRecipient), zoraReward + mintReferralReward + createReferralReward);
+        assertEq(protocolRewards.balanceOf(DEFAULT_FUNDS_RECIPIENT_ADDRESS), creatorReward + firstMinterReward);
+        assertEq(protocolRewards.balanceOf(mintFeeRecipient), zoraReward + mintReferralReward + createReferralReward);
     }
 
     function test_FreeMintRewardsWithMintReferral(uint32 purchaseQuantity) public setupZoraNFTBase(purchaseQuantity) {
@@ -488,9 +488,9 @@ contract ERC721DropTest is Test {
         vm.prank(collector);
         zoraNFTBase.mintWithRewards{value: totalReward}(collector, purchaseQuantity, "test comment", mintReferral);
 
-        assertEq(zoraRewards.balanceOf(DEFAULT_FUNDS_RECIPIENT_ADDRESS), creatorReward + firstMinterReward);
-        assertEq(zoraRewards.balanceOf(mintFeeRecipient), zoraReward + createReferralReward);
-        assertEq(zoraRewards.balanceOf(mintReferral), mintReferralReward);
+        assertEq(protocolRewards.balanceOf(DEFAULT_FUNDS_RECIPIENT_ADDRESS), creatorReward + firstMinterReward);
+        assertEq(protocolRewards.balanceOf(mintFeeRecipient), zoraReward + createReferralReward);
+        assertEq(protocolRewards.balanceOf(mintReferral), mintReferralReward);
     }
 
     function test_FreeMintRewardsWithCreateReferral(uint32 purchaseQuantity)
@@ -524,9 +524,9 @@ contract ERC721DropTest is Test {
         vm.prank(collector);
         zoraNFTBase.mintWithRewards{value: totalReward}(collector, purchaseQuantity, "test comment", address(0));
 
-        assertEq(zoraRewards.balanceOf(DEFAULT_FUNDS_RECIPIENT_ADDRESS), creatorReward + firstMinterReward);
-        assertEq(zoraRewards.balanceOf(mintFeeRecipient), zoraReward + mintReferralReward);
-        assertEq(zoraRewards.balanceOf(createReferral), createReferralReward);
+        assertEq(protocolRewards.balanceOf(DEFAULT_FUNDS_RECIPIENT_ADDRESS), creatorReward + firstMinterReward);
+        assertEq(protocolRewards.balanceOf(mintFeeRecipient), zoraReward + mintReferralReward);
+        assertEq(protocolRewards.balanceOf(createReferral), createReferralReward);
     }
 
     function test_FreeMintRewardsWithMintAndCreateReferrals(uint32 purchaseQuantity)
@@ -560,10 +560,10 @@ contract ERC721DropTest is Test {
         vm.prank(collector);
         zoraNFTBase.mintWithRewards{value: totalReward}(collector, purchaseQuantity, "test comment", mintReferral);
 
-        assertEq(zoraRewards.balanceOf(DEFAULT_FUNDS_RECIPIENT_ADDRESS), creatorReward + firstMinterReward);
-        assertEq(zoraRewards.balanceOf(mintFeeRecipient), zoraReward);
-        assertEq(zoraRewards.balanceOf(mintReferral), mintReferralReward);
-        assertEq(zoraRewards.balanceOf(createReferral), createReferralReward);
+        assertEq(protocolRewards.balanceOf(DEFAULT_FUNDS_RECIPIENT_ADDRESS), creatorReward + firstMinterReward);
+        assertEq(protocolRewards.balanceOf(mintFeeRecipient), zoraReward);
+        assertEq(protocolRewards.balanceOf(mintReferral), mintReferralReward);
+        assertEq(protocolRewards.balanceOf(createReferral), createReferralReward);
     }
 
     function testRevert_FreeMintRewardsInsufficientEth(uint32 purchaseQuantity)
@@ -617,8 +617,8 @@ contract ERC721DropTest is Test {
         zoraNFTBase.mintWithRewards{value: totalPayment}(collector, purchaseQuantity, "test comment", address(0));
 
         assertEq(address(zoraNFTBase).balance, totalSales);
-        assertEq(zoraRewards.balanceOf(DEFAULT_FUNDS_RECIPIENT_ADDRESS), firstMinterReward);
-        assertEq(zoraRewards.balanceOf(mintFeeRecipient), zoraReward + mintReferralReward + createReferralReward);
+        assertEq(protocolRewards.balanceOf(DEFAULT_FUNDS_RECIPIENT_ADDRESS), firstMinterReward);
+        assertEq(protocolRewards.balanceOf(mintFeeRecipient), zoraReward + mintReferralReward + createReferralReward);
     }
 
     function test_PaidMintRewardsWithMintReferral(uint64 salePrice, uint32 purchaseQuantity)
@@ -650,9 +650,9 @@ contract ERC721DropTest is Test {
         zoraNFTBase.mintWithRewards{value: totalPayment}(collector, purchaseQuantity, "test comment", mintReferral);
 
         assertEq(address(zoraNFTBase).balance, totalSales);
-        assertEq(zoraRewards.balanceOf(DEFAULT_FUNDS_RECIPIENT_ADDRESS), firstMinterReward);
-        assertEq(zoraRewards.balanceOf(mintFeeRecipient), zoraReward + createReferralReward);
-        assertEq(zoraRewards.balanceOf(mintReferral), mintReferralReward);
+        assertEq(protocolRewards.balanceOf(DEFAULT_FUNDS_RECIPIENT_ADDRESS), firstMinterReward);
+        assertEq(protocolRewards.balanceOf(mintFeeRecipient), zoraReward + createReferralReward);
+        assertEq(protocolRewards.balanceOf(mintReferral), mintReferralReward);
     }
 
     function test_PaidMintRewardsWithCreateReferral(uint64 salePrice, uint32 purchaseQuantity)
@@ -685,9 +685,9 @@ contract ERC721DropTest is Test {
         zoraNFTBase.mintWithRewards{value: totalPayment}(collector, purchaseQuantity, "test comment", address(0));
 
         assertEq(address(zoraNFTBase).balance, totalSales);
-        assertEq(zoraRewards.balanceOf(DEFAULT_FUNDS_RECIPIENT_ADDRESS), firstMinterReward);
-        assertEq(zoraRewards.balanceOf(mintFeeRecipient), zoraReward + mintReferralReward);
-        assertEq(zoraRewards.balanceOf(createReferral), createReferralReward);
+        assertEq(protocolRewards.balanceOf(DEFAULT_FUNDS_RECIPIENT_ADDRESS), firstMinterReward);
+        assertEq(protocolRewards.balanceOf(mintFeeRecipient), zoraReward + mintReferralReward);
+        assertEq(protocolRewards.balanceOf(createReferral), createReferralReward);
     }
 
     function test_PaidMintRewardsWithMintAndCreateReferrals(uint64 salePrice, uint32 purchaseQuantity)
@@ -720,10 +720,10 @@ contract ERC721DropTest is Test {
         zoraNFTBase.mintWithRewards{value: totalPayment}(collector, purchaseQuantity, "test comment", mintReferral);
 
         assertEq(address(zoraNFTBase).balance, totalSales);
-        assertEq(zoraRewards.balanceOf(DEFAULT_FUNDS_RECIPIENT_ADDRESS), firstMinterReward);
-        assertEq(zoraRewards.balanceOf(mintFeeRecipient), zoraReward);
-        assertEq(zoraRewards.balanceOf(mintReferral), mintReferralReward);
-        assertEq(zoraRewards.balanceOf(createReferral), createReferralReward);
+        assertEq(protocolRewards.balanceOf(DEFAULT_FUNDS_RECIPIENT_ADDRESS), firstMinterReward);
+        assertEq(protocolRewards.balanceOf(mintFeeRecipient), zoraReward);
+        assertEq(protocolRewards.balanceOf(mintReferral), mintReferralReward);
+        assertEq(protocolRewards.balanceOf(createReferral), createReferralReward);
     }
 
     function testRevert_PaidMintRewardsInsufficientEth(uint64 salePrice, uint32 purchaseQuantity)
@@ -756,7 +756,7 @@ contract ERC721DropTest is Test {
                 address(0x0),
                 mintFee,
                 mintFeeRecipient,
-                address(zoraRewards)
+                address(protocolRewards)
             )
         );
 
@@ -776,7 +776,7 @@ contract ERC721DropTest is Test {
                 address(0x0),
                 mintFee,
                 mintFeeRecipient,
-                address(zoraRewards)
+                address(protocolRewards)
             )
         );
 

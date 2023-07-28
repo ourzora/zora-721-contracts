@@ -24,7 +24,7 @@ import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/se
 import {MerkleProofUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/cryptography/MerkleProofUpgradeable.sol";
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import {MathUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/math/MathUpgradeable.sol";
-import {ERC721Rewards, ERC721RewardsStorage} from "@zoralabs/zora-rewards/dist/contracts/abstract/ERC721/ERC721Rewards.sol";
+import {ERC721Rewards, ERC721RewardsStorage} from "@zoralabs/protocol-rewards/dist/contracts/abstract/ERC721/ERC721Rewards.sol";
 
 import {IMetadataRenderer} from "./interfaces/IMetadataRenderer.sol";
 import {IOperatorFilterRegistry} from "./interfaces/IOperatorFilterRegistry.sol";
@@ -185,8 +185,8 @@ contract ERC721Drop is
         address _marketFilterDAOAddress,
         uint256 _mintFeeAmount,
         address payable _mintFeeRecipient,
-        address _zoraRewards
-    ) initializer ERC721Rewards(_zoraRewards, _mintFeeRecipient) {
+        address _protocolRewards
+    ) initializer ERC721Rewards(_protocolRewards, _mintFeeRecipient) {
         zoraERC721TransferHelper = _zoraERC721TransferHelper;
         factoryUpgradeGate = _factoryUpgradeGate;
         marketFilterDAOAddress = _marketFilterDAOAddress;

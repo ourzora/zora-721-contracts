@@ -93,7 +93,7 @@ contract ERC721Drop is
     uint8 constant SUPPLY_ROYALTY_FOR_EVERY_MINT = 1;
 
     // /// @notice Empty string for blank comments
-    // string constant EMPTY_STRING = "";
+    string constant EMPTY_STRING = "";
 
     /// @notice Market filter DAO address for opensea filter registry
     address public immutable marketFilterDAOAddress;
@@ -460,7 +460,7 @@ contract ERC721Drop is
         onlyPublicSaleActive
         returns (uint256)
     {
-        return _handlePurchase(msg.sender, quantity, "");
+        return _handleMintWithRewards(msg.sender, quantity, "", address(0));
     }
 
     /// @notice Purchase a quantity of tokens with a comment
@@ -474,7 +474,7 @@ contract ERC721Drop is
         onlyPublicSaleActive
         returns (uint256)
     {
-        return _handlePurchase(msg.sender, quantity, comment);
+        return _handleMintWithRewards(msg.sender, quantity, comment, address(0));
     }
 
     /// @notice Purchase a quantity of tokens to a specified recipient, with an optional comment
@@ -489,7 +489,7 @@ contract ERC721Drop is
         onlyPublicSaleActive 
         returns (uint256) 
     {
-        return _handlePurchase(recipient, quantity, comment);
+        return _handleMintWithRewards(recipient, quantity, comment, address(0));
     }
 
     /// @notice Mint a quantity of tokens with a comment that will pay out rewards
@@ -509,7 +509,7 @@ contract ERC721Drop is
         return _handleMintWithRewards(recipient, quantity, comment, mintReferral);
     }
 
-    function _handleMintWithRewards(address recipient, uint256 quantity, string calldata comment, address mintReferral) internal returns (uint256) {
+    function _handleMintWithRewards(address recipient, uint256 quantity, string memory comment, address mintReferral) internal returns (uint256) {
         _mintSupplyRoyalty(quantity);
         _requireCanPurchaseQuantity(recipient, quantity);
 
@@ -538,38 +538,6 @@ contract ERC721Drop is
             });
         }
 
-        return firstMintedTokenId;
-    }
-
-    function _handlePurchase(address recipient, uint256 quantity, string memory comment) internal returns (uint256) {
-        _mintSupplyRoyalty(quantity);
-        _requireCanMintQuantity(quantity);
-        _requireCanPurchaseQuantity(recipient, quantity);
-
-        uint256 salePrice = salesConfig.publicSalePrice;
-
-        _requireLegacyFee(msg.value, salePrice, quantity);
-
-        _mintNFTs(recipient, quantity);
-        uint256 firstMintedTokenId = _lastMintedTokenId() - quantity;
-
-        _payoutZoraFee(quantity);
-
-        emit IERC721Drop.Sale({
-            to: recipient,
-            quantity: quantity,
-            pricePerToken: salePrice,
-            firstPurchasedTokenId: firstMintedTokenId
-        });
-        if(bytes(comment).length > 0) {
-            emit IERC721Drop.MintComment({
-                sender: _msgSender(),
-                tokenContract: address(this),
-                tokenId: firstMintedTokenId,
-                quantity: quantity,
-                comment: comment
-            });
-        }
         return firstMintedTokenId;
     }
 
@@ -666,7 +634,7 @@ contract ERC721Drop is
         onlyPresaleActive
         returns (uint256)
     {
-        return _handlePurchasePresale(quantity, maxQuantity, pricePerToken, merkleProof, "");
+        return _handlePurchasePresaleWithRewards(quantity, maxQuantity, pricePerToken, merkleProof, "", address(0));
     }
 
     /// @notice Merkle-tree based presale purchase function with a comment
@@ -688,49 +656,7 @@ contract ERC721Drop is
         onlyPresaleActive
         returns (uint256)
     {
-        return _handlePurchasePresale(quantity, maxQuantity, pricePerToken, merkleProof, comment);
-    }
-
-    function _handlePurchasePresale(
-        uint256 quantity,
-        uint256 maxQuantity,
-        uint256 pricePerToken,
-        bytes32[] calldata merkleProof,
-        string memory comment
-    ) internal returns (uint256) {
-        _mintSupplyRoyalty(quantity);
-        _requireCanMintQuantity(quantity);
-
-        address msgSender = _msgSender();
-
-        _requireMerkleApproval(msgSender, maxQuantity, pricePerToken, merkleProof);
-
-        _requireLegacyFee(msg.value, pricePerToken, quantity);
-
-        _requireCanPurchasePresale(msgSender, quantity, maxQuantity);
-
-        _mintNFTs(msgSender, quantity);
-        uint256 firstMintedTokenId = _lastMintedTokenId() - quantity;
-
-        _payoutZoraFee(quantity);
-
-        emit IERC721Drop.Sale({
-            to: msgSender,
-            quantity: quantity,
-            pricePerToken: pricePerToken,
-            firstPurchasedTokenId: firstMintedTokenId
-        });
-        if (bytes(comment).length > 0) {
-            emit IERC721Drop.MintComment({
-                sender: msgSender,
-                tokenContract: address(this),
-                tokenId: firstMintedTokenId,
-                quantity: quantity,
-                comment: comment
-            });
-        }
-
-        return firstMintedTokenId;
+        return _handlePurchasePresaleWithRewards(quantity, maxQuantity, pricePerToken, merkleProof, comment, address(0));
     }
 
     /// @notice Merkle-tree based presale purchase function with a comment and protocol rewards
@@ -762,7 +688,7 @@ contract ERC721Drop is
         uint256 maxQuantity,
         uint256 pricePerToken,
         bytes32[] calldata merkleProof,
-        string calldata comment,
+        string memory comment,
         address mintReferral
     ) internal returns (uint256) {
         _mintSupplyRoyalty(quantity);
@@ -1373,21 +1299,6 @@ contract ERC721Drop is
                 _startTokenId(),
                 totalMinted + _startTokenId()
             );
-        }
-    }
-
-    function _payoutZoraFee(uint256 quantity) internal {
-        // Transfer ZORA fee to recipient
-        (, uint256 zoraFee) = zoraFeeForAmount(quantity);
-        (bool success, ) = ZORA_MINT_FEE_RECIPIENT.call{value: zoraFee, gas: FUNDS_SEND_GAS_LIMIT}(
-            ""
-        );
-        emit MintFeePayout(zoraFee, ZORA_MINT_FEE_RECIPIENT, success);
-    }
-
-    function _requireLegacyFee(uint256 msgValue, uint256 salePrice, uint256 quantity) internal view {
-        if (msgValue != (salePrice + ZORA_MINT_FEE) * quantity) {
-            revert Purchase_WrongPrice((salePrice + ZORA_MINT_FEE) * quantity);
         }
     }
 

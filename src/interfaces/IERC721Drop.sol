@@ -31,6 +31,8 @@ interface IERC721Drop {
     error Withdraw_FundsSendFailure();
     /// @notice Mint fee send failure
     error MintFee_FundsSendFailure();
+    /// @notice Protocol Rewards withdraw failure
+    error ProtocolRewards_WithdrawSendFailure();
 
     /// @notice Call to external metadata renderer failed.
     error ExternalMetadataRenderer_CallFailed();

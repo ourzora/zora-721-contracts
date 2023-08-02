@@ -667,24 +667,24 @@
     fastq "^1.6.0"
 
 "@oclif/command@^1", "@oclif/command@^1.8.15":
-  version "1.8.34"
-  resolved "https://registry.yarnpkg.com/@oclif/command/-/command-1.8.34.tgz#ed3b7678f1c410d1a6a3cc6a3441b825fb0b4227"
-  integrity sha512-9JlYRAsPzo3sziCVsZikSCgGm22aVSi9fL3ZbEpkR1yU6xd4R+m5YP75xJ57gnRv9U18aLRUl8iRYwxOuaqvhg==
+  version "1.8.35"
+  resolved "https://registry.yarnpkg.com/@oclif/command/-/command-1.8.35.tgz#7023f48a6b058d33ccb578c28a1522fba192efd2"
+  integrity sha512-oILFTe3n6WjEbhXaSJd6FPsU4H97WxkC3Q0+Y63pfTXIZ424Fb9Hlg1CazscWcJqCrhuuUag6mItdgYo0kpinw==
   dependencies:
     "@oclif/config" "^1.18.2"
     "@oclif/errors" "^1.3.6"
     "@oclif/help" "^1.0.1"
-    "@oclif/parser" "^3.8.15"
+    "@oclif/parser" "^3.8.16"
     debug "^4.1.1"
     semver "^7.5.4"
 
-"@oclif/config@1.18.14":
-  version "1.18.14"
-  resolved "https://registry.yarnpkg.com/@oclif/config/-/config-1.18.14.tgz#b7569b92b0501fd34244c210ccae3ca4eee8a753"
-  integrity sha512-cLT/deFDm6A69LjAfV5ZZMMvMDlPt7sjMHYBrsOgQ5Upq5kDMgbaZM3hEbw74DmYIsuhq2E2wYrPD+Ax2qAfkA==
+"@oclif/config@1.18.15":
+  version "1.18.15"
+  resolved "https://registry.yarnpkg.com/@oclif/config/-/config-1.18.15.tgz#3be95862dda32d759fc61bcadff1e7819915a112"
+  integrity sha512-eBTiFXGfXSzghc4Yjp3EutYU+6MrHX1kzk4j5i4CsR5AEor43ynXFrzpO6v7IwbR1KyUo+9SYE2D69Y+sHIMpg==
   dependencies:
     "@oclif/errors" "^1.3.6"
-    "@oclif/parser" "^3.8.14"
+    "@oclif/parser" "^3.8.15"
     debug "^4.3.4"
     globby "^11.1.0"
     is-wsl "^2.1.1"
@@ -703,16 +703,16 @@
     tslib "^2.0.0"
 
 "@oclif/config@^1", "@oclif/config@^1.18.2":
-  version "1.18.15"
-  resolved "https://registry.yarnpkg.com/@oclif/config/-/config-1.18.15.tgz#3be95862dda32d759fc61bcadff1e7819915a112"
-  integrity sha512-eBTiFXGfXSzghc4Yjp3EutYU+6MrHX1kzk4j5i4CsR5AEor43ynXFrzpO6v7IwbR1KyUo+9SYE2D69Y+sHIMpg==
+  version "1.18.16"
+  resolved "https://registry.yarnpkg.com/@oclif/config/-/config-1.18.16.tgz#3235d260ab1eb8388ebb6255bca3dd956249d796"
+  integrity sha512-VskIxVcN22qJzxRUq+raalq6Q3HUde7sokB7/xk5TqRZGEKRVbFeqdQBxDWwQeudiJEgcNiMvIFbMQ43dY37FA==
   dependencies:
     "@oclif/errors" "^1.3.6"
-    "@oclif/parser" "^3.8.15"
+    "@oclif/parser" "^3.8.16"
     debug "^4.3.4"
     globby "^11.1.0"
     is-wsl "^2.1.1"
-    tslib "^2.5.0"
+    tslib "^2.6.1"
 
 "@oclif/errors@1.3.5":
   version "1.3.5"
@@ -737,11 +737,11 @@
     wrap-ansi "^7.0.0"
 
 "@oclif/help@^1.0.1":
-  version "1.0.13"
-  resolved "https://registry.yarnpkg.com/@oclif/help/-/help-1.0.13.tgz#7d81538851d8c76809e2d9d147008deb92483e1e"
-  integrity sha512-/DWgI7umEG3mmTKweKlCJ2a4iS3QIdVYXUltmpFvgfZ6YHPy1DrLRN/l8j9yqawPlPMPn8DfCbINJ9atZ+4Kcw==
+  version "1.0.14"
+  resolved "https://registry.yarnpkg.com/@oclif/help/-/help-1.0.14.tgz#da5f9fdf6f57b40b133f095cbb9c78c480975ca3"
+  integrity sha512-Hu2/Dyo91cgLNaqN3wkvkBGuZ7eqb0TQNVKrzGButZyaBpJzmwW4L6D4tAF390WDYZG7EubmLePlNYb+rNB4jw==
   dependencies:
-    "@oclif/config" "1.18.14"
+    "@oclif/config" "1.18.15"
     "@oclif/errors" "1.3.6"
     chalk "^4.1.2"
     indent-string "^4.0.0"
@@ -756,15 +756,15 @@
   resolved "https://registry.yarnpkg.com/@oclif/linewrap/-/linewrap-1.0.0.tgz#aedcb64b479d4db7be24196384897b5000901d91"
   integrity sha512-Ups2dShK52xXa8w6iBWLgcjPJWjais6KPJQq3gQ/88AY6BXoTX+MIGFPrWQO1KLMiQfoTpcLnUwloN4brrVUHw==
 
-"@oclif/parser@^3.8.0", "@oclif/parser@^3.8.14", "@oclif/parser@^3.8.15":
-  version "3.8.15"
-  resolved "https://registry.yarnpkg.com/@oclif/parser/-/parser-3.8.15.tgz#b5581c288543a4a7f59e61cb186109715819b1d0"
-  integrity sha512-M7ljUexkyJkR2efqG+PL31fAWyWDW1dczaMKoY+sOVqk78sm23iDMOJj/1vkfUrhO+W8dhseoPFnpSB6Hewfyw==
+"@oclif/parser@^3.8.0", "@oclif/parser@^3.8.15", "@oclif/parser@^3.8.16":
+  version "3.8.16"
+  resolved "https://registry.yarnpkg.com/@oclif/parser/-/parser-3.8.16.tgz#bedfc55153075b8b2925657f8865035aa877515c"
+  integrity sha512-jeleXSh5izmBQ6vwyCJmbFPahPpd/ajxASi25FaYAWcvwVMzP/vKAKQXKWZun6T9K/gd6ywSsTpfAXiZAjBd6g==
   dependencies:
     "@oclif/errors" "^1.3.6"
     "@oclif/linewrap" "^1.0.0"
     chalk "^4.1.0"
-    tslib "^2.6.0"
+    tslib "^2.6.1"
 
 "@oclif/plugin-help@^3":
   version "3.3.1"
@@ -822,15 +822,15 @@
   resolved "https://registry.yarnpkg.com/@types/minimist/-/minimist-1.2.2.tgz#ee771e2ba4b3dc5b372935d549fd9617bf345b8c"
   integrity sha512-jhuKLIRrhvCPLqwPcx6INqmKeiA5EWrsCOPhrlFSrbrmU4ZMPjj5Ul/oLCMDO98XRUIwVm78xICz4EPCektzeQ==
 
+"@types/node@*", "@types/node@^20.1.2":
+  version "20.4.6"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-20.4.6.tgz#b66b66c9bb5d49b199f03399e341c9d6036e9e88"
+  integrity sha512-q0RkvNgMweWWIvSMDiXhflGUKMdIxBo2M2tYM/0kEGDueQByFzK4KZAgu5YHGFNxziTlppNpTIBcqHQAxlfHdA==
+
 "@types/node@^12.7.1":
   version "12.20.55"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-12.20.55.tgz#c329cbd434c42164f846b909bd6f85b5537f6240"
   integrity sha512-J8xLz7q2OFulZ2cyGTLE1TbbZcjpno7FaN6zdJNrgAdrJ+DZzh/uFR6YrTb4C+nXakvud8Q4+rbhoIWlYQbUFQ==
-
-"@types/node@^20.1.2":
-  version "20.4.5"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-20.4.5.tgz#9dc0a5cb1ccce4f7a731660935ab70b9c00a5d69"
-  integrity sha512-rt40Nk13II9JwQBdeYqmbn2Q6IVTA5uPhvSO+JVqdXw/6/4glI6oR9ezty/A9Hg5u7JH4OmYmuQ+XvjKm0Datg==
 
 "@types/normalize-package-data@^2.4.0":
   version "2.4.1"
@@ -841,6 +841,13 @@
   version "7.5.0"
   resolved "https://registry.yarnpkg.com/@types/semver/-/semver-7.5.0.tgz#591c1ce3a702c45ee15f47a42ade72c2fd78978a"
   integrity sha512-G8hZ6XJiHnuhQKR7ZmysCeJWE08o8T0AXtk5darsCaTVsYZhhgUrq53jizaR2FvsoeCwJhlmwTjkXBY5Pn/ZHw==
+
+"@types/ws@^8.5.4":
+  version "8.5.5"
+  resolved "https://registry.yarnpkg.com/@types/ws/-/ws-8.5.5.tgz#af587964aa06682702ee6dcbc7be41a80e4b28eb"
+  integrity sha512-lwhs8hktwxSjf9UaZ9tG5M03PGogvFaH8gUgLNbN9HKIg0dvv6q+gkSuJ8HN4/VbyxkuLzCjlN7GquQ0gUJfIg==
+  dependencies:
+    "@types/node" "*"
 
 "@wagmi/chains@1.3.0":
   version "1.3.0"
@@ -3427,9 +3434,9 @@ signal-exit@^3.0.2, signal-exit@^3.0.3, signal-exit@^3.0.7:
   integrity sha512-wnD2ZE+l+SPC/uoS0vXeE9L1+0wuaMqKlfz9AMUo38JsyLSBWSFcHR1Rri62LZc12vLr1gb3jl7iwQhgwpAbGQ==
 
 signal-exit@^4.0.1:
-  version "4.0.2"
-  resolved "https://registry.yarnpkg.com/signal-exit/-/signal-exit-4.0.2.tgz#ff55bb1d9ff2114c13b400688fa544ac63c36967"
-  integrity sha512-MY2/qGx4enyjprQnFaZsHib3Yadh3IXyV2C321GY0pjGfVBu4un0uDJkwgdxqO+Rdx8JMT8IfJIRwbYVz3Ob3Q==
+  version "4.1.0"
+  resolved "https://registry.yarnpkg.com/signal-exit/-/signal-exit-4.1.0.tgz#952188c1cbd546070e2dd20d0f41c0ae0530cb04"
+  integrity sha512-bzyZ1e88w9O1iNJbKnOlvYTrWPDl46O1bG0D3XInv+9tkPrxrN8jUUTiFlDkkmKWgn1M6CfIA13SuGqOa9Korw==
 
 signale@^1.4.0:
   version "1.4.0"
@@ -3715,7 +3722,7 @@ tslib@^1:
   resolved "https://registry.yarnpkg.com/tslib/-/tslib-1.14.1.tgz#cf2d38bdc34a134bcaf1091c41f6619e2f672d00"
   integrity sha512-Xni35NKzjgMrwevysHTCArtLDpPvye8zV/0E4EyYn43P7/7qvQwPh9BGkHewbMulVntbigmcT7rdX3BNo9wRJg==
 
-tslib@^2.0.0, tslib@^2.0.3, tslib@^2.5.0, tslib@^2.6.0:
+tslib@^2.0.0, tslib@^2.0.3, tslib@^2.5.0, tslib@^2.6.1:
   version "2.6.1"
   resolved "https://registry.yarnpkg.com/tslib/-/tslib-2.6.1.tgz#fd8c9a0ff42590b25703c0acb3de3d3f4ede0410"
   integrity sha512-t0hLfiEKfMUoqhG+U1oid7Pva4bbDPHYfJNiB7BiIjRkj1pyC++4N3huJfqY6aRH6VTB0rvtzQwjM4K6qpfOig==
@@ -3860,15 +3867,16 @@ validate-npm-package-license@^3.0.1:
     spdx-expression-parse "^3.0.0"
 
 viem@^1.0.0:
-  version "1.4.2"
-  resolved "https://registry.yarnpkg.com/viem/-/viem-1.4.2.tgz#81aaff0d8ee0d39bb2994ffa6c89bf7ee4fbcde6"
-  integrity sha512-125E7HoOr5PrL+Iwt8853dQexwRoiPpLwPsrRvlDX94su2xoe7AYqrdfR6N9nmy6vd6mt8eQy8+LWiP3A+1dqw==
+  version "1.5.2"
+  resolved "https://registry.yarnpkg.com/viem/-/viem-1.5.2.tgz#b8b9b464c4fb211c1daec6253b3e2559b69607b7"
+  integrity sha512-hPs4TJ9ONZw44K8lh24I5+Qntu62DEP85yhPsGqSSyr2d9yROY/9AisLLTlrlsudhg+A+BnLQGAuqvj/X+i8Ow==
   dependencies:
     "@adraffy/ens-normalize" "1.9.0"
     "@noble/curves" "1.0.0"
     "@noble/hashes" "1.3.0"
     "@scure/bip32" "1.3.0"
     "@scure/bip39" "1.2.0"
+    "@types/ws" "^8.5.4"
     "@wagmi/chains" "1.6.0"
     abitype "0.9.3"
     isomorphic-ws "5.0.0"

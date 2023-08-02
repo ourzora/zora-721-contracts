@@ -5,6 +5,7 @@ import {Test} from "forge-std/Test.sol";
 import {IERC721AUpgradeable} from "erc721a-upgradeable/IERC721AUpgradeable.sol";
 import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
 import {ProtocolRewards} from "@zoralabs/protocol-rewards/dist/contracts/ProtocolRewards.sol";
+import {RewardsSettings} from "@zoralabs/protocol-rewards/dist/contracts/abstract/RewardSplits.sol";
 
 import {ERC721Drop} from "../src/ERC721Drop.sol";
 import {DummyMetadataRenderer} from "./utils/DummyMetadataRenderer.sol";
@@ -444,20 +445,14 @@ contract ERC721DropTest is Test {
 
         uint256 totalReward = zoraNFTBase.computeTotalReward(purchaseQuantity);
 
-        (
-            uint256 creatorReward,
-            uint256 mintReferralReward,
-            uint256 createReferralReward,
-            uint256 firstMinterReward,
-            uint256 zoraReward
-        ) = zoraNFTBase.computeFreeMintRewards(purchaseQuantity);
+        RewardsSettings memory settings = zoraNFTBase.computeFreeMintRewards(purchaseQuantity);
 
         vm.deal(collector, totalReward);
         vm.prank(collector);
         zoraNFTBase.mintWithRewards{value: totalReward}(collector, purchaseQuantity, "test comment", address(0));
 
-        assertEq(protocolRewards.balanceOf(DEFAULT_FUNDS_RECIPIENT_ADDRESS), creatorReward + firstMinterReward);
-        assertEq(protocolRewards.balanceOf(mintFeeRecipient), zoraReward + mintReferralReward + createReferralReward);
+        assertEq(protocolRewards.balanceOf(DEFAULT_FUNDS_RECIPIENT_ADDRESS), settings.creatorReward + settings.firstMinterReward);
+        assertEq(protocolRewards.balanceOf(mintFeeRecipient), settings.zoraReward + settings.mintReferralReward + settings.createReferralReward);
     }
 
     function test_FreeMintRewardsWithMintReferral(uint32 purchaseQuantity) public setupZoraNFTBase(purchaseQuantity) {
@@ -476,21 +471,15 @@ contract ERC721DropTest is Test {
 
         uint256 totalReward = zoraNFTBase.computeTotalReward(purchaseQuantity);
 
-        (
-            uint256 creatorReward,
-            uint256 mintReferralReward,
-            uint256 createReferralReward,
-            uint256 firstMinterReward,
-            uint256 zoraReward
-        ) = zoraNFTBase.computeFreeMintRewards(purchaseQuantity);
+        RewardsSettings memory settings = zoraNFTBase.computeFreeMintRewards(purchaseQuantity);
 
         vm.deal(collector, totalReward);
         vm.prank(collector);
         zoraNFTBase.mintWithRewards{value: totalReward}(collector, purchaseQuantity, "test comment", mintReferral);
 
-        assertEq(protocolRewards.balanceOf(DEFAULT_FUNDS_RECIPIENT_ADDRESS), creatorReward + firstMinterReward);
-        assertEq(protocolRewards.balanceOf(mintFeeRecipient), zoraReward + createReferralReward);
-        assertEq(protocolRewards.balanceOf(mintReferral), mintReferralReward);
+        assertEq(protocolRewards.balanceOf(DEFAULT_FUNDS_RECIPIENT_ADDRESS), settings.creatorReward + settings.firstMinterReward);
+        assertEq(protocolRewards.balanceOf(mintFeeRecipient), settings.zoraReward + settings.createReferralReward);
+        assertEq(protocolRewards.balanceOf(mintReferral), settings.mintReferralReward);
     }
 
     function test_FreeMintRewardsWithCreateReferral(uint32 purchaseQuantity)
@@ -512,21 +501,15 @@ contract ERC721DropTest is Test {
 
         uint256 totalReward = zoraNFTBase.computeTotalReward(purchaseQuantity);
 
-        (
-            uint256 creatorReward,
-            uint256 mintReferralReward,
-            uint256 createReferralReward,
-            uint256 firstMinterReward,
-            uint256 zoraReward
-        ) = zoraNFTBase.computeFreeMintRewards(purchaseQuantity);
+        RewardsSettings memory settings = zoraNFTBase.computeFreeMintRewards(purchaseQuantity);
 
         vm.deal(collector, totalReward);
         vm.prank(collector);
         zoraNFTBase.mintWithRewards{value: totalReward}(collector, purchaseQuantity, "test comment", address(0));
 
-        assertEq(protocolRewards.balanceOf(DEFAULT_FUNDS_RECIPIENT_ADDRESS), creatorReward + firstMinterReward);
-        assertEq(protocolRewards.balanceOf(mintFeeRecipient), zoraReward + mintReferralReward);
-        assertEq(protocolRewards.balanceOf(createReferral), createReferralReward);
+        assertEq(protocolRewards.balanceOf(DEFAULT_FUNDS_RECIPIENT_ADDRESS), settings.creatorReward + settings.firstMinterReward);
+        assertEq(protocolRewards.balanceOf(mintFeeRecipient), settings.zoraReward + settings.mintReferralReward);
+        assertEq(protocolRewards.balanceOf(createReferral), settings.createReferralReward);
     }
 
     function test_FreeMintRewardsWithMintAndCreateReferrals(uint32 purchaseQuantity)
@@ -548,22 +531,16 @@ contract ERC721DropTest is Test {
 
         uint256 totalReward = zoraNFTBase.computeTotalReward(purchaseQuantity);
 
-        (
-            uint256 creatorReward,
-            uint256 mintReferralReward,
-            uint256 createReferralReward,
-            uint256 firstMinterReward,
-            uint256 zoraReward
-        ) = zoraNFTBase.computeFreeMintRewards(purchaseQuantity);
+        RewardsSettings memory settings = zoraNFTBase.computeFreeMintRewards(purchaseQuantity);
 
         vm.deal(collector, totalReward);
         vm.prank(collector);
         zoraNFTBase.mintWithRewards{value: totalReward}(collector, purchaseQuantity, "test comment", mintReferral);
 
-        assertEq(protocolRewards.balanceOf(DEFAULT_FUNDS_RECIPIENT_ADDRESS), creatorReward + firstMinterReward);
-        assertEq(protocolRewards.balanceOf(mintFeeRecipient), zoraReward);
-        assertEq(protocolRewards.balanceOf(mintReferral), mintReferralReward);
-        assertEq(protocolRewards.balanceOf(createReferral), createReferralReward);
+        assertEq(protocolRewards.balanceOf(DEFAULT_FUNDS_RECIPIENT_ADDRESS), settings.creatorReward + settings.firstMinterReward);
+        assertEq(protocolRewards.balanceOf(mintFeeRecipient), settings.zoraReward);
+        assertEq(protocolRewards.balanceOf(mintReferral), settings.mintReferralReward);
+        assertEq(protocolRewards.balanceOf(createReferral), settings.createReferralReward);
     }
 
     function testRevert_FreeMintRewardsInsufficientEth(uint32 purchaseQuantity)
@@ -605,8 +582,7 @@ contract ERC721DropTest is Test {
             presaleMerkleRoot: bytes32(0)
         });
 
-        (uint256 mintReferralReward, uint256 createReferralReward, uint256 firstMinterReward, uint256 zoraReward) =
-            zoraNFTBase.computePaidMintRewards(purchaseQuantity);
+        RewardsSettings memory settings = zoraNFTBase.computePaidMintRewards(purchaseQuantity);
 
         uint256 totalReward = zoraNFTBase.computeTotalReward(purchaseQuantity);
         uint256 totalSales = uint256(salePrice) * purchaseQuantity;
@@ -617,8 +593,8 @@ contract ERC721DropTest is Test {
         zoraNFTBase.mintWithRewards{value: totalPayment}(collector, purchaseQuantity, "test comment", address(0));
 
         assertEq(address(zoraNFTBase).balance, totalSales);
-        assertEq(protocolRewards.balanceOf(DEFAULT_FUNDS_RECIPIENT_ADDRESS), firstMinterReward);
-        assertEq(protocolRewards.balanceOf(mintFeeRecipient), zoraReward + mintReferralReward + createReferralReward);
+        assertEq(protocolRewards.balanceOf(DEFAULT_FUNDS_RECIPIENT_ADDRESS), settings.firstMinterReward);
+        assertEq(protocolRewards.balanceOf(mintFeeRecipient), settings.zoraReward + settings.mintReferralReward + settings.createReferralReward);
     }
 
     function test_PaidMintRewardsWithMintReferral(uint64 salePrice, uint32 purchaseQuantity)
@@ -639,8 +615,7 @@ contract ERC721DropTest is Test {
             presaleMerkleRoot: bytes32(0)
         });
 
-        (uint256 mintReferralReward, uint256 createReferralReward, uint256 firstMinterReward, uint256 zoraReward) =
-            zoraNFTBase.computePaidMintRewards(purchaseQuantity);
+        RewardsSettings memory settings = zoraNFTBase.computePaidMintRewards(purchaseQuantity);
         uint256 totalReward = zoraNFTBase.computeTotalReward(purchaseQuantity);
         uint256 totalSales = uint256(salePrice) * purchaseQuantity;
         uint256 totalPayment = totalSales + totalReward;
@@ -650,9 +625,9 @@ contract ERC721DropTest is Test {
         zoraNFTBase.mintWithRewards{value: totalPayment}(collector, purchaseQuantity, "test comment", mintReferral);
 
         assertEq(address(zoraNFTBase).balance, totalSales);
-        assertEq(protocolRewards.balanceOf(DEFAULT_FUNDS_RECIPIENT_ADDRESS), firstMinterReward);
-        assertEq(protocolRewards.balanceOf(mintFeeRecipient), zoraReward + createReferralReward);
-        assertEq(protocolRewards.balanceOf(mintReferral), mintReferralReward);
+        assertEq(protocolRewards.balanceOf(DEFAULT_FUNDS_RECIPIENT_ADDRESS), settings.firstMinterReward);
+        assertEq(protocolRewards.balanceOf(mintFeeRecipient), settings.zoraReward + settings.createReferralReward);
+        assertEq(protocolRewards.balanceOf(mintReferral), settings.mintReferralReward);
     }
 
     function test_PaidMintRewardsWithCreateReferral(uint64 salePrice, uint32 purchaseQuantity)
@@ -673,8 +648,7 @@ contract ERC721DropTest is Test {
             presaleMerkleRoot: bytes32(0)
         });
 
-        (uint256 mintReferralReward, uint256 createReferralReward, uint256 firstMinterReward, uint256 zoraReward) =
-            zoraNFTBase.computePaidMintRewards(purchaseQuantity);
+        RewardsSettings memory settings = zoraNFTBase.computePaidMintRewards(purchaseQuantity);
 
         uint256 totalReward = zoraNFTBase.computeTotalReward(purchaseQuantity);
         uint256 totalSales = uint256(salePrice) * purchaseQuantity;
@@ -685,9 +659,9 @@ contract ERC721DropTest is Test {
         zoraNFTBase.mintWithRewards{value: totalPayment}(collector, purchaseQuantity, "test comment", address(0));
 
         assertEq(address(zoraNFTBase).balance, totalSales);
-        assertEq(protocolRewards.balanceOf(DEFAULT_FUNDS_RECIPIENT_ADDRESS), firstMinterReward);
-        assertEq(protocolRewards.balanceOf(mintFeeRecipient), zoraReward + mintReferralReward);
-        assertEq(protocolRewards.balanceOf(createReferral), createReferralReward);
+        assertEq(protocolRewards.balanceOf(DEFAULT_FUNDS_RECIPIENT_ADDRESS), settings.firstMinterReward);
+        assertEq(protocolRewards.balanceOf(mintFeeRecipient), settings.zoraReward + settings.mintReferralReward);
+        assertEq(protocolRewards.balanceOf(createReferral), settings.createReferralReward);
     }
 
     function test_PaidMintRewardsWithMintAndCreateReferrals(uint64 salePrice, uint32 purchaseQuantity)
@@ -708,8 +682,7 @@ contract ERC721DropTest is Test {
             presaleMerkleRoot: bytes32(0)
         });
 
-        (uint256 mintReferralReward, uint256 createReferralReward, uint256 firstMinterReward, uint256 zoraReward) =
-            zoraNFTBase.computePaidMintRewards(purchaseQuantity);
+        RewardsSettings memory settings = zoraNFTBase.computePaidMintRewards(purchaseQuantity);
 
         uint256 totalReward = zoraNFTBase.computeTotalReward(purchaseQuantity);
         uint256 totalSales = uint256(salePrice) * purchaseQuantity;
@@ -720,10 +693,10 @@ contract ERC721DropTest is Test {
         zoraNFTBase.mintWithRewards{value: totalPayment}(collector, purchaseQuantity, "test comment", mintReferral);
 
         assertEq(address(zoraNFTBase).balance, totalSales);
-        assertEq(protocolRewards.balanceOf(DEFAULT_FUNDS_RECIPIENT_ADDRESS), firstMinterReward);
-        assertEq(protocolRewards.balanceOf(mintFeeRecipient), zoraReward);
-        assertEq(protocolRewards.balanceOf(mintReferral), mintReferralReward);
-        assertEq(protocolRewards.balanceOf(createReferral), createReferralReward);
+        assertEq(protocolRewards.balanceOf(DEFAULT_FUNDS_RECIPIENT_ADDRESS), settings.firstMinterReward);
+        assertEq(protocolRewards.balanceOf(mintFeeRecipient), settings.zoraReward);
+        assertEq(protocolRewards.balanceOf(mintReferral), settings.mintReferralReward);
+        assertEq(protocolRewards.balanceOf(createReferral), settings.createReferralReward);
     }
 
     function testRevert_PaidMintRewardsInsufficientEth(uint64 salePrice, uint32 purchaseQuantity)

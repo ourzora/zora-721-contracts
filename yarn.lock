@@ -881,10 +881,10 @@
     viem "^1.0.0"
     zod "^3.21.4"
 
-"@zoralabs/protocol-rewards@^1.0.1":
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/@zoralabs/protocol-rewards/-/protocol-rewards-1.0.1.tgz#63880dbd2999ab0a56ab0a483e8848d15236062e"
-  integrity sha512-1ZopbZ3x0cvSL08ZlHZ2b4JLOX+UC6cwUr24Q8xso2G++3+DBZneDuAQxh+i02mEICp86fH6EZC37VvazemZeg==
+"@zoralabs/protocol-rewards@^1.0.2":
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/@zoralabs/protocol-rewards/-/protocol-rewards-1.0.2.tgz#7727b3b6bbba57c26aae088884ff168542f745ed"
+  integrity sha512-r+4EGY9HKHXTwY89VFciI4wvjgh9ZJPuPGKBoAY6TwXXk8bN1h4CathbUmzkjC8hCw4knItEKTgebbHNpslAcg==
 
 abitype@0.8.7:
   version "0.8.7"

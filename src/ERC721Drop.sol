@@ -24,6 +24,7 @@ import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/se
 import {MerkleProofUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/cryptography/MerkleProofUpgradeable.sol";
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import {MathUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/math/MathUpgradeable.sol";
+import {IProtocolRewards} from "@zoralabs/protocol-rewards/dist/contracts/interfaces/IProtocolRewards.sol";
 import {ERC721Rewards} from "@zoralabs/protocol-rewards/dist/contracts/abstract/ERC721/ERC721Rewards.sol";
 import {ERC721RewardsStorageV1} from "@zoralabs/protocol-rewards/dist/contracts/abstract/ERC721/ERC721RewardsStorageV1.sol";
 
@@ -522,22 +523,7 @@ contract ERC721Drop is
 
         uint256 firstMintedTokenId = _lastMintedTokenId() - quantity;
 
-        emit IERC721Drop.Sale({
-            to: recipient,
-            quantity: quantity,
-            pricePerToken: salePrice,
-            firstPurchasedTokenId: firstMintedTokenId
-        });
-
-        if (bytes(comment).length > 0) {
-            emit IERC721Drop.MintComment({
-                sender: _msgSender(),
-                tokenContract: address(this),
-                tokenId: firstMintedTokenId,
-                quantity: quantity,
-                comment: comment
-            });
-        }
+        _emitSaleEvents(_msgSender(), recipient, quantity, salePrice, firstMintedTokenId, comment);
 
         return firstMintedTokenId;
     }
@@ -556,21 +542,8 @@ contract ERC721Drop is
 
         _payoutZoraFee(quantity);
 
-        emit IERC721Drop.Sale({
-            to: recipient,
-            quantity: quantity,
-            pricePerToken: salePrice,
-            firstPurchasedTokenId: firstMintedTokenId
-        });
-        if(bytes(comment).length > 0) {
-            emit IERC721Drop.MintComment({
-                sender: _msgSender(),
-                tokenContract: address(this),
-                tokenId: firstMintedTokenId,
-                quantity: quantity,
-                comment: comment
-            });
-        }
+        _emitSaleEvents(_msgSender(), recipient, quantity, salePrice, firstMintedTokenId, comment);
+
         return firstMintedTokenId;
     }
 
@@ -781,22 +754,7 @@ contract ERC721Drop is
 
         uint256 firstMintedTokenId = _lastMintedTokenId() - quantity;
 
-    
-        emit IERC721Drop.Sale({
-            to: msgSender,
-            quantity: quantity,
-            pricePerToken: pricePerToken,
-            firstPurchasedTokenId: firstMintedTokenId
-        });
-        if (bytes(comment).length > 0) {
-            emit IERC721Drop.MintComment({
-                sender: msgSender,
-                tokenContract: address(this),
-                tokenId: firstMintedTokenId,
-                quantity: quantity,
-                comment: comment
-            });
-        }
+        _emitSaleEvents(msgSender, msgSender, quantity, pricePerToken, firstMintedTokenId, comment);
 
         return firstMintedTokenId;
     }
@@ -1232,16 +1190,9 @@ contract ERC721Drop is
     function withdraw() external nonReentrant {
         address sender = _msgSender();
 
-        uint256 funds = address(this).balance;
+        _verifyWithdrawAccess(sender);
 
-        // Check if withdraw is allowed for sender
-        if (
-            !hasRole(DEFAULT_ADMIN_ROLE, sender) &&
-            !hasRole(SALES_MANAGER_ROLE, sender) &&
-            sender != config.fundsRecipient
-        ) {
-            revert Access_WithdrawNotAllowed();
-        }
+        uint256 funds = address(this).balance;
 
         // Payout recipient
         (bool successFunds, ) = config.fundsRecipient.call{
@@ -1262,7 +1213,28 @@ contract ERC721Drop is
         );
     }
 
-    function withdrawRewards(address to, uint256 amount) external nonReentrant {}
+    /// @notice This withdraws ETH from the protocol rewards contract to an address specified by the contract owner.
+    function withdrawRewards(address to, uint256 amount) external nonReentrant {
+        _verifyWithdrawAccess(msg.sender);
+
+        bytes memory data = abi.encodeWithSelector(IProtocolRewards.withdraw.selector, to, amount);
+
+        (bool success, ) = address(protocolRewards).call(data);
+
+        if (!success) {
+            revert ProtocolRewards_WithdrawSendFailure();
+        }
+    }
+
+    function _verifyWithdrawAccess(address msgSender) internal view {
+        if (
+            !hasRole(DEFAULT_ADMIN_ROLE, msgSender) &&
+            !hasRole(SALES_MANAGER_ROLE, msgSender) &&
+            msgSender != config.fundsRecipient
+        ) {
+            revert Access_WithdrawNotAllowed();
+        }
+    }
 
     //                       ,-.
     //                       `-'
@@ -1475,6 +1447,24 @@ contract ERC721Drop is
         createReferral = recipient;
     }
 
+    function _emitSaleEvents(address msgSender, address recipient, uint256 quantity, uint256 pricePerToken, uint256 firstMintedTokenId, string memory comment) internal {
+        emit IERC721Drop.Sale({
+            to: recipient,
+            quantity: quantity,
+            pricePerToken: pricePerToken,
+            firstPurchasedTokenId: firstMintedTokenId
+        });
+
+        if (bytes(comment).length > 0) {
+            emit IERC721Drop.MintComment({
+                sender: msgSender,
+                tokenContract: address(this),
+                tokenId: firstMintedTokenId,
+                quantity: quantity,
+                comment: comment
+            });
+        }
+    }
 
     /// @notice ERC165 supports interface
     /// @param interfaceId interface id to check if supported

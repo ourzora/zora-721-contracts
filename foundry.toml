@@ -14,6 +14,7 @@ fs_permissions = [{ access = "read", path = "./addresses"}, { access = "read", p
 [etherscan]
 optimism = { key = "$OPT_ETHERSCAN_API_KEY" }
 base = { key = "ANY_KEY_IS_OKAY" }
+mainnet = { key = "$ETHERSCAN_API_KEY" }
 
 zora_mainnet = { key = "", chain = 7777777, url = "https://explorer.zora.energy/api\\?" }
 zora_testnet = { key = "", chain = 999, url = "https://explorer.testnet.zora.energy/api\\?" }

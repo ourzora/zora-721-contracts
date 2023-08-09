@@ -43,7 +43,8 @@ contract Deploy is ZoraDropsDeployBase {
             _factoryUpgradeGate: factoryUpgradeGate,
             _marketFilterDAOAddress: address(chainConfig.subscriptionMarketFilterAddress),
             _mintFeeAmount: chainConfig.mintFeeAmount,
-            _mintFeeRecipient: payable(chainConfig.mintFeeRecipient)
+            _mintFeeRecipient: payable(chainConfig.mintFeeRecipient),
+            _protocolRewards: address(chainConfig.protocolRewards)
         });
 
         ZoraNFTCreatorV1 factoryImpl = new ZoraNFTCreatorV1(address(dropImplementation), editionMetadata, dropMetadata);

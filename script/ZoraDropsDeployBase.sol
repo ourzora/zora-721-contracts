@@ -9,7 +9,7 @@ import {IERC721Drop} from "../src/interfaces/IERC721Drop.sol";
 
 /// @notice Deployment drops for base where 
 abstract contract ZoraDropsDeployBase is ScriptDeploymentConfig {
-
+    
     /// @notice Get deployment configuration struct as JSON
     /// @param deployment deploymet struct
     /// @return deploymentJson string JSON of the deployment info

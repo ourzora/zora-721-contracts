@@ -1,7 +1,7 @@
 [profile.default]
 solc_version = '0.8.17'
 optimizer = true
-optimizer_runs = 2383
+optimizer_runs = 300
 via_ir = true
 out = 'out'
 test = 'test'
@@ -33,6 +33,5 @@ zora_goerli = "https://testnet.rpc.zora.energy"
 
 base = "https://developer-access-mainnet.base.org"
 base_goerli = "https://goerli.base.org"
-
 pgn = "https://rpc.publicgoods.network"
 pgn_sepolia = "https://sepolia.publicgoods.network"

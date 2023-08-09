@@ -2,15 +2,17 @@
 pragma solidity ^0.8.10;
 
 import {Test} from "forge-std/Test.sol";
+import {ProtocolRewards} from "@zoralabs/protocol-rewards/dist/contracts/ProtocolRewards.sol";
+
 import {IERC721Drop} from "../../src/interfaces/IERC721Drop.sol";
 import {ERC721Drop} from "../../src/ERC721Drop.sol";
 import {DummyMetadataRenderer} from "../utils/DummyMetadataRenderer.sol";
 import {FactoryUpgradeGate} from "../../src/FactoryUpgradeGate.sol";
 import {ERC721DropProxy} from "../../src/ERC721DropProxy.sol";
-
 import {MerkleData} from "./MerkleData.sol";
 
 contract ZoraNFTBaseTest is Test {
+    ProtocolRewards internal protocolRewards;
     ERC721Drop zoraNFTBase;
     DummyMetadataRenderer public dummyRenderer = new DummyMetadataRenderer();
     MerkleData public merkleData;
@@ -22,6 +24,7 @@ contract ZoraNFTBaseTest is Test {
     address public constant mediaContract = address(0x123456);
     address payable public constant mintFeeRecipient = payable(address(0x1234));
     uint256 public constant mintFee = 0.000777 ether;
+    address internal constant DEFAULT_CREATE_REFERRAL = address(0);
 
     modifier setupZoraNFTBase() {
         bytes[] memory setupCalls = new bytes[](0);
@@ -34,22 +37,25 @@ contract ZoraNFTBaseTest is Test {
             _royaltyBPS: 800,
             _setupCalls: setupCalls,
             _metadataRenderer: dummyRenderer,
-            _metadataRendererInit: ""
+            _metadataRendererInit: "",
+            _createReferral: DEFAULT_CREATE_REFERRAL
         });
 
         _;
     }
 
     function setUp() public {
-        vm.prank(DEFAULT_ZORA_DAO_ADDRESS);
+        protocolRewards = new ProtocolRewards();
 
+        vm.prank(DEFAULT_ZORA_DAO_ADDRESS);
         address impl = address(
             new ERC721Drop(
                 address(1234),
                 FactoryUpgradeGate(address(0)),
                 address(0),
                 mintFee,
-                mintFeeRecipient
+                mintFeeRecipient,
+                address(protocolRewards)
             )
         );
         address payable newDrop = payable(
@@ -265,7 +271,8 @@ contract ZoraNFTBaseTest is Test {
             _royaltyBPS: 800,
             _setupCalls: setupCalls,
             _metadataRenderer: dummyRenderer,
-            _metadataRendererInit: ""
+            _metadataRendererInit: "",
+            _createReferral: DEFAULT_CREATE_REFERRAL
         });
 
         vm.startPrank(DEFAULT_OWNER_ADDRESS);

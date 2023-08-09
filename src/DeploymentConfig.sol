@@ -22,6 +22,8 @@ struct ChainConfig {
     address subscriptionMarketFilterOwner;
     /// @notice Auto-approved hyperstructure on mainnet for enabling ZORA v3 with less gas. Deprecated – safe to set to address(0x)
     address zoraERC721TransferHelper;
+    /// @notice The Protocol Rewards contract
+    address protocolRewards;
 }
 
 /// @notice Deployment addresses – set to new deployed addresses by the scripts.
@@ -51,6 +53,8 @@ abstract contract DeploymentConfig is StdChains, StdCheatsSafe, StdUtils, Script
     /// @notice File used for demo metadata on verification test mint
     string constant DEMO_IPFS_METADATA_FILE = "ipfs://bafkreigu544g6wjvqcysurpzy5pcskbt45a5f33m6wgythpgb3rfqi3lzi";
 
+    address constant DEFAULT_CREATE_REFERRAL = address(0);
+
     ///
     // These are the JSON key constants to standardize writing and reading configuration
     ///
@@ -62,6 +66,7 @@ abstract contract DeploymentConfig is StdChains, StdCheatsSafe, StdUtils, Script
     string constant SUBSCRIPTION_MARKET_FILTER_ADDRESS = "SUBSCRIPTION_MARKET_FILTER_ADDRESS";
     string constant SUBSCRIPTION_MARKET_FILTER_OWNER = "SUBSCRIPTION_MARKET_FILTER_OWNER";
     string constant ZORA_ERC721_TRANSFER_HELPER = "ZORA_ERC721_TRANSFER_HELPER";
+    string constant PROTOCOL_REWARDS = "PROTOCOL_REWARDS";
 
     string constant DROP_METADATA_RENDERER = "DROP_METADATA_RENDERER";
     string constant EDITION_METADATA_RENDERER = "EDITION_METADATA_RENDERER";
@@ -86,8 +91,8 @@ abstract contract DeploymentConfig is StdChains, StdCheatsSafe, StdUtils, Script
         chainConfig.mintFeeAmount = json.readUint(getKeyPrefix(MINT_FEE_AMOUNT));
         chainConfig.mintFeeRecipient = json.readAddress(getKeyPrefix(MINT_FEE_RECIPIENT));
         chainConfig.subscriptionMarketFilterAddress = json.readAddress(getKeyPrefix(SUBSCRIPTION_MARKET_FILTER_ADDRESS));
-        chainConfig.subscriptionMarketFilterOwner = json.readAddress(getKeyPrefix(SUBSCRIPTION_MARKET_FILTER_OWNER));
         chainConfig.zoraERC721TransferHelper = json.readAddress(getKeyPrefix(ZORA_ERC721_TRANSFER_HELPER));
+        chainConfig.protocolRewards = json.readAddress(getKeyPrefix(PROTOCOL_REWARDS));
     }
 
     /// @notice Get the deployment configuration struct from the JSON configuration file

@@ -91,7 +91,6 @@ abstract contract DeploymentConfig is StdChains, StdCheatsSafe, StdUtils, Script
         chainConfig.mintFeeAmount = json.readUint(getKeyPrefix(MINT_FEE_AMOUNT));
         chainConfig.mintFeeRecipient = json.readAddress(getKeyPrefix(MINT_FEE_RECIPIENT));
         chainConfig.subscriptionMarketFilterAddress = json.readAddress(getKeyPrefix(SUBSCRIPTION_MARKET_FILTER_ADDRESS));
-        chainConfig.subscriptionMarketFilterOwner = json.readAddress(getKeyPrefix(SUBSCRIPTION_MARKET_FILTER_OWNER));
         chainConfig.zoraERC721TransferHelper = json.readAddress(getKeyPrefix(ZORA_ERC721_TRANSFER_HELPER));
         chainConfig.protocolRewards = json.readAddress(getKeyPrefix(PROTOCOL_REWARDS));
     }

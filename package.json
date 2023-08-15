@@ -1,7 +1,7 @@
 {
-  "name": "@zoralabs/nft-drop-contracts",
+  "name": "@zoralabs/zora-721-contracts",
   "version": "1.14.1",
-  "description": "ZORA NFT Drops Contracts",
+  "description": "ZORA ERC-721 Drops Contracts",
   "author": "ZORA",
   "license": "MIT",
   "private": false,

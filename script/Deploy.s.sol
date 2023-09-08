@@ -8,7 +8,6 @@ import {ERC721Drop} from "../src/ERC721Drop.sol";
 import {ERC721DropProxy} from "../src/ERC721DropProxy.sol";
 import {ZoraNFTCreatorV1} from "../src/ZoraNFTCreatorV1.sol";
 import {ZoraNFTCreatorProxy} from "../src/ZoraNFTCreatorProxy.sol";
-import {IOperatorFilterRegistry} from "../src/interfaces/IOperatorFilterRegistry.sol";
 import {FactoryUpgradeGate} from "../src/FactoryUpgradeGate.sol";
 import {DropMetadataRenderer} from "../src/metadata/DropMetadataRenderer.sol";
 import {EditionMetadataRenderer} from "../src/metadata/EditionMetadataRenderer.sol";
@@ -25,8 +24,6 @@ contract Deploy is ZoraDropsDeployBase {
         console2.log("Factory Owner", chainConfig.factoryOwner);
         console2.log("Fee Recipient", chainConfig.mintFeeRecipient);
         console2.log("Fee Amount", chainConfig.mintFeeAmount);
-        console2.log("Filterer Registry", chainConfig.subscriptionMarketFilterAddress);
-        console2.log("Filterer Subscription", chainConfig.subscriptionMarketFilterOwner);
 
         console2.log("Setup contracts ---");
 
@@ -41,7 +38,6 @@ contract Deploy is ZoraDropsDeployBase {
         ERC721Drop dropImplementation = new ERC721Drop({
             _zoraERC721TransferHelper: address(0x0),
             _factoryUpgradeGate: factoryUpgradeGate,
-            _marketFilterDAOAddress: address(chainConfig.subscriptionMarketFilterAddress),
             _mintFeeAmount: chainConfig.mintFeeAmount,
             _mintFeeRecipient: payable(chainConfig.mintFeeRecipient),
             _protocolRewards: address(chainConfig.protocolRewards)

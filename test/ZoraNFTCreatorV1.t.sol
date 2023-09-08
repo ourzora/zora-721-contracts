@@ -36,7 +36,6 @@ contract ZoraNFTCreatorV1Test is Test {
         dropImpl = new ERC721Drop(
             address(1234),
             FactoryUpgradeGate(address(0)),
-            address(0),
             mintFee,
             mintFeeRecipient,
             address(protocolRewards)

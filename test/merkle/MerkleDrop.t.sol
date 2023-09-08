@@ -52,7 +52,6 @@ contract ZoraNFTBaseTest is Test {
             new ERC721Drop(
                 address(1234),
                 FactoryUpgradeGate(address(0)),
-                address(0),
                 mintFee,
                 mintFeeRecipient,
                 address(protocolRewards)

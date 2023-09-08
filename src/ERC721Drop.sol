@@ -24,9 +24,9 @@ import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/se
 import {MerkleProofUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/cryptography/MerkleProofUpgradeable.sol";
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import {MathUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/math/MathUpgradeable.sol";
-import {IProtocolRewards} from "@zoralabs/protocol-rewards/dist/contracts/interfaces/IProtocolRewards.sol";
-import {ERC721Rewards} from "@zoralabs/protocol-rewards/dist/contracts/abstract/ERC721/ERC721Rewards.sol";
-import {ERC721RewardsStorageV1} from "@zoralabs/protocol-rewards/dist/contracts/abstract/ERC721/ERC721RewardsStorageV1.sol";
+import {IProtocolRewards} from "@zoralabs/protocol-rewards/src/interfaces/IProtocolRewards.sol";
+import {ERC721Rewards} from "@zoralabs/protocol-rewards/src/abstract/ERC721/ERC721Rewards.sol";
+import {ERC721RewardsStorageV1} from "@zoralabs/protocol-rewards/src/abstract/ERC721/ERC721RewardsStorageV1.sol";
 
 import {IMetadataRenderer} from "./interfaces/IMetadataRenderer.sol";
 import {IOperatorFilterRegistry} from "./interfaces/IOperatorFilterRegistry.sol";

@@ -34,6 +34,8 @@ struct DropDeployment {
     address editionMetadata;
     /// @notice Implementation contract for the drop contract
     address dropImplementation;
+    /// @notice Implementation version for the drop contract
+    uint256 dropImplementationVersion;
     /// @notice Factory upgrade gate immutable registry for allowing upgrades
     address factoryUpgradeGate;
     /// @notice Factory proxy contract that creates zora drops style NFT contracts
@@ -71,6 +73,7 @@ abstract contract DeploymentConfig is StdChains, StdCheatsSafe, StdUtils, Script
     string constant DROP_METADATA_RENDERER = "DROP_METADATA_RENDERER";
     string constant EDITION_METADATA_RENDERER = "EDITION_METADATA_RENDERER";
     string constant ERC721DROP_IMPL = "ERC721DROP_IMPL";
+    string constant ERC721DROP_IMPL_VERSION = "ERC721DROP_IMPL_VERSION";
     string constant FACTORY_UPGRADE_GATE = "FACTORY_UPGRADE_GATE";
     string constant ZORA_NFT_CREATOR_PROXY = "ZORA_NFT_CREATOR_PROXY";
     string constant ZORA_NFT_CREATOR_V1_IMPL = "ZORA_NFT_CREATOR_V1_IMPL";

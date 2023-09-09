@@ -63,12 +63,15 @@ contract Deploy is ZoraDropsDeployBase {
 
         // vm.stopBroadcast();
 
+        uint256 dropImplementationVersion = dropImplementation.contractVersion();
+
         return
             getDeploymentJSON(
                 DropDeployment({
                     dropMetadata: address(dropMetadata),
                     editionMetadata: address(editionMetadata),
                     dropImplementation: address(dropImplementation),
+                    dropImplementationVersion: dropImplementationVersion,
                     factoryUpgradeGate: address(factoryUpgradeGate),
                     factory: address(factory),
                     factoryImpl: address(factoryImpl)

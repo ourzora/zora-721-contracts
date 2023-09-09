@@ -4,8 +4,8 @@ pragma solidity ^0.8.10;
 import {Test} from "forge-std/Test.sol";
 import {IERC721AUpgradeable} from "erc721a-upgradeable/IERC721AUpgradeable.sol";
 import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
-import {ProtocolRewards} from "@zoralabs/protocol-rewards/dist/contracts/ProtocolRewards.sol";
-import {RewardsSettings} from "@zoralabs/protocol-rewards/dist/contracts/abstract/RewardSplits.sol";
+import {ProtocolRewards} from "@zoralabs/protocol-rewards/src/ProtocolRewards.sol";
+import {RewardsSettings} from "@zoralabs/protocol-rewards/src/abstract/RewardSplits.sol";
 
 import {ERC721Drop} from "../src/ERC721Drop.sol";
 import {DummyMetadataRenderer} from "./utils/DummyMetadataRenderer.sol";

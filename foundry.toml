@@ -12,6 +12,10 @@ gas_reports = ['*']
 fs_permissions = [{ access = "read", path = "./addresses"}, { access = "read", path = "./chainConfigs"}, { access = "read", path = "./package.json" }]
 
 [etherscan]
+optimism = { key = "$OPT_ETHERSCAN_API_KEY" }
+base = { key = "ANY_KEY_IS_OKAY" }
+mainnet = { key = "$ETHERSCAN_API_KEY" }
+
 zora_mainnet = { key = "", chain = 7777777, url = "https://explorer.zora.energy/api\\?" }
 zora_testnet = { key = "", chain = 999, url = "https://explorer.testnet.zora.energy/api\\?" }
 
@@ -22,16 +26,13 @@ pgn_sepolia = { key = "", chain = 7777777, url = "https://explorer.sepolia.publi
 mainnet = "https://eth-mainnet.g.alchemy.com/v2/${ALCHEMY_KEY}"
 goerli = "https://eth-goerli.g.alchemy.com/v2/${ALCHEMY_KEY}"
 
-# for optimism, since we are just using this for deployment/fork testing,
-# we can use these since they're lower volume.
-
-optimism = "https://mainnet.optimism.io"
-optimism_goerli = "https://goerli.optimism.io"
+optimism = "https://opt-mainnet.g.alchemy.com/v2/${ALCHEMY_KEY}"
+optimism_goerli = "https://opt-goerli.g.alchemy.com/v2/${ALCHEMY_KEY}"
 
 zora = "https://rpc.zora.energy"
 zora_goerli = "https://testnet.rpc.zora.energy"
 
-base = "https://developer-access-mainnet.base.org"
-base_goerli = "https://goerli.base.org"
+base = "https://base-mainnet.g.alchemy.com/v2/${ALCHEMY_KEY}"
+base_goerli = "https://base-goerli.g.alchemy.com/v2/${ALCHEMY_KEY}"
 pgn = "https://rpc.publicgoods.network"
 pgn_sepolia = "https://sepolia.publicgoods.network"

@@ -3,7 +3,7 @@ pragma solidity ^0.8.13;
 
 import "forge-std/console2.sol";
 import {ZoraDropsDeployBase} from "./ZoraDropsDeployBase.sol";
-import {ChainConfig, DropDeployment} from '../src/DeploymentConfig.sol';
+import {ChainConfig, DropDeployment} from "../src/DeploymentConfig.sol";
 
 import {ERC721Drop} from "../src/ERC721Drop.sol";
 import {ERC721DropProxy} from "../src/ERC721DropProxy.sol";
@@ -61,6 +61,7 @@ contract UpgradeERC721DropFactory is ZoraDropsDeployBase {
         });
 
         deployment.dropImplementation = address(dropImplementation);
+        deployment.dropImplementationVersion = dropImplementation.contractVersion();
 
         console2.log("Drop IMPL: ");
         console2.log(address(dropImplementation));

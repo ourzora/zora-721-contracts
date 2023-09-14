@@ -46,7 +46,15 @@ contract ZoraNFTBaseTest is Test {
         protocolRewards = new ProtocolRewards();
 
         vm.prank(DEFAULT_ZORA_DAO_ADDRESS);
-        address impl = address(new ERC721Drop(address(1234), FactoryUpgradeGate(address(0)), address(0), mintFee, mintFeeRecipient, address(protocolRewards)));
+        address impl = address(
+            new ERC721Drop(
+                address(1234),
+                FactoryUpgradeGate(address(0)),
+                mintFee,
+                mintFeeRecipient,
+                address(protocolRewards)
+            )
+        );
         address payable newDrop = payable(address(new ERC721DropProxy(impl, "")));
         zoraNFTBase = ERC721Drop(newDrop);
         merkleData = new MerkleData();

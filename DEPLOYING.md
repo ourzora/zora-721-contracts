@@ -7,17 +7,6 @@ Make sure required addresses / multisigs are setup for
 1. funds recipient
 2. contract factory upgrade owner address
 
-Ensure that the default operator-filterer-registry deployment is on the current chain.
-
-If not, use the mainnet default filter address to re-deploy on the chain using ImmutableCreate2Factory (required also for seaport).
-
-To deploy ImmutableCreate2Factory, follow the steps in the seaport deploy scripts: https://github.com/ProjectOpenSea/seaport/blob/main/docs/Deployment.md#setting-up-factory-on-a-new-chain
-
-example call:
-cast send 0x0000000000FFe8B47B3e2130213B802212439497 'function safeCreate2(bytes32,bytes)' [...] --rpc-url $(rpc base) --interactive
-
-copied from the mainnet deploy txn: https://etherscan.io/tx/0x4c2038f55147cae309c2e597a5323b42b63fd556a15d2f1b5a799eee1b3ddf04
-
 ### 1. Setup `chainConfigs` file.
 
 Use `1.json` for reference. We are ordering keys alphabetically.

@@ -16,10 +16,6 @@ struct ChainConfig {
     uint256 mintFeeAmount;
     /// @notice Mint fee recipient user
     address mintFeeRecipient;
-    /// @notice Subscription address for operator-filterer-registry (opensea / cori)
-    address subscriptionMarketFilterAddress;
-    /// @notice Owner for subscription of operator-filterer-registry (opensea / cori)
-    address subscriptionMarketFilterOwner;
     /// @notice Auto-approved hyperstructure on mainnet for enabling ZORA v3 with less gas. Deprecated – safe to set to address(0x)
     address zoraERC721TransferHelper;
     /// @notice The Protocol Rewards contract
@@ -65,8 +61,6 @@ abstract contract DeploymentConfig is StdChains, StdCheatsSafe, StdUtils, Script
     string constant FACTORY_UPGRADE_GATE_OWNER = "FACTORY_OWNER";
     string constant MINT_FEE_AMOUNT = "MINT_FEE_AMOUNT";
     string constant MINT_FEE_RECIPIENT = "MINT_FEE_RECIPIENT";
-    string constant SUBSCRIPTION_MARKET_FILTER_ADDRESS = "SUBSCRIPTION_MARKET_FILTER_ADDRESS";
-    string constant SUBSCRIPTION_MARKET_FILTER_OWNER = "SUBSCRIPTION_MARKET_FILTER_OWNER";
     string constant ZORA_ERC721_TRANSFER_HELPER = "ZORA_ERC721_TRANSFER_HELPER";
     string constant PROTOCOL_REWARDS = "PROTOCOL_REWARDS";
 
@@ -93,7 +87,6 @@ abstract contract DeploymentConfig is StdChains, StdCheatsSafe, StdUtils, Script
         chainConfig.factoryUpgradeGateOwner = json.readAddress(getKeyPrefix(FACTORY_UPGRADE_GATE_OWNER));
         chainConfig.mintFeeAmount = json.readUint(getKeyPrefix(MINT_FEE_AMOUNT));
         chainConfig.mintFeeRecipient = json.readAddress(getKeyPrefix(MINT_FEE_RECIPIENT));
-        chainConfig.subscriptionMarketFilterAddress = json.readAddress(getKeyPrefix(SUBSCRIPTION_MARKET_FILTER_ADDRESS));
         chainConfig.zoraERC721TransferHelper = json.readAddress(getKeyPrefix(ZORA_ERC721_TRANSFER_HELPER));
         chainConfig.protocolRewards = json.readAddress(getKeyPrefix(PROTOCOL_REWARDS));
     }

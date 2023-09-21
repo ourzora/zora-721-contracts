@@ -24,10 +24,11 @@ import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/se
 import {MerkleProofUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/cryptography/MerkleProofUpgradeable.sol";
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import {MathUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/math/MathUpgradeable.sol";
-import {ERC721Rewards, ERC721RewardsStorage} from "@zoralabs/protocol-rewards/dist/contracts/abstract/ERC721/ERC721Rewards.sol";
+import {IProtocolRewards} from "@zoralabs/protocol-rewards/src/interfaces/IProtocolRewards.sol";
+import {ERC721Rewards} from "@zoralabs/protocol-rewards/src/abstract/ERC721/ERC721Rewards.sol";
+import {ERC721RewardsStorageV1} from "@zoralabs/protocol-rewards/src/abstract/ERC721/ERC721RewardsStorageV1.sol";
 
 import {IMetadataRenderer} from "./interfaces/IMetadataRenderer.sol";
-import {IOperatorFilterRegistry} from "./interfaces/IOperatorFilterRegistry.sol";
 import {IERC721Drop} from "./interfaces/IERC721Drop.sol";
 import {IOwnable} from "./interfaces/IOwnable.sol";
 import {IERC4906} from "./interfaces/IERC4906.sol";
@@ -63,7 +64,7 @@ contract ERC721Drop is
     ERC721DropStorageV1,
     ERC721DropStorageV2,
     ERC721Rewards,
-    ERC721RewardsStorage
+    ERC721RewardsStorageV1
 {
     /// @dev This is the max mint batch size for the optimized ERC721A mint contract
     uint256 internal immutable MAX_MINT_BATCH_SIZE = 8;
@@ -94,12 +95,6 @@ contract ERC721Drop is
 
     // /// @notice Empty string for blank comments
     string constant EMPTY_STRING = "";
-
-    /// @notice Market filter DAO address for opensea filter registry
-    address public immutable marketFilterDAOAddress;
-
-    IOperatorFilterRegistry immutable operatorFilterRegistry =
-        IOperatorFilterRegistry(0x000000000000AAeB6D7670E522A718067333cd4E);
 
     /// @notice Only allow for users with admin access
     modifier onlyAdmin() {
@@ -176,20 +171,17 @@ contract ERC721Drop is
     /// @dev Marked as an initializer to prevent storage being used of base implementation. Can only be init'd by a proxy.
     /// @param _zoraERC721TransferHelper Transfer helper
     /// @param _factoryUpgradeGate Factory upgrade gate address
-    /// @param _marketFilterDAOAddress Market filter DAO address
     /// @param _mintFeeAmount Mint fee amount in wei
     /// @param _mintFeeRecipient Mint fee recipient address
     constructor(
         address _zoraERC721TransferHelper,
         IFactoryUpgradeGate _factoryUpgradeGate,
-        address _marketFilterDAOAddress,
         uint256 _mintFeeAmount,
         address payable _mintFeeRecipient,
         address _protocolRewards
     ) initializer ERC721Rewards(_protocolRewards, _mintFeeRecipient) {
         zoraERC721TransferHelper = _zoraERC721TransferHelper;
         factoryUpgradeGate = _factoryUpgradeGate;
-        marketFilterDAOAddress = _marketFilterDAOAddress;
         ZORA_MINT_FEE = _mintFeeAmount;
         ZORA_MINT_FEE_RECIPIENT = _mintFeeRecipient;
     }
@@ -509,34 +501,37 @@ contract ERC721Drop is
         return _handleMintWithRewards(recipient, quantity, comment, mintReferral);
     }
 
-    function _handleMintWithRewards(address recipient, uint256 quantity, string memory comment, address mintReferral) internal returns (uint256) {
+    function _handleMintWithRewards(address recipient, uint256 quantity, string calldata comment, address mintReferral) internal returns (uint256) {
         _mintSupplyRoyalty(quantity);
         _requireCanPurchaseQuantity(recipient, quantity);
 
         uint256 salePrice = salesConfig.publicSalePrice;
 
-        _handleRewards(msg.value, quantity, salePrice, config.fundsRecipient, mintReferral, createReferral);
+        _handleRewards(msg.value, quantity, salePrice, config.fundsRecipient != address(0) ? config.fundsRecipient : address(this), createReferral, mintReferral);
 
         _mintNFTs(recipient, quantity);
 
         uint256 firstMintedTokenId = _lastMintedTokenId() - quantity;
 
-        emit IERC721Drop.Sale({
-            to: recipient,
-            quantity: quantity,
-            pricePerToken: salePrice,
-            firstPurchasedTokenId: firstMintedTokenId
-        });
+        _emitSaleEvents(_msgSender(), recipient, quantity, salePrice, firstMintedTokenId, comment);
 
-        if (bytes(comment).length > 0) {
-            emit IERC721Drop.MintComment({
-                sender: _msgSender(),
-                tokenContract: address(this),
-                tokenId: firstMintedTokenId,
-                quantity: quantity,
-                comment: comment
-            });
-        }
+        return firstMintedTokenId;
+    }
+
+    function _handlePurchase(address recipient, uint256 quantity, string memory comment) internal returns (uint256) {
+        _mintSupplyRoyalty(quantity);
+        _requireCanMintQuantity(quantity);
+        _requireCanPurchaseQuantity(recipient, quantity);
+
+        uint256 salePrice = salesConfig.publicSalePrice;
+
+        _requireLegacyFee(msg.value, salePrice, quantity);
+
+        _mintNFTs(recipient, quantity);
+
+        uint256 firstMintedTokenId = _lastMintedTokenId() - quantity;
+
+        _emitSaleEvents(_msgSender(), recipient, quantity, salePrice, firstMintedTokenId, comment);
 
         return firstMintedTokenId;
     }
@@ -726,51 +721,42 @@ contract ERC721Drop is
         return firstMintedTokenId;
     }
 
-    /**
-     *** ---------------------------------- ***
-     ***                                    ***
-     ***     ADMIN OPERATOR FILTERING       ***
-     ***                                    ***
-     *** ---------------------------------- ***
-     ***/
-
-    /// @notice Proxy to update market filter settings in the main registry contracts
-    /// @notice Requires admin permissions
-    /// @param args Calldata args to pass to the registry
-    function updateMarketFilterSettings(bytes calldata args)
+    /// @notice Merkle-tree based presale purchase function with a comment and protocol rewards
+    /// @param quantity quantity to purchase
+    /// @param maxQuantity max quantity that can be purchased via merkle proof #
+    /// @param pricePerToken price that each token is purchased at
+    /// @param merkleProof proof for presale mint
+    /// @param comment comment to include in the IERC721Drop.Sale event
+    /// @param mintReferral The facilitator of the mint
+    function purchasePresaleWithRewards(
+        uint256 quantity,
+        uint256 maxQuantity,
+        uint256 pricePerToken,
+        bytes32[] calldata merkleProof,
+        string calldata comment,
+        address mintReferral
+    )
         external
-        onlyAdmin
-        returns (bytes memory)
+        payable
+        nonReentrant
+        onlyPresaleActive
+        returns (uint256)
     {
-        (bool success, bytes memory ret) = address(operatorFilterRegistry).call(
-            args
-        );
-        if (!success) {
-            revert RemoteOperatorFilterRegistryCallFailed();
-        }
-        return ret;
+        return _handlePurchasePresaleWithRewards(quantity, maxQuantity, pricePerToken, merkleProof, comment, mintReferral);
     }
 
-    /// @notice Manage subscription to the DAO for marketplace filtering based off royalty payouts.
-    /// @param enable Enable filtering to non-royalty payout marketplaces
-    function manageMarketFilterDAOSubscription(bool enable) external onlyAdmin {
-        address self = address(this);
-        if (marketFilterDAOAddress == address(0x0)) {
-            revert MarketFilterDAOAddressNotSupportedForChain();
-        }
-        if (!operatorFilterRegistry.isRegistered(self) && enable) {
-            operatorFilterRegistry.registerAndSubscribe(
-                self,
-                marketFilterDAOAddress
-            );
-        } else if (enable) {
-            operatorFilterRegistry.subscribe(self, marketFilterDAOAddress);
-        } else {
-            operatorFilterRegistry.unsubscribe(self, false);
-            operatorFilterRegistry.unregister(self);
-        }
-    }
+    function _handlePurchasePresaleWithRewards(        
+        uint256 quantity,
+        uint256 maxQuantity,
+        uint256 pricePerToken,
+        bytes32[] calldata merkleProof,
+        string calldata comment,
+        address mintReferral
+    ) internal returns (uint256) {
+        _mintSupplyRoyalty(quantity);
+        _requireCanMintQuantity(quantity);
 
+<<<<<<< HEAD
     /// @notice Hook to filter operators (no-op if no filters are registered)
     /// @dev Part of ERC721A token hooks
     /// @param from Transfer from user
@@ -1157,16 +1143,9 @@ contract ERC721Drop is
     function withdraw() external nonReentrant {
         address sender = _msgSender();
 
-        uint256 funds = address(this).balance;
+        _verifyWithdrawAccess(sender);
 
-        // Check if withdraw is allowed for sender
-        if (
-            !hasRole(DEFAULT_ADMIN_ROLE, sender) &&
-            !hasRole(SALES_MANAGER_ROLE, sender) &&
-            sender != config.fundsRecipient
-        ) {
-            revert Access_WithdrawNotAllowed();
-        }
+        uint256 funds = address(this).balance;
 
         // Payout recipient
         (bool successFunds, ) = config.fundsRecipient.call{
@@ -1185,6 +1164,29 @@ contract ERC721Drop is
             address(0),
             0
         );
+    }
+
+    /// @notice This withdraws ETH from the protocol rewards contract to an address specified by the contract owner.
+    function withdrawRewards(address to, uint256 amount) external nonReentrant {
+        _verifyWithdrawAccess(msg.sender);
+
+        bytes memory data = abi.encodeWithSelector(IProtocolRewards.withdraw.selector, to, amount);
+
+        (bool success, ) = address(protocolRewards).call(data);
+
+        if (!success) {
+            revert ProtocolRewards_WithdrawSendFailure();
+        }
+    }
+
+    function _verifyWithdrawAccess(address msgSender) internal view {
+        if (
+            !hasRole(DEFAULT_ADMIN_ROLE, msgSender) &&
+            !hasRole(SALES_MANAGER_ROLE, msgSender) &&
+            msgSender != config.fundsRecipient
+        ) {
+            revert Access_WithdrawNotAllowed();
+        }
     }
 
     //                       ,-.
@@ -1302,6 +1304,24 @@ contract ERC721Drop is
         }
     }
 
+<<<<<<< HEAD
+=======
+    function _payoutZoraFee(uint256 quantity) internal {
+        // Transfer ZORA fee to recipient
+        (, uint256 zoraFee) = zoraFeeForAmount(quantity);
+        (bool success, ) = ZORA_MINT_FEE_RECIPIENT.call{value: zoraFee, gas: FUNDS_SEND_GAS_LIMIT}(
+            ""
+        );
+        emit MintFeePayout(zoraFee, ZORA_MINT_FEE_RECIPIENT, success);
+    }
+
+    function _requireLegacyFee(uint256 msgValue, uint256 salePrice, uint256 quantity) internal view {
+        if (msgValue != (salePrice + ZORA_MINT_FEE) * quantity) {
+            revert Purchase_WrongPrice((salePrice + ZORA_MINT_FEE) * quantity);
+        }
+    }
+
+>>>>>>> origin/main
     function _requireCanMintQuantity(uint256 quantity) internal view {
         if (quantity + _totalMinted() > config.editionSize) {
             revert Mint_SoldOut();
@@ -1383,6 +1403,24 @@ contract ERC721Drop is
         createReferral = recipient;
     }
 
+    function _emitSaleEvents(address msgSender, address recipient, uint256 quantity, uint256 pricePerToken, uint256 firstMintedTokenId, string memory comment) internal {
+        emit IERC721Drop.Sale({
+            to: recipient,
+            quantity: quantity,
+            pricePerToken: pricePerToken,
+            firstPurchasedTokenId: firstMintedTokenId
+        });
+
+        if (bytes(comment).length > 0) {
+            emit IERC721Drop.MintComment({
+                sender: msgSender,
+                tokenContract: address(this),
+                tokenId: firstMintedTokenId,
+                quantity: quantity,
+                comment: comment
+            });
+        }
+    }
 
     /// @notice ERC165 supports interface
     /// @param interfaceId interface id to check if supported

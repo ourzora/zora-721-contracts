@@ -31,6 +31,7 @@
 | salesConfig           | struct IERC721Drop.SalesConfiguration                         | 354  | 0      | 96    | src/ERC721Drop.sol:ERC721Drop |
 | presaleMintsByAddress | mapping(address => uint256)                                   | 357  | 0      | 32    | src/ERC721Drop.sol:ERC721Drop |
 | royaltyMintSchedule   | uint32                                                        | 358  | 0      | 4     | src/ERC721Drop.sol:ERC721Drop |
+| createReferral        | address                                                       | 358  | 4      | 20    | src/ERC721Drop.sol:ERC721Drop |
 
 =======================
 ➡ ERC721DropProxy

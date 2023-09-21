@@ -3,14 +3,12 @@ pragma solidity ^0.8.13;
 
 import "forge-std/console2.sol";
 import {ZoraDropsDeployBase} from "./ZoraDropsDeployBase.sol";
-import {ChainConfig, DropDeployment} from '../src/DeploymentConfig.sol';
+import {ChainConfig, DropDeployment} from "../src/DeploymentConfig.sol";
 
 import {ERC721Drop} from "../src/ERC721Drop.sol";
 import {ERC721DropProxy} from "../src/ERC721DropProxy.sol";
 import {ZoraNFTCreatorV1} from "../src/ZoraNFTCreatorV1.sol";
 import {ZoraNFTCreatorProxy} from "../src/ZoraNFTCreatorProxy.sol";
-import {IOperatorFilterRegistry} from "../src/interfaces/IOperatorFilterRegistry.sol";
-import {OwnedSubscriptionManager} from "../src/filter/OwnedSubscriptionManager.sol";
 import {FactoryUpgradeGate} from "../src/FactoryUpgradeGate.sol";
 import {DropMetadataRenderer} from "../src/metadata/DropMetadataRenderer.sol";
 import {EditionMetadataRenderer} from "../src/metadata/EditionMetadataRenderer.sol";
@@ -57,13 +55,13 @@ contract UpgradeERC721DropFactory is ZoraDropsDeployBase {
         ERC721Drop dropImplementation = new ERC721Drop({
             _zoraERC721TransferHelper: chainConfig.zoraERC721TransferHelper,
             _factoryUpgradeGate: IFactoryUpgradeGate(deployment.factoryUpgradeGate),
-            _marketFilterDAOAddress: chainConfig.subscriptionMarketFilterAddress,
             _mintFeeAmount: chainConfig.mintFeeAmount,
             _mintFeeRecipient: payable(chainConfig.mintFeeRecipient),
             _protocolRewards: chainConfig.protocolRewards
         });
 
         deployment.dropImplementation = address(dropImplementation);
+        deployment.dropImplementationVersion = dropImplementation.contractVersion();
 
         console2.log("Drop IMPL: ");
         console2.log(address(dropImplementation));

@@ -3,7 +3,7 @@ pragma solidity ^0.8.10;
 
 import {Test} from "forge-std/Test.sol";
 import {IERC721AUpgradeable} from "erc721a-upgradeable/IERC721AUpgradeable.sol";
-import {ProtocolRewards} from "@zoralabs/protocol-rewards/dist/contracts/ProtocolRewards.sol";
+import {ProtocolRewards} from "@zoralabs/protocol-rewards/src/ProtocolRewards.sol";
 
 import {IMetadataRenderer} from "../src/interfaces/IMetadataRenderer.sol";
 import "../src/ZoraNFTCreatorV1.sol";
@@ -36,7 +36,6 @@ contract ZoraNFTCreatorV1Test is Test {
         dropImpl = new ERC721Drop(
             address(1234),
             FactoryUpgradeGate(address(0)),
-            address(0),
             mintFee,
             mintFeeRecipient,
             address(protocolRewards)

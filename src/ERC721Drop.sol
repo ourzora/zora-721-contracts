@@ -452,7 +452,8 @@ contract ERC721Drop is
         onlyPublicSaleActive
         returns (uint256)
     {
-        return _handlePurchase(msg.sender, quantity, "");
+        // Check that address(0) for referral sends to zora
+        return _handleMintWithRewards(msg.sender, quantity, "", address(0));
     }
 
     /// @notice Purchase a quantity of tokens with a comment
@@ -512,25 +513,6 @@ contract ERC721Drop is
         _mintNFTs(recipient, quantity);
 
         uint256 firstMintedTokenId = _lastMintedTokenId() - quantity;
-
-        _emitSaleEvents(_msgSender(), recipient, quantity, salePrice, firstMintedTokenId, comment);
-
-        return firstMintedTokenId;
-    }
-
-    function _handlePurchase(address recipient, uint256 quantity, string memory comment) internal returns (uint256) {
-        _mintSupplyRoyalty(quantity);
-        _requireCanMintQuantity(quantity);
-        _requireCanPurchaseQuantity(recipient, quantity);
-
-        uint256 salePrice = salesConfig.publicSalePrice;
-
-        _requireLegacyFee(msg.value, salePrice, quantity);
-
-        _mintNFTs(recipient, quantity);
-        uint256 firstMintedTokenId = _lastMintedTokenId() - quantity;
-
-        _payoutZoraFee(quantity);
 
         _emitSaleEvents(_msgSender(), recipient, quantity, salePrice, firstMintedTokenId, comment);
 
@@ -626,11 +608,10 @@ contract ERC721Drop is
     )
         external
         payable
-        nonReentrant
-        onlyPresaleActive
         returns (uint256)
     {
-        return _handlePurchasePresale(quantity, maxQuantity, pricePerToken, merkleProof, "");
+        // If 0 does not go to ZORA automically use the ZORA recipient address in the immutable variables.
+        return purchasePresaleWithRewards(quantity, maxQuantity, pricePerToken, merkleProof, "", address(0));
     }
 
     /// @notice Merkle-tree based presale purchase function with a comment
@@ -652,49 +633,7 @@ contract ERC721Drop is
         onlyPresaleActive
         returns (uint256)
     {
-        return _handlePurchasePresale(quantity, maxQuantity, pricePerToken, merkleProof, comment);
-    }
-
-    function _handlePurchasePresale(
-        uint256 quantity,
-        uint256 maxQuantity,
-        uint256 pricePerToken,
-        bytes32[] calldata merkleProof,
-        string memory comment
-    ) internal returns (uint256) {
-        _mintSupplyRoyalty(quantity);
-        _requireCanMintQuantity(quantity);
-
-        address msgSender = _msgSender();
-
-        _requireMerkleApproval(msgSender, maxQuantity, pricePerToken, merkleProof);
-
-        _requireLegacyFee(msg.value, pricePerToken, quantity);
-
-        _requireCanPurchasePresale(msgSender, quantity, maxQuantity);
-
-        _mintNFTs(msgSender, quantity);
-        uint256 firstMintedTokenId = _lastMintedTokenId() - quantity;
-
-        _payoutZoraFee(quantity);
-
-        emit IERC721Drop.Sale({
-            to: msgSender,
-            quantity: quantity,
-            pricePerToken: pricePerToken,
-            firstPurchasedTokenId: firstMintedTokenId
-        });
-        if (bytes(comment).length > 0) {
-            emit IERC721Drop.MintComment({
-                sender: msgSender,
-                tokenContract: address(this),
-                tokenId: firstMintedTokenId,
-                quantity: quantity,
-                comment: comment
-            });
-        }
-
-        return firstMintedTokenId;
+        return purchasePresaleWithRewards(quantity, maxQuantity, pricePerToken, merkleProof, comment, address(0));
     }
 
     /// @notice Merkle-tree based presale purchase function with a comment and protocol rewards
@@ -712,7 +651,7 @@ contract ERC721Drop is
         string calldata comment,
         address mintReferral
     )
-        external
+        public
         payable
         nonReentrant
         onlyPresaleActive
@@ -1279,12 +1218,6 @@ contract ERC721Drop is
             ""
         );
         emit MintFeePayout(zoraFee, ZORA_MINT_FEE_RECIPIENT, success);
-    }
-
-    function _requireLegacyFee(uint256 msgValue, uint256 salePrice, uint256 quantity) internal view {
-        if (msgValue != (salePrice + ZORA_MINT_FEE) * quantity) {
-            revert Purchase_WrongPrice((salePrice + ZORA_MINT_FEE) * quantity);
-        }
     }
 
     function _requireCanMintQuantity(uint256 quantity) internal view {

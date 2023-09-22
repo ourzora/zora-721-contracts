@@ -206,7 +206,38 @@ contract ERC721DropTest is Test {
         assertEq(royaltyAmount, 0 ether);
     }
 
-    function test_Purchase(uint64 salePrice, uint32 purchaseQuantity) public setupZoraNFTBase(purchaseQuantity) {
+    function test_PurchaseFreeMint(uint32 purchaseQuantity) public setupZoraNFTBase(purchaseQuantity) {
+        vm.assume(purchaseQuantity < 100 && purchaseQuantity > 0);
+        vm.prank(DEFAULT_OWNER_ADDRESS);
+        zoraNFTBase.setSaleConfiguration({
+            publicSaleStart: 0,
+            publicSaleEnd: type(uint64).max,
+            presaleStart: 0,
+            presaleEnd: 0,
+            publicSalePrice: 0,
+            maxSalePurchasePerAddress: purchaseQuantity + 1,
+            presaleMerkleRoot: bytes32(0)
+        });
+
+        (, uint256 protocolFee) = zoraNFTBase.zoraFeeForAmount(purchaseQuantity);
+        uint256 paymentAmount = protocolFee;
+        vm.deal(address(456), paymentAmount);
+        vm.prank(address(456));
+        vm.expectEmit(true, true, true, true);
+        emit Sale(address(456), purchaseQuantity, 0, 0);
+        zoraNFTBase.purchase{value: paymentAmount}(purchaseQuantity);
+
+        assertEq(zoraNFTBase.saleDetails().maxSupply, purchaseQuantity);
+        assertEq(zoraNFTBase.saleDetails().totalMinted, purchaseQuantity);
+        require(zoraNFTBase.ownerOf(1) == address(456), "owner is wrong for new minted token");
+        assertEq(address(zoraNFTBase).balance, paymentAmount - protocolFee);
+        assertEq(address(protocolRewards).balance, protocolFee);
+        assertEq(protocolRewards.balanceOf(DEFAULT_FUNDS_RECIPIENT_ADDRESS), 0.000444 ether * purchaseQuantity);
+        assertEq(protocolRewards.balanceOf(mintFeeRecipient), 0.000333 ether * purchaseQuantity);
+    }
+
+    function test_PurchaseWithValue(uint64 salePrice, uint32 purchaseQuantity) public setupZoraNFTBase(purchaseQuantity) {
+        vm.assume(salePrice > 0);
         vm.assume(purchaseQuantity < 100 && purchaseQuantity > 0);
         vm.prank(DEFAULT_OWNER_ADDRESS);
         zoraNFTBase.setSaleConfiguration({
@@ -230,10 +261,12 @@ contract ERC721DropTest is Test {
         assertEq(zoraNFTBase.saleDetails().maxSupply, purchaseQuantity);
         assertEq(zoraNFTBase.saleDetails().totalMinted, purchaseQuantity);
         require(zoraNFTBase.ownerOf(1) == address(456), "owner is wrong for new minted token");
+
         assertEq(address(zoraNFTBase).balance, paymentAmount - zoraFee);
         assertEq(address(protocolRewards).balance, zoraFee);
-        assertEq(protocolRewards.balanceOf(DEFAULT_FUNDS_RECIPIENT_ADDRESS), 0.000444 ether * purchaseQuantity);
-        assertEq(protocolRewards.balanceOf(mintFeeRecipient), 0.000333 ether * purchaseQuantity);
+        assertEq(protocolRewards.balanceOf(mintFeeRecipient), 0.000666 ether * purchaseQuantity);
+        assertEq(address(zoraNFTBase).balance, uint256(salePrice) * uint256(purchaseQuantity));
+        assertEq(protocolRewards.balanceOf(DEFAULT_FUNDS_RECIPIENT_ADDRESS), 0.000111 ether * uint256(purchaseQuantity));
     }
 
     function test_PurchaseWithComment(uint64 salePrice, uint32 purchaseQuantity) public setupZoraNFTBase(purchaseQuantity) {

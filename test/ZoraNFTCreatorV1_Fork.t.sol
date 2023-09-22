@@ -25,7 +25,8 @@ contract ZoraNFTCreatorV1Test is Test, ForkHelper {
     DropMetadataRenderer public dropMetadataRenderer;
 
     function makeDefaultSalesConfiguration(uint104 price) internal returns (IERC721Drop.SalesConfiguration memory) {
-        return IERC721Drop.SalesConfiguration({
+        return
+            IERC721Drop.SalesConfiguration({
                 publicSaleStart: 0,
                 publicSaleEnd: type(uint64).max,
                 presaleStart: 0,
@@ -36,7 +37,7 @@ contract ZoraNFTCreatorV1Test is Test, ForkHelper {
             });
     }
 
-    function test_create_fork() external {
+    function testForkEdition() external {
         string[] memory forkTestChains = getForkTestChains();
 
         for (uint256 i = 0; i < forkTestChains.length; i++) {
@@ -46,7 +47,31 @@ contract ZoraNFTCreatorV1Test is Test, ForkHelper {
             creator = ZoraNFTCreatorV1(getDeployment().factory);
             verifyAddressesFork(chainName);
             forkEdition();
+        }
+    }
+
+    function testForkDrop() external {
+        string[] memory forkTestChains = getForkTestChains();
+
+        for (uint256 i = 0; i < forkTestChains.length; i++) {
+            string memory chainName = forkTestChains[i];
+
+            vm.createSelectFork(vm.rpcUrl(chainName));
+            creator = ZoraNFTCreatorV1(getDeployment().factory);
+            verifyAddressesFork(chainName);
             forkDrop();
+        }
+    }
+
+    function testForkDropGeneric() external {
+        string[] memory forkTestChains = getForkTestChains();
+
+        for (uint256 i = 0; i < forkTestChains.length; i++) {
+            string memory chainName = forkTestChains[i];
+
+            vm.createSelectFork(vm.rpcUrl(chainName));
+            creator = ZoraNFTCreatorV1(getDeployment().factory);
+            verifyAddressesFork(chainName);
             forkDropGeneric();
         }
     }
@@ -96,7 +121,7 @@ contract ZoraNFTCreatorV1Test is Test, ForkHelper {
             500,
             DEFAULT_FUNDS_RECIPIENT_ADDRESS,
             DEFAULT_FUNDS_RECIPIENT_ADDRESS,
-            makeDefaultSalesConfiguration(0.1 ether), 
+            makeDefaultSalesConfiguration(0.1 ether),
             "desc",
             "animation",
             "image"

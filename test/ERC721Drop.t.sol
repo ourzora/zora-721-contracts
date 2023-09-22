@@ -231,7 +231,9 @@ contract ERC721DropTest is Test {
         assertEq(zoraNFTBase.saleDetails().totalMinted, purchaseQuantity);
         require(zoraNFTBase.ownerOf(1) == address(456), "owner is wrong for new minted token");
         assertEq(address(zoraNFTBase).balance, paymentAmount - zoraFee);
-        assertEq(mintFeeRecipient.balance, zoraFee);
+        assertEq(address(protocolRewards).balance, zoraFee);
+        assertEq(protocolRewards.balanceOf(DEFAULT_FUNDS_RECIPIENT_ADDRESS), 0.000444 ether * purchaseQuantity);
+        assertEq(protocolRewards.balanceOf(mintFeeRecipient), 0.000333 ether * purchaseQuantity);
     }
 
     function test_PurchaseWithComment(uint64 salePrice, uint32 purchaseQuantity) public setupZoraNFTBase(purchaseQuantity) {
@@ -787,9 +789,8 @@ contract ERC721DropTest is Test {
             maxSalePurchasePerAddress: 2,
             presaleMerkleRoot: bytes32(0)
         });
-        (, uint256 fee) = zoraNFTBase.zoraFeeForAmount(1);
         vm.prank(address(456));
-        vm.expectRevert(abi.encodeWithSelector(IERC721Drop.Purchase_WrongPrice.selector, 0.15 ether + fee));
+        vm.expectRevert(abi.encodeWithSignature("INVALID_ETH_AMOUNT()"));
         zoraNFTBase.purchase{value: 0.12 ether}(1);
     }
 
@@ -940,7 +941,7 @@ contract ERC721DropTest is Test {
         vm.expectRevert(IERC721Drop.Mint_SoldOut.selector);
         vm.prank(DEFAULT_OWNER_ADDRESS);
         zoraNFTBase.adminMint(address(0x1234), 2);
-        vm.expectRevert(IERC721Drop.Mint_SoldOut.selector);
+        vm.expectRevert(abi.encodeWithSignature("INVALID_ETH_AMOUNT()"));
         zoraNFTBase.purchase{value: 0.6 ether}(3);
     }
 
@@ -981,7 +982,7 @@ contract ERC721DropTest is Test {
 
         vm.deal(address(456), uint256(1) * 2);
         vm.prank(address(456));
-        vm.expectRevert(IERC721Drop.Mint_SoldOut.selector);
+        vm.expectRevert(abi.encodeWithSignature("INVALID_ETH_AMOUNT()"));
         zoraNFTBase.purchase{value: 1}(1);
     }
 

@@ -2,14 +2,13 @@
 pragma solidity ^0.8.13;
 
 import "forge-std/Script.sol";
-import {ScriptDeploymentConfig, DropDeployment} from '../src/DeploymentConfig.sol';
+import {ScriptDeploymentConfig, DropDeployment} from "../src/DeploymentConfig.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import {ZoraNFTCreatorV1} from "../src/ZoraNFTCreatorV1.sol";
 import {IERC721Drop} from "../src/interfaces/IERC721Drop.sol";
 
-/// @notice Deployment drops for base where 
+/// @notice Deployment drops for base where
 abstract contract ZoraDropsDeployBase is ScriptDeploymentConfig {
-
     /// @notice Get deployment configuration struct as JSON
     /// @param deployment deploymet struct
     /// @return deploymentJson string JSON of the deployment info
@@ -19,6 +18,7 @@ abstract contract ZoraDropsDeployBase is ScriptDeploymentConfig {
         vm.serializeAddress(deploymentJsonKey, DROP_METADATA_RENDERER, deployment.dropMetadata);
         vm.serializeAddress(deploymentJsonKey, EDITION_METADATA_RENDERER, deployment.editionMetadata);
         vm.serializeAddress(deploymentJsonKey, ERC721DROP_IMPL, deployment.dropImplementation);
+        vm.serializeUint(deploymentJsonKey, ERC721DROP_IMPL_VERSION, deployment.dropImplementationVersion);
         vm.serializeAddress(deploymentJsonKey, FACTORY_UPGRADE_GATE, deployment.factoryUpgradeGate);
         vm.serializeAddress(deploymentJsonKey, ZORA_NFT_CREATOR_PROXY, deployment.factory);
         // Get the JSON key as a seralized string

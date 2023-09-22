@@ -1,5 +1,12 @@
 # @zoralabs/nft-drop-contracts
 
+## 1.14.1
+
+### Patch Changes
+
+- 3e6d7a6: Deployed to pgn sepolia
+- 3e6d7a6: Added pgn mainnet
+
 ## 1.14.0
 
 ### Minor Changes

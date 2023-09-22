@@ -1,6 +1,6 @@
 {
   "name": "@zoralabs/nft-drop-contracts",
-  "version": "1.14.0",
+  "version": "1.14.1",
   "description": "ZORA NFT Drops Contracts",
   "author": "ZORA",
   "license": "MIT",
@@ -51,6 +51,7 @@
   },
   "dependencies": {
     "@dotenv/cli": "^2.2.2",
+    "@zoralabs/protocol-rewards": "^1.0.2",
     "ds-test": "https://github.com/dapphub/ds-test#cd98eff28324bfac652e63a239a60632a761790b",
     "forge-std": "https://github.com/foundry-rs/forge-std#cd7d533f9a0ee0ec02ad81e0a8f262bc4203c653"
   }

@@ -7,17 +7,6 @@ Make sure required addresses / multisigs are setup for
 1. funds recipient
 2. contract factory upgrade owner address
 
-Ensure that the default operator-filterer-registry deployment is on the current chain.
-
-If not, use the mainnet default filter address to re-deploy on the chain using ImmutableCreate2Factory (required also for seaport).
-
-To deploy ImmutableCreate2Factory, follow the steps in the seaport deploy scripts: https://github.com/ProjectOpenSea/seaport/blob/main/docs/Deployment.md#setting-up-factory-on-a-new-chain
-
-example call:
-cast send 0x0000000000FFe8B47B3e2130213B802212439497 'function safeCreate2(bytes32,bytes)' [...] --rpc-url $(rpc base) --interactive
-
-copied from the mainnet deploy txn: https://etherscan.io/tx/0x4c2038f55147cae309c2e597a5323b42b63fd556a15d2f1b5a799eee1b3ddf04
-
 ### 1. Setup `chainConfigs` file.
 
 Use `1.json` for reference. We are ordering keys alphabetically.
@@ -35,8 +24,6 @@ Use `1.json` for reference. We are ordering keys alphabetically.
   # subscription market filter address for operator filter registry.
   # can be set to 0 to disable. see: https://github.com/ProjectOpenSea/operator-filter-registry
   "SUBSCRIPTION_MARKET_FILTER_ADDRESS": "0x3cc6CddA760b79bAfa08dF41ECFA224f810dCeB6",
-  # subscription market filter owner address.
-  "SUBSCRIPTION_MARKET_FILTER_OWNER": "0x9AaC739c133074dB445183A95149880a2156541A",
   # pre-approved transfer helper for ZORA v3, likely should be 0 on new networks
   "ZORA_ERC721_TRANSFER_HELPER": "0x909e9efE4D87d1a6018C2065aE642b6D0447bc91"
 }

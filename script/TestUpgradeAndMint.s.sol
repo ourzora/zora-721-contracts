@@ -11,8 +11,6 @@ import {ZoraNFTCreatorV1} from "../src/ZoraNFTCreatorV1.sol";
 import {IERC721Drop} from "../src/interfaces/IERC721Drop.sol";
 
 import {ZoraNFTCreatorProxy} from "../src/ZoraNFTCreatorProxy.sol";
-import {IOperatorFilterRegistry} from "../src/interfaces/IOperatorFilterRegistry.sol";
-import {OwnedSubscriptionManager} from "../src/filter/OwnedSubscriptionManager.sol";
 import {FactoryUpgradeGate} from "../src/FactoryUpgradeGate.sol";
 import {DropMetadataRenderer} from "../src/metadata/DropMetadataRenderer.sol";
 import {EditionMetadataRenderer} from "../src/metadata/EditionMetadataRenderer.sol";

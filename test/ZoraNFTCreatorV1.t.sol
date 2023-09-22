@@ -11,7 +11,6 @@ import "../src/ZoraNFTCreatorProxy.sol";
 import {MockMetadataRenderer} from "./metadata/MockMetadataRenderer.sol";
 import {FactoryUpgradeGate} from "../src/FactoryUpgradeGate.sol";
 import {IERC721AUpgradeable} from "erc721a-upgradeable/IERC721AUpgradeable.sol";
-import {ForkHelper} from "./utils/ForkHelper.sol";
 import {DropDeployment , ChainConfig} from "../src/DeploymentConfig.sol";
 
 contract ZoraNFTCreatorV1Test is Test {

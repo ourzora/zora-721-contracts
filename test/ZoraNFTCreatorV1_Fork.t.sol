@@ -138,7 +138,8 @@ contract ZoraNFTCreatorV1Test is Test, ForkHelper {
             DEFAULT_FUNDS_RECIPIENT_ADDRESS,
             makeDefaultSalesConfiguration(0),
             mockRenderer,
-            ""
+            "",
+            address(0)
         );
         ERC721Drop drop = ERC721Drop(payable(deployedDrop));
         ERC721Drop.SaleDetails memory saleDetails = drop.saleDetails();

@@ -112,11 +112,10 @@ contract ZoraNFTBaseTest is Test {
         MerkleData.MerkleEntry memory item;
 
         item = merkleData.getTestSetByName("test-3-addresses").entries[0];
-        (, uint256 fee) = zoraNFTBase.zoraFeeForAmount(1);
         vm.deal(address(item.user), 1 ether);
         vm.startPrank(address(item.user));
 
-        vm.expectRevert(abi.encodeWithSelector(IERC721Drop.Purchase_WrongPrice.selector, item.mintPrice + fee));
+        vm.expectRevert(abi.encodeWithSignature("INVALID_ETH_AMOUNT()"));
         zoraNFTBase.purchasePresale{value: item.mintPrice - 1}(1, item.maxMint, item.mintPrice, item.proof);
         assertEq(zoraNFTBase.saleDetails().maxSupply, 10);
         assertEq(zoraNFTBase.saleDetails().totalMinted, 0);

@@ -17,6 +17,9 @@ import {IContractMetadata} from "./interfaces/IContractMetadata.sol";
 contract ZoraNFTCreatorV1 is OwnableUpgradeable, UUPSUpgradeable, IContractMetadata, Version(8) {
     string private constant CANNOT_BE_ZERO = "Cannot be 0 address";
 
+    /// Contract names do not match
+    error UpgradeToMismatchedContractName(string expected, string actual);
+
     /// @notice Emitted when a edition is created reserving the corresponding token IDs.
     event CreatedDrop(
         address indexed creator,
@@ -74,7 +77,11 @@ contract ZoraNFTCreatorV1 is OwnableUpgradeable, UUPSUpgradeable, IContractMetad
         internal
         override
         onlyOwner
-    {}
+    {
+        if (!(keccak256(bytes(IContractMetadata(_newImplementation).contractName())) == keccak256(bytes(this.contractName())))) {
+            revert UpgradeToMismatchedContractName(this.contractName(), IContractMetadata(_newImplementation).contractName());
+        }
+    }
 
     function createAndConfigureDrop(
         string memory name,

@@ -8,6 +8,7 @@ import {ProtocolRewards} from "@zoralabs/protocol-rewards/src/ProtocolRewards.so
 import {IMetadataRenderer} from "../src/interfaces/IMetadataRenderer.sol";
 import "../src/ZoraNFTCreatorV1.sol";
 import "../src/ZoraNFTCreatorProxy.sol";
+import {MockContractMetadata} from "./utils/MockContractMetadata.sol";
 import {MockMetadataRenderer} from "./metadata/MockMetadataRenderer.sol";
 import {FactoryUpgradeGate} from "../src/FactoryUpgradeGate.sol";
 import {IERC721AUpgradeable} from "erc721a-upgradeable/IERC721AUpgradeable.sol";
@@ -156,5 +157,11 @@ contract ZoraNFTCreatorV1Test is Test {
         assertEq(drop.tokenURI(1), "DEMO");
     }
 
-
+    function test_UpgradeFailsWithDifferentContractName() public {
+        MockContractMetadata mockMetadata = new MockContractMetadata("uri", "test name");
+        address owner = creator.owner();
+        vm.prank(owner);
+        vm.expectRevert(abi.encodeWithSignature("UpgradeToMismatchedContractName(string,string)", "ZORA NFT Creator", "test name"));
+        creator.upgradeTo(address(mockMetadata));
+    }
 }

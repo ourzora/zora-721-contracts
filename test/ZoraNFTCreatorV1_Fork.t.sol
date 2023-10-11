@@ -6,12 +6,14 @@ import {Test} from "forge-std/Test.sol";
 import {IMetadataRenderer} from "../src/interfaces/IMetadataRenderer.sol";
 import "../src/ZoraNFTCreatorV1.sol";
 import "../src/ZoraNFTCreatorProxy.sol";
+import {MockContractMetadata} from "./utils/MockContractMetadata.sol";
 import {MockMetadataRenderer} from "./metadata/MockMetadataRenderer.sol";
 import {FactoryUpgradeGate} from "../src/FactoryUpgradeGate.sol";
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import {IERC721AUpgradeable} from "erc721a-upgradeable/IERC721AUpgradeable.sol";
 import {ForkHelper} from "./utils/ForkHelper.sol";
 import {DropDeployment, ChainConfig} from "../src/DeploymentConfig.sol";
+import {ProtocolRewards} from "@zoralabs/protocol-rewards/src/ProtocolRewards.sol";
 
 contract ZoraNFTCreatorV1Test is Test, ForkHelper {
     address public constant DEFAULT_OWNER_ADDRESS = address(0x23499);
@@ -23,6 +25,15 @@ contract ZoraNFTCreatorV1Test is Test, ForkHelper {
     ZoraNFTCreatorV1 public creator;
     EditionMetadataRenderer public editionMetadataRenderer;
     DropMetadataRenderer public dropMetadataRenderer;
+
+    function deployCore() internal {
+        ProtocolRewards protocolRewards = new ProtocolRewards();
+
+        dropImpl = new ERC721Drop(address(1234), FactoryUpgradeGate(address(0)), mintFee, mintFeeRecipient, address(protocolRewards));
+
+        editionMetadataRenderer = new EditionMetadataRenderer();
+        dropMetadataRenderer = new DropMetadataRenderer();
+    }
 
     function makeDefaultSalesConfiguration(uint104 price) internal returns (IERC721Drop.SalesConfiguration memory) {
         return
@@ -177,5 +188,48 @@ contract ZoraNFTCreatorV1Test is Test, ForkHelper {
         (, uint256 fee) = drop.zoraFeeForAmount(1);
         drop.purchase{value: fee}(1);
         assertEq(drop.tokenURI(1), "DEMO");
+    }
+
+    // The current contracts on chain do not have the contract name check in _authorizeUpgrade
+    // so it will not check for miss matched contract names. In order to get around that we upgrade first and then check
+    function test_ForkUpgradeWithDifferentContractName() external {
+        string[] memory forkTestChains = getForkTestChains();
+
+        for (uint256 i = 0; i < forkTestChains.length; i++) {
+            string memory chainName = forkTestChains[i];
+            vm.createSelectFork(vm.rpcUrl(chainName));
+            creator = ZoraNFTCreatorV1(getDeployment().factory);
+            verifyAddressesFork(chainName);
+            deployCore();
+            revertsWhenContractNameMismatches();
+            forkUpgradeSucceedsWithMatchingContractName();
+        }
+    }
+
+    function revertsWhenContractNameMismatches() internal {
+        ZoraNFTCreatorV1 newCreatorImpl = new ZoraNFTCreatorV1(address(dropImpl), editionMetadataRenderer, dropMetadataRenderer);
+        address owner = creator.owner();
+
+        vm.prank(owner);
+        creator.upgradeTo(address(newCreatorImpl));
+
+        MockContractMetadata mockMetadata = new MockContractMetadata("uri", "test name");
+
+        vm.prank(owner);
+        vm.expectRevert(abi.encodeWithSignature("UpgradeToMismatchedContractName(string,string)", "ZORA NFT Creator", "test name"));
+        creator.upgradeTo(address(mockMetadata));
+    }
+
+    function forkUpgradeSucceedsWithMatchingContractName() internal {
+        ZoraNFTCreatorV1 newCreatorImpl = new ZoraNFTCreatorV1(address(dropImpl), editionMetadataRenderer, dropMetadataRenderer);
+        address owner = creator.owner();
+
+        vm.prank(owner);
+        creator.upgradeTo(address(newCreatorImpl));
+
+        MockContractMetadata mockMetadata = new MockContractMetadata("uri", "ZORA NFT Creator");
+
+        vm.prank(owner);
+        creator.upgradeTo(address(mockMetadata));
     }
 }

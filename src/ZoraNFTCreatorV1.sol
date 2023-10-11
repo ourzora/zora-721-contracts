@@ -74,7 +74,11 @@ contract ZoraNFTCreatorV1 is OwnableUpgradeable, UUPSUpgradeable, IContractMetad
         internal
         override
         onlyOwner
-    {}
+    {
+        if (!(keccak256(bytes(IContractMetadata(_newImplementation).contractName())) == keccak256(bytes(this.contractName())))) {
+            revert UpgradeToMismatchedContractName(this.contractName(), IContractMetadata(_newImplementation).contractName());
+        }
+    }
 
     function createAndConfigureDrop(
         string memory name,

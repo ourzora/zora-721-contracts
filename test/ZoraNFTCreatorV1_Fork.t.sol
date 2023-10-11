@@ -190,7 +190,7 @@ contract ZoraNFTCreatorV1Test is Test, ForkHelper {
         assertEq(drop.tokenURI(1), "DEMO");
     }
 
-    // The current contracts on chain do not have the contract name check in _authorizeUpgrade 
+    // The current contracts on chain do not have the contract name check in _authorizeUpgrade
     // so it will not check for miss matched contract names. In order to get around that we upgrade first and then check
     function test_ForkUpgradeWithDifferentContractName() external {
         string[] memory forkTestChains = getForkTestChains();

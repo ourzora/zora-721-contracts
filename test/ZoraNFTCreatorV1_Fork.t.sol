@@ -199,12 +199,12 @@ contract ZoraNFTCreatorV1Test is Test, ForkHelper {
             creator = ZoraNFTCreatorV1(getDeployment().factory);
             verifyAddressesFork(chainName);
             deployCore();
-            forkContractNameWithRevert();
-            forkContractNameSucceed();
+            revertsWhenContractNameMismatches();
+            forkUpgradeSucceedsWithMatchingContractName();
         }
     }
 
-    function forkContractNameWithRevert() internal {
+    function revertsWhenContractNameMismatches() internal {
         ZoraNFTCreatorV1 newCreatorImpl = new ZoraNFTCreatorV1(address(dropImpl), editionMetadataRenderer, dropMetadataRenderer);
         address owner = creator.owner();
 
@@ -218,7 +218,7 @@ contract ZoraNFTCreatorV1Test is Test, ForkHelper {
         creator.upgradeTo(address(mockMetadata));
     }
 
-    function forkContractNameSucceed() internal {
+    function forkUpgradeSucceedsWithMatchingContractName() internal {
         ZoraNFTCreatorV1 newCreatorImpl = new ZoraNFTCreatorV1(address(dropImpl), editionMetadataRenderer, dropMetadataRenderer);
         address owner = creator.owner();
 

@@ -35,7 +35,7 @@ Use `1.json` for reference. We are ordering keys alphabetically.
   
 For example, to deploy on optimism goerli, this is the forge command:
 
-    forge script script/Deploy.s.sol --rpc-url $RPC --verify --etherscan-api-key $API_KEY --broadcast --interactives 1 --sender $SENDER_WALLET
+    forge script script/Deploy.s.sol $(chains optimism-goerli) --verify --broadcast --interactives 1 --sender $SENDER_WALLET
 
 *Important*: Sender is required to have the simulation succeed. Without it, the drops contract is not deployed.
 
@@ -46,3 +46,20 @@ Use your own RPC configuration variables
 Copies new addresses over to `addresses` folder:
 
     node js-scripts/copy-latest-deployment-addresses.mjs deploy
+
+
+## Upgrading an implementation on a new chain
+
+### 1. Upgrade forge script
+
+    forge script script/UpgradeERC721DropFactory.s.sol --broadcast --verify $(chains optimism-goerli --deploy) --sender $SENDER_WALLET
+
+*Important*: Sender is required to have the simulation succeed. Without it, the drops contract is not deployed.
+
+Use your own RPC configuration variables
+
+### 2. Copy new chain configuration for deployment
+
+Copies new addresses over to `addresses` folder:
+
+    node js-scripts/copy-latest-deployment-addresses.mjs

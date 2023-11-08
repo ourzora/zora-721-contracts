@@ -1,5 +1,16 @@
 # @zoralabs/nft-drop-contracts
 
+## 1.15.0
+
+### Minor Changes
+
+- 4fa7404: Removing old purchase without rewards functions for purchase and purchasePresale
+- 08f2f3e: Add rewards
+
+### Patch Changes
+
+- 67f8ed0: Adding a contract name check in \_authorizeUpgrade to prevent incorrect contract name upgrades.
+
 ## 1.14.1
 
 ### Patch Changes

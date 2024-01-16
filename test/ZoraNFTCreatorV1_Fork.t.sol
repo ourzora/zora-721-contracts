@@ -121,7 +121,7 @@ contract ZoraNFTCreatorV1Test is Test, ForkHelper {
             address(creator.editionMetadataRenderer()),
             string.concat("configured edition metadata renderer incorrect on: ", chainName)
         );
-        assertEq(deployment.dropImplementation, address(creator.implementation()), string.concat("configured metadata renderer incorrect on: ", chainName));
+        assertEq(deployment.dropImplementation, address(creator.implementation()), string.concat("configured drop implementation incorrect on: ", chainName));
     }
 
     function forkEdition() internal {

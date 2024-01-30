@@ -1,5 +1,11 @@
 # @zoralabs/nft-drop-contracts
 
+## 1.15.1
+
+### Patch Changes
+
+- d19f866: Deploy 721 contracts on Arbitrum One
+
 ## 1.15.0
 
 ### Minor Changes

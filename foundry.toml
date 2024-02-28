@@ -15,24 +15,18 @@ fs_permissions = [{ access = "read", path = "./addresses"}, { access = "read", p
 optimism = { key = "$OPT_ETHERSCAN_API_KEY" }
 base = { key = "ANY_KEY_IS_OKAY" }
 mainnet = { key = "$ETHERSCAN_API_KEY" }
-
 zora_mainnet = { key = "", chain = 7777777, url = "https://explorer.zora.energy/api\\?" }
 zora_testnet = { key = "", chain = 999, url = "https://explorer.testnet.zora.energy/api\\?" }
 
-pgn = { key = "", chain = 7777777, url = "https://explorer.publicgoods.network/api\\?" }
-pgn_sepolia = { key = "", chain = 7777777, url = "https://explorer.sepolia.publicgoods.network/api\\?" }
-
 [rpc_endpoints]
 mainnet = "https://eth-mainnet.g.alchemy.com/v2/${ALCHEMY_KEY}"
-goerli = "https://eth-goerli.g.alchemy.com/v2/${ALCHEMY_KEY}"
+sepolia = "https://eth-sepolia.g.alchemy.com/v2/${ALCHEMY_KEY}"
 
 optimism = "https://opt-mainnet.g.alchemy.com/v2/${ALCHEMY_KEY}"
-optimism_goerli = "https://opt-goerli.g.alchemy.com/v2/${ALCHEMY_KEY}"
+optimism_sepolia = "https://opt-sepolia.g.alchemy.com/v2/${ALCHEMY_KEY}"
 
 zora = "https://rpc.zora.energy"
-zora_goerli = "https://testnet.rpc.zora.energy"
+zora_sepolia = "https://sepolia.rpc.zora.energy"
 
 base = "https://base-mainnet.g.alchemy.com/v2/${ALCHEMY_KEY}"
-base_goerli = "https://base-goerli.g.alchemy.com/v2/${ALCHEMY_KEY}"
-pgn = "https://rpc.publicgoods.network"
-pgn_sepolia = "https://sepolia.publicgoods.network"
+base_sepolia = "https://base-sepolia.g.alchemy.com/v2/${ALCHEMY_KEY}"

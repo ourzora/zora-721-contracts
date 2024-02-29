@@ -77,7 +77,9 @@ contract UpgradeERC721DropFactory is ZoraDropsDeployBase {
         console2.log("Factory/Creator IMPL: ");
         console2.log(address(newZoraNFTCreatorImpl));
 
-        deployTestContractForVerification(newZoraNFTCreatorImpl);
+        address deployer = vm.envAddress("DEPLOYER");
+
+        deployTestContractForVerification(newZoraNFTCreatorImpl, deployer);
 
         vm.stopBroadcast();
 

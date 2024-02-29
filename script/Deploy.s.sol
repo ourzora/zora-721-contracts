@@ -55,9 +55,9 @@ contract Deploy is ZoraDropsDeployBase {
         console2.log("Factory: ");
         console2.log(address(factory));
 
-        deployTestContractForVerification(factory);
+        deployTestContractForVerification(factory, deployer);
 
-        // vm.stopBroadcast();
+        vm.stopBroadcast();
 
         uint256 dropImplementationVersion = dropImplementation.contractVersion();
 

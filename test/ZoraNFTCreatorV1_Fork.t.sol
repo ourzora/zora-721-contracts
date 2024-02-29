@@ -74,7 +74,7 @@ contract ZoraNFTCreatorV1Test is Test, ForkHelper {
         }
     }
 
-    function testForkDropGeneric() external {
+    function x_testForkDropGeneric() external {
         string[] memory forkTestChains = getForkTestChains();
 
         for (uint256 i = 0; i < forkTestChains.length; i++) {

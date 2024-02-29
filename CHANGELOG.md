@@ -1,5 +1,11 @@
 # @zoralabs/nft-drop-contracts
 
+## 1.15.2
+
+### Patch Changes
+
+- ddb8f38: Update deployments for sepolia
+
 ## 1.15.1
 
 ### Patch Changes

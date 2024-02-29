@@ -1,5 +1,5 @@
 ---
-'@zoralabs/nft-drop-contracts': patch
+'@zoralabs/zora-721-contracts': patch
 ---
 
 Update deployments for sepolia

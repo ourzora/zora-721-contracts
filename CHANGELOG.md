@@ -1,5 +1,12 @@
 # @zoralabs/nft-drop-contracts
 
+## 1.15.3
+
+### Patch Changes
+
+- a867b16: Deploy to Blast mainnet
+- 3370c1b: Blast sepolia deploy
+
 ## 1.15.2
 
 ### Patch Changes

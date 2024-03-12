@@ -33,12 +33,14 @@ import {IERC721Drop} from "./interfaces/IERC721Drop.sol";
 import {IOwnable} from "./interfaces/IOwnable.sol";
 import {IERC4906} from "./interfaces/IERC4906.sol";
 import {IFactoryUpgradeGate} from "./interfaces/IFactoryUpgradeGate.sol";
+import {ITransferHookExtension} from "./interfaces/ITransferHookExtension.sol";
 import {OwnableSkeleton} from "./utils/OwnableSkeleton.sol";
 import {FundsReceiver} from "./utils/FundsReceiver.sol";
 import {Version} from "./utils/Version.sol";
 import {PublicMulticall} from "./utils/PublicMulticall.sol";
 import {ERC721DropStorageV1} from "./storage/ERC721DropStorageV1.sol";
 import {ERC721DropStorageV2} from "./storage/ERC721DropStorageV2.sol";
+import {ERC721TransferHookStorageV1, TransferHookStorage} from "./storage/ERC721TransferHookStorageV1.sol";
 
 
 /**
@@ -64,7 +66,8 @@ contract ERC721Drop is
     ERC721DropStorageV1,
     ERC721DropStorageV2,
     ERC721Rewards,
-    ERC721RewardsStorageV1
+    ERC721RewardsStorageV1,
+    ERC721TransferHookStorageV1
 {
     /// @dev This is the max mint batch size for the optimized ERC721A mint contract
     uint256 internal immutable MAX_MINT_BATCH_SIZE = 8;
@@ -854,6 +857,31 @@ contract ERC721Drop is
     /// @param newOwner new owner to set
     function setOwner(address newOwner) public onlyAdmin {
         _setOwner(newOwner);
+    }
+
+    /// @notice Admin function to set the NFT transfer hook, useful for metadata and non-transferrable NFTs.
+    /// @dev Set to 0 to disable, address to enable transfer hook.
+    /// @param newTransferHook new transfer hook to receive before token transfer events
+    function setTransferHook(address newTransferHook) public onlyAdmin {
+        if (newTransferHook == address(0) || ITransferHookExtension(newTransferHook).supportsInterface(type(ITransferHookExtension).interfaceId)) {
+            _setTransferHook(newTransferHook);
+        } else {
+            revert InvalidTransferHook();
+        }
+    }
+
+    /// @notice Handles the internal before token transfer hook
+    /// @param from address transfer is coming from
+    /// @param to address transfer is going to
+    /// @param tokenId token id for transfer
+    /// @param amount number of transfers
+    function _beforeTokenTransfers(address from, address to, uint256 tokenId, uint256 amount) internal override virtual {
+        TransferHookStorage storage transferHookStorage = _getTransferHookStorage();
+        if (transferHookStorage.transferHookExtension != address(0)) {
+            ITransferHookExtension(transferHookStorage.transferHookExtension).beforeTokenTransfers(from, to, tokenId, amount);
+        }
+        
+        super._beforeTokenTransfers(from, to, tokenId, amount);
     }
 
     /// @notice Set a new metadata renderer

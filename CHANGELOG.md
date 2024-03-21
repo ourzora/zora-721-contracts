@@ -1,5 +1,11 @@
 # @zoralabs/nft-drop-contracts
 
+## 1.15.4
+
+### Patch Changes
+
+- fff2441: Add Base Sepolia package update
+
 ## 1.15.3
 
 ### Patch Changes

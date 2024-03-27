@@ -10,10 +10,12 @@ import {RewardsSettings} from "@zoralabs/protocol-rewards/src/abstract/RewardSpl
 import {ERC721Drop} from "../src/ERC721Drop.sol";
 import {DummyMetadataRenderer} from "./utils/DummyMetadataRenderer.sol";
 import {MockUser} from "./utils/MockUser.sol";
+import {MockTransferHookReverts, MockTransferHookWrongInterface, MockTransferHookSavesState} from "./utils/MockTransferHook.sol";
 import {IMetadataRenderer} from "../src/interfaces/IMetadataRenderer.sol";
 import {IERC721Drop} from "../src/interfaces/IERC721Drop.sol";
 import {FactoryUpgradeGate} from "../src/FactoryUpgradeGate.sol";
 import {ERC721DropProxy} from "../src/ERC721DropProxy.sol";
+import {ERC721TransferHookStorageV1} from "../src/storage/ERC721TransferHookStorageV1.sol";
 
 contract ERC721DropTest is Test {
     /// @notice Event emitted when the funds are withdrawn from the minting contract
@@ -185,6 +187,45 @@ contract ERC721DropTest is Test {
     //         _metadataRendererInit: ""
     //     });
     // }
+
+    function test_transferHook() public setupZoraNFTBase(4) {
+        vm.prank(address(10));
+        vm.expectRevert(abi.encodeWithSignature("Access_OnlyAdmin()"));
+        zoraNFTBase.setTransferHook(address(243));
+
+        vm.startPrank(DEFAULT_OWNER_ADDRESS);
+
+        vm.expectRevert();
+        zoraNFTBase.setTransferHook(address(243));
+
+        MockTransferHookWrongInterface transferHookBadInterface = new MockTransferHookWrongInterface();
+        vm.expectRevert(ERC721TransferHookStorageV1.InvalidTransferHook.selector);
+        zoraNFTBase.setTransferHook(address(transferHookBadInterface));
+
+        MockTransferHookReverts transferHookReverts = new MockTransferHookReverts();
+        zoraNFTBase.setTransferHook(address(transferHookReverts));
+
+        // expect hook reverts here
+        vm.expectRevert();
+        zoraNFTBase.adminMint(address(this), 1);
+
+        // remove transfer hook
+        zoraNFTBase.setTransferHook(address(0));
+
+        // assume mint works
+        zoraNFTBase.adminMint(DEFAULT_OWNER_ADDRESS, 1);
+        assertEq(zoraNFTBase.balanceOf(DEFAULT_OWNER_ADDRESS), 1);
+
+        // set transfer hook that sets state
+        MockTransferHookSavesState transferHookState = new MockTransferHookSavesState();
+        zoraNFTBase.setTransferHook(address(transferHookState));
+
+        zoraNFTBase.adminMint(DEFAULT_OWNER_ADDRESS, 1);
+        zoraNFTBase.adminMint(DEFAULT_OWNER_ADDRESS, 2);
+        assertEq(transferHookState.numberTransfers(), 2);
+
+        vm.stopPrank();
+    }
 
     function test_IsAdminGetter() public setupZoraNFTBase(1) {
         assertTrue(zoraNFTBase.isAdmin(DEFAULT_OWNER_ADDRESS));

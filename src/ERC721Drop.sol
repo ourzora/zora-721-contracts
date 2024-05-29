@@ -33,13 +33,14 @@ import {IERC721Drop} from "./interfaces/IERC721Drop.sol";
 import {IOwnable} from "./interfaces/IOwnable.sol";
 import {IERC4906} from "./interfaces/IERC4906.sol";
 import {IFactoryUpgradeGate} from "./interfaces/IFactoryUpgradeGate.sol";
+import {ITransferHookExtension} from "./interfaces/ITransferHookExtension.sol";
 import {OwnableSkeleton} from "./utils/OwnableSkeleton.sol";
 import {FundsReceiver} from "./utils/FundsReceiver.sol";
 import {Version} from "./utils/Version.sol";
 import {PublicMulticall} from "./utils/PublicMulticall.sol";
 import {ERC721DropStorageV1} from "./storage/ERC721DropStorageV1.sol";
 import {ERC721DropStorageV2} from "./storage/ERC721DropStorageV2.sol";
-
+import {ERC721TransferHookStorageV1, TransferHookStorage} from "./storage/ERC721TransferHookStorageV1.sol";
 
 /**
  * @notice ZORA NFT Base contract for Drops and Editions
@@ -64,7 +65,8 @@ contract ERC721Drop is
     ERC721DropStorageV1,
     ERC721DropStorageV2,
     ERC721Rewards,
-    ERC721RewardsStorageV1
+    ERC721RewardsStorageV1,
+    ERC721TransferHookStorageV1
 {
     /// @dev This is the max mint batch size for the optimized ERC721A mint contract
     uint256 internal immutable MAX_MINT_BATCH_SIZE = 8;
@@ -108,10 +110,7 @@ contract ERC721Drop is
     /// @notice Only a given role has access or admin
     /// @param role role to check for alongside the admin role
     modifier onlyRoleOrAdmin(bytes32 role) {
-        if (
-            !hasRole(DEFAULT_ADMIN_ROLE, _msgSender()) &&
-            !hasRole(role, _msgSender())
-        ) {
+        if (!hasRole(DEFAULT_ADMIN_ROLE, _msgSender()) && !hasRole(role, _msgSender())) {
             revert Access_MissingRoleOrAdmin(role);
         }
 
@@ -128,15 +127,11 @@ contract ERC721Drop is
     }
 
     function _presaleActive() internal view returns (bool) {
-        return
-            salesConfig.presaleStart <= block.timestamp &&
-            salesConfig.presaleEnd > block.timestamp;
+        return salesConfig.presaleStart <= block.timestamp && salesConfig.presaleEnd > block.timestamp;
     }
 
     function _publicSaleActive() internal view returns (bool) {
-        return
-            salesConfig.publicSaleStart <= block.timestamp &&
-            salesConfig.publicSaleEnd > block.timestamp;
+        return salesConfig.publicSaleStart <= block.timestamp && salesConfig.publicSaleEnd > block.timestamp;
     }
 
     /// @notice Presale active
@@ -255,17 +250,8 @@ contract ERC721Drop is
     /// @notice Connects this contract to the factory upgrade gate
     /// @param newImplementation proposed new upgrade implementation
     /// @dev Only can be called by admin
-    function _authorizeUpgrade(address newImplementation)
-        internal
-        override
-        onlyAdmin
-    {
-        if (
-            !factoryUpgradeGate.isValidUpgradePath({
-                _newImpl: newImplementation,
-                _currentImpl: _getImplementation()
-            })
-        ) {
+    function _authorizeUpgrade(address newImplementation) internal override onlyAdmin {
+        if (!factoryUpgradeGate.isValidUpgradePath({_newImpl: newImplementation, _currentImpl: _getImplementation()})) {
             revert Admin_InvalidUpgradeAddress(newImplementation);
         }
     }
@@ -296,28 +282,16 @@ contract ERC721Drop is
 
     /// @dev Get royalty information for token
     /// @param _salePrice Sale price for the token
-    function royaltyInfo(uint256, uint256 _salePrice)
-        external
-        view
-        override
-        returns (address receiver, uint256 royaltyAmount)
-    {
+    function royaltyInfo(uint256, uint256 _salePrice) external view override returns (address receiver, uint256 royaltyAmount) {
         if (config.fundsRecipient == address(0)) {
             return (config.fundsRecipient, 0);
         }
-        return (
-            config.fundsRecipient,
-            (_salePrice * config.royaltyBPS) / 10_000
-        );
+        return (config.fundsRecipient, (_salePrice * config.royaltyBPS) / 10_000);
     }
 
     /// @notice Sale details
     /// @return IERC721Drop.SaleDetails sale information details
-    function saleDetails()
-        external
-        view
-        returns (IERC721Drop.SaleDetails memory)
-    {
+    function saleDetails() external view returns (IERC721Drop.SaleDetails memory) {
         return
             IERC721Drop.SaleDetails({
                 publicSaleActive: _publicSaleActive(),
@@ -336,17 +310,11 @@ contract ERC721Drop is
 
     /// @dev Number of NFTs the user has minted per address
     /// @param minter to get counts for
-    function mintedPerAddress(address minter)
-        external
-        view
-        override
-        returns (IERC721Drop.AddressMintDetails memory)
-    {
+    function mintedPerAddress(address minter) external view override returns (IERC721Drop.AddressMintDetails memory) {
         return
             IERC721Drop.AddressMintDetails({
                 presaleMints: presaleMintsByAddress[minter],
-                publicMints: _numberMinted(minter) -
-                    presaleMintsByAddress[minter],
+                publicMints: _numberMinted(minter) - presaleMintsByAddress[minter],
                 totalMints: _numberMinted(minter)
             });
     }
@@ -355,12 +323,7 @@ contract ERC721Drop is
     ///      Still requires approval for module
     /// @param nftOwner owner of the nft
     /// @param operator operator wishing to transfer/burn/etc the NFTs
-    function isApprovedForAll(address nftOwner, address operator)
-        public
-        view
-        override(IERC721Upgradeable, ERC721AUpgradeable)
-        returns (bool)
-    {
+    function isApprovedForAll(address nftOwner, address operator) public view override(IERC721Upgradeable, ERC721AUpgradeable) returns (bool) {
         if (operator == zoraERC721TransferHelper) {
             return true;
         }
@@ -369,11 +332,7 @@ contract ERC721Drop is
 
     /// @notice ZORA fee is fixed now per mint
     /// @dev Gets the zora fee for amount of withdraw
-    function zoraFeeForAmount(uint256 quantity)
-        public
-        view
-        returns (address payable recipient, uint256 fee)
-    {
+    function zoraFeeForAmount(uint256 quantity) public view returns (address payable recipient, uint256 fee) {
         recipient = ZORA_MINT_FEE_RECIPIENT;
         fee = ZORA_MINT_FEE * quantity;
     }
@@ -445,13 +404,7 @@ contract ERC721Drop is
     /// @notice Purchase a quantity of tokens
     /// @param quantity quantity to purchase
     /// @return tokenId of the first token minted
-    function purchase(uint256 quantity)
-        external
-        payable
-        nonReentrant
-        onlyPublicSaleActive
-        returns (uint256)
-    {
+    function purchase(uint256 quantity) external payable nonReentrant onlyPublicSaleActive returns (uint256) {
         return _handleMintWithRewards(msg.sender, quantity, "", address(0));
     }
 
@@ -459,13 +412,7 @@ contract ERC721Drop is
     /// @param quantity quantity to purchase
     /// @param comment comment to include in the IERC721Drop.Sale event
     /// @return tokenId of the first token minted
-    function purchaseWithComment(uint256 quantity, string calldata comment)
-        external
-        payable
-        nonReentrant
-        onlyPublicSaleActive
-        returns (uint256)
-    {
+    function purchaseWithComment(uint256 quantity, string calldata comment) external payable nonReentrant onlyPublicSaleActive returns (uint256) {
         return _handleMintWithRewards(msg.sender, quantity, comment, address(0));
     }
 
@@ -474,13 +421,11 @@ contract ERC721Drop is
     /// @param quantity quantity to purchase
     /// @param comment optional comment to include in the IERC721Drop.Sale event (leave blank for no comment)
     /// @return tokenId of the first token minted
-    function purchaseWithRecipient(address recipient, uint256 quantity, string calldata comment) 
-        external 
-        payable 
-        nonReentrant 
-        onlyPublicSaleActive 
-        returns (uint256) 
-    {
+    function purchaseWithRecipient(
+        address recipient,
+        uint256 quantity,
+        string calldata comment
+    ) external payable nonReentrant onlyPublicSaleActive returns (uint256) {
         return _handleMintWithRewards(recipient, quantity, comment, address(0));
     }
 
@@ -490,14 +435,12 @@ contract ERC721Drop is
     /// @param comment comment to include in the IERC721Drop.Sale event
     /// @param mintReferral The finder of the mint
     /// @return tokenId of the first token minted
-    function mintWithRewards(address recipient, uint256 quantity, string calldata comment, address mintReferral)
-        external
-        payable
-        nonReentrant
-        canMintTokens(quantity)
-        onlyPublicSaleActive
-        returns (uint256)
-    {
+    function mintWithRewards(
+        address recipient,
+        uint256 quantity,
+        string calldata comment,
+        address mintReferral
+    ) external payable nonReentrant canMintTokens(quantity) onlyPublicSaleActive returns (uint256) {
         return _handleMintWithRewards(recipient, quantity, comment, mintReferral);
     }
 
@@ -507,7 +450,14 @@ contract ERC721Drop is
 
         uint256 salePrice = salesConfig.publicSalePrice;
 
-        _handleRewards(msg.value, quantity, salePrice, config.fundsRecipient != address(0) ? config.fundsRecipient : address(this), createReferral, mintReferral);
+        _handleRewards(
+            msg.value,
+            quantity,
+            salePrice,
+            config.fundsRecipient != address(0) ? config.fundsRecipient : address(this),
+            createReferral,
+            mintReferral
+        );
 
         _mintNFTs(recipient, quantity);
 
@@ -525,9 +475,7 @@ contract ERC721Drop is
     /// @param quantity number of NFTs to mint
     function _mintNFTs(address to, uint256 quantity) internal {
         do {
-            uint256 toMint = quantity > MAX_MINT_BATCH_SIZE
-                ? MAX_MINT_BATCH_SIZE
-                : quantity;
+            uint256 toMint = quantity > MAX_MINT_BATCH_SIZE ? MAX_MINT_BATCH_SIZE : quantity;
             _mint({to: to, quantity: toMint});
             quantity -= toMint;
         } while (quantity > 0);
@@ -599,16 +547,7 @@ contract ERC721Drop is
     /// @param maxQuantity max quantity that can be purchased via merkle proof #
     /// @param pricePerToken price that each token is purchased at
     /// @param merkleProof proof for presale mint
-    function purchasePresale(
-        uint256 quantity,
-        uint256 maxQuantity,
-        uint256 pricePerToken,
-        bytes32[] calldata merkleProof
-    )
-        external
-        payable
-        returns (uint256)
-    {
+    function purchasePresale(uint256 quantity, uint256 maxQuantity, uint256 pricePerToken, bytes32[] calldata merkleProof) external payable returns (uint256) {
         return purchasePresaleWithRewards(quantity, maxQuantity, pricePerToken, merkleProof, "", address(0));
     }
 
@@ -624,13 +563,7 @@ contract ERC721Drop is
         uint256 pricePerToken,
         bytes32[] calldata merkleProof,
         string calldata comment
-    )
-        external
-        payable
-        nonReentrant
-        onlyPresaleActive
-        returns (uint256)
-    {
+    ) external payable nonReentrant onlyPresaleActive returns (uint256) {
         return purchasePresaleWithRewards(quantity, maxQuantity, pricePerToken, merkleProof, comment, address(0));
     }
 
@@ -648,17 +581,11 @@ contract ERC721Drop is
         bytes32[] calldata merkleProof,
         string memory comment,
         address mintReferral
-    )
-        public
-        payable
-        nonReentrant
-        onlyPresaleActive
-        returns (uint256)
-    {
+    ) public payable nonReentrant onlyPresaleActive returns (uint256) {
         return _handlePurchasePresaleWithRewards(quantity, maxQuantity, pricePerToken, merkleProof, comment, mintReferral);
     }
 
-    function _handlePurchasePresaleWithRewards(        
+    function _handlePurchasePresaleWithRewards(
         uint256 quantity,
         uint256 maxQuantity,
         uint256 pricePerToken,
@@ -675,7 +602,14 @@ contract ERC721Drop is
 
         _requireCanPurchasePresale(msgSender, quantity, maxQuantity);
 
-        _handleRewards(msg.value, quantity, pricePerToken, config.fundsRecipient != address(0) ? config.fundsRecipient : address(this), createReferral, mintReferral);
+        _handleRewards(
+            msg.value,
+            quantity,
+            pricePerToken,
+            config.fundsRecipient != address(0) ? config.fundsRecipient : address(this),
+            createReferral,
+            mintReferral
+        );
 
         _mintNFTs(msgSender, quantity);
 
@@ -736,12 +670,7 @@ contract ERC721Drop is
     /// @notice Mint admin
     /// @param recipient recipient to mint to
     /// @param quantity quantity to mint
-    function adminMint(address recipient, uint256 quantity)
-        external
-        onlyRoleOrAdmin(MINTER_ROLE)
-        canMintTokens(quantity)
-        returns (uint256)
-    {
+    function adminMint(address recipient, uint256 quantity) external onlyRoleOrAdmin(MINTER_ROLE) canMintTokens(quantity) returns (uint256) {
         _mintNFTs(recipient, quantity);
 
         return _lastMintedTokenId();
@@ -793,22 +722,12 @@ contract ERC721Drop is
     //                       / \
     /// @dev This mints multiple editions to the given list of addresses.
     /// @param recipients list of addresses to send the newly minted editions to
-    function adminMintAirdrop(address[] calldata recipients)
-        external
-        override
-        onlyRoleOrAdmin(MINTER_ROLE)
-        canMintTokens(recipients.length)
-        returns (uint256)
-    {
+    function adminMintAirdrop(address[] calldata recipients) external override onlyRoleOrAdmin(MINTER_ROLE) canMintTokens(recipients.length) returns (uint256) {
         uint256 atId = _currentIndex;
         uint256 startAt = atId;
 
         unchecked {
-            for (
-                uint256 endAt = atId + recipients.length;
-                atId < endAt;
-                atId++
-            ) {
+            for (uint256 endAt = atId + recipients.length; atId < endAt; atId++) {
                 _mintNFTs(recipients[atId - startAt], 1);
             }
         }
@@ -856,23 +775,48 @@ contract ERC721Drop is
         _setOwner(newOwner);
     }
 
+    /// @notice Admin function to set the NFT transfer hook, useful for metadata and non-transferrable NFTs.
+    /// @dev Set to 0 to disable, address to enable transfer hook.
+    /// @param newTransferHook new transfer hook to receive before token transfer events
+    function setTransferHook(address newTransferHook) public onlyAdmin {
+        if (newTransferHook != address(0) && !ITransferHookExtension(newTransferHook).supportsInterface(type(ITransferHookExtension).interfaceId)) {
+            revert InvalidTransferHook();
+        }
+
+        _setTransferHook(newTransferHook);
+    }
+
+    /// @notice Handles the internal before token transfer hook
+    /// @param from address transfer is coming from
+    /// @param to address transfer is going to
+    /// @param startTokenId token id for transfer
+    /// @param quantity number of transfers
+    function _beforeTokenTransfers(address from, address to, uint256 startTokenId, uint256 quantity) internal virtual override {
+        TransferHookStorage storage transferHookStorage = _getTransferHookStorage();
+        if (transferHookStorage.transferHookExtension != address(0)) {
+            ITransferHookExtension(transferHookStorage.transferHookExtension).beforeTokenTransfers({
+                from: from,
+                to: to,
+                operator: msg.sender,
+                startTokenId: startTokenId,
+                quantity: quantity
+            });
+        }
+
+        super._beforeTokenTransfers(from, to, startTokenId, quantity);
+    }
+
     /// @notice Set a new metadata renderer
     /// @param newRenderer new renderer address to use
     /// @param setupRenderer data to setup new renderer with
-    function setMetadataRenderer(
-        IMetadataRenderer newRenderer,
-        bytes memory setupRenderer
-    ) external onlyAdmin {
+    function setMetadataRenderer(IMetadataRenderer newRenderer, bytes memory setupRenderer) external onlyAdmin {
         config.metadataRenderer = newRenderer;
 
         if (setupRenderer.length > 0) {
             newRenderer.initializeWithData(setupRenderer);
         }
 
-        emit UpdatedMetadataRenderer({
-            sender: _msgSender(),
-            renderer: newRenderer
-        });
+        emit UpdatedMetadataRenderer({sender: _msgSender(), renderer: newRenderer});
 
         _notifyMetadataUpdate();
     }
@@ -880,13 +824,8 @@ contract ERC721Drop is
     /// @notice Calls the metadata renderer contract to make an update and uses the EIP4906 event to notify
     /// @param data raw calldata to call the metadata renderer contract with.
     /// @dev Only accessible via an admin role
-    function callMetadataRenderer(bytes memory data)
-        public
-        onlyAdmin
-        returns (bytes memory)
-    {
-        (bool success, bytes memory response) = address(config.metadataRenderer)
-            .call(data);
+    function callMetadataRenderer(bytes memory data) public onlyAdmin returns (bytes memory) {
+        (bool success, bytes memory response) = address(config.metadataRenderer).call(data);
         if (!success) {
             revert ExternalMetadataRenderer_CallFailed();
         }
@@ -986,10 +925,7 @@ contract ERC721Drop is
     //                       / \
     /// @notice Set a different funds recipient
     /// @param newRecipientAddress new funds recipient address
-    function setFundsRecipient(address payable newRecipientAddress)
-        external
-        onlyRoleOrAdmin(SALES_MANAGER_ROLE)
-    {
+    function setFundsRecipient(address payable newRecipientAddress) external onlyRoleOrAdmin(SALES_MANAGER_ROLE) {
         // TODO(iain): funds recipient cannot be 0?
         config.fundsRecipient = newRecipientAddress;
         emit FundsRecipientChanged(newRecipientAddress, _msgSender());
@@ -1053,22 +989,13 @@ contract ERC721Drop is
         uint256 funds = address(this).balance;
 
         // Payout recipient
-        (bool successFunds, ) = config.fundsRecipient.call{
-            value: funds,
-            gas: FUNDS_SEND_GAS_LIMIT
-        }("");
+        (bool successFunds, ) = config.fundsRecipient.call{value: funds, gas: FUNDS_SEND_GAS_LIMIT}("");
         if (!successFunds) {
             revert Withdraw_FundsSendFailure();
         }
 
         // Emit event for indexing
-        emit FundsWithdrawn(
-            _msgSender(),
-            config.fundsRecipient,
-            funds,
-            address(0),
-            0
-        );
+        emit FundsWithdrawn(_msgSender(), config.fundsRecipient, funds, address(0), 0);
     }
 
     /// @notice This withdraws ETH from the protocol rewards contract to an address specified by the contract owner.
@@ -1085,11 +1012,7 @@ contract ERC721Drop is
     }
 
     function _verifyWithdrawAccess(address msgSender) internal view {
-        if (
-            !hasRole(DEFAULT_ADMIN_ROLE, msgSender) &&
-            !hasRole(SALES_MANAGER_ROLE, msgSender) &&
-            msgSender != config.fundsRecipient
-        ) {
+        if (!hasRole(DEFAULT_ADMIN_ROLE, msgSender) && !hasRole(SALES_MANAGER_ROLE, msgSender) && msgSender != config.fundsRecipient) {
             revert Access_WithdrawNotAllowed();
         }
     }
@@ -1136,10 +1059,7 @@ contract ERC721Drop is
     //                        |
     //                       / \
     /// @notice Admin function to finalize and open edition sale
-    function finalizeOpenEdition()
-        external
-        onlyRoleOrAdmin(SALES_MANAGER_ROLE)
-    {
+    function finalizeOpenEdition() external onlyRoleOrAdmin(SALES_MANAGER_ROLE) {
         if (config.editionSize != type(uint64).max) {
             revert Admin_UnableToFinalizeNotOpenEdition();
         }
@@ -1158,12 +1078,7 @@ contract ERC721Drop is
 
     /// @notice Simple override for owner interface.
     /// @return user owner address
-    function owner()
-        public
-        view
-        override(OwnableSkeleton, IERC721Drop)
-        returns (address)
-    {
+    function owner() public view override(OwnableSkeleton, IERC721Drop) returns (address) {
         return super.owner();
     }
 
@@ -1181,12 +1096,7 @@ contract ERC721Drop is
     /// @notice Token URI Getter, proxies to metadataRenderer
     /// @param tokenId id of token to get URI for
     /// @return Token URI
-    function tokenURI(uint256 tokenId)
-        public
-        view
-        override
-        returns (string memory)
-    {
+    function tokenURI(uint256 tokenId) public view override returns (string memory) {
         if (!_exists(tokenId)) {
             revert IERC721AUpgradeable.URIQueryForNonexistentToken();
         }
@@ -1202,19 +1112,14 @@ contract ERC721Drop is
 
         // If we have tokens to notify about
         if (totalMinted > 0) {
-            emit BatchMetadataUpdate(
-                _startTokenId(),
-                totalMinted + _startTokenId()
-            );
+            emit BatchMetadataUpdate(_startTokenId(), totalMinted + _startTokenId());
         }
     }
 
     function _payoutZoraFee(uint256 quantity) internal {
         // Transfer ZORA fee to recipient
         (, uint256 zoraFee) = zoraFeeForAmount(quantity);
-        (bool success, ) = ZORA_MINT_FEE_RECIPIENT.call{value: zoraFee, gas: FUNDS_SEND_GAS_LIMIT}(
-            ""
-        );
+        (bool success, ) = ZORA_MINT_FEE_RECIPIENT.call{value: zoraFee, gas: FUNDS_SEND_GAS_LIMIT}("");
         emit MintFeePayout(zoraFee, ZORA_MINT_FEE_RECIPIENT, success);
     }
 
@@ -1228,9 +1133,8 @@ contract ERC721Drop is
         // If max purchase per address == 0 there is no limit.
         // Any other number, the per address mint limit is that.
         if (
-            salesConfig.maxSalePurchasePerAddress != 0
-                && _numberMinted(recipient) + quantity - presaleMintsByAddress[recipient]
-                    > salesConfig.maxSalePurchasePerAddress
+            salesConfig.maxSalePurchasePerAddress != 0 &&
+            _numberMinted(recipient) + quantity - presaleMintsByAddress[recipient] > salesConfig.maxSalePurchasePerAddress
         ) {
             revert Purchase_TooManyForAddress();
         }
@@ -1244,12 +1148,7 @@ contract ERC721Drop is
         }
     }
 
-    function _requireMerkleApproval(
-        address recipient,
-        uint256 maxQuantity,
-        uint256 pricePerToken,
-        bytes32[] calldata merkleProof
-    ) internal view {
+    function _requireMerkleApproval(address recipient, uint256 maxQuantity, uint256 pricePerToken, bytes32[] calldata merkleProof) internal view {
         if (
             !MerkleProofUpgradeable.verify(
                 merkleProof,
@@ -1270,7 +1169,7 @@ contract ERC721Drop is
             return;
         }
 
-        address royaltyRecipient = config.fundsRecipient;            
+        address royaltyRecipient = config.fundsRecipient;
         if (royaltyRecipient == address(0)) {
             return;
         }
@@ -1299,37 +1198,24 @@ contract ERC721Drop is
         createReferral = recipient;
     }
 
-    function _emitSaleEvents(address msgSender, address recipient, uint256 quantity, uint256 pricePerToken, uint256 firstMintedTokenId, string memory comment) internal {
-        emit IERC721Drop.Sale({
-            to: recipient,
-            quantity: quantity,
-            pricePerToken: pricePerToken,
-            firstPurchasedTokenId: firstMintedTokenId
-        });
+    function _emitSaleEvents(
+        address msgSender,
+        address recipient,
+        uint256 quantity,
+        uint256 pricePerToken,
+        uint256 firstMintedTokenId,
+        string memory comment
+    ) internal {
+        emit IERC721Drop.Sale({to: recipient, quantity: quantity, pricePerToken: pricePerToken, firstPurchasedTokenId: firstMintedTokenId});
 
         if (bytes(comment).length > 0) {
-            emit IERC721Drop.MintComment({
-                sender: msgSender,
-                tokenContract: address(this),
-                tokenId: firstMintedTokenId,
-                quantity: quantity,
-                comment: comment
-            });
+            emit IERC721Drop.MintComment({sender: msgSender, tokenContract: address(this), tokenId: firstMintedTokenId, quantity: quantity, comment: comment});
         }
     }
 
     /// @notice ERC165 supports interface
     /// @param interfaceId interface id to check if supported
-    function supportsInterface(bytes4 interfaceId)
-        public
-        view
-        override(
-            IERC165Upgradeable,
-            ERC721AUpgradeable,
-            AccessControlUpgradeable
-        )
-        returns (bool)
-    {
+    function supportsInterface(bytes4 interfaceId) public view override(IERC165Upgradeable, ERC721AUpgradeable, AccessControlUpgradeable) returns (bool) {
         return
             super.supportsInterface(interfaceId) ||
             type(IOwnable).interfaceId == interfaceId ||

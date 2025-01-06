@@ -1,3 +1,10 @@
+# ⚠️ Deprecation Notice
+
+This repository pertains to a legacy NFT protocol that is no longer actively used or supported by ZORA. While the protocol remains live on-chain due to the immutable nature of decentralized applications, it is not recommended for new projects.
+
+In order to find what protocol is recommended to utilize ZORA with the current onchain iteration, visit the [zora docs](https://docs.zora.co).
+
+
 # Zora NFT Drop Media Contracts
 
 ### How do I integrate these in my own site?
@@ -49,7 +56,3 @@ The metadata renderer abstraction allows these drops contracts to power a variet
 1. `yarn install`
 1. `git submodule init && git submodule update`
 1. `yarn build`
-
-### Bug Bounty
-5 ETH for any critical bugs that could result in loss of funds.
-Rewards will be given for smaller bugs or ideas.
